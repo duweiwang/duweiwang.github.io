@@ -18,4 +18,37 @@
 <p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
 ]]></content>
   </entry>
+  <entry>
+    <title>LeetCode 反转单链表</title>
+    <url>/leetcode-reverse-list.html</url>
+    <content><![CDATA[<h3 id="LeetCode-206-反转单链表"><a href="#LeetCode-206-反转单链表" class="headerlink" title="LeetCode-206 反转单链表"></a>LeetCode-206 反转单链表</h3><blockquote>
+<p>给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</p>
+</blockquote>
+<p>问题分析：</p>
+<p>这是初始状态的链表</p>
+<p><img src="../images/revert_list_0.png" alt="初始状态"></p>
+<p>由于反转链表后 <strong>head</strong> 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  </p>
+<p>尝试一次反转后，我们发现，后续结点信息丢失了！我们不得不声明一个新的变量保存原链表的信息。</p>
+<p><img src="../images/revert_list_7.png"></p>
+<p>所以，我们一共需要三个指针来记录转换过程  </p>
+<ul>
+<li>prev、 head 用于交换</li>
+<li>next 用于记录  </li>
+</ul>
+<p>分析到这里，我们再回到初始状态  ：</p>
+<p><img src="../images/revert_list_4.png"></p>
+<p>接下来我们进行第一次反转，<strong>head.next</strong> 指向虚拟的空结点，且后续链表信息没有丢失。</p>
+<p><img src="../images/revert_list_5.png"></p>
+<p>三个指针一起往后移动一个单位。我们发现此时链表又回到了最初的状态。</p>
+<p><img src="../images/revert_list_6.png"></p>
+<p>至此，我们可以尝试写出如下代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">reverseIteratively</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">    ListNode pre = <span class="keyword">null</span>;</span><br><span class="line">    ListNode next = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = head.next;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//改变指针方向，对第一个节点来说，他的前一个节点是null</span></span><br><span class="line">        head.next = pre;</span><br><span class="line">        <span class="comment">//向前移动两个指针</span></span><br><span class="line">        pre = head;</span><br><span class="line">        head = next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>思考：<br>你能使用递归的方式改写上述代码逻辑吗？</p>
+]]></content>
+      <tags>
+        <tag>LeetCode,算法</tag>
+      </tags>
+  </entry>
 </search>
