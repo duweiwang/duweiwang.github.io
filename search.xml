@@ -29,8 +29,12 @@
 
 <p>思考：<br>你能使用递归的方式改写上述代码逻辑吗？</p>
 ]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
       <tags>
-        <tag>LeetCode,算法</tag>
+        <tag>LeetCode</tag>
+        <tag>算法</tag>
       </tags>
   </entry>
 </search>
