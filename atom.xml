@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>duwei&#39;s blog</title>
+  <title>嗅不到北的狗子</title>
   
   <subtitle>风水宝地</subtitle>
-  <link href="http://wangduwei.top/atom.xml" rel="self"/>
+  <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
-  <link href="http://wangduwei.top/"/>
-  <updated>2021-08-24T01:24:19.841Z</updated>
-  <id>http://wangduwei.top/</id>
+  <link href="https://wangduwei.top/"/>
+  <updated>2021-08-25T08:18:12.771Z</updated>
+  <id>https://wangduwei.top/</id>
   
   <author>
     <name>wangduwei</name>
@@ -17,9 +17,36 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>LeetCode 两数相加</title>
+    <link href="https://wangduwei.top/leetcode-list-add.html"/>
+    <id>https://wangduwei.top/leetcode-list-add.html</id>
+    <published>2021-08-25T03:54:07.000Z</published>
+    <updated>2021-08-25T08:18:12.771Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="Leetode-23"><a href="#Leetode-23" class="headerlink" title="Leetode-23"></a>Leetode-23</h3><blockquote><p>给你两个 非空 的链表，表示两个非负的整数。它们每位数字都是按照 逆序 的方式存储的，并且每个节点只能存储 一位 数字。请你将两个数相加，并以相同形式返回一个表示和的链表。你可以假设除了数字 0 之外，这两个数都不会以 0 开头。</p></blockquote><span id="more"></span><p><img src="../images/add_two_6.jpeg" alt="初始状态"></p><h4 id="问题分析："><a href="#问题分析：" class="headerlink" title="问题分析："></a>问题分析：</h4><h5 id="当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。"><a href="#当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。" class="headerlink" title="当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。"></a>当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。</h5><p><img src="../images/add_two_7.jpeg" alt="链表长度相等"></p><h5 id="当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。"><a href="#当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。" class="headerlink" title="当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。"></a>当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。</h5><p><img src="../images/add_two_8.jpeg" alt="长度不等"></p><p><img src="../images/add_two_9.jpeg" alt="相加之后的结果"></p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 两个链表相加</span></span><br><span class="line"><span class="comment">     * 复用一个链表的结点</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> l1 第一个链表</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> l2 第二个链表</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">addTwoNumbers</span><span class="params">(ListNode l1, ListNode l2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> carry = <span class="keyword">false</span>;<span class="comment">//进位</span></span><br><span class="line">        ListNode l1Prev = <span class="keyword">null</span>, l2Prev = <span class="keyword">null</span>, result = l1;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//两个链表都有值，相加直到一个链表末尾</span></span><br><span class="line">        <span class="keyword">while</span> (l1 != <span class="keyword">null</span> &amp;&amp; l2 != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span> add = l1.val + l2.val + (carry ? <span class="number">1</span> : <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">            l1.val = add % <span class="number">10</span> ;</span><br><span class="line">            carry = add &gt; <span class="number">9</span>;</span><br><span class="line"></span><br><span class="line">            l1Prev = l1;</span><br><span class="line">            l2Prev = l2;</span><br><span class="line">            l1 = l1.next;</span><br><span class="line">            l2 = l2.next;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//有一个链表已经走到头，</span></span><br><span class="line">        <span class="keyword">if</span> (l1 == <span class="keyword">null</span> &amp;&amp; l2 != <span class="keyword">null</span>) &#123;</span><br><span class="line">            addSingleList(l1Prev, l2, carry);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (l1 != <span class="keyword">null</span> &amp;&amp; l2 == <span class="keyword">null</span>) &#123;</span><br><span class="line">            addSingleList(l2Prev, l1, carry);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (l1 == <span class="keyword">null</span> &amp;&amp; l2 == <span class="keyword">null</span> &amp;&amp; carry)&#123;</span><br><span class="line">            l1Prev.next = <span class="keyword">new</span> ListNode(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//单链表和进位相加</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">addSingleList</span><span class="params">(ListNode l1, ListNode l2, <span class="keyword">boolean</span> carry)</span> </span>&#123;</span><br><span class="line">        l1.next = l2;</span><br><span class="line">        <span class="keyword">while</span> (l2 != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span> add = l2.val + (carry ? <span class="number">1</span> : <span class="number">0</span>);</span><br><span class="line">            l2.val = add % <span class="number">10</span>;</span><br><span class="line">            carry = add &gt; <span class="number">9</span>;</span><br><span class="line">            l1 = l2;</span><br><span class="line">            l2 = l2.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (carry) &#123;</span><br><span class="line">            l1.next = <span class="keyword">new</span> ListNode(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>]]></content>
+    
+    
+    <summary type="html">&lt;h3 id=&quot;Leetode-23&quot;&gt;&lt;a href=&quot;#Leetode-23&quot; class=&quot;headerlink&quot; title=&quot;Leetode-23&quot;&gt;&lt;/a&gt;Leetode-23&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;给你两个 非空 的链表，表示两个非负的整数。它们每位数字都是按照 逆序 的方式存储的，并且每个节点只能存储 一位 数字。请你将两个数相加，并以相同形式返回一个表示和的链表。你可以假设除了数字 0 之外，这两个数都不会以 0 开头。&lt;/p&gt;
+&lt;/blockquote&gt;</summary>
+    
+    
+    
+    <category term="LeetCode" scheme="https://wangduwei.top/categories/LeetCode/"/>
+    
+    
+    <category term="LeetCode" scheme="https://wangduwei.top/tags/LeetCode/"/>
+    
+    <category term="算法" scheme="https://wangduwei.top/tags/%E7%AE%97%E6%B3%95/"/>
+    
+    <category term="链表" scheme="https://wangduwei.top/tags/%E9%93%BE%E8%A1%A8/"/>
+    
+  </entry>
+  
+  <entry>
     <title>LeetCode 反转单链表</title>
-    <link href="http://wangduwei.top/leetcode-reverse-list.html"/>
-    <id>http://wangduwei.top/leetcode-reverse-list.html</id>
+    <link href="https://wangduwei.top/leetcode-reverse-list.html"/>
+    <id>https://wangduwei.top/leetcode-reverse-list.html</id>
     <published>2021-08-23T13:23:30.000Z</published>
     <updated>2021-08-24T01:24:19.841Z</updated>
     
@@ -30,12 +57,12 @@
     
     
     
-    <category term="LeetCode" scheme="http://wangduwei.top/categories/LeetCode/"/>
+    <category term="LeetCode" scheme="https://wangduwei.top/categories/LeetCode/"/>
     
     
-    <category term="LeetCode" scheme="http://wangduwei.top/tags/LeetCode/"/>
+    <category term="LeetCode" scheme="https://wangduwei.top/tags/LeetCode/"/>
     
-    <category term="算法" scheme="http://wangduwei.top/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="算法" scheme="https://wangduwei.top/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
