@@ -3,9 +3,9 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: duwei's blog
+title: 嗅不到北的狗子
 subtitle: '风水宝地'
-description: '我要背着那重重的壳~ 一步一步滴往上爬~'
+description: ''
 keywords:
 author: wangduwei
 language: zh-CN
@@ -13,7 +13,7 @@ timezone: ''
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: http://wangduwei.top
+url: https://wangduwei.top/
 permalink: :title.html
 permalink_defaults:
 pretty_urls:
@@ -105,7 +105,7 @@ deploy:
   type: git
   repo: git@github.com:duweiwang/duweiwang.github.io.git
   branch: main
-
+#gitee: git@gitee.com:wangduwei/wangduwei.git, master
 
 
 
