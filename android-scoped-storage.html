@@ -22,27 +22,23 @@
     var CONFIG = {"hostname":"wangduwei.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk | valine","storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="给你单链表的头结点 head，请你反转链表，并返回反转后的链表。">
+  <meta name="description" content="一、What、Why（是什么、为什么）1.1 什么是分区存储了解传统的共享存储 (Shared Storage):  每个app有独立的存储空间Android&#x2F;data&#x2F;pkg其他应用不可见（Context.getExternalFileDir） 访问外部空间需要额外权限READ&#x2F;WRITE_EXTERNAL_STORAGE、获取存储权限的应用可以访问整个外部存储空间 应用卸载时，保存在外部存储空">
 <meta property="og:type" content="article">
-<meta property="og:title" content="LeetCode 反转单链表">
-<meta property="og:url" content="https://wangduwei.top/leetcode-reverse-list.html">
+<meta property="og:title" content="Android分区存储">
+<meta property="og:url" content="https://wangduwei.top/android-scoped-storage.html">
 <meta property="og:site_name" content="嗅不到北的狗子">
-<meta property="og:description" content="给你单链表的头结点 head，请你反转链表，并返回反转后的链表。">
+<meta property="og:description" content="一、What、Why（是什么、为什么）1.1 什么是分区存储了解传统的共享存储 (Shared Storage):  每个app有独立的存储空间Android&#x2F;data&#x2F;pkg其他应用不可见（Context.getExternalFileDir） 访问外部空间需要额外权限READ&#x2F;WRITE_EXTERNAL_STORAGE、获取存储权限的应用可以访问整个外部存储空间 应用卸载时，保存在外部存储空">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://wangduwei.top/images/revert_list_0.png">
-<meta property="og:image" content="https://wangduwei.top/images/revert_list_7.png">
-<meta property="og:image" content="https://wangduwei.top/images/revert_list_4.png">
-<meta property="og:image" content="https://wangduwei.top/images/revert_list_5.png">
-<meta property="og:image" content="https://wangduwei.top/images/revert_list_6.png">
-<meta property="article:published_time" content="2021-08-23T13:23:30.000Z">
-<meta property="article:modified_time" content="2021-08-24T01:24:19.841Z">
+<meta property="og:image" content="https://wangduwei.top/images/scoped_storage.png">
+<meta property="og:image" content="https://wangduwei.top/images/scoped_storage_2.png">
+<meta property="article:published_time" content="2021-08-25T12:22:34.000Z">
+<meta property="article:modified_time" content="2021-08-25T13:17:03.780Z">
 <meta property="article:author" content="wangduwei">
-<meta property="article:tag" content="LeetCode">
-<meta property="article:tag" content="算法">
+<meta property="article:tag" content="Android">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://wangduwei.top/images/revert_list_0.png">
+<meta name="twitter:image" content="https://wangduwei.top/images/scoped_storage.png">
 
-<link rel="canonical" href="https://wangduwei.top/leetcode-reverse-list.html">
+<link rel="canonical" href="https://wangduwei.top/android-scoped-storage.html">
 
 
 <script id="page-configurations">
@@ -55,7 +51,7 @@
   };
 </script>
 
-  <title>LeetCode 反转单链表 | 嗅不到北的狗子</title>
+  <title>Android分区存储 | 嗅不到北的狗子</title>
   
 
 
@@ -193,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/leetcode-reverse-list.html">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-scoped-storage.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -206,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          LeetCode 反转单链表
+          Android分区存储
         </h1>
 
         <div class="post-meta">
@@ -215,23 +211,17 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2021-08-23 21:23:30" itemprop="dateCreated datePublished" datetime="2021-08-23T21:23:30+08:00">2021-08-23</time>
+              <time title="创建时间：2021-08-25 20:22:34 / 修改时间：21:17:03" itemprop="dateCreated datePublished" datetime="2021-08-25T20:22:34+08:00">2021-08-25</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-08-24 09:24:19" itemprop="dateModified" datetime="2021-08-24T09:24:19+08:00">2021-08-24</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/LeetCode/" itemprop="url" rel="index"><span itemprop="name">LeetCode</span></a>
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
                 </span>
             </span>
 
@@ -251,8 +241,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/leetcode-reverse-list.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/leetcode-reverse-list.html" itemprop="commentCount"></span>
+    <a title="valine" href="/android-scoped-storage.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/android-scoped-storage.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -262,16 +252,15 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>571</span>
+              <span>4.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>4 分钟</span>
             </span>
-            <div class="post-description">给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</div>
 
         </div>
       </header>
@@ -282,32 +271,88 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="LeetCode-206-反转单链表"><a href="#LeetCode-206-反转单链表" class="headerlink" title="LeetCode-206 反转单链表"></a>LeetCode-206 反转单链表</h3><blockquote>
-<p>给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</p>
-</blockquote>
-<p>问题分析：</p>
-<p>这是初始状态的链表</p>
-<p><img src="../images/revert_list_0.png" alt="初始状态"></p>
-<p>由于反转链表后 <strong>head</strong> 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  </p>
-<p>尝试一次反转后，我们发现，后续结点信息丢失了！我们不得不声明一个新的变量保存原链表的信息。</p>
-<p><img src="../images/revert_list_7.png"></p>
-<p>所以，我们一共需要三个指针来记录转换过程  </p>
+        <h3 id="一、What、Why（是什么、为什么）"><a href="#一、What、Why（是什么、为什么）" class="headerlink" title="一、What、Why（是什么、为什么）"></a>一、What、Why（是什么、为什么）</h3><p>1.1 什么是分区存储<br>了解传统的共享存储 (Shared Storage):</p>
 <ul>
-<li>prev、 head 用于交换</li>
-<li>next 用于记录  </li>
+<li>每个app有独立的存储空间Android/data/pkg其他应用不可见（Context.getExternalFileDir）</li>
+<li>访问外部空间需要额外权限READ/WRITE_EXTERNAL_STORAGE、获取存储权限的应用可以访问整个外部存储空间</li>
+<li>应用卸载时，保存在外部存储空间文件不会被删除。</li>
 </ul>
-<p>分析到这里，我们再回到初始状态  ：</p>
-<p><img src="../images/revert_list_4.png"></p>
-<p>接下来我们进行第一次反转，<strong>head.next</strong> 指向虚拟的空结点，且后续链表信息没有丢失。</p>
-<p><img src="../images/revert_list_5.png"></p>
-<p>三个指针一起往后移动一个单位。我们发现此时链表又回到了最初的状态。</p>
-<p><img src="../images/revert_list_6.png"></p>
-<p>至此，我们可以尝试写出如下代码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">reverseIteratively</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">    ListNode pre = <span class="keyword">null</span>;</span><br><span class="line">    ListNode next = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = head.next;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//改变指针方向，对第一个节点来说，他的前一个节点是null</span></span><br><span class="line">        head.next = pre;</span><br><span class="line">        <span class="comment">//向前移动两个指针</span></span><br><span class="line">        pre = head;</span><br><span class="line">        head = next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+
+<p>共享存储带来的问题</p>
+<ul>
+<li>数据安全</li>
+<li>存储空间浪费，难以管理</li>
+</ul>
+<p>分区存储解决方案(Scoped Storage):</p>
+<ul>
+<li>必须通过Media Store API和Storage Access FrameWork访问文件系统。=&gt;对传统共享存储系统的一种强制约束</li>
+<li>文件归属：操作自己创建的文件无需任何权限（自己创建的文件系统会记录此文件的归属app，应用卸载后清除该归属字段，重装后读取该文件仍需权限申请），非共享文件存入私有目录。=&gt;文件和应用挂钩，便于操作系统进行管理</li>
+</ul>
+<p>By The Way:<br>在Android-Q （API-29）中通过android:requestLegacyExternalStorage=”true”可以禁用分区存储<br>在Android-R （API-30）中必须使用分区存储<br>在Android-Q中完全禁用了File API，Android-R重新启用</p>
+<h3 id="二、How（分区存储实践-数据的增、删、改、查）"><a href="#二、How（分区存储实践-数据的增、删、改、查）" class="headerlink" title="二、How（分区存储实践-数据的增、删、改、查）"></a>二、How（分区存储实践-数据的增、删、改、查）</h3><p>2.1 对媒体文件的增删改查：</p>
+<ul>
+<li>增查：新增操作无需任何权限。查询其他应用的媒体资源需要READ_EXTERNAL_STORAGE权限。查询自己应用创建的媒体资源无需权限，当应用卸载重装后，自己创建的资源也需要申请权限。</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">saveImageToAlbum</span><span class="params">(context: <span class="type">Context</span>, imageFile: <span class="type">File</span>, imageName: <span class="type">String</span>)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> withContext(Dispatchers.IO) &#123;</span><br><span class="line">        <span class="keyword">val</span> contentValues = ContentValues().apply &#123;</span><br><span class="line">            put(MediaStore.Images.Media.DISPLAY_NAME, imageName)</span><br><span class="line">            put(MediaStore.Images.Media.DESCRIPTION, <span class="string">&quot;图片描述&quot;</span>)</span><br><span class="line">            put(MediaStore.Images.Media.MIME_TYPE, <span class="string">&quot;image/jpg&quot;</span>)</span><br><span class="line">            <span class="comment">// 文件待处理状态，本应用独占，其他应用暂时无法访问</span></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">                put(MediaStore.Images.Media.IS_PENDING, <span class="number">1</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 插入数据库，获得uri</span></span><br><span class="line">        <span class="keyword">val</span> uri = context.contentResolver</span><br><span class="line">            .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)</span><br><span class="line">            ?: <span class="keyword">return</span><span class="symbol">@withContext</span> <span class="literal">false</span></span><br><span class="line">        <span class="comment">// 根据uri打开输出流，写入imageFile文件</span></span><br><span class="line">        context.contentResolver.openOutputStream(uri)?.use &#123; it.write(imageFile.readBytes()) &#125;</span><br><span class="line">        <span class="comment">// 切换文件待处理状态</span></span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">            contentValues.clear()</span><br><span class="line">            contentValues.put(MediaStore.Images.Media.IS_PENDING, <span class="number">0</span>)</span><br><span class="line">            context.contentResolver.update(uri, contentValues, <span class="literal">null</span>, <span class="literal">null</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span><span class="symbol">@withContext</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
-<p>思考：<br>你能使用递归的方式改写上述代码逻辑吗？</p>
+<ul>
+<li>删改：删改自己创建的媒体资源无需权限。删改其他应用创建的资源需要捕获RecoverableSecurityException异常后，向用户申请删除权限。</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">performDeleteImage</span><span class="params">(image: <span class="type">MediaStoreModel</span>)</span></span> &#123;</span><br><span class="line">    withContext(Dispatchers.IO) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            getApplication&lt;Application&gt;().contentResolver.delete(</span><br><span class="line">                image.contentUri,</span><br><span class="line">                <span class="string">&quot;<span class="subst">$&#123;MediaStore.Images.Media._ID&#125;</span> = ?&quot;</span>,</span><br><span class="line">                arrayOf(image.id.toString())</span><br><span class="line">            )</span><br><span class="line">        &#125; <span class="keyword">catch</span> (securityException: SecurityException) &#123;</span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">               <span class="keyword">val</span> recoverableSecurityException = securityException <span class="keyword">as</span>? RecoverableSecurityException</span><br><span class="line">                        ?: <span class="keyword">throw</span> securityException</span><br><span class="line">               startIntentSenderForResult(</span><br><span class="line">                   recoverableSecurityException.userAction.actionIntent.intentSender,</span><br><span class="line">                   DELETE_PERMISSION_REQUEST,</span><br><span class="line">                   <span class="literal">null</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="literal">null</span>)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> securityException</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+
+
+<p>2.2 对文档的增删改查：<br>对外部文档的读写操作需要使用Storage Access FrameWork，通过各种Intent交由系统处理。更多实例见[参考资料2]</p>
+<p>SAF存储的限制：</p>
+<ul>
+<li>Intent.ACTION_OPEN_DOCUMENT_TREE访问限制<ul>
+<li>内部存储根目录</li>
+<li>Download目录</li>
+<li>Android/data/  和  Android/obb/</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建文档-返回Uri再进行写入</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply &#123;</span><br><span class="line">    addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">    type = <span class="string">&quot;text/plain&quot;</span></span><br><span class="line">    putExtra(Intent.EXTRA_TITLE, <span class="string">&quot;test.txt&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//读取&amp;删改</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply &#123;</span><br><span class="line">    addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">    type = <span class="string">&quot;*/*&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//目录操作</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply &#123;</span><br><span class="line">    flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>2.3 批量操作<br>通过MediaStore静态方法创建修改请求，征求用户同意后进行操作。Android-R后新增的API，旧版需走回contentResolver.delete()操作</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>createWriteRequest</td>
+<td>向用户请求媒体文件组写入权限</td>
+</tr>
+<tr>
+<td>createFavoriteRequest</td>
+<td>用户将设备上指定的媒体文件标记为“收藏”的请求</td>
+</tr>
+<tr>
+<td>createTrashRequest</td>
+<td>用户将指定的媒体文件放入设备垃圾箱的请求。垃圾箱中的内容会在系统定义的时间段后被永久删除。</td>
+</tr>
+<tr>
+<td>createDeleteRequest</td>
+<td>用户立即永久删除指定的媒体文件</td>
+</tr>
+</tbody></table>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">val</span> uriList = <span class="comment">/* A collection of content URIs to modify. */</span></span><br><span class="line"><span class="keyword">val</span> pendingIntent = MediaStore.createWriteRequest(contentResolver,urisToModify)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Launch a system prompt requesting user permission for the operation.</span></span><br><span class="line">startIntentSenderForResult(editPendingIntent.intentSender,</span><br><span class="line">                           EDIT_REQUEST_CODE, </span><br><span class="line">                           <span class="literal">null</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="三、直接文件读写"><a href="#三、直接文件读写" class="headerlink" title="三、直接文件读写"></a>三、直接文件读写</h3><p>Android-11重新支持File对象访问文件的直接路径。<br>1、针对媒体文件<br>    - 归属于你应用的文件 和 你的私有目录 的文件 可以直接使用File API访问<br>    - 如果直接用File API访问没有权限的文件，抛出 FileNotFoundException<br>2、Media Store DATA 属性<br>DATA属性存储了媒体文件的绝对路径，在Android-10的时候废弃了该属性。由于Android-11又支持File对象，所以DATA属性也可以读取直接路径，但不一定有值。但是新增和更新操作不要再使用DATA了，请使用DISPLAY_NAME 和 RELATIVE_PATH 。</p>
+<h3 id="四、另外一扇窗"><a href="#四、另外一扇窗" class="headerlink" title="四、另外一扇窗"></a>四、另外一扇窗</h3><p>对于一些特殊的App，例如文件管理器，备份等。可以申请所有文件访问权限<br>1.声明 MANAGE_EXTERNAL_STORAGE 权限<br>2.使用 ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION  操作将用户引导至一个系统设置页面</p>
+<h3 id="五、应用截图"><a href="#五、应用截图" class="headerlink" title="五、应用截图"></a>五、应用截图</h3><table>
+    <tr>
+        <td><img src="../images/scoped_storage.png" width="200"/></td>
+        <td><img src="../images/scoped_storage_2.png" width="200"/></td>
+    </tr>
+</table>
     </div>
 
     
@@ -342,7 +387,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://wangduwei.top/leetcode-reverse-list.html" title="LeetCode 反转单链表">https://wangduwei.top/leetcode-reverse-list.html</a>
+    <a href="https://wangduwei.top/android-scoped-storage.html" title="Android分区存储">https://wangduwei.top/android-scoped-storage.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -353,8 +398,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/LeetCode/" rel="tag"># LeetCode</a>
-              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+              <a href="/tags/Android/" rel="tag"># Android</a>
           </div>
 
         
@@ -367,11 +411,11 @@
 
         
     <div class="post-nav">
-      <div class="post-nav-item"></div>
       <div class="post-nav-item">
-    <a href="/leetcode-list-add.html" rel="next" title="LeetCode 两数相加">
-      LeetCode 两数相加 <i class="fa fa-chevron-right"></i>
+    <a href="/leetcode-list-add.html" rel="prev" title="LeetCode 两数相加">
+      <i class="fa fa-chevron-left"></i> LeetCode 两数相加
     </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -444,7 +488,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#LeetCode-206-%E5%8F%8D%E8%BD%AC%E5%8D%95%E9%93%BE%E8%A1%A8"><span class="nav-number">1.</span> <span class="nav-text">LeetCode-206 反转单链表</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81What%E3%80%81Why%EF%BC%88%E6%98%AF%E4%BB%80%E4%B9%88%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">一、What、Why（是什么、为什么）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81How%EF%BC%88%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8%E5%AE%9E%E8%B7%B5-%E6%95%B0%E6%8D%AE%E7%9A%84%E5%A2%9E%E3%80%81%E5%88%A0%E3%80%81%E6%94%B9%E3%80%81%E6%9F%A5%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">二、How（分区存储实践-数据的增、删、改、查）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%9B%B4%E6%8E%A5%E6%96%87%E4%BB%B6%E8%AF%BB%E5%86%99"><span class="nav-number">3.</span> <span class="nav-text">三、直接文件读写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%8F%A6%E5%A4%96%E4%B8%80%E6%89%87%E7%AA%97"><span class="nav-number">4.</span> <span class="nav-text">四、另外一扇窗</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%BA%94%E7%94%A8%E6%88%AA%E5%9B%BE"><span class="nav-number">5.</span> <span class="nav-text">五、应用截图</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -654,7 +698,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'duweiwang.github.io',
       owner       : 'duweiwang',
       admin       : ['duweiwang'],
-      id          : 'eb5152ef01d1a31647ca7fb5da3cfb00',
+      id          : 'd447aeae799cb42a590f3bcf271edded',
         language: '',
       distractionFreeMode: true
     });
