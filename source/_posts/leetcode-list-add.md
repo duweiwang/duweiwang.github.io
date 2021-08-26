@@ -14,7 +14,11 @@ description:
   
 <!-- more -->
 
-![初始状态](../images/add_two_6.jpeg)
+<center>
+    <img src="../images/add_two_6.jpeg" width="400" alt="初始状态"/>
+</center>
+
+<br>
 
 #### 问题分析：
 
@@ -22,15 +26,21 @@ description:
 ##### 当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。   
 
 
-![链表长度相等](../images/add_two_7.jpeg)
+<center>
+    <img src="../images/add_two_7.jpeg" width="400"/>
+</center>
 
 
 ##### 当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。  
 
-![长度不等](../images/add_two_8.jpeg)
+<center>
+    <img src="../images/add_two_8.jpeg" width="400"/>
+</center>
 
 
-![相加之后的结果](../images/add_two_9.jpeg)
+<center>
+    <img src="../images/ad_two_9.jpeg" width="400"/>
+</center>
 
 
 ```java
