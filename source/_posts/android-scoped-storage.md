@@ -169,8 +169,16 @@ DATA属性存储了媒体文件的绝对路径，在Android-10的时候废弃了
 ### 四、另外一扇窗
 对于一些特殊的App，例如文件管理器，备份等。可以申请所有文件访问权限 
 1.声明 MANAGE_EXTERNAL_STORAGE 权限
-2.使用 ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION  操作将用户引导至一个系统设置页面
+2.使用 ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION  将用户引导至一个系统设置页面进行授权
 
+授权范围
+- 读写共享存储区的所有文件
+    + Media content （MediaStore）
+    + Documents and other files （SAF）
+    + Datasets （BlobStoreManager）
+- MediaStore.Files数据库表
+- USB 和 SD卡 根目录
+- 除 /Android/data/ 和 /sdcard/Android 之外的其他私有目录
 
 ### 五、应用截图
 <table>
