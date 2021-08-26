@@ -105,7 +105,8 @@ deploy:
   type: git
   repo: git@github.com:duweiwang/duweiwang.github.io.git
   branch: main
-#gitee: git@gitee.com:wangduwei/wangduwei.git, master
+#  repo: git@gitee.com:wangduwei/wangduwei.git
+#  branch: master
 
 
 
