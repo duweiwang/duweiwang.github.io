@@ -14,7 +14,7 @@
 
 <link rel="stylesheet" href="/css/main.css">
 
-
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Serif SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
 <link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
 
 <script id="hexo-configurations">
@@ -35,10 +35,11 @@
 <meta property="og:image" content="https://wangduwei.top/images/revert_list_5.png">
 <meta property="og:image" content="https://wangduwei.top/images/revert_list_6.png">
 <meta property="article:published_time" content="2021-08-23T13:23:30.000Z">
-<meta property="article:modified_time" content="2021-08-24T01:24:19.841Z">
+<meta property="article:modified_time" content="2021-08-26T05:50:14.017Z">
 <meta property="article:author" content="wangduwei">
 <meta property="article:tag" content="LeetCode">
 <meta property="article:tag" content="算法">
+<meta property="article:tag" content="链表">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://wangduwei.top/images/revert_list_0.png">
 
@@ -232,7 +233,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-08-24 09:24:19" itemprop="dateModified" datetime="2021-08-24T09:24:19+08:00">2021-08-24</time>
+                <time title="修改时间：2021-08-26 13:50:14" itemprop="dateModified" datetime="2021-08-26T13:50:14+08:00">2021-08-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -271,7 +272,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>571</span>
+              <span>575</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -296,21 +297,37 @@
 </blockquote>
 <p>问题分析：</p>
 <p>这是初始状态的链表</p>
-<p><img src="../images/revert_list_0.png" alt="初始状态"></p>
-<p>由于反转链表后 <strong>head</strong> 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  </p>
+<center>
+    <img src="../images/revert_list_0.png" width="400"/>
+</center>
+由于反转链表后 **head** 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  
+
 <p>尝试一次反转后，我们发现，后续结点信息丢失了！我们不得不声明一个新的变量保存原链表的信息。</p>
-<p><img src="../images/revert_list_7.png"></p>
+<center>
+    <img src="../images/revert_list_7.png" width="400"/>
+</center>
+
 <p>所以，我们一共需要三个指针来记录转换过程  </p>
 <ul>
 <li>prev、 head 用于交换</li>
 <li>next 用于记录  </li>
 </ul>
 <p>分析到这里，我们再回到初始状态  ：</p>
-<p><img src="../images/revert_list_4.png"></p>
+<center>
+    <img src="../images/revert_list_4.png" width="400"/>
+</center>
+
 <p>接下来我们进行第一次反转，<strong>head.next</strong> 指向虚拟的空结点，且后续链表信息没有丢失。</p>
-<p><img src="../images/revert_list_5.png"></p>
+<center>
+    <img src="../images/revert_list_5.png" width="400"/>
+</center>
+
 <p>三个指针一起往后移动一个单位。我们发现此时链表又回到了最初的状态。</p>
-<p><img src="../images/revert_list_6.png"></p>
+<center>
+    <img src="../images/revert_list_6.png" width="400"/>
+</center>
+
+
 <p>至此，我们可以尝试写出如下代码：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">reverseIteratively</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">    ListNode pre = <span class="keyword">null</span>;</span><br><span class="line">    ListNode next = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = head.next;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//改变指针方向，对第一个节点来说，他的前一个节点是null</span></span><br><span class="line">        head.next = pre;</span><br><span class="line">        <span class="comment">//向前移动两个指针</span></span><br><span class="line">        pre = head;</span><br><span class="line">        head = next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -364,6 +381,7 @@
           <div class="post-tags">
               <a href="/tags/LeetCode/" rel="tag"># LeetCode</a>
               <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+              <a href="/tags/%E9%93%BE%E8%A1%A8/" rel="tag"># 链表</a>
           </div>
 
         

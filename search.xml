@@ -8,10 +8,27 @@
 </blockquote>
 <span id="more"></span>
 
-<p><img src="../images/add_two_6.jpeg" alt="初始状态"></p>
-<h4 id="问题分析："><a href="#问题分析：" class="headerlink" title="问题分析："></a>问题分析：</h4><h5 id="当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。"><a href="#当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。" class="headerlink" title="当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。"></a>当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。</h5><p><img src="../images/add_two_7.jpeg" alt="链表长度相等"></p>
-<h5 id="当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。"><a href="#当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。" class="headerlink" title="当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。"></a>当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。</h5><p><img src="../images/add_two_8.jpeg" alt="长度不等"></p>
-<p><img src="../images/add_two_9.jpeg" alt="相加之后的结果"></p>
+<center>
+    <img src="../images/add_two_6.jpeg" width="400" alt="初始状态"/>
+</center>
+
+<br>
+
+<h4 id="问题分析："><a href="#问题分析：" class="headerlink" title="问题分析："></a>问题分析：</h4><h5 id="当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。"><a href="#当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。" class="headerlink" title="当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。"></a>当两个链表长度相等时，我们只需要不断的相加，再移动两个指针，直至链表末尾。</h5><center>
+    <img src="../images/add_two_7.jpeg" width="400"/>
+</center>
+
+
+<h5 id="当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。"><a href="#当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。" class="headerlink" title="当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。"></a>当两个链表长度不等时，前半部分走链表相等逻辑，后半部分其实是一个单链表和进位相加的逻辑。</h5><center>
+    <img src="../images/add_two_8.jpeg" width="400"/>
+</center>
+
+
+<center>
+    <img src="../images/ad_two_9.jpeg" width="400"/>
+</center>
+
+
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 两个链表相加</span></span><br><span class="line"><span class="comment">     * 复用一个链表的结点</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> l1 第一个链表</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> l2 第二个链表</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">addTwoNumbers</span><span class="params">(ListNode l1, ListNode l2)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> carry = <span class="keyword">false</span>;<span class="comment">//进位</span></span><br><span class="line">        ListNode l1Prev = <span class="keyword">null</span>, l2Prev = <span class="keyword">null</span>, result = l1;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//两个链表都有值，相加直到一个链表末尾</span></span><br><span class="line">        <span class="keyword">while</span> (l1 != <span class="keyword">null</span> &amp;&amp; l2 != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span> add = l1.val + l2.val + (carry ? <span class="number">1</span> : <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">            l1.val = add % <span class="number">10</span> ;</span><br><span class="line">            carry = add &gt; <span class="number">9</span>;</span><br><span class="line"></span><br><span class="line">            l1Prev = l1;</span><br><span class="line">            l2Prev = l2;</span><br><span class="line">            l1 = l1.next;</span><br><span class="line">            l2 = l2.next;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//有一个链表已经走到头，</span></span><br><span class="line">        <span class="keyword">if</span> (l1 == <span class="keyword">null</span> &amp;&amp; l2 != <span class="keyword">null</span>) &#123;</span><br><span class="line">            addSingleList(l1Prev, l2, carry);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (l1 != <span class="keyword">null</span> &amp;&amp; l2 == <span class="keyword">null</span>) &#123;</span><br><span class="line">            addSingleList(l2Prev, l1, carry);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (l1 == <span class="keyword">null</span> &amp;&amp; l2 == <span class="keyword">null</span> &amp;&amp; carry)&#123;</span><br><span class="line">            l1Prev.next = <span class="keyword">new</span> ListNode(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//单链表和进位相加</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">addSingleList</span><span class="params">(ListNode l1, ListNode l2, <span class="keyword">boolean</span> carry)</span> </span>&#123;</span><br><span class="line">        l1.next = l2;</span><br><span class="line">        <span class="keyword">while</span> (l2 != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span> add = l2.val + (carry ? <span class="number">1</span> : <span class="number">0</span>);</span><br><span class="line">            l2.val = add % <span class="number">10</span>;</span><br><span class="line">            carry = add &gt; <span class="number">9</span>;</span><br><span class="line">            l1 = l2;</span><br><span class="line">            l2 = l2.next;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (carry) &#123;</span><br><span class="line">            l1.next = <span class="keyword">new</span> ListNode(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
@@ -123,21 +140,37 @@
 </blockquote>
 <p>问题分析：</p>
 <p>这是初始状态的链表</p>
-<p><img src="../images/revert_list_0.png" alt="初始状态"></p>
-<p>由于反转链表后 <strong>head</strong> 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  </p>
+<center>
+    <img src="../images/revert_list_0.png" width="400"/>
+</center>
+由于反转链表后 **head** 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  
+
 <p>尝试一次反转后，我们发现，后续结点信息丢失了！我们不得不声明一个新的变量保存原链表的信息。</p>
-<p><img src="../images/revert_list_7.png"></p>
+<center>
+    <img src="../images/revert_list_7.png" width="400"/>
+</center>
+
 <p>所以，我们一共需要三个指针来记录转换过程  </p>
 <ul>
 <li>prev、 head 用于交换</li>
 <li>next 用于记录  </li>
 </ul>
 <p>分析到这里，我们再回到初始状态  ：</p>
-<p><img src="../images/revert_list_4.png"></p>
+<center>
+    <img src="../images/revert_list_4.png" width="400"/>
+</center>
+
 <p>接下来我们进行第一次反转，<strong>head.next</strong> 指向虚拟的空结点，且后续链表信息没有丢失。</p>
-<p><img src="../images/revert_list_5.png"></p>
+<center>
+    <img src="../images/revert_list_5.png" width="400"/>
+</center>
+
 <p>三个指针一起往后移动一个单位。我们发现此时链表又回到了最初的状态。</p>
-<p><img src="../images/revert_list_6.png"></p>
+<center>
+    <img src="../images/revert_list_6.png" width="400"/>
+</center>
+
+
 <p>至此，我们可以尝试写出如下代码：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">reverseIteratively</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">    ListNode pre = <span class="keyword">null</span>;</span><br><span class="line">    ListNode next = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = head.next;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//改变指针方向，对第一个节点来说，他的前一个节点是null</span></span><br><span class="line">        head.next = pre;</span><br><span class="line">        <span class="comment">//向前移动两个指针</span></span><br><span class="line">        pre = head;</span><br><span class="line">        head = next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -150,6 +183,7 @@
       <tags>
         <tag>LeetCode</tag>
         <tag>算法</tag>
+        <tag>链表</tag>
       </tags>
   </entry>
 </search>
