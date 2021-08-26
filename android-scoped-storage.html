@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://wangduwei.top/images/scoped_storage.png">
 <meta property="og:image" content="https://wangduwei.top/images/scoped_storage_2.png">
 <meta property="article:published_time" content="2021-08-25T12:22:34.000Z">
-<meta property="article:modified_time" content="2021-08-25T13:17:03.780Z">
+<meta property="article:modified_time" content="2021-08-26T13:17:02.050Z">
 <meta property="article:author" content="wangduwei">
 <meta property="article:tag" content="Android">
 <meta name="twitter:card" content="summary">
@@ -222,10 +222,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-08-25 20:22:34 / 修改时间：21:17:03" itemprop="dateCreated datePublished" datetime="2021-08-25T20:22:34+08:00">2021-08-25</time>
+              <time title="创建时间：2021-08-25 20:22:34" itemprop="dateCreated datePublished" datetime="2021-08-25T20:22:34+08:00">2021-08-25</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-26 21:17:02" itemprop="dateModified" datetime="2021-08-26T21:17:02+08:00">2021-08-26</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -263,7 +269,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>4.1k</span>
+              <span>4.3k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -357,7 +363,19 @@
 
 
 <h3 id="三、直接文件读写"><a href="#三、直接文件读写" class="headerlink" title="三、直接文件读写"></a>三、直接文件读写</h3><p>Android-11重新支持File对象访问文件的直接路径。<br>1、针对媒体文件<br>    - 归属于你应用的文件 和 你的私有目录 的文件 可以直接使用File API访问<br>    - 如果直接用File API访问没有权限的文件，抛出 FileNotFoundException<br>2、Media Store DATA 属性<br>DATA属性存储了媒体文件的绝对路径，在Android-10的时候废弃了该属性。由于Android-11又支持File对象，所以DATA属性也可以读取直接路径，但不一定有值。但是新增和更新操作不要再使用DATA了，请使用DISPLAY_NAME 和 RELATIVE_PATH 。</p>
-<h3 id="四、另外一扇窗"><a href="#四、另外一扇窗" class="headerlink" title="四、另外一扇窗"></a>四、另外一扇窗</h3><p>对于一些特殊的App，例如文件管理器，备份等。可以申请所有文件访问权限<br>1.声明 MANAGE_EXTERNAL_STORAGE 权限<br>2.使用 ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION  操作将用户引导至一个系统设置页面</p>
+<h3 id="四、另外一扇窗"><a href="#四、另外一扇窗" class="headerlink" title="四、另外一扇窗"></a>四、另外一扇窗</h3><p>对于一些特殊的App，例如文件管理器，备份等。可以申请所有文件访问权限<br>1.声明 MANAGE_EXTERNAL_STORAGE 权限<br>2.使用 ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION  将用户引导至一个系统设置页面进行授权</p>
+<p>授权范围</p>
+<ul>
+<li>读写共享存储区的所有文件<ul>
+<li>Media content （MediaStore）</li>
+<li>Documents and other files （SAF）</li>
+<li>Datasets （BlobStoreManager）</li>
+</ul>
+</li>
+<li>MediaStore.Files数据库表</li>
+<li>USB 和 SD卡 根目录</li>
+<li>除 /Android/data/ 和 /sdcard/Android 之外的其他私有目录</li>
+</ul>
 <h3 id="五、应用截图"><a href="#五、应用截图" class="headerlink" title="五、应用截图"></a>五、应用截图</h3><table>
     <tr>
         <td><img src="../images/scoped_storage.png" width="200"/></td>
@@ -426,7 +444,10 @@
     <a href="/leetcode-list-add.html" rel="prev" title="LeetCode 两数相加">
       <i class="fa fa-chevron-left"></i> LeetCode 两数相加
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/android-target-30.html" rel="next" title="Android-11适配">
+      Android-11适配 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -515,7 +536,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -570,13 +591,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">6k</span>
+    <span title="站点总字数">8k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5 分钟</span>
+    <span title="站点阅读时长">8 分钟</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
