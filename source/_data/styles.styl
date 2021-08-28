@@ -8,6 +8,22 @@ body {
   color: #2e405b;
 }
 
+// --------------------站点名字体
+.site-title {
+    font-size: 28px;
+    color: #2e405b;
+    line-height: 80px;
+   // letter-spacing: 3px;
+}
+//-----------------------
+
+//--------除网站头其他都有效-----
+.sidebar-inner, .comments, .post-block, .sidebar, .header-inner{
+    background: unset;
+    box-shadow: unset;
+}
+//------------
+
 //文章内容的透明度设置
 .content-wrap {
   opacity: 0.9;
@@ -24,10 +40,33 @@ body {
   background: rgba(255,255,255,0.9);
 }
 
-//首页顶部留白
-//.container{margin-top:10px;}
+//-------------顶部一条细线-wdw-ok------------
+.headband {
+    height: 1.5px;
+    background-image: linear-gradient(90deg, #F79533 0%, #F37055 15%, #EF4E7B 30%, #A166AB 44%, #5073B8 58%, #1098AD 72%, #07B39B 86%, #6DBA82 100%);
+}
+//-------------------------------------------
 
-//页脚文字
+//页脚文字-有效
 //.footer,.footer a,.footer .with-love{
  // color: #31ff00
 //}
+
+
+// 站点名背景
+//.site-brand-container {
+ //   padding: 20px 0;
+ //   color: #fff;
+ //   background: transparent;
+//}
+
+//站点名和子标题背景
+//.site-meta {
+ //   padding: 20px 0;
+ //   color: #2e405b;
+ //   background: transparent;
+//}
+
+.header-inner, .site-meta, .site-brand-container{
+    background: transparent;
+}
