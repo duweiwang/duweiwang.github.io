@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2021-08-26T13:25:36.286Z</updated>
+  <updated>2021-08-29T08:39:48.048Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Class文件的存储格式</title>
+    <link href="https://wangduwei.top/file-format-class.html"/>
+    <id>https://wangduwei.top/file-format-class.html</id>
+    <published>2021-08-29T08:06:06.000Z</published>
+    <updated>2021-08-29T08:39:48.048Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、Class文件结构概览&quot;&gt;&lt;a href=&quot;#一、Class文件结构概览&quot; class=&quot;headerlink&quot; title=&quot;一、Class文件结构概览&quot;&gt;&lt;/a&gt;一、Class文件结构概览&lt;/h4&gt;&lt;h5 id=&quot;1-1-概述&quot;&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="Java" scheme="https://wangduwei.top/categories/Java/"/>
+    
+    <category term="File" scheme="https://wangduwei.top/categories/Java/File/"/>
+    
+    
+    <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
+    
+    <category term="File" scheme="https://wangduwei.top/tags/File/"/>
+    
+  </entry>
   
   <entry>
     <title>Android-11适配</title>

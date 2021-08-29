@@ -24,28 +24,36 @@
 
 <script data-ad-client="ca-pub-8087648226243491" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="嗅不到北的狗子">
-<meta property="og:url" content="https://wangduwei.top/archives/index.html">
+  <meta name="description" content="一、Class文件结构概览1.1 概述 每一个class文件包含一个类或者接口的定义 以大端方式存储 u1、u2、u4分别表示1、2、4个字节    1.2 数据结构123456789101112131415161718ClassFile &amp;#123;    u4             magic;    u2             minor_version;    u2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Class文件的存储格式">
+<meta property="og:url" content="https://wangduwei.top/file-format-class.html">
 <meta property="og:site_name" content="嗅不到北的狗子">
+<meta property="og:description" content="一、Class文件结构概览1.1 概述 每一个class文件包含一个类或者接口的定义 以大端方式存储 u1、u2、u4分别表示1、2、4个字节    1.2 数据结构123456789101112131415161718ClassFile &amp;#123;    u4             magic;    u2             minor_version;    u2">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wangduwei.top/images/class_file_format.jpeg">
+<meta property="article:published_time" content="2021-08-29T08:06:06.000Z">
+<meta property="article:modified_time" content="2021-08-29T08:39:48.048Z">
 <meta property="article:author" content="wangduwei">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="File">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wangduwei.top/images/class_file_format.jpeg">
 
-<link rel="canonical" href="https://wangduwei.top/archives/">
+<link rel="canonical" href="https://wangduwei.top/file-format-class.html">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>嗅不到北的狗子</title>
+  <title>Class文件的存储格式 | 嗅不到北的狗子</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-69Z1P1CBTV"></script>
     <script>
@@ -177,9 +185,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -195,10 +204,9 @@
       <meta itemprop="name" content="嗅不到北的狗子">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/file-format-class.html" class="post-title-link" itemprop="url">Class文件的存储格式</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          Class文件的存储格式
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -225,6 +233,13 @@
             </span>
 
           
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
   
   <span class="post-meta-item">
     
@@ -263,7 +278,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h4 id="一、Class文件结构概览"><a href="#一、Class文件结构概览" class="headerlink" title="一、Class文件结构概览"></a>一、Class文件结构概览</h4><h5 id="1-1-概述"><a href="#1-1-概述" class="headerlink" title="1.1 概述"></a>1.1 概述</h5><ul>
+        <h4 id="一、Class文件结构概览"><a href="#一、Class文件结构概览" class="headerlink" title="一、Class文件结构概览"></a>一、Class文件结构概览</h4><h5 id="1-1-概述"><a href="#1-1-概述" class="headerlink" title="1.1 概述"></a>1.1 概述</h5><ul>
 <li>每一个class文件包含一个类或者接口的定义</li>
 <li>以大端方式存储</li>
 <li>u1、u2、u4分别表示1、2、4个字节  </li>
@@ -366,464 +381,96 @@
 <h4 id="六、参考链接"><a href="#六、参考链接" class="headerlink" title="六、参考链接"></a>六、参考链接</h4><p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4">Chapter 4. The class File Format</a>  </p>
 <p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/ae3f860499aa">Java Class文件结构解析</a></p>
 
-      
     </div>
 
     
     
     
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
+        <div class="reward-container">
+  <div>赏你一杯咖啡</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
       
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-target-30.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="嗅不到北的狗子">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/android-target-30.html" class="post-title-link" itemprop="url">Android-11适配</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-08-26 20:27:25 / 修改时间：21:25:36" itemprop="dateCreated datePublished" datetime="2021-08-26T20:27:25+08:00">2021-08-26</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/android-target-30.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/android-target-30.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.4k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="wangduwei 微信支付">
+        <p>微信支付</p>
+      </div>
       
-          <p>Android-11,target-sdk 30 变更及适配指南</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/android-target-30.html">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpeg" alt="wangduwei 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
         
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-scoped-storage.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="嗅不到北的狗子">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/android-scoped-storage.html" class="post-title-link" itemprop="url">Android分区存储</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-25 20:22:34" itemprop="dateCreated datePublished" datetime="2021-08-25T20:22:34+08:00">2021-08-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-08-26 21:17:02" itemprop="dateModified" datetime="2021-08-26T21:17:02+08:00">2021-08-26</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/android-scoped-storage.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/android-scoped-storage.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>4.3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="一、What、Why（是什么、为什么）"><a href="#一、What、Why（是什么、为什么）" class="headerlink" title="一、What、Why（是什么、为什么）"></a>一、What、Why（是什么、为什么）</h3><p>1.1 什么是分区存储<br>了解传统的共享存储 (Shared Storage):</p>
-<ul>
-<li>每个app有独立的存储空间Android/data/pkg其他应用不可见（Context.getExternalFileDir）</li>
-<li>访问外部空间需要额外权限READ/WRITE_EXTERNAL_STORAGE、获取存储权限的应用可以访问整个外部存储空间</li>
-<li>应用卸载时，保存在外部存储空间文件不会被删除。</li>
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>wangduwei
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://wangduwei.top/file-format-class.html" title="Class文件的存储格式">https://wangduwei.top/file-format-class.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
 </ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/android-scoped-storage.html#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
+</div>
 
-    
-    
-    
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/File/" rel="tag"># File</a>
+          </div>
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/android-target-30.html" rel="prev" title="Android-11适配">
+      <i class="fa fa-chevron-left"></i> Android-11适配
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
       </footer>
+    
   </article>
   
   
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/leetcode-list-add.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="嗅不到北的狗子">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/leetcode-list-add.html" class="post-title-link" itemprop="url">LeetCode 两数相加</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-25 11:54:07" itemprop="dateCreated datePublished" datetime="2021-08-25T11:54:07+08:00">2021-08-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-08-26 14:04:43" itemprop="dateModified" datetime="2021-08-26T14:04:43+08:00">2021-08-26</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/LeetCode/" itemprop="url" rel="index"><span itemprop="name">LeetCode</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/leetcode-list-add.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/leetcode-list-add.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.2k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="Leetode-2-两数相加"><a href="#Leetode-2-两数相加" class="headerlink" title="Leetode-2 两数相加"></a>Leetode-2 两数相加</h3><blockquote>
-<p>给你两个 非空 的链表，表示两个非负的整数。它们每位数字都是按照 逆序 的方式存储的，并且每个节点只能存储 一位 数字。请你将两个数相加，并以相同形式返回一个表示和的链表。你可以假设除了数字 0 之外，这两个数都不会以 0 开头。</p>
-</blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/leetcode-list-add.html#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/leetcode-reverse-list.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="嗅不到北的狗子">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/leetcode-reverse-list.html" class="post-title-link" itemprop="url">LeetCode 反转单链表</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-23 21:23:30" itemprop="dateCreated datePublished" datetime="2021-08-23T21:23:30+08:00">2021-08-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-08-26 13:50:14" itemprop="dateModified" datetime="2021-08-26T13:50:14+08:00">2021-08-26</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/LeetCode/" itemprop="url" rel="index"><span itemprop="name">LeetCode</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/leetcode-reverse-list.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/leetcode-reverse-list.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>575</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/leetcode-reverse-list.html">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-
   
 
 
 
           </div>
           
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-valine">valine</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane valine" id="comment-valine">
+              <div class="comments" id="valine-comments"></div>
+            </div>
+        </div>
+      </div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -870,6 +517,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81Class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">一、Class文件结构概览</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-1-%E6%A6%82%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 概述</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-2-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 数据结构</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-3-%E5%9B%BE%E5%BD%A2%E5%8C%96%E8%A1%A8%E7%A4%BA"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 图形化表示</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-4-%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 示例</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%B8%B8%E9%87%8F%E6%B1%A0%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">二、常量池的结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%AD%97%E6%AE%B5%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">三、字段的结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%96%B9%E6%B3%95%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">4.</span> <span class="nav-text">四、方法的结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%B1%9E%E6%80%A7%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">5.</span> <span class="nav-text">五、属性的结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-number">6.</span> <span class="nav-text">六、参考链接</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -1064,6 +712,25 @@
 
   
 
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '16c7d02bc3ca2bae3d85',
+      clientSecret: 'bfda6fb671841e71f55e41fdd3fb794c8dbf40b2',
+      repo        : 'duweiwang.github.io',
+      owner       : 'duweiwang',
+      admin       : ['duweiwang'],
+      id          : 'c21fcd6d93203c56e14450a1ba06a634',
+        language: '',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
 
 
 <script>

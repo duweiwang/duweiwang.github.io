@@ -286,4 +286,119 @@
         <tag>链表</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Class文件的存储格式</title>
+    <url>/file-format-class.html</url>
+    <content><![CDATA[<h4 id="一、Class文件结构概览"><a href="#一、Class文件结构概览" class="headerlink" title="一、Class文件结构概览"></a>一、Class文件结构概览</h4><h5 id="1-1-概述"><a href="#1-1-概述" class="headerlink" title="1.1 概述"></a>1.1 概述</h5><ul>
+<li>每一个class文件包含一个类或者接口的定义</li>
+<li>以大端方式存储</li>
+<li>u1、u2、u4分别表示1、2、4个字节  </li>
+</ul>
+<h5 id="1-2-数据结构"><a href="#1-2-数据结构" class="headerlink" title="1.2 数据结构"></a>1.2 数据结构</h5><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">ClassFile &#123;</span><br><span class="line">    u4             magic;</span><br><span class="line">    u2             minor_version;</span><br><span class="line">    u2             major_version;</span><br><span class="line">    u2             constant_pool_count;</span><br><span class="line">    cp_info        constant_pool[constant_pool_count<span class="number">-1</span>];</span><br><span class="line">    u2             access_flags;</span><br><span class="line">    u2             this_class;</span><br><span class="line">    u2             super_class;</span><br><span class="line">    u2             interfaces_count;</span><br><span class="line">    u2             interfaces[interfaces_count];</span><br><span class="line">    u2             fields_count;</span><br><span class="line">    field_info     fields[fields_count];</span><br><span class="line">    u2             methods_count;</span><br><span class="line">    method_info    methods[methods_count];</span><br><span class="line">    u2             attributes_count;</span><br><span class="line">    attribute_info attributes[attributes_count];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="1-3-图形化表示"><a href="#1-3-图形化表示" class="headerlink" title="1.3 图形化表示"></a>1.3 图形化表示</h5><center>
+    <img src="../images/class_file_format.jpeg" width="400"/>
+</center>
+
+<h5 id="1-4-示例"><a href="#1-4-示例" class="headerlink" title="1.4 示例"></a>1.4 示例</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BMWCar</span> <span class="keyword">implements</span> <span class="title">Car</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BMWCar</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        name = <span class="string">&quot;宝马&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;BMW car drive.&quot;</span> + name);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Last modified 2017-11-10; size 644 bytes</span><br><span class="line">  MD5 checksum ac6d7477d45479490e4ea3f660b1dcdd</span><br><span class="line">  Compiled from &quot;BMWCar.java&quot;</span><br><span class="line">public class BMWCar implements Car</span><br><span class="line">  minor version: 0</span><br><span class="line">  major version: 52</span><br><span class="line">  flags: ACC_PUBLIC, ACC_SUPER</span><br><span class="line">Constant pool:</span><br><span class="line">   #1 = Methodref          #12.#23        // java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #2 = String             #24            // 宝马</span><br><span class="line">   #3 = Fieldref           #11.#25        // BMWCar.name:Ljava/lang/String;</span><br><span class="line">   #4 = Fieldref           #26.#27        // java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">   #5 = Class              #28            // java/lang/StringBuilder</span><br><span class="line">   #6 = Methodref          #5.#23         // java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #7 = String             #29            // BMW car drive.</span><br><span class="line">   #8 = Methodref          #5.#30         // java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">   #9 = Methodref          #5.#31         // java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">  #10 = Methodref          #32.#33        // java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">  #11 = Class              #34            // BMWCar</span><br><span class="line">  #12 = Class              #35            // java/lang/Object</span><br><span class="line">  #13 = Class              #36            // Car</span><br><span class="line">  #14 = Utf8               name</span><br><span class="line">  #15 = Utf8               Ljava/lang/String;</span><br><span class="line">  #16 = Utf8               &lt;init&gt;</span><br><span class="line">  #17 = Utf8               ()V</span><br><span class="line">  #18 = Utf8               Code</span><br><span class="line">  #19 = Utf8               LineNumberTable</span><br><span class="line">  #20 = Utf8               drive</span><br><span class="line">  #21 = Utf8               SourceFile</span><br><span class="line">  #22 = Utf8               BMWCar.java</span><br><span class="line">  #23 = NameAndType        #16:#17        // &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">  #24 = Utf8               宝马</span><br><span class="line">  #25 = NameAndType        #14:#15        // name:Ljava/lang/String;</span><br><span class="line">  #26 = Class              #37            // java/lang/System</span><br><span class="line">  #27 = NameAndType        #38:#39        // out:Ljava/io/PrintStream;</span><br><span class="line">  #28 = Utf8               java/lang/StringBuilder</span><br><span class="line">  #29 = Utf8               BMW car drive.</span><br><span class="line">  #30 = NameAndType        #40:#41        // append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">  #31 = NameAndType        #42:#43        // toString:()Ljava/lang/String;</span><br><span class="line">  #32 = Class              #44            // java/io/PrintStream</span><br><span class="line">  #33 = NameAndType        #45:#46        // println:(Ljava/lang/String;)V</span><br><span class="line">  #34 = Utf8               BMWCar</span><br><span class="line">  #35 = Utf8               java/lang/Object</span><br><span class="line">  #36 = Utf8               Car</span><br><span class="line">  #37 = Utf8               java/lang/System</span><br><span class="line">  #38 = Utf8               out</span><br><span class="line">  #39 = Utf8               Ljava/io/PrintStream;</span><br><span class="line">  #40 = Utf8               append</span><br><span class="line">  #41 = Utf8               (Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">  #42 = Utf8               toString</span><br><span class="line">  #43 = Utf8               ()Ljava/lang/String;</span><br><span class="line">  #44 = Utf8               java/io/PrintStream</span><br><span class="line">  #45 = Utf8               println</span><br><span class="line">  #46 = Utf8               (Ljava/lang/String;)V</span><br><span class="line">&#123;</span><br><span class="line">  public BMWCar();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=1, args_size=1</span><br><span class="line">         0: aload_0</span><br><span class="line">         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         4: aload_0</span><br><span class="line">         5: ldc           #2                  // String 宝马</span><br><span class="line">         7: putfield      #3                  // Field name:Ljava/lang/String;</span><br><span class="line">        10: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 6: 0</span><br><span class="line">        line 7: 4</span><br><span class="line">        line 8: 10</span><br><span class="line"></span><br><span class="line">  public void drive();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=3, locals=1, args_size=1</span><br><span class="line">         0: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">         3: new           #5                  // class java/lang/StringBuilder</span><br><span class="line">         6: dup</span><br><span class="line">         7: invokespecial #6                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">        10: ldc           #7                  // String BMW car drive.</span><br><span class="line">        12: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">        15: aload_0</span><br><span class="line">        16: getfield      #3                  // Field name:Ljava/lang/String;</span><br><span class="line">        19: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">        22: invokevirtual #9                  // Method java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">        25: invokevirtual #10                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">        28: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 12: 0</span><br><span class="line">        line 13: 28</span><br><span class="line">&#125;</span><br><span class="line">SourceFile: &quot;BMWCar.java&quot;</span><br></pre></td></tr></table></figure>
+
+<h4 id="二、常量池的结构"><a href="#二、常量池的结构" class="headerlink" title="二、常量池的结构"></a>二、常量池的结构</h4><p>常量池是一个cp_info的数组：通过tag定位到具体的数据结构，再通过数据结构的表示，判断下面几个字节怎么解析。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cp_info &#123;</span><br><span class="line">    u1 tag; //cp-info的类型</span><br><span class="line">    u1 info[];//类型对应的数组</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>tag</th>
+<th>info</th>
+<th>数据结构</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>CONSTANT_Utf8_info</td>
+<td>CONSTANT_NameAndType_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 name_index;<br>    &nbsp;u2 descriptor_index;<br>}</td>
+<td>UTF-8编码的字符串</td>
+</tr>
+<tr>
+<td>3</td>
+<td>CONSTANT_Integer_info</td>
+<td>CONSTANT_Integer_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u4 bytes;<br>}</td>
+<td>整形字面量，boolean、byte、char、short等类型都用int存放</td>
+</tr>
+<tr>
+<td>4</td>
+<td>CONSTANT_Float_info</td>
+<td>CONSTANT_Float_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u4 bytes;<br>}</td>
+<td>浮点型字面量</td>
+</tr>
+<tr>
+<td>5</td>
+<td>CONSTANT_Long_info</td>
+<td>CONSTANT_Long_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u4 high_bytes;<br>    &nbsp;u4 low_bytes;<br>}</td>
+<td>浮点型字面量</td>
+</tr>
+<tr>
+<td>6</td>
+<td>CONSTANT_Double_info</td>
+<td>CONSTANT_Long_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u4 high_bytes;<br>    &nbsp;u4 low_bytes;<br>}</td>
+<td>双精度浮点型字面量</td>
+</tr>
+<tr>
+<td>7</td>
+<td>CONSTANT_Class_info</td>
+<td>CONSTANT_Class_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 name_index;<br>}</td>
+<td>类或接口的符号引用</td>
+</tr>
+<tr>
+<td>8</td>
+<td>CONSTANT_String_info</td>
+<td>CONSTANT_String_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 string_index;<br>}</td>
+<td>字符串类型字面量</td>
+</tr>
+<tr>
+<td>9</td>
+<td>CONSTANT_Fieldref_info</td>
+<td>CONSTANT_Fieldref_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 class_index;//索引值<br>    &nbsp;u2 name_and_type_index;<br>}</td>
+<td>字段的符号引用</td>
+</tr>
+<tr>
+<td>10</td>
+<td>CONSTANT_Methodref_info</td>
+<td>CONSTANT_Methodref_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 class_index;;//索引值<br>    &nbsp;u2 name_and_type_index;<br>}</td>
+<td>类中方法的符号引用</td>
+</tr>
+<tr>
+<td>11</td>
+<td>CONSTANT_InterfaceMethodref</td>
+<td>CONSTANT_InterfaceMethodref_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 class_index;;//索引值<br>    &nbsp;u2 name_and_type_index;<br>}</td>
+<td>接口中方法的符号引用</td>
+</tr>
+<tr>
+<td>12</td>
+<td>CONSTANT_NameAndType_info</td>
+<td>CONSTANT_NameAndType_info {<br>    &nbsp;u1 tag;<br>    &nbsp;&nbsp;u2 name_index;<br>    &nbsp;&nbsp;u2 descriptor_index;<br>}</td>
+<td>接口中方法的符号引用</td>
+</tr>
+</tbody></table>
+<h4 id="三、字段的结构"><a href="#三、字段的结构" class="headerlink" title="三、字段的结构"></a>三、字段的结构</h4><p>每一个字段用一个 field_info的结构体表示</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">field_info &#123;</span><br><span class="line">    u2             access_flags;</span><br><span class="line">    u2             name_index;//指向常量池的index，表示字段名</span><br><span class="line">    u2             descriptor_index;//指向常量池的inde，字段的描述符</span><br><span class="line">    u2             attributes_count;</span><br><span class="line">    attribute_info attributes[attributes_count];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="四、方法的结构"><a href="#四、方法的结构" class="headerlink" title="四、方法的结构"></a>四、方法的结构</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">method_info &#123;</span><br><span class="line">    u2             access_flags;</span><br><span class="line">    u2             name_index;</span><br><span class="line">    u2             descriptor_index;</span><br><span class="line">    u2             attributes_count;</span><br><span class="line">    attribute_info attributes[attributes_count];//Code字节码信息</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="五、属性的结构"><a href="#五、属性的结构" class="headerlink" title="五、属性的结构"></a>五、属性的结构</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">attribute_info &#123;</span><br><span class="line">    u2 attribute_name_index;</span><br><span class="line">    u4 attribute_length;</span><br><span class="line">    u1 info[attribute_length];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="六、参考链接"><a href="#六、参考链接" class="headerlink" title="六、参考链接"></a>六、参考链接</h4><p><a href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4">Chapter 4. The class File Format</a>  </p>
+<p><a href="https://www.jianshu.com/p/ae3f860499aa">Java Class文件结构解析</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+        <category>File</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>File</tag>
+      </tags>
+  </entry>
 </search>
