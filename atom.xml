@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2021-08-29T08:39:48.048Z</updated>
+  <updated>2021-09-01T12:21:32.812Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ELF文件的结构</title>
+    <link href="https://wangduwei.top/file-format-elf.html"/>
+    <id>https://wangduwei.top/file-format-elf.html</id>
+    <published>2021-08-30T07:22:49.000Z</published>
+    <updated>2021-09-01T12:21:32.812Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="File" scheme="https://wangduwei.top/tags/File/"/>
+    
+  </entry>
   
   <entry>
     <title>Class文件的存储格式</title>
@@ -93,7 +116,7 @@
     <link href="https://wangduwei.top/leetcode-list-add.html"/>
     <id>https://wangduwei.top/leetcode-list-add.html</id>
     <published>2021-08-25T03:54:07.000Z</published>
-    <updated>2021-08-26T06:04:43.519Z</updated>
+    <updated>2021-08-30T07:39:12.754Z</updated>
     
     
     <summary type="html">&lt;h3 id=&quot;Leetode-2-两数相加&quot;&gt;&lt;a href=&quot;#Leetode-2-两数相加&quot; class=&quot;headerlink&quot; title=&quot;Leetode-2 两数相加&quot;&gt;&lt;/a&gt;Leetode-2 两数相加&lt;/h3&gt;&lt;blockquote&gt;
@@ -107,9 +130,9 @@
     
     <category term="LeetCode" scheme="https://wangduwei.top/tags/LeetCode/"/>
     
-    <category term="算法" scheme="https://wangduwei.top/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="Algorithm" scheme="https://wangduwei.top/tags/Algorithm/"/>
     
-    <category term="链表" scheme="https://wangduwei.top/tags/%E9%93%BE%E8%A1%A8/"/>
+    <category term="List" scheme="https://wangduwei.top/tags/List/"/>
     
   </entry>
   
@@ -118,7 +141,7 @@
     <link href="https://wangduwei.top/leetcode-reverse-list.html"/>
     <id>https://wangduwei.top/leetcode-reverse-list.html</id>
     <published>2021-08-23T13:23:30.000Z</published>
-    <updated>2021-08-26T05:50:14.017Z</updated>
+    <updated>2021-08-30T07:39:12.764Z</updated>
     
     
     <summary type="html">给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</summary>
@@ -130,9 +153,9 @@
     
     <category term="LeetCode" scheme="https://wangduwei.top/tags/LeetCode/"/>
     
-    <category term="算法" scheme="https://wangduwei.top/tags/%E7%AE%97%E6%B3%95/"/>
+    <category term="Algorithm" scheme="https://wangduwei.top/tags/Algorithm/"/>
     
-    <category term="链表" scheme="https://wangduwei.top/tags/%E9%93%BE%E8%A1%A8/"/>
+    <category term="List" scheme="https://wangduwei.top/tags/List/"/>
     
   </entry>
   

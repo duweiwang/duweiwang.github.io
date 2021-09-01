@@ -183,6 +183,154 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/file-format-elf.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="嗅不到北的狗子">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/file-format-elf.html" class="post-title-link" itemprop="url">ELF文件的结构</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-30 15:22:49" itemprop="dateCreated datePublished" datetime="2021-08-30T15:22:49+08:00">2021-08-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-09-01 20:21:32" itemprop="dateModified" datetime="2021-09-01T20:21:32+08:00">2021-09-01</time>
+              </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/file-format-elf.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/file-format-elf.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>代码是解决问题的工具。当通过编码方式解决一个问题时，通常有如下步骤：<br>1.定义问题<br>2.设计解决方案<br>3.编码实现方案<br>    3.1 编译源码，生成目标文件<br>    3.2 链接目标文件，生成可执行文件或库<br>4.测试程序</p>
+<p>那么，什么是目标文件呢？</p>
+<p>我们用IDE编写的代码是普通的文本文件，要想被机器识别，需要经过一些处理转换成二进制格式。<br>这个处理过程包括：</p>
+<ul>
+<li>预处理</li>
+<li>编译</li>
+<li>汇编</li>
+<li>链接</li>
+</ul>
+<p>预处理过程由预处理器（Preprocessor）完成：</p>
+<ul>
+<li>#define宏定义展开</li>
+<li>处理条件编译指令</li>
+<li>处理#include指令</li>
+<li>删除注释</li>
+<li>添加行号</li>
+<li>保留#pragma指令<br>编译过程由编译器（Compiler）完成：转换成汇编代码</li>
+<li>词法分析、语法分析、语义分析和优化<br>汇编过程由汇编器（Assembler）完成：转换成二进制的机器码</li>
+<li>汇编码到机器码的翻译<br>链接过程由链接器（Linker）完成：将上一步生成的目标文件和其他目标文件一起链接生成可执行文件</li>
+</ul>
+<center>
+    <img src="../images/GCC_CompilationProcess.png" width="400"/>
+</center>
+
+<p>综上可知，目标文件是程序未链接前的一个中间文件。</p>
+<h4 id="二、文件结构解析"><a href="#二、文件结构解析" class="headerlink" title="二、文件结构解析"></a>二、文件结构解析</h4><p>目标文件其实是ELF文件的一种，常见的ELF文件还有.so和.oat文件。ELF文件存在两种观察角度，分别是编译角度和运行角度。两个角度看到的结构略有差异。如图：</p>
+<center>
+    <img src="../images/elf_format_overview.png" width="400"/>
+</center>
+
+<p>从图中可以得到这样一些信息：Program Header Table对于编译视图是可选的，Section Header Table对于执行视图是可选的。<br>编译视图是以section为组织单位，执行视图是以segment为组织单位，下面介绍一些重要的结构。</p>
+<h5 id="ELF-Header"><a href="#ELF-Header" class="headerlink" title="ELF Header"></a>ELF Header</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">#define EI_NIDENT 16</span><br><span class="line">typedef struct &#123;</span><br><span class="line">    unsigned char e_ident[EI_NIDENT];</span><br><span class="line">    //此elf文件的类型</span><br><span class="line">    Elf32_Half e_type;//ET_NONE An unknown type.</span><br><span class="line">                        ET_REL A relocatable file.</span><br><span class="line">                        ET_EXEC An executable file.</span><br><span class="line">                        ET_DYN A shared object.</span><br><span class="line">                        ET_CORE A core file.</span><br><span class="line">    Elf32_Half e_machine;</span><br><span class="line">    Elf32_Word e_version;</span><br><span class="line">    Elf32_Addr e_entry;</span><br><span class="line">    Elf32_Off e_phoff;</span><br><span class="line">//section header table在此文件中的偏移量</span><br><span class="line">    Elf32_Off e_shoff;</span><br><span class="line">    Elf32_Word e_flags;</span><br><span class="line">    Elf32_Half e_ehsize;</span><br><span class="line">//program-header-table数组中一个元素的大小</span><br><span class="line">    Elf32_Half e_phentsize;</span><br><span class="line">//program-header-table数组元素的个数</span><br><span class="line">    Elf32_Half e_phnum;</span><br><span class="line">    Elf32_Half e_shentsize;</span><br><span class="line">//section header table包含的元素个数</span><br><span class="line">    Elf32_Half e_shnum;</span><br><span class="line">//section header table每个元素的字节大小</span><br><span class="line">    Elf32_Half e_shstrndx;</span><br><span class="line"> &#125; Elf32_Ehdr;</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="Program-Header-Table"><a href="#Program-Header-Table" class="headerlink" title="Program Header Table"></a>Program Header Table</h5><p>用于ELF文件装载进内存时进行分块</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">//此元素描述的是哪种segment，以及如何解析</span><br><span class="line">   uint32_t   p_type;</span><br><span class="line">//segment首字节在文件中的偏移值</span><br><span class="line">   Elf32_Off  p_offset;</span><br><span class="line">//应该加载到内存中的哪个虚拟地址中</span><br><span class="line">   Elf32_Addr p_vaddr;</span><br><span class="line">//相关的物理地址，BSD中为0</span><br><span class="line">   Elf32_Addr p_paddr;</span><br><span class="line">//文件的字节数</span><br><span class="line">   uint32_t   p_filesz;</span><br><span class="line">//加载到内存中的字节数</span><br><span class="line">   uint32_t   p_memsz;</span><br><span class="line">//segment类型标志位</span><br><span class="line">//PF_X   An executable segment.</span><br><span class="line">//PF_W   A writable segment.</span><br><span class="line">//PF_R   A readable segment.</span><br><span class="line">   uint32_t   p_flags;</span><br><span class="line">//</span><br><span class="line">   uint32_t   p_align;</span><br><span class="line">&#125; Elf32_Phdr;</span><br></pre></td></tr></table></figure>
+
+
+<h5 id="Section-Header-Table"><a href="#Section-Header-Table" class="headerlink" title="Section Header Table"></a>Section Header Table</h5><p>用于定位文件中所有的section，它是一个元素为Elf32_Shdr的数组结构。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">typedef struct</span><br><span class="line">&#123;</span><br><span class="line">	Elf32_Word sh_name;      /* Section name (string tbl index)   */</span><br><span class="line">	Elf32_Word sh_type;      /* Section type                      */</span><br><span class="line">	Elf32_Word sh_flags;     /* Section flags                     */</span><br><span class="line">	Elf32_Addr sh_addr;      /* Section virtual addr at execution */</span><br><span class="line">	Elf32_Off sh_offset;     /* Section file offset               */</span><br><span class="line">	Elf32_Word sh_size;      /* Section size in bytes             */</span><br><span class="line">	Elf32_Word sh_link;      /* Link to another section           */</span><br><span class="line">	Elf32_Word sh_info;      /* Additional section information    */</span><br><span class="line">	Elf32_Word sh_addralign; /* Section alignment                 */</span><br><span class="line">	Elf32_Word sh_entsize;   /* Entry size if section holds table */</span><br><span class="line">&#125; Elf32_Shdr;</span><br></pre></td></tr></table></figure>
+
+<h5 id="字符串表和符号表（String-and-symbol-tables）"><a href="#字符串表和符号表（String-and-symbol-tables）" class="headerlink" title="字符串表和符号表（String and symbol tables）"></a>字符串表和符号表（String and symbol tables）</h5><p>存放scetion的名字，以及符号信息。其他结构通过index访问此结构中的字符串信息。符号表保存了用于定位符号引用的信息。它是以下结构的数组：</p>
+<center>
+    <img src="../images/elf_string_table.jpeg" width="500"/>
+</center>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">       uint32_t      st_name;</span><br><span class="line">       Elf32_Addr    st_value;</span><br><span class="line">       uint32_t      st_size;</span><br><span class="line">       unsigned char st_info;</span><br><span class="line">       unsigned char st_other;</span><br><span class="line">       uint16_t      st_shndx;</span><br><span class="line">&#125; Elf32_Sym;</span><br></pre></td></tr></table></figure>
+
+
+<h5 id="Relocation-entries-Rel-amp-Rela"><a href="#Relocation-entries-Rel-amp-Rela" class="headerlink" title="Relocation entries (Rel &amp; Rela)"></a>Relocation entries (Rel &amp; Rela)</h5><p>重定位是连接符号引用和符号定义的过程。重定位文件必须包含如何修改section内容的信息，来让执行文件或共享目标文件正确的调用外部函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr      r_offset;</span><br><span class="line">        Elf32_Word      r_info;</span><br><span class="line">&#125; Elf32_Rel;</span><br><span class="line"> </span><br><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr      r_offset;</span><br><span class="line">        Elf32_Word      r_info;</span><br><span class="line">        Elf32_Sword     r_addend;</span><br><span class="line">&#125; Elf32_Rela;</span><br></pre></td></tr></table></figure>
+<p>r_offset：<br>对于重定位文件来说，此值表示从section的开始到被修改值在section中的偏移量。<br>对于执行文件和共享库文件来说，此值表示需要被重定位的虚拟地址。</p>
+<p>r_info：<br>符号表的index和重定位的类型。</p>
+<p>r_addend：<br>用于计算重定位字段的值。</p>
+<h4 id="三、参考链接"><a href="#三、参考链接" class="headerlink" title="三、参考链接"></a>三、参考链接</h4><p><a target="_blank" rel="noopener" href="https://www.man7.org/linux/man-pages/man5/elf.5.html">Linux manual page</a><br><a target="_blank" rel="noopener" href="https://www.codetd.com/article/489055">The structure of an ARM ELF image</a><br><a target="_blank" rel="noopener" href="https://www3.ntu.edu.sg/home/ehchua/programming/cpp/gcc_make.html">Compiling, Linking and Building</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/file-format-class.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -632,7 +780,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-08-26 14:04:43" itemprop="dateModified" datetime="2021-08-26T14:04:43+08:00">2021-08-26</time>
+                <time title="修改时间：2021-08-30 15:39:12" itemprop="dateModified" datetime="2021-08-30T15:39:12+08:00">2021-08-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -743,7 +891,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-08-26 13:50:14" itemprop="dateModified" datetime="2021-08-26T13:50:14+08:00">2021-08-26</time>
+                <time title="修改时间：2021-08-30 15:39:12" itemprop="dateModified" datetime="2021-08-30T15:39:12+08:00">2021-08-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -936,13 +1084,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">14k</span>
+    <span title="站点总字数">17k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">13 分钟</span>
+    <span title="站点阅读时长">15 分钟</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
@@ -1065,7 +1213,6 @@
   
 
 
-
 <script>
 NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
   NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
@@ -1093,6 +1240,7 @@ NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
   }, window.Valine);
 });
 </script>
+
 
 
   <!-- 页面点击小红心 -->
