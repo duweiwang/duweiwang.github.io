@@ -208,7 +208,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-09-02 17:30:12 / 修改时间：17:32:14" itemprop="dateCreated datePublished" datetime="2021-09-02T17:30:12+08:00">2021-09-02</time>
+              <time title="创建时间：2021-09-02 17:30:12 / 修改时间：22:43:12" itemprop="dateCreated datePublished" datetime="2021-09-02T17:30:12+08:00">2021-09-02</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -240,7 +240,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>530</span>
+              <span>570</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -272,8 +272,11 @@
 <li>值越低说明投资回收期短，风险越小，投资价值越高。</li>
 <li>值越大说明翻本期长，风险大。</li>
 </ul>
-<p>缺点：<br>取的是上一年度的净利润，是一个过去的值，有点滞后。</p>
-<p>例子：你花了240w买了一二手房，进行出租，月租2w，一年收益24w。十年后回本，市盈率 = 10</p>
+<p>缺点：</p>
+<ul>
+<li>取的是上一年度的净利润，是一个过去的值，有点滞后。</li>
+</ul>
+<p>例子：<br>你花了240w买了一套二手房，打算进行出租赚点外快，已知去年平均月租2w，一年收益大概24w。以去年这些数据为参考，你预计<strong>十年后</strong>才能赚回成本240w，所以市盈率 = 10。</p>
 <p>1.2 动态市盈率<br>为了弥补静态市盈率的滞后性，增加动态市盈率作为参考指标。</p>
 <blockquote>
 <p>市盈率 = 当前总市值 / X</p>
@@ -352,7 +355,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-09-01 20:21:32" itemprop="dateModified" datetime="2021-09-01T20:21:32+08:00">2021-09-01</time>
+                <time title="修改时间：2021-09-02 21:26:02" itemprop="dateModified" datetime="2021-09-02T21:26:02+08:00">2021-09-02</time>
               </span>
 
           
@@ -444,7 +447,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">       uint32_t      st_name;</span><br><span class="line">       Elf32_Addr    st_value;</span><br><span class="line">       uint32_t      st_size;</span><br><span class="line">       unsigned char st_info;</span><br><span class="line">       unsigned char st_other;</span><br><span class="line">       uint16_t      st_shndx;</span><br><span class="line">&#125; Elf32_Sym;</span><br></pre></td></tr></table></figure>
 
 
-<h5 id="Relocation-entries-Rel-amp-Rela"><a href="#Relocation-entries-Rel-amp-Rela" class="headerlink" title="Relocation entries (Rel &amp; Rela)"></a>Relocation entries (Rel &amp; Rela)</h5><p>重定位是连接符号引用和符号定义的过程。重定位文件必须包含如何修改section内容的信息，来让执行文件或共享目标文件正确的调用外部函数。</p>
+<h5 id="Relocation-entries-Rel-amp-Rela"><a href="#Relocation-entries-Rel-amp-Rela" class="headerlink" title="Relocation entries (Rel &amp; Rela)"></a>Relocation entries (Rel &amp; Rela)</h5><p>重定位是连接符号引用（函数的名字）和符号定义（函数的定义、函数的实现）的过程。重定位文件必须包含如何修改section内容的信息，来让执行文件或共享目标文件正确的调用外部函数。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr      r_offset;</span><br><span class="line">        Elf32_Word      r_info;</span><br><span class="line">&#125; Elf32_Rel;</span><br><span class="line"> </span><br><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr      r_offset;</span><br><span class="line">        Elf32_Word      r_info;</span><br><span class="line">        Elf32_Sword     r_addend;</span><br><span class="line">&#125; Elf32_Rela;</span><br></pre></td></tr></table></figure>
 <p>r_offset：<br>对于重定位文件来说，此值表示从section的开始到被修改值在section中的偏移量。<br>对于执行文件和共享库文件来说，此值表示需要被重定位的虚拟地址。</p>
 <p>r_info：<br>符号表的index和重定位的类型。</p>
