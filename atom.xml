@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2021-09-01T12:21:32.812Z</updated>
+  <updated>2021-09-02T09:32:14.507Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>市盈率和市净率</title>
+    <link href="https://wangduwei.top/base-economic-concept.html"/>
+    <id>https://wangduwei.top/base-economic-concept.html</id>
+    <published>2021-09-02T09:30:12.000Z</published>
+    <updated>2021-09-02T09:32:14.507Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、市盈率&quot;&gt;&lt;a href=&quot;#一、市盈率&quot; class=&quot;headerlink&quot; title=&quot;一、市盈率&quot;&gt;&lt;/a&gt;一、市盈率&lt;/h4&gt;&lt;p&gt;1.1 PE - 静态市盈率&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;① 市盈率 = 当日收盘价 /</summary>
+        
+      
+    
+    
+    
+    <category term="Economics" scheme="https://wangduwei.top/categories/Economics/"/>
+    
+    
+    <category term="Economics" scheme="https://wangduwei.top/tags/Economics/"/>
+    
+  </entry>
   
   <entry>
     <title>ELF文件的结构</title>
