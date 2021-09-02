@@ -3,8 +3,8 @@ title: LeetCode 两数相加
 date: 2021-08-25 11:54:07
 tags: 
 - LeetCode
-- 算法
-- 链表
+- Algorithm
+- List
 categories: LeetCode
 description: 
 ---

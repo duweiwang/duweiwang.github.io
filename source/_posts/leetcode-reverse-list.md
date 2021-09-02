@@ -3,8 +3,8 @@ title: LeetCode 反转单链表
 date: 2021-08-23 21:23:30
 tags: 
 - LeetCode
-- 算法
-- 链表
+- Algorithm
+- List
 categories: LeetCode
 description: 给你单链表的头结点 head，请你反转链表，并返回反转后的链表。
 ---
