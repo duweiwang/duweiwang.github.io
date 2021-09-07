@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2021-09-02T14:43:12.392Z</updated>
+  <updated>2021-09-07T15:12:26.754Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>重定位</title>
+    <link href="https://wangduwei.top/file-format-elf-relocation.html"/>
+    <id>https://wangduwei.top/file-format-elf-relocation.html</id>
+    <published>2021-09-04T13:53:33.000Z</published>
+    <updated>2021-09-07T15:12:26.754Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、可重定位文件&quot;&gt;&lt;a href=&quot;#一、可重定位文件&quot; class=&quot;headerlink&quot; title=&quot;一、可重定位文件&quot;&gt;&lt;/a&gt;一、可重定位文件&lt;/h4&gt;&lt;figure class=&quot;highlight</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>市盈率和市净率</title>
@@ -48,7 +69,7 @@
     <link href="https://wangduwei.top/file-format-elf.html"/>
     <id>https://wangduwei.top/file-format-elf.html</id>
     <published>2021-08-30T07:22:49.000Z</published>
-    <updated>2021-09-04T12:35:45.221Z</updated>
+    <updated>2021-09-04T13:13:35.844Z</updated>
     
     
       
