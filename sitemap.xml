@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://wangduwei.top/principles-of-economics.html</loc>
+    
+    <lastmod>2021-09-09</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://wangduwei.top/file-format-elf-relocation.html</loc>
     
     <lastmod>2021-09-07</lastmod>
@@ -81,7 +88,7 @@
 
   <url>
     <loc>https://wangduwei.top/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -89,49 +96,49 @@
   
   <url>
     <loc>https://wangduwei.top/tags/Android/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wangduwei.top/tags/Java/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wangduwei.top/tags/File/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wangduwei.top/tags/Economics/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wangduwei.top/tags/LeetCode/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wangduwei.top/tags/Algorithm/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wangduwei.top/tags/List/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -140,35 +147,35 @@
   
   <url>
     <loc>https://wangduwei.top/categories/Android/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wangduwei.top/categories/Java/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wangduwei.top/categories/Economics/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wangduwei.top/categories/LeetCode/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>https://wangduwei.top/categories/Java/File/</loc>
-    <lastmod>2021-09-08</lastmod>
+    <lastmod>2021-09-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
