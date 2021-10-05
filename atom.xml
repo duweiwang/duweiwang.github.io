@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2021-09-25T09:40:43.784Z</updated>
+  <updated>2021-10-05T08:03:56.098Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,57 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>对象的内存布局</title>
+    <link href="https://wangduwei.top/java-object-layout.html"/>
+    <id>https://wangduwei.top/java-object-layout.html</id>
+    <published>2021-10-03T07:59:09.000Z</published>
+    <updated>2021-10-05T08:03:56.098Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot; title=&quot;一、概述&quot;&gt;&lt;/a&gt;一、概述&lt;/h4&gt;&lt;p&gt;很多时候我们都有一个疑问：一个对象在内存中占用多大的空间呢？&lt;/p&gt;
+&lt;figure class=&quot;highlight</summary>
+        
+      
+    
+    
+    
+    <category term="JVM" scheme="https://wangduwei.top/categories/JVM/"/>
+    
+    
+    <category term="JVM" scheme="https://wangduwei.top/tags/JVM/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java synchronized</title>
+    <link href="https://wangduwei.top/java-multithreading-synchronized.html"/>
+    <id>https://wangduwei.top/java-multithreading-synchronized.html</id>
+    <published>2021-09-26T14:29:34.000Z</published>
+    <updated>2021-10-05T08:01:43.479Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Java" scheme="https://wangduwei.top/categories/Java/"/>
+    
+    
+    <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
+    
+  </entry>
   
   <entry>
     <title>Kotlin Flow 基础</title>
