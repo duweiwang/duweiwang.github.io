@@ -26,7 +26,7 @@
 
   <meta name="description" content="一、性能1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。参考 从数据可以看出，L1缓存和主存访问速度相差200倍。          二、缓存行CPU缓存的基本单位是缓存行，主存数据和缓存的映射存在下列关系： 2.1 直接映射缓存        1、 index用于计算在哪一个缓存行2、 offset用于计算在缓存行的哪个字节3、 tag用于判断缓存是否命中（假设0x7f6601 和">
 <meta property="og:type" content="article">
-<meta property="og:title" content="CPU的缓存行">
+<meta property="og:title" content="CPU的缓存">
 <meta property="og:url" content="https://wangduwei.top/cpu-cache-overview.html">
 <meta property="og:site_name" content="嗅不到北的狗子">
 <meta property="og:description" content="一、性能1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。参考 从数据可以看出，L1缓存和主存访问速度相差200倍。          二、缓存行CPU缓存的基本单位是缓存行，主存数据和缓存的映射存在下列关系： 2.1 直接映射缓存        1、 index用于计算在哪一个缓存行2、 offset用于计算在缓存行的哪个字节3、 tag用于判断缓存是否命中（假设0x7f6601 和">
@@ -37,7 +37,7 @@
 <meta property="og:image" content="https://wangduwei.top/images/cpu_cache_problem.jpeg">
 <meta property="og:image" content="https://wangduwei.top/images/cpu_cache_mesi_state.jpeg">
 <meta property="article:published_time" content="2021-10-13T07:28:59.000Z">
-<meta property="article:modified_time" content="2021-10-13T07:58:22.978Z">
+<meta property="article:modified_time" content="2021-10-13T08:00:14.035Z">
 <meta property="article:author" content="wangduwei">
 <meta property="article:tag" content="计算机基础">
 <meta name="twitter:card" content="summary">
@@ -56,7 +56,7 @@
   };
 </script>
 
-  <title>CPU的缓存行 | 嗅不到北的狗子</title>
+  <title>CPU的缓存 | 嗅不到北的狗子</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-69Z1P1CBTV"></script>
     <script>
@@ -208,7 +208,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          CPU的缓存行
+          CPU的缓存
         </h1>
 
         <div class="post-meta">
@@ -219,7 +219,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-10-13 15:28:59 / 修改时间：15:58:22" itemprop="dateCreated datePublished" datetime="2021-10-13T15:28:59+08:00">2021-10-13</time>
+              <time title="创建时间：2021-10-13 15:28:59 / 修改时间：16:00:14" itemprop="dateCreated datePublished" datetime="2021-10-13T15:28:59+08:00">2021-10-13</time>
             </span>
 
           
@@ -356,7 +356,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://wangduwei.top/cpu-cache-overview.html" title="CPU的缓存行">https://wangduwei.top/cpu-cache-overview.html</a>
+    <a href="https://wangduwei.top/cpu-cache-overview.html" title="CPU的缓存">https://wangduwei.top/cpu-cache-overview.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -399,15 +399,15 @@
           
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
-            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-valine">valine</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
         </ul>
         <div class="tab-content">
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
-            </div>
             <div class="tab-pane valine" id="comment-valine">
               <div class="comments" id="valine-comments"></div>
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
             </div>
         </div>
       </div>
@@ -652,26 +652,6 @@
 
   
 
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : '16c7d02bc3ca2bae3d85',
-      clientSecret: 'bfda6fb671841e71f55e41fdd3fb794c8dbf40b2',
-      repo        : 'duweiwang.github.io',
-      owner       : 'duweiwang',
-      admin       : ['duweiwang'],
-      id          : '628dd5a10020ff226433ec63bb376298',
-        language: '',
-      distractionFreeMode: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
 
 <script>
 NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
@@ -698,6 +678,26 @@ NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
       serverURLs : ''
     });
   }, window.Valine);
+});
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '16c7d02bc3ca2bae3d85',
+      clientSecret: 'bfda6fb671841e71f55e41fdd3fb794c8dbf40b2',
+      repo        : 'duweiwang.github.io',
+      owner       : 'duweiwang',
+      admin       : ['duweiwang'],
+      id          : '628dd5a10020ff226433ec63bb376298',
+        language: '',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
 });
 </script>
 
