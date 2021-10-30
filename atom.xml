@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2021-10-25T01:28:19.747Z</updated>
+  <updated>2021-10-30T07:07:42.377Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -17,11 +17,37 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>用Kotlin协程解决深度递归问题</title>
+    <link href="https://wangduwei.top/kotlin-coroutine-deep-recursion.html"/>
+    <id>https://wangduwei.top/kotlin-coroutine-deep-recursion.html</id>
+    <published>2021-10-30T02:38:30.000Z</published>
+    <updated>2021-10-30T07:07:42.377Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;协程一般用于异步编程。在解决异步编程问题方面，Kotlin编译器在对协程的设计和实现是通用的。我们可以借助协程优雅的解决深度递归问题。&lt;/p&gt;
+&lt;h4 id=&quot;一、问题描述&quot;&gt;&lt;a href=&quot;#一、问题描述&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Android中的约束布局</title>
     <link href="https://wangduwei.top/android-basic-constraintlayout.html"/>
     <id>https://wangduwei.top/android-basic-constraintlayout.html</id>
     <published>2021-10-23T07:03:23.000Z</published>
-    <updated>2021-10-25T01:28:19.747Z</updated>
+    <updated>2021-10-25T01:31:28.052Z</updated>
     
     
       
