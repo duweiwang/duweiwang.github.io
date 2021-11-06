@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2021-10-30T07:07:42.377Z</updated>
+  <updated>2021-11-06T14:47:39.655Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>高效Kotlin-51：使用Sequence优化集合操作</title>
+    <link href="https://wangduwei.top/kotlin-lang-sequence.html"/>
+    <id>https://wangduwei.top/kotlin-lang-sequence.html</id>
+    <published>2021-11-06T13:37:43.000Z</published>
+    <updated>2021-11-06T14:47:39.655Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot; title=&quot;一、概述&quot;&gt;&lt;/a&gt;一、概述&lt;/h4&gt;&lt;p&gt;你可能对 &lt;code&gt;Iterable&lt;/code&gt; 和 &lt;code&gt;Sequence&lt;/code&gt;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
+    
+  </entry>
   
   <entry>
     <title>用Kotlin协程解决深度递归问题</title>
@@ -267,7 +290,7 @@
     <link href="https://wangduwei.top/file-format-elf.html"/>
     <id>https://wangduwei.top/file-format-elf.html</id>
     <published>2021-08-30T07:22:49.000Z</published>
-    <updated>2021-09-04T13:13:35.844Z</updated>
+    <updated>2021-10-30T07:11:19.874Z</updated>
     
     
       
