@@ -69,22 +69,49 @@ Sequence的惰性执行有以下几个优点：
 
 ##### 一、顺序性很重要
 
-使用sequence处理数据时，取第一个**数据**对其执行所有操作符，取第二、三...个**数据**依次执行所有操作符。这是一种元素接元素的处理方式。
-使用Iterable处理数据时，取第一个**操作符**执行所有数据，取第二、三...个**操作符**依次执行所有数据。这是一种步骤接步骤的处理方式。
+<table>
+    <tr>
+        <td>使用Sequence处理数据时，每个元素依次执行所有操作符。这是一种元素接元素的处理方式。</td>
+        <td>使用Iterable处理数据时，每个操作符依次执行所有数据。这是一种步骤接步骤的处理方式。</td>
+    </tr>
+     <tr>
+            <td>
+            ```kotlin 
+            sequenceOf(1, 2, 3)
+                .filter { 
+                    print("F$it, "); 
+                    it % 2 == 1 
+                }
+                .map { 
+                    print("M$it, "); 
+                    it * 2 
+                }
+                .forEach { 
+                    print("E$it, ") 
+                }
+            // Prints: F1, M1, E2, F2, F3, M3, E6, 
+            ```
+            </td>
+            <td>
+            ```kotlin           
+            listOf(1, 2, 3)
+                .filter { 
+                    print("F$it, "); 
+                    it % 2 == 1 
+                }
+                .map { 
+                    print("M$it, "); 
+                    it * 2 
+                }
+                .forEach { 
+                    print("E$it, ") 
+                }
+            // Prints: F1, F2, F3, M1, M3, E2, E6,
+            ```
+            </td>
+        </tr>
+</table>
 
-```kotlin
-sequenceOf(1, 2, 3)
-    .filter { print("F$it, "); it % 2 == 1 }
-    .map { print("M$it, "); it * 2 }
-    .forEach { print("E$it, ") }
-// Prints: F1, M1, E2, F2, F3, M3, E6, 
-
-listOf(1, 2, 3)
-    .filter { print("F$it, "); it % 2 == 1 }
-    .map { print("M$it, "); it * 2 }
-    .forEach { print("E$it, ") }
-// Prints: F1, F2, F3, M1, M3, E2, E6,
-```
 
 <center>
     <img src="../images/kotlin_sequence_order.jpeg" width="500"/>
@@ -116,25 +143,51 @@ for (e in listOf(1, 2, 3)) {
 
 看下面的例子：
 
-```kotlin
-(1..10).asSequence()
-    .filter { print("F$it, "); it % 2 == 1 }
-    .map { print("M$it, "); it * 2 }
-    .find { it > 5 }
-// Prints: F1, M1, F2, F3, M3,
-
-(1..10)
-    .filter { print("F$it, "); it % 2 == 1 }
-    .map { print("M$it, "); it * 2 }
-    .find { it > 5 }
-// Prints: F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, 
-// M1, M3, M5, M7, M9,
-```
+<table>
+     <tr>
+            <td>
+            ```kotlin 
+            (1..10).asSequence()
+                .filter { 
+                    print("F$it, "); 
+                    it % 2 == 1 
+                }
+                .map { 
+                    print("M$it, "); 
+                    it * 2 
+                }
+                .find { 
+                    it > 5 
+                }
+            // Prints: F1, M1, F2, F3, M3,
+            ```
+            </td>
+            <td>
+            ```kotlin  
+            (1..10)
+                .filter { 
+                    print("F$it, "); 
+                    it % 2 == 1 
+                }
+                .map { 
+                    print("M$it, "); 
+                    it * 2 
+                }
+                .find { 
+                    it > 5 
+                }
+            // Prints: 
+            //F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, 
+            // M1, M3, M5, M7, M9,         
+            ```
+            </td>
+        </tr>
+</table>
 
 这个例子中，有很多个操作符，最后的终止操作符不需要处理所有的数据，因此sequence性能更好。类似的操作符还有：`first`, `find`, `take`, `any`, `all`, `none` 或 `indexOf`。
 
 
-##### 三、Sequence可以永无止境
+##### 三、Sequence是无限的
 
 由于Sequence按需处理，我们可以定义无限序列。一种常用的方式是使用sequence生成器 `generateSequence` 或 `sequence` 。
 
@@ -185,20 +238,38 @@ print(fibonacci.toList()) // Runs forever
 
 标准的集合处理函数每一步都返回新的集合，当我们处理大量数据时会分配很多临时内存。
 
-```kotlin
-numbers
-    .filter { it % 10 == 0 } // 1 collection here
-    .map { it * 2 } // 1 collection here
-    .sum()
-// In total, 2 collections created under the hood
 
-numbers
-    .asSequence()
-    .filter { it % 10 == 0 }
-    .map { it * 2 }
-    .sum()
-// No collections created
-```
+<table>
+     <tr>
+         <td>
+            ```kotlin 
+            num
+               .filter {// 1                   
+                   it % 10 == 0 
+               } 
+               .map {// 2      
+                   it * 2 
+               } 
+               .sum()
+            // In total, 2 collections 
+            // created under the hood
+            ```
+         </td>
+         <td>
+            ```kotlin  
+             num.asSequence()
+                .filter {//0 
+                   it % 10 == 0 
+                }
+                .map {//0
+                   it * 2 
+                }
+                .sum()
+             // No collections created
+            ```
+         </td>
+     </tr>
+</table>
 
 一个极端又常见的例子：文件读取。文件可能是几个G，每执行一个操作符都分配这么多内存是一种极大的浪费。下面例子是读取大小1.53G的芝加哥犯罪记录中包含毒品交易信息的记录数量，其中readLines 返回 List<String>。
 
@@ -234,10 +305,11 @@ File("ChicagoCrimes.csv").useLines { lines ->
 
 同样运行这段代码，只耗时8.3s。为了比较一下这两种方法的效率，我做了另外一个实验：删除数据中不必要的列以减少文件大小，得到`CrimeData.csv`只有728MB，然后做相同的操作。使用Collection处理函数，耗时13s，使用sequence函数，耗时4.5s。正如实验数据，使用sequence处理大文件不仅节约内存，而且提升性能。
 
-事实上，在每个步骤中，我们创建一个新的集合本身也是一种成本，当我们处理包含大量元素的集合时，这种成本就会显现出来。差别并不大——主要是因为在许多步骤中创建的集合都是用预期的大小初始化的，所以当我们添加元素时，我们只需要将它们放在下一个位置。尽管即使是廉价的集合复制也比完全不复制要昂贵，这也是为什么我们应该更喜欢对具有多个处理步骤的大集合使用Sequence的主要原因。
+事实上，在每个步骤中，我们创建一个新的集合本身也是一种成本，当我们处理包含大量元素的集合时，这种成本就会显现出来。差别并不大——主要是因为在许多步骤中创建的集合都是用预期的大小初始化的，所以当我们添加元素时，我们只需要将它们放在下一个位置。尽管即使是廉价的集合复制也比完全不复制要昂贵，这也是为什么我们应该更喜欢对具有*多个处理步骤*的*大集合*使用Sequence的主要原因。
 
-对于“大集合”是指：很多元素和非常重的集合。它可能是一个包含数万个元素的整数列表。它也可能是一个只有几个字符串的列表，但是每个字符串都很长，所以它们加起来有很多兆字节。这些情况并不常见，但有时也会发生
-对于"多个操作"是指：处理集合时使用很多操作符。
+> 大集合：元素多（含数万个元素的整数列表）、元素大（超长字符串）
+>
+> 多个处理步骤：处理集合时使用很多操作符。
 
 如果对比下面两个函数：
 ```kotlin
@@ -319,18 +391,29 @@ productsList.asSequence()
 
 ##### 六、看看Java的Stream操作
 Java 8新增了集合处理流的特性，看起来和Kotlin的序列很像。
-```java
-productsList.asSequence()
-    .filter { it.bought }
-    .map { it.price }
-    .average()
 
-productsList.stream()
-    .filter { it.bought }
-    .mapToDouble { it.price }
-    .average()
-    .orElse(0.0)
-```
+<table>
+     <tr>
+         <td>
+            ```java 
+             productsList.asSequence()
+                 .filter { it.bought }
+                 .map { it.price }
+                 .average()
+            ```
+         </td>
+         <td>
+            ```java  
+            productsList.stream()
+                .filter { it.bought }
+                .mapToDouble { it.price }
+                .average()
+                .orElse(0.0)
+            ```
+         </td>
+     </tr>
+</table>
+
 Java 8的Stream也是惰性的在最后一个操作符触发计算。与Kotlin sequence的区别主要是：
 + Kotlin sequence包含更多的处理函数（被定义为拓展函数），使用简单: `toList()` vs `collect(Collectors.toList())`
 + Java stream可以开启并行模式，在多核处理器上会有很大的性能提升。
