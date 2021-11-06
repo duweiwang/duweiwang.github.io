@@ -1,9 +1,8 @@
 ---
 title: ELF文件的结构
 date: 2021-08-30 15:22:49
-tags: 
-- File
-categories:
+tags: File
+categories: 
 description:
 ---
 
