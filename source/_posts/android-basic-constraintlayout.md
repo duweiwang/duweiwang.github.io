@@ -108,6 +108,13 @@ description:
     app:layout_constraintWidth_percent="0.5"
 />
 ```
+`app:layout_constraintWidth_default`可以取的值包括：
++ spread
++ percent
++ wrap
+
+在ConstraintLayout-1.1之后，使用`app:layout_constrainedWidth="true"`替代`app:layout_constraintWidth_default="wrap"`
+
 2.6.2 比率  
 宽高一比一：
 ```xml
@@ -141,23 +148,23 @@ description:
     </tr>
     <tr>
         <td><img src="../images/constraint/constraint_chain_spread.png" width="250"/></td>
-        <td>Spread Chain</td>
+        <td> _chainStyle="spread" </td>
     </tr>
      <tr>
       <td><img src="../images/constraint/constraint_chain_spread_inside.png" width="250"/></td>
-      <td>Spread Inside Chain</td>
+      <td> _chainStyle="spread_inside" </td>
      </tr>
      <tr>
      <td><img src="../images/constraint/constraint_chain_weight.png" width="250"/></td>
-     <td>Weighted Chain</td>
+     <td> _chainStyle="spread" <br> _weight="1" </td>
      </tr>
      <tr>
      <td><img src="../images/constraint/constraint_chain_packed.png" width="250"/></td>
-     <td>Packed Chain</td>
+     <td> _chainStyle="packed" </td>
      </tr>
      <tr>
      <td><img src="../images/constraint/constraint_chain_bias.png" width="250"/></td>
-     <td>Packed Chain with Bias</td>
+     <td> _chainStyle="packed" <br> _bias="0.3"</td>
      </tr>
 </table>
 
