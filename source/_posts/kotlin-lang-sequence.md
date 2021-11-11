@@ -442,5 +442,6 @@ Kotlin Sequence和Java Stream都支持debug每一步操作。Java需要使用"Ja
 基于这些优点，对于包含多个处理步骤的包含大对象或元素很多的集合来说使用Sequence更好。Sequence也包含调试器，能帮助我们可视化的分析元素处理过程。Sequence不是为了取代传统的集合处理方式，使用前应该分析清楚自己的目的和原因才能带来性能的提升以及更少的内存问题。
 
 
-
+#### 四、参考  
+[Effective Kotlin Item 51: Prefer Sequence for big collections with more than one processing step](https://kt.academy/article/ek-sequence)
 
