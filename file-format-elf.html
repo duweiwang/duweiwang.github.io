@@ -28,7 +28,7 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="ELF文件的结构">
 <meta property="og:url" content="https://wangduwei.top/file-format-elf.html">
-<meta property="og:site_name" content="嗅不到北的狗子">
+<meta property="og:site_name" content="蓝色的笔记本">
 <meta property="og:description" content="一、概述代码是解决问题的工具。当通过编码方式解决一个问题时，通常有如下步骤：  定义问题 设计解决方案 编码实现方案 测试程序  编码实现通常是我们利用计算机高级语言书写的，符合一定逻辑的程序代码，这种含逻辑的代码计算机是无法理解的，它能理解的只是一条条由0和1组成的指令即机器语言。所以这就涉及从高级语言到机器语言的翻译和转换过程，处理这个过程的程序叫编译器。 编译器这个程序，很庞大很复杂，为了让">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wangduwei.top/images/GCC_CompilationProcess.png">
@@ -54,7 +54,7 @@
   };
 </script>
 
-  <title>ELF文件的结构 | 嗅不到北的狗子</title>
+  <title>ELF文件的结构 | 蓝色的笔记本</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-69Z1P1CBTV"></script>
     <script>
@@ -103,7 +103,7 @@
   </style>
 </noscript>
 
-<link rel="alternate" href="/atom.xml" title="嗅不到北的狗子" type="application/atom+xml">
+<link rel="alternate" href="/atom.xml" title="蓝色的笔记本" type="application/atom+xml">
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage">
@@ -124,9 +124,10 @@
 
     <a href="/" class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">嗅不到北的狗子</h1>
+      <h1 class="site-title">蓝色的笔记本</h1>
       <span class="logo-line-after"><i></i></span>
     </a>
+      <p class="site-subtitle" itemprop="description">记录学习内容</p>
   </div>
 
   <div class="site-nav-right">
@@ -198,11 +199,11 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
       <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content="耐心和坚持">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="嗅不到北的狗子">
+      <meta itemprop="name" content="蓝色的笔记本">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -610,7 +611,7 @@
     <img class="site-author-image" itemprop="image" alt="wangduwei"
       src="/images/avatar.jpeg">
   <p class="site-author-name" itemprop="name">wangduwei</p>
-  <div class="site-description" itemprop="description"></div>
+  <div class="site-description" itemprop="description">耐心和坚持</div>
 </div>
 <div class="site-state-wrap motion-element">
   <nav class="site-state">
@@ -668,13 +669,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">53k</span>
+    <span title="站点总字数">61k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">48 分钟</span>
+    <span title="站点阅读时长">55 分钟</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>

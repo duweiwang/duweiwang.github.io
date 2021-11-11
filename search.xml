@@ -212,6 +212,13 @@
 </tbody></table>
 <p>2.6.1 百分比</p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonA&quot;</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:layout_constraintWidth_default</span>=<span class="string">&quot;percent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:layout_constraintWidth_percent</span>=<span class="string">&quot;0.5&quot;</span></span></span><br><span class="line"><span class="tag">/&gt;</span></span><br></pre></td></tr></table></figure>
+<p><code>app:layout_constraintWidth_default</code>可以取的值包括：</p>
+<ul>
+<li>spread</li>
+<li>percent</li>
+<li>wrap</li>
+</ul>
+<p>在ConstraintLayout-1.1之后，使用<code>app:layout_constrainedWidth=&quot;true&quot;</code>替代<code>app:layout_constraintWidth_default=&quot;wrap&quot;</code></p>
 <p>2.6.2 比率<br>宽高一比一：</p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonA&quot;</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:layout_constraintDimensionRatio</span>=<span class="string">&quot;1:1&quot;</span></span></span><br><span class="line"><span class="tag">/&gt;</span></span><br></pre></td></tr></table></figure>
 <p>指定一条边符合约束比率：</p>
@@ -231,23 +238,23 @@
     </tr>
     <tr>
         <td><img src="../images/constraint/constraint_chain_spread.png" width="250"/></td>
-        <td>Spread Chain</td>
+        <td> _chainStyle="spread" </td>
     </tr>
      <tr>
       <td><img src="../images/constraint/constraint_chain_spread_inside.png" width="250"/></td>
-      <td>Spread Inside Chain</td>
+      <td> _chainStyle="spread_inside" </td>
      </tr>
      <tr>
      <td><img src="../images/constraint/constraint_chain_weight.png" width="250"/></td>
-     <td>Weighted Chain</td>
+     <td> _chainStyle="spread" <br> _weight="1" </td>
      </tr>
      <tr>
      <td><img src="../images/constraint/constraint_chain_packed.png" width="250"/></td>
-     <td>Packed Chain</td>
+     <td> _chainStyle="packed" </td>
      </tr>
      <tr>
      <td><img src="../images/constraint/constraint_chain_bias.png" width="250"/></td>
-     <td>Packed Chain with Bias</td>
+     <td> _chainStyle="packed" <br> _bias="0.3"</td>
      </tr>
 </table>
 
@@ -552,6 +559,67 @@
       </tags>
   </entry>
   <entry>
+    <title>CPU的缓存</title>
+    <url>/cpu-cache-overview.html</url>
+    <content><![CDATA[<h4 id="一、性能"><a href="#一、性能" class="headerlink" title="一、性能"></a>一、性能</h4><p>1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。<a href="https://gist.github.com/jboner/2841832">参考</a></p>
+<p>从数据可以看出，L1缓存和主存访问速度相差200倍。</p>
+<center>
+    <img src="../images/cpu_cache_speed.png" width="500"/>
+</center>
+
+
+<h4 id="二、缓存行"><a href="#二、缓存行" class="headerlink" title="二、缓存行"></a>二、缓存行</h4><p>CPU缓存的基本单位是缓存行，主存数据和缓存的映射存在下列关系：</p>
+<h5 id="2-1-直接映射缓存"><a href="#2-1-直接映射缓存" class="headerlink" title="2.1 直接映射缓存"></a>2.1 直接映射缓存</h5><center>
+    <img src="../images/cpu_cache_direct_map.jpeg" width="600"/>
+</center>
+
+<p>1、 index用于计算在哪一个缓存行<br>2、 offset用于计算在缓存行的哪个字节<br>3、 tag用于判断缓存是否命中（假设0x7f6601 和 0x8f6602两个地址，低位都一样，缓存行和字节偏移都命中了，tag不命中）</p>
+<p>缺点：<br>图中，cache缓存8行数据，当访问第0行、第8行、第16行时，缓存无法命中，每次都要去主存加载，发生<strong>缓存颠簸</strong></p>
+<h5 id="2-2-多路组相连"><a href="#2-2-多路组相连" class="headerlink" title="2.2 多路组相连"></a>2.2 多路组相连</h5><p>这是一个两路组相连的示意图：</p>
+<center>
+    <img src="../images/cpu_cache_n_way.png" width="500"/>
+</center>
+
+<p>1、index定位组<br>2、组内依次对tag进行对比（可以通过硬件并行比较增加性能）</p>
+<h4 id="三、缓存一致性"><a href="#三、缓存一致性" class="headerlink" title="三、缓存一致性"></a>三、缓存一致性</h4><h5 id="3-1-问题描述："><a href="#3-1-问题描述：" class="headerlink" title="3.1 问题描述："></a>3.1 问题描述：</h5><center>
+    <img src="../images/cpu_cache_problem.jpeg" width="500"/>
+</center>
+
+<p>处理器 1 读 X ：从内存读取24并缓存<br>处理器 2 读 X ：从内存读取24并缓存<br>处理器 1 写 X = 32 ：更新自己的缓存<br>处理器 3 读 X = ？  </p>
+<p>如何保证缓存的一致性？<a href="https://people.eecs.berkeley.edu/~pattrsn/252F96/Lecture18.pdf">参考</a></p>
+<h5 id="3-2-解决方案"><a href="#3-2-解决方案" class="headerlink" title="3.2 解决方案"></a>3.2 解决方案</h5><p>3.1.1 嗅探-Snooping Solution(Snoopy Bus)</p>
+<p>根据写操作对缓存数据的影响嗅探协议可分为：<br>Write-invalidate：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并标志自己的缓存失效。这保证了全局只有一份缓存是有效的。</p>
+<ul>
+<li>MSI</li>
+<li>MESI</li>
+<li>MOSI</li>
+<li>MOESI</li>
+<li>MESIF </li>
+</ul>
+<p>Write-update：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并更新自己的缓存。通过总线广播给所有的缓存造成了总线繁忙，所以不常见。</p>
+<p>3.1.2 目录-Directory-Based Schemes</p>
+<h5 id="3-2-MESI协议参考"><a href="#3-2-MESI协议参考" class="headerlink" title="3.2 MESI协议参考"></a>3.2 MESI协议<a href="https://people.cs.pitt.edu/~melhem/courses/2410p/ch5-4.pdf">参考</a></h5><p>MESI是四个状态的首字母缩写，在缓存行中用2个bit标志该缓存行的状态。</p>
+<ul>
+<li>M:Modified（只存在当前缓存行，已被修改，和主存不一致，需要更新回主存）</li>
+<li>E:Exclusive（只存在当前缓存行，和主存一致）</li>
+<li>S:Shared（其他缓存行也存在该数据，和主存一致）</li>
+<li>I:Invalid（此缓存行失效）</li>
+</ul>
+<p>MESI的状态迁移：</p>
+<center>
+    <img src="../images/cpu_cache_mesi_state.jpeg" width="500"/>
+</center>
+
+
+
+
+<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p><a href="https://www.cnkirito.moe/cache-line/#%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%93%E5%AD%98%E8%A1%8C-Cache-Line-%EF%BC%9F">0.Java角度理解CPU缓存</a><br><a href="https://zhuanlan.zhihu.com/p/102293437">1.Cache的基本原理</a><br><a href="https://gist.github.com/jboner/2841832">2.每个开发者需要知道的数据</a><br><a href="https://medium.com/fcamels-notes/%E5%BE%9E%E7%A1%AC%E9%AB%94%E8%A7%80%E9%BB%9E%E4%BA%86%E8%A7%A3-memry-barrier-%E7%9A%84%E5%AF%A6%E4%BD%9C%E5%92%8C%E6%95%88%E6%9E%9C-416ff0a64fc1">3.硬件角度看内存屏障</a><br><a href="https://medium.com/fcamels-notes/%E5%BE%9E-double-checked-locking-%E4%BA%86%E8%A7%A3-memory-barrier-%E7%9A%84%E4%BD%9C%E7%94%A8-bb151a359c1b">4.软件角度内存屏障</a><br><a href="https://stackoverflow.com/questions/3928995/how-do-cache-lines-work">5.stackoverflow-How do cache lines work?</a><br><a href="https://courses.cs.duke.edu/spring09/cps104/lectures/2up-lecture17.pdf">6.courses-pdf</a></p>
+]]></content>
+      <tags>
+        <tag>计算机基础</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>对称/非对称加密和数字签名</title>
     <url>/basic-encryption-algorithm.html</url>
     <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
@@ -709,67 +777,6 @@
       <tags>
         <tag>Java</tag>
         <tag>File</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>CPU的缓存</title>
-    <url>/cpu-cache-overview.html</url>
-    <content><![CDATA[<h4 id="一、性能"><a href="#一、性能" class="headerlink" title="一、性能"></a>一、性能</h4><p>1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。<a href="https://gist.github.com/jboner/2841832">参考</a></p>
-<p>从数据可以看出，L1缓存和主存访问速度相差200倍。</p>
-<center>
-    <img src="../images/cpu_cache_speed.png" width="500"/>
-</center>
-
-
-<h4 id="二、缓存行"><a href="#二、缓存行" class="headerlink" title="二、缓存行"></a>二、缓存行</h4><p>CPU缓存的基本单位是缓存行，主存数据和缓存的映射存在下列关系：</p>
-<h5 id="2-1-直接映射缓存"><a href="#2-1-直接映射缓存" class="headerlink" title="2.1 直接映射缓存"></a>2.1 直接映射缓存</h5><center>
-    <img src="../images/cpu_cache_direct_map.jpeg" width="600"/>
-</center>
-
-<p>1、 index用于计算在哪一个缓存行<br>2、 offset用于计算在缓存行的哪个字节<br>3、 tag用于判断缓存是否命中（假设0x7f6601 和 0x8f6602两个地址，低位都一样，缓存行和字节偏移都命中了，tag不命中）</p>
-<p>缺点：<br>图中，cache缓存8行数据，当访问第0行、第8行、第16行时，缓存无法命中，每次都要去主存加载，发生<strong>缓存颠簸</strong></p>
-<h5 id="2-2-多路组相连"><a href="#2-2-多路组相连" class="headerlink" title="2.2 多路组相连"></a>2.2 多路组相连</h5><p>这是一个两路组相连的示意图：</p>
-<center>
-    <img src="../images/cpu_cache_n_way.png" width="500"/>
-</center>
-
-<p>1、index定位组<br>2、组内依次对tag进行对比（可以通过硬件并行比较增加性能）</p>
-<h4 id="三、缓存一致性"><a href="#三、缓存一致性" class="headerlink" title="三、缓存一致性"></a>三、缓存一致性</h4><h5 id="3-1-问题描述："><a href="#3-1-问题描述：" class="headerlink" title="3.1 问题描述："></a>3.1 问题描述：</h5><center>
-    <img src="../images/cpu_cache_problem.jpeg" width="500"/>
-</center>
-
-<p>处理器 1 读 X ：从内存读取24并缓存<br>处理器 2 读 X ：从内存读取24并缓存<br>处理器 1 写 X = 32 ：更新自己的缓存<br>处理器 3 读 X = ？  </p>
-<p>如何保证缓存的一致性？<a href="https://people.eecs.berkeley.edu/~pattrsn/252F96/Lecture18.pdf">参考</a></p>
-<h5 id="3-2-解决方案"><a href="#3-2-解决方案" class="headerlink" title="3.2 解决方案"></a>3.2 解决方案</h5><p>3.1.1 嗅探-Snooping Solution(Snoopy Bus)</p>
-<p>根据写操作对缓存数据的影响嗅探协议可分为：<br>Write-invalidate：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并标志自己的缓存失效。这保证了全局只有一份缓存是有效的。</p>
-<ul>
-<li>MSI</li>
-<li>MESI</li>
-<li>MOSI</li>
-<li>MOESI</li>
-<li>MESIF </li>
-</ul>
-<p>Write-update：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并更新自己的缓存。通过总线广播给所有的缓存造成了总线繁忙，所以不常见。</p>
-<p>3.1.2 目录-Directory-Based Schemes</p>
-<h5 id="3-2-MESI协议参考"><a href="#3-2-MESI协议参考" class="headerlink" title="3.2 MESI协议参考"></a>3.2 MESI协议<a href="https://people.cs.pitt.edu/~melhem/courses/2410p/ch5-4.pdf">参考</a></h5><p>MESI是四个状态的首字母缩写，在缓存行中用2个bit标志该缓存行的状态。</p>
-<ul>
-<li>M:Modified（只存在当前缓存行，已被修改，和主存不一致，需要更新回主存）</li>
-<li>E:Exclusive（只存在当前缓存行，和主存一致）</li>
-<li>S:Shared（其他缓存行也存在该数据，和主存一致）</li>
-<li>I:Invalid（此缓存行失效）</li>
-</ul>
-<p>MESI的状态迁移：</p>
-<center>
-    <img src="../images/cpu_cache_mesi_state.jpeg" width="500"/>
-</center>
-
-
-
-
-<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p><a href="https://www.cnkirito.moe/cache-line/#%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%93%E5%AD%98%E8%A1%8C-Cache-Line-%EF%BC%9F">0.Java角度理解CPU缓存</a><br><a href="https://zhuanlan.zhihu.com/p/102293437">1.Cache的基本原理</a><br><a href="https://gist.github.com/jboner/2841832">2.每个开发者需要知道的数据</a><br><a href="https://medium.com/fcamels-notes/%E5%BE%9E%E7%A1%AC%E9%AB%94%E8%A7%80%E9%BB%9E%E4%BA%86%E8%A7%A3-memry-barrier-%E7%9A%84%E5%AF%A6%E4%BD%9C%E5%92%8C%E6%95%88%E6%9E%9C-416ff0a64fc1">3.硬件角度看内存屏障</a><br><a href="https://medium.com/fcamels-notes/%E5%BE%9E-double-checked-locking-%E4%BA%86%E8%A7%A3-memory-barrier-%E7%9A%84%E4%BD%9C%E7%94%A8-bb151a359c1b">4.软件角度内存屏障</a><br><a href="https://stackoverflow.com/questions/3928995/how-do-cache-lines-work">5.stackoverflow-How do cache lines work?</a><br><a href="https://courses.cs.duke.edu/spring09/cps104/lectures/2up-lecture17.pdf">6.courses-pdf</a></p>
-]]></content>
-      <tags>
-        <tag>计算机基础</tag>
       </tags>
   </entry>
   <entry>
@@ -1162,6 +1169,53 @@
       </tags>
   </entry>
   <entry>
+    <title>用Kotlin协程解决深度递归问题</title>
+    <url>/kotlin-coroutine-deep-recursion.html</url>
+    <content><![CDATA[<p>&ensp;&ensp;&ensp;&ensp;协程一般用于异步编程。在解决异步编程问题方面，Kotlin编译器在对协程的设计和实现是通用的。我们可以借助协程优雅的解决深度递归问题。</p>
+<h4 id="一、问题描述"><a href="#一、问题描述" class="headerlink" title="一、问题描述"></a>一、问题描述</h4><p>定义以下二叉树的结点，并构造一棵只含十万个左结点的树，进行深度遍历，求树的深度：  </p>
+<center>
+    <img src="../images/tree_only_left.png" width="500"/>
+</center>
+
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">//结点定义</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Tree</span></span>(<span class="keyword">val</span> left: Tree?, <span class="keyword">val</span> right: Tree?)</span><br><span class="line"></span><br><span class="line"><span class="comment">//构造二叉树：以叶子结点开始，重复构造父结点，并把当前结点作为父结点的左子树</span></span><br><span class="line"><span class="keyword">val</span> n = <span class="number">100_000</span></span><br><span class="line"><span class="keyword">val</span> deepTree = generateSequence(Tree(<span class="literal">null</span>, <span class="literal">null</span>)) &#123; prev -&gt;</span><br><span class="line">    Tree(prev, <span class="literal">null</span>) </span><br><span class="line">&#125;.take(n).last()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="二、解决方案"><a href="#二、解决方案" class="headerlink" title="二、解决方案"></a>二、解决方案</h4><h5 id="2-1-解决方案一："><a href="#2-1-解决方案一：" class="headerlink" title="2.1 解决方案一："></a>2.1 解决方案一：</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">depth</span><span class="params">(t: <span class="type">Tree</span>?)</span></span>: <span class="built_in">Int</span> =</span><br><span class="line">    <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="number">0</span> <span class="keyword">else</span> maxOf(</span><br><span class="line">        depth(t.left), <span class="comment">// recursive call one</span></span><br><span class="line">        depth(t.right) <span class="comment">// recursive call two</span></span><br><span class="line">    ) + <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>分析：<br>对树进行递归是最简洁直接的解决方案。而递归将保存函数的调用栈用于后续状态恢复，线程的调用栈是有大小限制的，此处将抛出<code>Exception in thread &quot;main&quot; java.lang.StackOverflowError</code>错误。</p>
+<h5 id="2-2-解决方案二："><a href="#2-2-解决方案二：" class="headerlink" title="2.2 解决方案二："></a>2.2 解决方案二：</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">depth</span><span class="params">(t: <span class="type">Tree</span>?)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">      <span class="class"><span class="keyword">class</span> <span class="title">Frame</span></span>(<span class="keyword">val</span> node: Tree, <span class="keyword">var</span> state: <span class="built_in">Int</span> = <span class="number">0</span>, <span class="keyword">var</span> depth: <span class="built_in">Int</span> = <span class="number">1</span>)</span><br><span class="line">      <span class="keyword">val</span> stack = ArrayList&lt;Frame&gt;()</span><br><span class="line">      <span class="keyword">val</span> root = Frame(t)</span><br><span class="line">      stack.add(root)</span><br><span class="line">      <span class="keyword">while</span> (stack.isNotEmpty()) &#123;</span><br><span class="line">          <span class="keyword">val</span> frame = stack.last()</span><br><span class="line">          <span class="keyword">when</span> (frame.state++) &#123;</span><br><span class="line">              <span class="number">0</span> -&gt; frame.node.left?.let &#123; l -&gt; stack.add(Frame(l)) &#125;</span><br><span class="line">              <span class="number">1</span> -&gt; frame.node.right?.let &#123; r -&gt; stack.add(Frame(r)) &#125;</span><br><span class="line">              <span class="number">2</span> -&gt; &#123;</span><br><span class="line">                  stack.removeLast()</span><br><span class="line">                  stack.lastOrNull()?.let &#123; p -&gt; </span><br><span class="line">                      p.depth = maxOf(p.depth, frame.depth + <span class="number">1</span>) </span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> root.depth</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>分析：<br>基于解决方案一，我们考虑将调用栈状态的保存转移到内存空间更大的堆区，并加入了状态机和<code>while</code>循环。在此例中，程序开始时将全部走状态0，将所有的左节点加入stack。然后全部走状态2(因为没有右结点)，由下到上计算每一个结点的深度。最后返回根节点的深度。</p>
+<h5 id="2-3-解决方案三："><a href="#2-3-解决方案三：" class="headerlink" title="2.3 解决方案三："></a>2.3 解决方案三：</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> depth = DeepRecursiveFunction&lt;Tree?, <span class="built_in">Int</span>&gt; &#123; t -&gt;</span><br><span class="line">        <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="number">0</span> <span class="keyword">else</span> maxOf(</span><br><span class="line">            callRecursive(t.left),</span><br><span class="line">            callRecursive(t.right)</span><br><span class="line">        ) + <span class="number">1</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>分析：<br>方案二中的状态机就是Kotlin挂起函数的实现原理。所以我们也可以利用Kotlin的挂起函数实现深度遍历。那么方案三是如何实现的呢？我们分析三个方面：  </p>
+<ul>
+<li>如何调用</li>
+<li>如何进入循环</li>
+<li>如何保存状态</li>
+</ul>
+<p>2.3.1 调用<br><code>DeepRecursiveFunction</code>类声明了<code>invoke</code>操作符，调用<code>depth</code>函数就是调用下面👇🏻的操作符。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@SinceKotlin(<span class="meta-string">&quot;1.4&quot;</span>)</span></span><br><span class="line"><span class="meta">@ExperimentalStdlibApi</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> DeepRecursiveFunction<span class="type">&lt;T, R&gt;</span>.<span class="title">invoke</span><span class="params">(value: <span class="type">T</span>)</span></span>: R =</span><br><span class="line">    DeepRecursiveScopeImpl&lt;T, R&gt;(block, value).runCallLoop()</span><br></pre></td></tr></table></figure>
+
+<p>2.3.2 循环<br>调用<code>DeepRecursiveFunction</code>后直接进入<code>runCallLoop()</code>循环，result的默认值为UNDEFINED_RESULT，所以会启动我们的递归业务逻辑</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Suppress(<span class="meta-string">&quot;UNCHECKED_CAST&quot;</span>)</span></span><br><span class="line">   <span class="function"><span class="keyword">fun</span> <span class="title">runCallLoop</span><span class="params">()</span></span>: R &#123;</span><br><span class="line">       <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">           <span class="comment">// Note: cont is set to null in DeepRecursiveScopeImpl.resumeWith when the whole computation completes</span></span><br><span class="line">           <span class="keyword">val</span> result = <span class="keyword">this</span>.result</span><br><span class="line">           <span class="keyword">val</span> cont = <span class="keyword">this</span>.cont</span><br><span class="line">               ?: <span class="keyword">return</span> (result <span class="keyword">as</span> Result&lt;R&gt;).getOrThrow() <span class="comment">// done -- final result</span></span><br><span class="line">           <span class="comment">// The order of comparison is important here for that case of rogue class with broken equals</span></span><br><span class="line">           <span class="keyword">if</span> (UNDEFINED_RESULT == result) &#123;</span><br><span class="line">               <span class="comment">// call &quot;function&quot; with &quot;value&quot; using &quot;cont&quot; as completion</span></span><br><span class="line">               <span class="keyword">val</span> r = <span class="keyword">try</span> &#123;</span><br><span class="line">                   <span class="comment">// This is block.startCoroutine(this, value, cont)</span></span><br><span class="line">                   function.startCoroutineUninterceptedOrReturn(<span class="keyword">this</span>, value, cont)</span><br><span class="line">               &#125; <span class="keyword">catch</span> (e: Throwable) &#123;</span><br><span class="line">                   cont.resumeWithException(e)</span><br><span class="line">                   <span class="keyword">continue</span></span><br><span class="line">               &#125;</span><br><span class="line">               <span class="comment">// If the function returns without suspension -- calls its continuation immediately</span></span><br><span class="line">               <span class="keyword">if</span> (r !== COROUTINE_SUSPENDED)</span><br><span class="line">                   cont.resume(r <span class="keyword">as</span> R)</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="comment">// we returned from a crossFunctionCompletion trampoline -- call resume here</span></span><br><span class="line">               <span class="keyword">this</span>.result = UNDEFINED_RESULT <span class="comment">// reset result back</span></span><br><span class="line">               cont.resumeWith(result)</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>2.3.3 状态保存<br>每次调用<code>callRecursive</code>时将保存当前的值和cont（continuation），注意这里cont对象每次都不是同一个对象。当进行挂起恢复时，拿到旧的continuation进行回调。</p>
+<center>
+    <img src="../images/kotlin_coroutine_resume.jpeg" width="500"/>
+</center>
+
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">callRecursive</span><span class="params">(value: <span class="type">T</span>)</span></span>: R = </span><br><span class="line">    suspendCoroutineUninterceptedOrReturn &#123; cont -&gt;</span><br><span class="line">        <span class="keyword">this</span>.cont = cont</span><br><span class="line">        <span class="keyword">this</span>.value = value</span><br><span class="line">        COROUTINE_SUSPENDED</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h4><p><a href="https://elizarov.medium.com/deep-recursion-with-coroutines-7c53e15993e3">Deep recursion with coroutines</a></p>
+]]></content>
+      <categories>
+        <category>Kotlin</category>
+      </categories>
+      <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Kotlin Flow 基础</title>
     <url>/kotlin-lang-flow.html</url>
     <content><![CDATA[<h4 id="一、什么是Flow"><a href="#一、什么是Flow" class="headerlink" title="一、什么是Flow"></a>一、什么是Flow</h4><h5 id="1、如何通过同步和异步方式返回多个值？"><a href="#1、如何通过同步和异步方式返回多个值？" class="headerlink" title="1、如何通过同步和异步方式返回多个值？"></a>1、如何通过同步和异步方式返回多个值？</h5><p>1.1 同步方式返回多个值</p>
@@ -1228,6 +1282,148 @@
       <categories>
         <category>Kotlin</category>
       </categories>
+      <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>高效Kotlin-48：内联：参数包含函数的方法</title>
+    <url>/kotlin-lang-inline-func-param.html</url>
+    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>你可能注意到了几乎所有的Kotlin标准库里面的高阶函数都是inline类型的。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">repeat</span><span class="params">(times: <span class="type">Int</span>, action: (<span class="type">Int</span>) -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (index <span class="keyword">in</span> <span class="number">0</span> until times) &#123;</span><br><span class="line">        action(index)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">map</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    transform: (<span class="type">T</span>) -&gt; <span class="type">R</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;R&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> mapTo(</span><br><span class="line">        ArrayList&lt;R&gt;(collectionSizeOrDefault(<span class="number">10</span>)),</span><br><span class="line">        transform</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">filter</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    predicate: (<span class="type">T</span>) -&gt; <span class="type">Boolean</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> filterTo(ArrayList&lt;T&gt;(), predicate)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这些函数的调用在编译时会被展开到调用处。如下所示:<code>repeat</code>函数会被它本身的函数体替换掉。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">repeat(<span class="number">10</span>) &#123;</span><br><span class="line">    print(it)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓</span></span><br><span class="line"><span class="keyword">for</span> (index <span class="keyword">in</span> <span class="number">0</span> until <span class="number">10</span>) &#123;</span><br><span class="line">    print(index)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一般的函数调用通常是：跳进函数体，执行代码，然后跳出函数体，回到调用点。而用函数体替换函数调用是一种完全不同的方式，这种方式有以下一些优点：</p>
+<ul>
+<li>类型参数具体化</li>
+<li>参数包含函数的方法内联后执行更快</li>
+<li>不允许非本地的return语句</li>
+</ul>
+<p>使用inline标识符也会有一些缺点，下面👇🏻我们一起来看一下它的优缺点：</p>
+<h5 id="一、类型参数具体化："><a href="#一、类型参数具体化：" class="headerlink" title="一、类型参数具体化："></a>一、类型参数具体化：</h5><p>早期的Java版本不支持泛型，在2004年的J2SE-5.0才支持。由于泛型会在编译期间被擦除，所以在字节码层面是不存在的。例如：<code>List&lt;Int&gt;</code> 编译后成为 <code>List</code> ，所以我们只需要检查一个对象是否是List实例，而不用检查它是否是一个<code>List&lt;Int&gt;</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">any <span class="keyword">is</span> List&lt;<span class="built_in">Int</span>&gt; <span class="comment">// Error</span></span><br><span class="line">any <span class="keyword">is</span> List&lt;*&gt; <span class="comment">// OK</span></span><br></pre></td></tr></table></figure>
+
+<center>
+    <img src="../images/kotlin_type_check.png" width="500"/>
+</center>
+
+<p>由于这个原因，我们不能操作类型参数：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">printTypeName</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(T::<span class="keyword">class</span>.simpleName) <span class="comment">// ERROR</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过内联函数我们可以突破这种限制。由于函数调用被函数体替换，通过使用<code>reified</code>修饰符，泛型被真实的类型参数替换。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;<span class="keyword">reified</span> T&gt;</span> <span class="title">printTypeName</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(T::<span class="keyword">class</span>.simpleName)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Usage</span></span><br><span class="line">printTypeName&lt;<span class="built_in">Int</span>&gt;()    <span class="comment">//→print(Int::class.simpleName) // Int</span></span><br><span class="line">printTypeName&lt;<span class="built_in">Char</span>&gt;()   <span class="comment">//→print(Char::class.simpleName)// Char</span></span><br><span class="line">printTypeName&lt;String&gt;() <span class="comment">//→print(String::class.simpleName)// String</span></span><br></pre></td></tr></table></figure>
+
+<p><code>reified</code>是一个非常有用的修饰符，例如标准库里面的<code>filterIsInstance</code>用来过滤某一种类型的元素。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Worker</span></span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Manager</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> employees: List&lt;Any&gt; =</span><br><span class="line">    listOf(Worker(), Manager(), Worker())</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> workers: List&lt;Worker&gt; =</span><br><span class="line">    employees.filterIsInstance&lt;Worker&gt;()</span><br></pre></td></tr></table></figure>
+
+<p>它经常被用在我们自己写的代码库或工具类中。下面的例子是使用Gson库实现的通用函数，它能帮助我们简化依赖注入和模块申明。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;<span class="keyword">reified</span> T : Any&gt;</span> String.<span class="title">fromJsonOrNull</span><span class="params">()</span></span>: T? =</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        gson.fromJson(json, T::<span class="keyword">class</span>.java)</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: JsonSyntaxException) &#123;</span><br><span class="line">        <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// usage</span></span><br><span class="line"><span class="keyword">val</span> user: User? = userAsText.fromJsonOrNull()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Koin module declaration</span></span><br><span class="line"><span class="keyword">val</span> myModule = module &#123;</span><br><span class="line">    single &#123; Controller(<span class="keyword">get</span>()) &#125; <span class="comment">// get is reified</span></span><br><span class="line">    single &#123; BusinessService() &#125; <span class="comment">// get is reified</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Koin injection</span></span><br><span class="line"><span class="keyword">val</span> service: BusinessService <span class="keyword">by</span> inject()</span><br><span class="line"><span class="comment">// inject is reified</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="二、函数类型的参数内联后执行更快"><a href="#二、函数类型的参数内联后执行更快" class="headerlink" title="二、函数类型的参数内联后执行更快"></a>二、函数类型的参数内联后执行更快</h5><p>更确切的讲，短小的函数内联会更快，它无需跳转执行和跟踪调用栈。这也是为什么标准库里面很多小函数都是inline类型的原因。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">print</span><span class="params">(message: <span class="type">Any</span>?)</span></span> &#123;</span><br><span class="line">    System.<span class="keyword">out</span>.print(message)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当方法没有函数类型的参数时，没必要内联且IntelliJ会给出以下提示⚠️：</p>
+<center>
+    <img src="../images/kotlin_intelij_waring_inline.jpeg" width="500"/>
+</center>
+
+
+<p>要理解其中的原因，我们首先需要理解将函数作为对象进行操作的问题是什么。这些类型的对象(使用函数字面量创建)需要以某种方式保存。在Kotlin/JVM上，需要使用JVM匿名类或普通类创建一些对象。因此，下面的lambda表达式:</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> lambda: () -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">    <span class="comment">// code</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将会被编译为一个类。或JVM匿名类。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Java</span></span><br><span class="line">Function0&lt;Unit&gt; lambda = <span class="keyword">new</span> Function0&lt;Unit&gt;() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Unit <span class="title">invoke</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// code</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>或者被编译成一个普通的类，被定义在一个单独的文件中。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Java</span></span><br><span class="line"><span class="comment">// Additional class in separate file</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span>$<span class="title">lambda</span> <span class="keyword">implements</span> <span class="title">Function0</span> &lt; <span class="title">Unit</span> &gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Unit <span class="title">invoke</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// code</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Usage</span></span><br><span class="line">Function0 lambda = <span class="keyword">new</span> Test$lambda();</span><br></pre></td></tr></table></figure>
+
+<p>这两种方式没有特别大的区别。</p>
+<p>我们注意到，这个函数类型被转换成Function0类型。在Kotlin中，无参类型会被编译器转换成Function0，同理单参数，两参数转换成Function1, Function2,Function3等</p>
+<ul>
+<li>()-&gt;Unit 编译成 Function0<Unit></li>
+<li>()-&gt;Int 编译成 Function0<Int></li>
+<li>(Int)-&gt;Int 编译成 Function1&lt;Int, Int&gt;</li>
+<li>(Int, Int)-&gt;Int 编译成 Function2&lt;Int, Int, Int&gt;</li>
+</ul>
+<p>这些所有的接口都是Kotlin编译器生成的。你不能在Kotlin里显示的使用他们，因为它们是按需生成的，而应该使用函数类型。知道函数类型只是接口为你开启了很多的可能性。比如：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">OnClickListener</span> : <span class="type"></span></span>() -&gt; <span class="built_in">Unit</span> &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">invoke</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>正如在<em>高效Kotlin-47</em>中所述：避免不必要的对象创建，把函数体包装成对象拖慢代码。这就是为什么下面的代码中，第一个更快。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">repeat</span><span class="params">(times: <span class="type">Int</span>, action: (<span class="type">Int</span>) -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (index <span class="keyword">in</span> <span class="number">0</span> until times) &#123;</span><br><span class="line">        action(index)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">repeatNoinline</span><span class="params">(times: <span class="type">Int</span>, action: (<span class="type">Int</span>) -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (index <span class="keyword">in</span> <span class="number">0</span> until times) &#123;</span><br><span class="line">        action(index)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这种差异是显而易见的，但在现实生活中的例子中很少有显著差异。我们把测试用例设计一下，放大这种差异：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Benchmark</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">nothingInline</span><span class="params">(blackhole: <span class="type">Blackhole</span>)</span></span> &#123;</span><br><span class="line">    repeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">        blackhole.consume(it)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Benchmark</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">nothingNoninline</span><span class="params">(blackhole: <span class="type">Blackhole</span>)</span></span> &#123;</span><br><span class="line">    noinlineRepeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">        blackhole.consume(it)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第一个在我们电脑平均运行189ms。第二个平均447ms。这种差距体现在：第一个例子迭代调用空函数。第二个例子迭代调用对象，这个对象调用一个空函数。这里使用了额外的对象。</p>
+<p>看一个更典型的例子。我们有5000个产品，计算我们购买物品的价格：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">users.filter &#123; it.bought &#125;.sumByDouble &#123; it.price &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在我的机器上平均耗时38ms。如果filter和sumByDouble不内联耗时多少呢？平均42ms！看起来不多，但每次调用也有10%的差异。</p>
+<p>内联和非内联函数最大的区别在于，当我们在函数字面量里捕获变量时。变量被使用时需要被包装成对象。例如：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> l = <span class="number">1L</span></span><br><span class="line">noinlineRepeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">    l += it</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一个本地变量不能直接在非内联lambda中使用。这就是为什么要被包装成引用对象：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> a = Ref.LongRef()</span><br><span class="line">a.element = <span class="number">1L</span></span><br><span class="line">noinlineRepeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">    a.element = a.element + it</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>区别很大是因为，通常这个对象会被使用很多次，上面代码中的a变量使用了两次。因此，额外的对象调用2*100_000_000。再看一下这个例子👇🏻：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Benchmark</span></span><br><span class="line"><span class="comment">// On average 30 ms</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">nothingInline</span><span class="params">(blackhole: <span class="type">Blackhole</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> l = <span class="number">0L</span></span><br><span class="line">    repeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">        l += it</span><br><span class="line">    &#125;</span><br><span class="line">    blackhole.consume(l)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Benchmark</span></span><br><span class="line"><span class="comment">// On average 274 ms</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">nothingNoninline</span><span class="params">(blackhole: <span class="type">Blackhole</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> l = <span class="number">0L</span></span><br><span class="line">    noinlineRepeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">        l += it</span><br><span class="line">    &#125;</span><br><span class="line">    blackhole.consume(l)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第一个在我电脑运行30ms，第二个274ms。差距的原因是，函数是一个对象，本地变量需要被包装。小的影响累计放大了。大多数情况下，我们不知道有函数类型参数的方法被如何使用，当我们定义这种函数时，最好内联一下。这也是标准库经常这么写的原因。</p>
+<h5 id="三、不允许非本地返回"><a href="#三、不允许非本地返回" class="headerlink" title="三、不允许非本地返回"></a>三、不允许非本地返回</h5><p>前面定义的<code>repeatNoninline</code>像是一个控制结构，拿它和if语句或for循环对比一下。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (value != <span class="literal">null</span>) &#123;</span><br><span class="line">    print(value)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1.</span><span class="number">.10</span>) &#123;</span><br><span class="line">    print(i)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">repeatNoninline(<span class="number">10</span>) &#123;</span><br><span class="line">    print(it)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>明显的区别是，内部不能返回</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    repeatNoinline(<span class="number">10</span>) &#123;</span><br><span class="line">        print(it)</span><br><span class="line">        <span class="keyword">return</span> <span class="comment">// ERROR: Not allowed</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是函数字面量编译的结果。当我们的代码处于另外一个类时，不能从main函数返回。但是，当使用内联时，就没限制。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    repeat(<span class="number">10</span>) &#123;</span><br><span class="line">        print(it)</span><br><span class="line">        <span class="keyword">return</span> <span class="comment">// OK</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>得益于此，函数可以看起来更像控制结构：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getSomeMoney</span><span class="params">()</span></span>: Money? &#123;</span><br><span class="line">    repeat(<span class="number">100</span>) &#123;</span><br><span class="line">        <span class="keyword">val</span> money = searchForMoney()</span><br><span class="line">        <span class="keyword">if</span> (money != <span class="literal">null</span>) <span class="keyword">return</span> money</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h5 id="四、内联修饰符的缺陷"><a href="#四、内联修饰符的缺陷" class="headerlink" title="四、内联修饰符的缺陷"></a>四、内联修饰符的缺陷</h5><p>inline很有用，但不应该随处使用。有些情况下不建议使用。再来看看最重要的限制。</p>
+<ul>
+<li>内联函数不能递归，否则调用展开将无限循环。周期性循环尤其危险，因为Intellij不报错：</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">a</span><span class="params">()</span></span> &#123;</span><br><span class="line">    b()</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">b</span><span class="params">()</span></span> &#123;</span><br><span class="line">    c()</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">c</span><span class="params">()</span></span> &#123;</span><br><span class="line">    a()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>内联函数不能使用可见性约束的元素</li>
+</ul>
+<p>在<code>public inline fun</code>中不能使用private 、internal修饰的函数或属性</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">internal</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">read</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> reader = Reader() <span class="comment">// Error</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">Reader</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这也是为什么它不能用于隐藏实现，并且很少在类中使用。</p>
+<ul>
+<li>内联函数使代码膨胀</li>
+</ul>
+<p>定义一个打印3的函数：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">printThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用三次：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    printThree()</span><br><span class="line">    printThree()</span><br><span class="line">    printThree()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>又定义下面函数：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threeThreePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    threePrintThree()</span><br><span class="line">    threePrintThree()</span><br><span class="line">    threePrintThree()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threeThreeThreePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    threeThreePrintThree()</span><br><span class="line">    threeThreePrintThree()</span><br><span class="line">    threeThreePrintThree()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看一下它们的编译结果，前两个还能看：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">printThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>后两个：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threeThreePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threeThreeThreePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)    </span><br><span class="line"> ...</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个例子展示了内联函数的弊端：过度使用时代码膨胀严重。</p>
+<h5 id="五、crossinline-和noinline"><a href="#五、crossinline-和noinline" class="headerlink" title="五、crossinline 和noinline"></a>五、crossinline 和noinline</h5><p>有时候我们想内联一个函数，由于某些原因，不能内联全部的函数类型参数。这种情况下我们使用下面的修饰符：</p>
+<p>crossinline：用于内联函数的参数，表示此参数内联范围扩大。对内联函数内部的lambda生效：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">hello</span><span class="params">(postAction:()-&gt;<span class="type">Unit</span>)</span></span>&#123;</span><br><span class="line">    println(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">    runOnUiThread &#123; </span><br><span class="line">        postAction()</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>noinline：用于内联函数的参数，表示此参数不能被内联。可以局部性关闭内联。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">requestNewToken</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    hasToken: <span class="type">Boolean</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">crossinline</span> onRefresh: () -&gt; <span class="type">Unit</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">noinline</span> onGenerate: () -&gt; <span class="type">Unit</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (hasToken) &#123;</span><br><span class="line">        httpCall(<span class="string">&quot;get-token&quot;</span>, onGenerate) <span class="comment">// We must use </span></span><br><span class="line">        <span class="comment">// noinline to pass function as an argument to a</span></span><br><span class="line">        <span class="comment">// function that is not inlined</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        httpCall(<span class="string">&quot;refresh-token&quot;</span>) &#123;</span><br><span class="line">            onRefresh() <span class="comment">// We must use crossinline to </span></span><br><span class="line">            <span class="comment">// inline function in a context where </span></span><br><span class="line">            <span class="comment">// non-local return is not allowed</span></span><br><span class="line">            onGenerate()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">httpCall</span><span class="params">(url: <span class="type">String</span>, callback: () -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="comment">/*...*/</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>能记住这两个修饰符最好，记不住也没事，IntelliJ会有提示：</p>
+<h5 id="六、总结："><a href="#六、总结：" class="headerlink" title="六、总结："></a>六、总结：</h5><p>使用inline的主要场景是：</p>
+<ul>
+<li>经常被使用的函数</li>
+<li>具体化的类型参数，像：<code>filterIsInstance</code></li>
+<li>定义带有函数类型的参数的顶层函数。尤其是辅助函数，如集合处理（map、filter）、作用域函数（also、apply、let）、顶层工具函数（repeat、run、with）</li>
+</ul>
+<p>我们很少用inline定义API，注意内联函数调用内联函数的情景。记住代码膨胀。</p>
+<p>参考：<br><a href="https://kt.academy/article/ek-inline-functions">Effective Kotlin Item 48: Use inline modifier for functions with parameters of functional types</a></p>
+]]></content>
       <tags>
         <tag>Kotlin</tag>
       </tags>
@@ -1385,54 +1581,8 @@
 <li>无需每一步创建新的集合</li>
 </ul>
 <p>基于这些优点，对于包含多个处理步骤的包含大对象或元素很多的集合来说使用Sequence更好。Sequence也包含调试器，能帮助我们可视化的分析元素处理过程。Sequence不是为了取代传统的集合处理方式，使用前应该分析清楚自己的目的和原因才能带来性能的提升以及更少的内存问题。</p>
+<h4 id="四、参考"><a href="#四、参考" class="headerlink" title="四、参考"></a>四、参考</h4><p><a href="https://kt.academy/article/ek-sequence">Effective Kotlin Item 51: Prefer Sequence for big collections with more than one processing step</a></p>
 ]]></content>
-      <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>用Kotlin协程解决深度递归问题</title>
-    <url>/kotlin-coroutine-deep-recursion.html</url>
-    <content><![CDATA[<p>&ensp;&ensp;&ensp;&ensp;协程一般用于异步编程。在解决异步编程问题方面，Kotlin编译器在对协程的设计和实现是通用的。我们可以借助协程优雅的解决深度递归问题。</p>
-<h4 id="一、问题描述"><a href="#一、问题描述" class="headerlink" title="一、问题描述"></a>一、问题描述</h4><p>定义以下二叉树的结点，并构造一棵只含十万个左结点的树，进行深度遍历，求树的深度：  </p>
-<center>
-    <img src="../images/tree_only_left.png" width="500"/>
-</center>
-
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">//结点定义</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Tree</span></span>(<span class="keyword">val</span> left: Tree?, <span class="keyword">val</span> right: Tree?)</span><br><span class="line"></span><br><span class="line"><span class="comment">//构造二叉树：以叶子结点开始，重复构造父结点，并把当前结点作为父结点的左子树</span></span><br><span class="line"><span class="keyword">val</span> n = <span class="number">100_000</span></span><br><span class="line"><span class="keyword">val</span> deepTree = generateSequence(Tree(<span class="literal">null</span>, <span class="literal">null</span>)) &#123; prev -&gt;</span><br><span class="line">    Tree(prev, <span class="literal">null</span>) </span><br><span class="line">&#125;.take(n).last()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="二、解决方案"><a href="#二、解决方案" class="headerlink" title="二、解决方案"></a>二、解决方案</h4><h5 id="2-1-解决方案一："><a href="#2-1-解决方案一：" class="headerlink" title="2.1 解决方案一："></a>2.1 解决方案一：</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">depth</span><span class="params">(t: <span class="type">Tree</span>?)</span></span>: <span class="built_in">Int</span> =</span><br><span class="line">    <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="number">0</span> <span class="keyword">else</span> maxOf(</span><br><span class="line">        depth(t.left), <span class="comment">// recursive call one</span></span><br><span class="line">        depth(t.right) <span class="comment">// recursive call two</span></span><br><span class="line">    ) + <span class="number">1</span></span><br></pre></td></tr></table></figure>
-
-<p>分析：<br>对树进行递归是最简洁直接的解决方案。而递归将保存函数的调用栈用于后续状态恢复，线程的调用栈是有大小限制的，此处将抛出<code>Exception in thread &quot;main&quot; java.lang.StackOverflowError</code>错误。</p>
-<h5 id="2-2-解决方案二："><a href="#2-2-解决方案二：" class="headerlink" title="2.2 解决方案二："></a>2.2 解决方案二：</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">depth</span><span class="params">(t: <span class="type">Tree</span>?)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">      <span class="class"><span class="keyword">class</span> <span class="title">Frame</span></span>(<span class="keyword">val</span> node: Tree, <span class="keyword">var</span> state: <span class="built_in">Int</span> = <span class="number">0</span>, <span class="keyword">var</span> depth: <span class="built_in">Int</span> = <span class="number">1</span>)</span><br><span class="line">      <span class="keyword">val</span> stack = ArrayList&lt;Frame&gt;()</span><br><span class="line">      <span class="keyword">val</span> root = Frame(t)</span><br><span class="line">      stack.add(root)</span><br><span class="line">      <span class="keyword">while</span> (stack.isNotEmpty()) &#123;</span><br><span class="line">          <span class="keyword">val</span> frame = stack.last()</span><br><span class="line">          <span class="keyword">when</span> (frame.state++) &#123;</span><br><span class="line">              <span class="number">0</span> -&gt; frame.node.left?.let &#123; l -&gt; stack.add(Frame(l)) &#125;</span><br><span class="line">              <span class="number">1</span> -&gt; frame.node.right?.let &#123; r -&gt; stack.add(Frame(r)) &#125;</span><br><span class="line">              <span class="number">2</span> -&gt; &#123;</span><br><span class="line">                  stack.removeLast()</span><br><span class="line">                  stack.lastOrNull()?.let &#123; p -&gt; </span><br><span class="line">                      p.depth = maxOf(p.depth, frame.depth + <span class="number">1</span>) </span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> root.depth</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-<p>分析：<br>基于解决方案一，我们考虑将调用栈状态的保存转移到内存空间更大的堆区，并加入了状态机和<code>while</code>循环。在此例中，程序开始时将全部走状态0，将所有的左节点加入stack。然后全部走状态2(因为没有右结点)，由下到上计算每一个结点的深度。最后返回根节点的深度。</p>
-<h5 id="2-3-解决方案三："><a href="#2-3-解决方案三：" class="headerlink" title="2.3 解决方案三："></a>2.3 解决方案三：</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> depth = DeepRecursiveFunction&lt;Tree?, <span class="built_in">Int</span>&gt; &#123; t -&gt;</span><br><span class="line">        <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="number">0</span> <span class="keyword">else</span> maxOf(</span><br><span class="line">            callRecursive(t.left),</span><br><span class="line">            callRecursive(t.right)</span><br><span class="line">        ) + <span class="number">1</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>分析：<br>方案二中的状态机就是Kotlin挂起函数的实现原理。所以我们也可以利用Kotlin的挂起函数实现深度遍历。那么方案三是如何实现的呢？我们分析三个方面：  </p>
-<ul>
-<li>如何调用</li>
-<li>如何进入循环</li>
-<li>如何保存状态</li>
-</ul>
-<p>2.3.1 调用<br><code>DeepRecursiveFunction</code>类声明了<code>invoke</code>操作符，调用<code>depth</code>函数就是调用下面👇🏻的操作符。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@SinceKotlin(<span class="meta-string">&quot;1.4&quot;</span>)</span></span><br><span class="line"><span class="meta">@ExperimentalStdlibApi</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> DeepRecursiveFunction<span class="type">&lt;T, R&gt;</span>.<span class="title">invoke</span><span class="params">(value: <span class="type">T</span>)</span></span>: R =</span><br><span class="line">    DeepRecursiveScopeImpl&lt;T, R&gt;(block, value).runCallLoop()</span><br></pre></td></tr></table></figure>
-
-<p>2.3.2 循环<br>调用<code>DeepRecursiveFunction</code>后直接进入<code>runCallLoop()</code>循环，result的默认值为UNDEFINED_RESULT，所以会启动我们的递归业务逻辑</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Suppress(<span class="meta-string">&quot;UNCHECKED_CAST&quot;</span>)</span></span><br><span class="line">   <span class="function"><span class="keyword">fun</span> <span class="title">runCallLoop</span><span class="params">()</span></span>: R &#123;</span><br><span class="line">       <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">           <span class="comment">// Note: cont is set to null in DeepRecursiveScopeImpl.resumeWith when the whole computation completes</span></span><br><span class="line">           <span class="keyword">val</span> result = <span class="keyword">this</span>.result</span><br><span class="line">           <span class="keyword">val</span> cont = <span class="keyword">this</span>.cont</span><br><span class="line">               ?: <span class="keyword">return</span> (result <span class="keyword">as</span> Result&lt;R&gt;).getOrThrow() <span class="comment">// done -- final result</span></span><br><span class="line">           <span class="comment">// The order of comparison is important here for that case of rogue class with broken equals</span></span><br><span class="line">           <span class="keyword">if</span> (UNDEFINED_RESULT == result) &#123;</span><br><span class="line">               <span class="comment">// call &quot;function&quot; with &quot;value&quot; using &quot;cont&quot; as completion</span></span><br><span class="line">               <span class="keyword">val</span> r = <span class="keyword">try</span> &#123;</span><br><span class="line">                   <span class="comment">// This is block.startCoroutine(this, value, cont)</span></span><br><span class="line">                   function.startCoroutineUninterceptedOrReturn(<span class="keyword">this</span>, value, cont)</span><br><span class="line">               &#125; <span class="keyword">catch</span> (e: Throwable) &#123;</span><br><span class="line">                   cont.resumeWithException(e)</span><br><span class="line">                   <span class="keyword">continue</span></span><br><span class="line">               &#125;</span><br><span class="line">               <span class="comment">// If the function returns without suspension -- calls its continuation immediately</span></span><br><span class="line">               <span class="keyword">if</span> (r !== COROUTINE_SUSPENDED)</span><br><span class="line">                   cont.resume(r <span class="keyword">as</span> R)</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="comment">// we returned from a crossFunctionCompletion trampoline -- call resume here</span></span><br><span class="line">               <span class="keyword">this</span>.result = UNDEFINED_RESULT <span class="comment">// reset result back</span></span><br><span class="line">               cont.resumeWith(result)</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-
-<p>2.3.3 状态保存<br>每次调用<code>callRecursive</code>时将保存当前的值和cont（continuation），注意这里cont对象每次都不是同一个对象。当进行挂起恢复时，拿到旧的continuation进行回调。</p>
-<center>
-    <img src="../images/kotlin_coroutine_resume.jpeg" width="500"/>
-</center>
-
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">callRecursive</span><span class="params">(value: <span class="type">T</span>)</span></span>: R = </span><br><span class="line">    suspendCoroutineUninterceptedOrReturn &#123; cont -&gt;</span><br><span class="line">        <span class="keyword">this</span>.cont = cont</span><br><span class="line">        <span class="keyword">this</span>.value = value</span><br><span class="line">        COROUTINE_SUSPENDED</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h4><p><a href="https://elizarov.medium.com/deep-recursion-with-coroutines-7c53e15993e3">Deep recursion with coroutines</a></p>
-]]></content>
-      <categories>
-        <category>Kotlin</category>
-      </categories>
       <tags>
         <tag>Kotlin</tag>
       </tags>
