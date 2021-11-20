@@ -1,5 +1,5 @@
 ---
-title: 高效Kotlin-51：使用Sequence优化集合操作
+title: Effective Kotlin-51：使用Sequence优化集合操作
 tags: Kotlin
 date: 2021-11-06 21:37:43
 categories:

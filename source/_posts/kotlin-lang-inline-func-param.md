@@ -1,5 +1,5 @@
 ---
-title: 高效Kotlin-48：为参数包含函数的方法内联
+title: Effective Kotlin-48：为参数包含函数的方法内联
 tags: Kotlin
 date: 2021-11-09 21:57:29
 categories:
