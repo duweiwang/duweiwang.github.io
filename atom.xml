@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2021-11-20T00:51:41.857Z</updated>
+  <updated>2021-11-23T12:36:45.997Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Effective Kotlin-35：用DSL创建复杂对象</title>
+    <link href="https://wangduwei.top/kotlin-lang-use-dsl.html"/>
+    <id>https://wangduwei.top/kotlin-lang-use-dsl.html</id>
+    <published>2021-11-23T12:19:39.000Z</published>
+    <updated>2021-11-23T12:36:45.997Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、概述：&quot;&gt;&lt;a href=&quot;#一、概述：&quot; class=&quot;headerlink&quot; title=&quot;一、概述：&quot;&gt;&lt;/a&gt;一、概述：&lt;/h4&gt;&lt;p&gt;利用Kotlin的语言特性可以创建可配置的领域语言-DSL（Domain Specific</summary>
+        
+      
+    
+    
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
+    
+  </entry>
   
   <entry>
     <title>Effective Kotlin-56：考虑使用可变集合</title>
