@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2021-11-26T13:25:49.614Z</updated>
+  <updated>2021-11-23T12:36:45.997Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,25 +15,6 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>一周工作总结</title>
-    <link href="https://wangduwei.top/my-work-of-this-week-01.html"/>
-    <id>https://wangduwei.top/my-work-of-this-week-01.html</id>
-    <published>2021-11-26T13:21:57.000Z</published>
-    <updated>2021-11-26T13:25:49.614Z</updated>
-    
-    
-    <summary type="html">工作</summary>
-    
-    
-    
-    <category term="工作" scheme="https://wangduwei.top/categories/%E5%B7%A5%E4%BD%9C/"/>
-    
-    
-    <category term="工作" scheme="https://wangduwei.top/tags/%E5%B7%A5%E4%BD%9C/"/>
-    
-  </entry>
   
   <entry>
     <title>Effective Kotlin-35：用DSL创建复杂对象</title>
@@ -483,6 +464,29 @@
     <summary type="html">&lt;h3 id=&quot;Leetode-2-两数相加&quot;&gt;&lt;a href=&quot;#Leetode-2-两数相加&quot; class=&quot;headerlink&quot; title=&quot;Leetode-2 两数相加&quot;&gt;&lt;/a&gt;Leetode-2 两数相加&lt;/h3&gt;&lt;blockquote&gt;
 &lt;p&gt;给你两个 非空 的链表，表示两个非负的整数。它们每位数字都是按照 逆序 的方式存储的，并且每个节点只能存储 一位 数字。请你将两个数相加，并以相同形式返回一个表示和的链表。你可以假设除了数字 0 之外，这两个数都不会以 0 开头。&lt;/p&gt;
 &lt;/blockquote&gt;</summary>
+    
+    
+    
+    <category term="LeetCode" scheme="https://wangduwei.top/categories/LeetCode/"/>
+    
+    
+    <category term="LeetCode" scheme="https://wangduwei.top/tags/LeetCode/"/>
+    
+    <category term="Algorithm" scheme="https://wangduwei.top/tags/Algorithm/"/>
+    
+    <category term="List" scheme="https://wangduwei.top/tags/List/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LeetCode 反转单链表</title>
+    <link href="https://wangduwei.top/leetcode-reverse-list.html"/>
+    <id>https://wangduwei.top/leetcode-reverse-list.html</id>
+    <published>2021-08-23T13:23:30.000Z</published>
+    <updated>2021-08-30T07:39:12.764Z</updated>
+    
+    
+    <summary type="html">给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</summary>
     
     
     

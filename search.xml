@@ -1850,44 +1850,4 @@
         <tag>Economics</tag>
       </tags>
   </entry>
-  <entry>
-    <title>一周工作总结</title>
-    <url>/my-work-of-this-week-01.html</url>
-    <content><![CDATA[<h5 id="时间：2021-11-22-至-2021-11-26"><a href="#时间：2021-11-22-至-2021-11-26" class="headerlink" title="时间：2021-11-22 至 2021-11-26"></a>时间：2021-11-22 至 2021-11-26</h5><h6 id="2021-11-22-周一："><a href="#2021-11-22-周一：" class="headerlink" title="2021-11-22 周一："></a>2021-11-22 周一：</h6><ul>
-<li>完成数据迁移逻辑<ul>
-<li>内外置SD卡兼容</li>
-<li>子主账号兼容</li>
-<li>Android-11兼容</li>
-</ul>
-</li>
-<li>文件恢复逻辑支持旧文件</li>
-<li>优化文件恢复不产生新数据库记录</li>
-</ul>
-<h6 id="2021-11-23-周二："><a href="#2021-11-23-周二：" class="headerlink" title="2021-11-23 周二："></a>2021-11-23 周二：</h6><ul>
-<li>各接口域名换新</li>
-<li>调整各逻辑至迁移完成后执行</li>
-</ul>
-<h6 id="2021-11-24-周三："><a href="#2021-11-24-周三：" class="headerlink" title="2021-11-24 周三："></a>2021-11-24 周三：</h6><ul>
-<li>崩溃日志上报地址</li>
-<li>deeplink协议替换</li>
-</ul>
-<h6 id="2021-11-25-周四："><a href="#2021-11-25-周四：" class="headerlink" title="2021-11-25 周四："></a>2021-11-25 周四：</h6><ul>
-<li>合并马甲包分支与云盘分支，合并数据库升级与数据迁移逻辑</li>
-<li>替换应用名称</li>
-</ul>
-<h6 id="2021-11-26-周五："><a href="#2021-11-26-周五：" class="headerlink" title="2021-11-26 周五："></a>2021-11-26 周五：</h6><ul>
-<li>马甲包去掉渠道和发达国家的特有逻辑，走常规逻辑</li>
-<li>Facebook三方登录应用注册获取fb-app-id</li>
-<li>清理不必要的打包产物</li>
-<li>启用常量内联和R文件内联</li>
-</ul>
-<h6 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h6><p>本周工作围绕马甲包上线展开，工作琐碎且繁杂，需要思考细节避免遗漏和考虑不周。</p>
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>工作</tag>
-      </tags>
-  </entry>
 </search>
