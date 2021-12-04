@@ -1,6 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Android分区存储</title>
+    <url>/android-scoped-storage.html</url>
+    <content><![CDATA[<h3 id="一、What、Why（是什么、为什么）"><a href="#一、What、Why（是什么、为什么）" class="headerlink" title="一、What、Why（是什么、为什么）"></a>一、What、Why（是什么、为什么）</h3><p>1.1 什么是分区存储<br>了解传统的共享存储 (Shared Storage):</p>
+<ul>
+<li>每个app有独立的存储空间Android/data/pkg其他应用不可见（Context.getExternalFileDir）</li>
+<li>访问外部空间需要额外权限READ/WRITE_EXTERNAL_STORAGE、获取存储权限的应用可以访问整个外部存储空间</li>
+<li>应用卸载时，保存在外部存储空间文件不会被删除。</li>
+</ul>
+<span id="more"></span>
+
+<p>共享存储带来的问题</p>
+<ul>
+<li>数据安全</li>
+<li>存储空间浪费，难以管理</li>
+</ul>
+<p>分区存储解决方案(Scoped Storage):</p>
+<ul>
+<li>必须通过Media Store API和Storage Access FrameWork访问文件系统。=&gt;对传统共享存储系统的一种强制约束</li>
+<li>文件归属：操作自己创建的文件无需任何权限（自己创建的文件系统会记录此文件的归属app，应用卸载后清除该归属字段，重装后读取该文件仍需权限申请），非共享文件存入私有目录。=&gt;文件和应用挂钩，便于操作系统进行管理</li>
+</ul>
+<p>By The Way:<br>在Android-Q （API-29）中通过android:requestLegacyExternalStorage=”true”可以禁用分区存储<br>在Android-R （API-30）中必须使用分区存储<br>在Android-Q中完全禁用了File API，Android-R重新启用</p>
+<h3 id="二、How（分区存储实践-数据的增、删、改、查）"><a href="#二、How（分区存储实践-数据的增、删、改、查）" class="headerlink" title="二、How（分区存储实践-数据的增、删、改、查）"></a>二、How（分区存储实践-数据的增、删、改、查）</h3><p>2.1 对媒体文件的增删改查：</p>
+<ul>
+<li>增查：新增操作无需任何权限。查询其他应用的媒体资源需要READ_EXTERNAL_STORAGE权限。查询自己应用创建的媒体资源无需权限，当应用卸载重装后，自己创建的资源也需要申请权限。</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">saveImageToAlbum</span><span class="params">(context: <span class="type">Context</span>, imageFile: <span class="type">File</span>, imageName: <span class="type">String</span>)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> withContext(Dispatchers.IO) &#123;</span><br><span class="line">        <span class="keyword">val</span> contentValues = ContentValues().apply &#123;</span><br><span class="line">            put(MediaStore.Images.Media.DISPLAY_NAME, imageName)</span><br><span class="line">            put(MediaStore.Images.Media.DESCRIPTION, <span class="string">&quot;图片描述&quot;</span>)</span><br><span class="line">            put(MediaStore.Images.Media.MIME_TYPE, <span class="string">&quot;image/jpg&quot;</span>)</span><br><span class="line">            <span class="comment">// 文件待处理状态，本应用独占，其他应用暂时无法访问</span></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">                put(MediaStore.Images.Media.IS_PENDING, <span class="number">1</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 插入数据库，获得uri</span></span><br><span class="line">        <span class="keyword">val</span> uri = context.contentResolver</span><br><span class="line">            .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)</span><br><span class="line">            ?: <span class="keyword">return</span><span class="symbol">@withContext</span> <span class="literal">false</span></span><br><span class="line">        <span class="comment">// 根据uri打开输出流，写入imageFile文件</span></span><br><span class="line">        context.contentResolver.openOutputStream(uri)?.use &#123; it.write(imageFile.readBytes()) &#125;</span><br><span class="line">        <span class="comment">// 切换文件待处理状态</span></span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">            contentValues.clear()</span><br><span class="line">            contentValues.put(MediaStore.Images.Media.IS_PENDING, <span class="number">0</span>)</span><br><span class="line">            context.contentResolver.update(uri, contentValues, <span class="literal">null</span>, <span class="literal">null</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span><span class="symbol">@withContext</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li>删改：删改自己创建的媒体资源无需权限。删改其他应用创建的资源需要捕获RecoverableSecurityException异常后，向用户申请删除权限。</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">performDeleteImage</span><span class="params">(image: <span class="type">MediaStoreModel</span>)</span></span> &#123;</span><br><span class="line">    withContext(Dispatchers.IO) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            getApplication&lt;Application&gt;().contentResolver.delete(</span><br><span class="line">                image.contentUri,</span><br><span class="line">                <span class="string">&quot;<span class="subst">$&#123;MediaStore.Images.Media._ID&#125;</span> = ?&quot;</span>,</span><br><span class="line">                arrayOf(image.id.toString())</span><br><span class="line">            )</span><br><span class="line">        &#125; <span class="keyword">catch</span> (securityException: SecurityException) &#123;</span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">               <span class="keyword">val</span> recoverableSecurityException = securityException <span class="keyword">as</span>? RecoverableSecurityException</span><br><span class="line">                        ?: <span class="keyword">throw</span> securityException</span><br><span class="line">               startIntentSenderForResult(</span><br><span class="line">                   recoverableSecurityException.userAction.actionIntent.intentSender,</span><br><span class="line">                   DELETE_PERMISSION_REQUEST,</span><br><span class="line">                   <span class="literal">null</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="literal">null</span>)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> securityException</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>2.2 对文档的增删改查：<br>对外部文档的读写操作需要使用Storage Access FrameWork，通过各种Intent交由系统处理。更多实例见[参考资料2]</p>
+<p>SAF存储的限制：</p>
+<ul>
+<li>Intent.ACTION_OPEN_DOCUMENT_TREE访问限制<ul>
+<li>内部存储根目录</li>
+<li>Download目录</li>
+<li>Android/data/  和  Android/obb/</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建文档-返回Uri再进行写入</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply &#123;</span><br><span class="line">    addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">    type = <span class="string">&quot;text/plain&quot;</span></span><br><span class="line">    putExtra(Intent.EXTRA_TITLE, <span class="string">&quot;test.txt&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//读取&amp;删改</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply &#123;</span><br><span class="line">    addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">    type = <span class="string">&quot;*/*&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//目录操作</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply &#123;</span><br><span class="line">    flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>2.3 批量操作<br>通过MediaStore静态方法创建修改请求，征求用户同意后进行操作。Android-R后新增的API，旧版需走回contentResolver.delete()操作</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>createWriteRequest</td>
+<td>向用户请求媒体文件组写入权限</td>
+</tr>
+<tr>
+<td>createFavoriteRequest</td>
+<td>用户将设备上指定的媒体文件标记为“收藏”的请求</td>
+</tr>
+<tr>
+<td>createTrashRequest</td>
+<td>用户将指定的媒体文件放入设备垃圾箱的请求。垃圾箱中的内容会在系统定义的时间段后被永久删除。</td>
+</tr>
+<tr>
+<td>createDeleteRequest</td>
+<td>用户立即永久删除指定的媒体文件</td>
+</tr>
+</tbody></table>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">val</span> uriList = <span class="comment">/* A collection of content URIs to modify. */</span></span><br><span class="line"><span class="keyword">val</span> pendingIntent = MediaStore.createWriteRequest(contentResolver,urisToModify)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Launch a system prompt requesting user permission for the operation.</span></span><br><span class="line">startIntentSenderForResult(editPendingIntent.intentSender,</span><br><span class="line">                           EDIT_REQUEST_CODE, </span><br><span class="line">                           <span class="literal">null</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="三、直接文件读写"><a href="#三、直接文件读写" class="headerlink" title="三、直接文件读写"></a>三、直接文件读写</h3><p>Android-11重新支持File对象访问文件的直接路径。<br>1、针对媒体文件<br>    - 归属于你应用的文件 和 你的私有目录 的文件 可以直接使用File API访问<br>    - 如果直接用File API访问没有权限的文件，抛出 FileNotFoundException<br>2、Media Store DATA 属性<br>DATA属性存储了媒体文件的绝对路径，在Android-10的时候废弃了该属性。由于Android-11又支持File对象，所以DATA属性也可以读取直接路径，但不一定有值。但是新增和更新操作不要再使用DATA了，请使用DISPLAY_NAME 和 RELATIVE_PATH 。</p>
+<h3 id="四、另外一扇窗"><a href="#四、另外一扇窗" class="headerlink" title="四、另外一扇窗"></a>四、另外一扇窗</h3><p>对于一些特殊的App，例如文件管理器，备份等。可以申请所有文件访问权限<br>1.声明 MANAGE_EXTERNAL_STORAGE 权限<br>2.使用 ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION  将用户引导至一个系统设置页面进行授权</p>
+<p>授权范围</p>
+<ul>
+<li>读写共享存储区的所有文件<ul>
+<li>Media content （MediaStore）</li>
+<li>Documents and other files （SAF）</li>
+<li>Datasets （BlobStoreManager）</li>
+</ul>
+</li>
+<li>MediaStore.Files数据库表</li>
+<li>USB 和 SD卡 根目录</li>
+<li>除 /Android/data/ 和 /sdcard/Android 之外的其他私有目录</li>
+</ul>
+<h3 id="五、应用截图"><a href="#五、应用截图" class="headerlink" title="五、应用截图"></a>五、应用截图</h3><table>
+    <tr>
+        <td><img src="../images/scoped_storage.png" width="200"/></td>
+        <td><img src="../images/scoped_storage_2.png" width="200"/></td>
+    </tr>
+</table>]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>市盈率和市净率</title>
+    <url>/base-economic-concept.html</url>
+    <content><![CDATA[<h4 id="一、市盈率"><a href="#一、市盈率" class="headerlink" title="一、市盈率"></a>一、市盈率</h4><p>1.1 PE - 静态市盈率</p>
+<blockquote>
+<p>① 市盈率 = 当日收盘价 / 上一年度每股税后利润  </p>
+</blockquote>
+<blockquote>
+<p>② 市盈率 = 当前总市值 / 上年度净利润</p>
+</blockquote>
+<p>理解：</p>
+<ul>
+<li>公司需要累计多少年的盈利才能达到目前的市价水平。</li>
+<li>值越低说明投资回收期短，风险越小，投资价值越高。</li>
+<li>值越大说明翻本期长，风险大。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>取的是上一年度的净利润，是一个过去的值，有点滞后。</li>
+</ul>
+<p>例子：<br>你花了240w买了一套二手房，打算进行出租赚点外快，已知去年平均月租2w，一年收益大概24w。以去年这些数据为参考，你预计<strong>十年后</strong>才能赚回成本240w，所以市盈率 = 10。</p>
+<p>1.2 动态市盈率<br>为了弥补静态市盈率的滞后性，增加动态市盈率作为参考指标。</p>
+<blockquote>
+<p>市盈率 = 当前总市值 / X</p>
+</blockquote>
+<p>根据当前的时间节点不同计算X的值：<br>X = 当年最近一个季度的净利润 * 4<br>X = 最近半年净利润 * 2<br>X = 最近三季度净利润 * 1.5 </p>
+<p>1.3 静态市盈率 vs 动态市盈率</p>
+<ul>
+<li>静态市盈率反映的是过去的数据，动态市盈率反映的是未来的预估</li>
+<li>动态市盈率 &gt; 静态市盈率，说明最近（一个季度、半年、三个季度）公司的利润下降了。</li>
+</ul>
+<p>1.4 TTM-Trailing Twelve Months</p>
+<ul>
+<li>最近十二个月市盈率，也叫滚动市盈率。</li>
+<li>它也是一个对过去情况的分析说明。</li>
+</ul>
+<h4 id="二、每股净值产"><a href="#二、每股净值产" class="headerlink" title="二、每股净值产"></a>二、每股净值产</h4><blockquote>
+<p>每股净值产 = （总资产 - 总负债） / 总股数</p>
+</blockquote>
+<center>
+    <img src="../images/a_b_c.jpeg" width="300"/>
+</center>
+
+
+<h4 id="三、市净率"><a href="#三、市净率" class="headerlink" title="三、市净率"></a>三、市净率</h4><p>3.1 PB-市净率</p>
+<blockquote>
+<p>市净率 = 每股市价 / 每股净值产</p>
+</blockquote>
+<p>市净率越低那么它的投资价值就越高，这也就意味着它的风险越低。</p>
+]]></content>
+      <categories>
+        <category>Economics</category>
+      </categories>
+      <tags>
+        <tag>Economics</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Android中的约束布局</title>
     <url>/android-basic-constraintlayout.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>&ensp;&ensp;&ensp;&ensp;Android中的视图是以树的形式组织起来的，它是一种层次结构。在代码中体现为组合模式，一个ViewGroup可以包含一个或多个View，同时ViewGroup又是一个View。在布局文件中体现为xml的结点和缩进。<br>&ensp;&ensp;&ensp;&ensp;同时视图的渲染少不了对其进行遍历，这就涉及数据结构中树的深度优先遍历和广度优先遍历。有时候一些复杂的布局一次遍历还无法完全确定View的信息。如何通过算法方式降低树的层次呢？也许这就是约束布局存在的意义吧。<br>&ensp;&ensp;&ensp;&ensp;在Android中，灵活运用ConstraintLayout包括以下几个点：</p>
@@ -310,300 +471,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Android分区存储</title>
-    <url>/android-scoped-storage.html</url>
-    <content><![CDATA[<h3 id="一、What、Why（是什么、为什么）"><a href="#一、What、Why（是什么、为什么）" class="headerlink" title="一、What、Why（是什么、为什么）"></a>一、What、Why（是什么、为什么）</h3><p>1.1 什么是分区存储<br>了解传统的共享存储 (Shared Storage):</p>
-<ul>
-<li>每个app有独立的存储空间Android/data/pkg其他应用不可见（Context.getExternalFileDir）</li>
-<li>访问外部空间需要额外权限READ/WRITE_EXTERNAL_STORAGE、获取存储权限的应用可以访问整个外部存储空间</li>
-<li>应用卸载时，保存在外部存储空间文件不会被删除。</li>
-</ul>
-<span id="more"></span>
-
-<p>共享存储带来的问题</p>
-<ul>
-<li>数据安全</li>
-<li>存储空间浪费，难以管理</li>
-</ul>
-<p>分区存储解决方案(Scoped Storage):</p>
-<ul>
-<li>必须通过Media Store API和Storage Access FrameWork访问文件系统。=&gt;对传统共享存储系统的一种强制约束</li>
-<li>文件归属：操作自己创建的文件无需任何权限（自己创建的文件系统会记录此文件的归属app，应用卸载后清除该归属字段，重装后读取该文件仍需权限申请），非共享文件存入私有目录。=&gt;文件和应用挂钩，便于操作系统进行管理</li>
-</ul>
-<p>By The Way:<br>在Android-Q （API-29）中通过android:requestLegacyExternalStorage=”true”可以禁用分区存储<br>在Android-R （API-30）中必须使用分区存储<br>在Android-Q中完全禁用了File API，Android-R重新启用</p>
-<h3 id="二、How（分区存储实践-数据的增、删、改、查）"><a href="#二、How（分区存储实践-数据的增、删、改、查）" class="headerlink" title="二、How（分区存储实践-数据的增、删、改、查）"></a>二、How（分区存储实践-数据的增、删、改、查）</h3><p>2.1 对媒体文件的增删改查：</p>
-<ul>
-<li>增查：新增操作无需任何权限。查询其他应用的媒体资源需要READ_EXTERNAL_STORAGE权限。查询自己应用创建的媒体资源无需权限，当应用卸载重装后，自己创建的资源也需要申请权限。</li>
-</ul>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">saveImageToAlbum</span><span class="params">(context: <span class="type">Context</span>, imageFile: <span class="type">File</span>, imageName: <span class="type">String</span>)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> withContext(Dispatchers.IO) &#123;</span><br><span class="line">        <span class="keyword">val</span> contentValues = ContentValues().apply &#123;</span><br><span class="line">            put(MediaStore.Images.Media.DISPLAY_NAME, imageName)</span><br><span class="line">            put(MediaStore.Images.Media.DESCRIPTION, <span class="string">&quot;图片描述&quot;</span>)</span><br><span class="line">            put(MediaStore.Images.Media.MIME_TYPE, <span class="string">&quot;image/jpg&quot;</span>)</span><br><span class="line">            <span class="comment">// 文件待处理状态，本应用独占，其他应用暂时无法访问</span></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">                put(MediaStore.Images.Media.IS_PENDING, <span class="number">1</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 插入数据库，获得uri</span></span><br><span class="line">        <span class="keyword">val</span> uri = context.contentResolver</span><br><span class="line">            .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)</span><br><span class="line">            ?: <span class="keyword">return</span><span class="symbol">@withContext</span> <span class="literal">false</span></span><br><span class="line">        <span class="comment">// 根据uri打开输出流，写入imageFile文件</span></span><br><span class="line">        context.contentResolver.openOutputStream(uri)?.use &#123; it.write(imageFile.readBytes()) &#125;</span><br><span class="line">        <span class="comment">// 切换文件待处理状态</span></span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">            contentValues.clear()</span><br><span class="line">            contentValues.put(MediaStore.Images.Media.IS_PENDING, <span class="number">0</span>)</span><br><span class="line">            context.contentResolver.update(uri, contentValues, <span class="literal">null</span>, <span class="literal">null</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span><span class="symbol">@withContext</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<ul>
-<li>删改：删改自己创建的媒体资源无需权限。删改其他应用创建的资源需要捕获RecoverableSecurityException异常后，向用户申请删除权限。</li>
-</ul>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">performDeleteImage</span><span class="params">(image: <span class="type">MediaStoreModel</span>)</span></span> &#123;</span><br><span class="line">    withContext(Dispatchers.IO) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            getApplication&lt;Application&gt;().contentResolver.delete(</span><br><span class="line">                image.contentUri,</span><br><span class="line">                <span class="string">&quot;<span class="subst">$&#123;MediaStore.Images.Media._ID&#125;</span> = ?&quot;</span>,</span><br><span class="line">                arrayOf(image.id.toString())</span><br><span class="line">            )</span><br><span class="line">        &#125; <span class="keyword">catch</span> (securityException: SecurityException) &#123;</span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">               <span class="keyword">val</span> recoverableSecurityException = securityException <span class="keyword">as</span>? RecoverableSecurityException</span><br><span class="line">                        ?: <span class="keyword">throw</span> securityException</span><br><span class="line">               startIntentSenderForResult(</span><br><span class="line">                   recoverableSecurityException.userAction.actionIntent.intentSender,</span><br><span class="line">                   DELETE_PERMISSION_REQUEST,</span><br><span class="line">                   <span class="literal">null</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="literal">null</span>)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> securityException</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>2.2 对文档的增删改查：<br>对外部文档的读写操作需要使用Storage Access FrameWork，通过各种Intent交由系统处理。更多实例见[参考资料2]</p>
-<p>SAF存储的限制：</p>
-<ul>
-<li>Intent.ACTION_OPEN_DOCUMENT_TREE访问限制<ul>
-<li>内部存储根目录</li>
-<li>Download目录</li>
-<li>Android/data/  和  Android/obb/</li>
-</ul>
-</li>
-</ul>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建文档-返回Uri再进行写入</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply &#123;</span><br><span class="line">    addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">    type = <span class="string">&quot;text/plain&quot;</span></span><br><span class="line">    putExtra(Intent.EXTRA_TITLE, <span class="string">&quot;test.txt&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//读取&amp;删改</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply &#123;</span><br><span class="line">    addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">    type = <span class="string">&quot;*/*&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//目录操作</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply &#123;</span><br><span class="line">    flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<p>2.3 批量操作<br>通过MediaStore静态方法创建修改请求，征求用户同意后进行操作。Android-R后新增的API，旧版需走回contentResolver.delete()操作</p>
-<table>
-<thead>
-<tr>
-<th>操作</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>createWriteRequest</td>
-<td>向用户请求媒体文件组写入权限</td>
-</tr>
-<tr>
-<td>createFavoriteRequest</td>
-<td>用户将设备上指定的媒体文件标记为“收藏”的请求</td>
-</tr>
-<tr>
-<td>createTrashRequest</td>
-<td>用户将指定的媒体文件放入设备垃圾箱的请求。垃圾箱中的内容会在系统定义的时间段后被永久删除。</td>
-</tr>
-<tr>
-<td>createDeleteRequest</td>
-<td>用户立即永久删除指定的媒体文件</td>
-</tr>
-</tbody></table>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">val</span> uriList = <span class="comment">/* A collection of content URIs to modify. */</span></span><br><span class="line"><span class="keyword">val</span> pendingIntent = MediaStore.createWriteRequest(contentResolver,urisToModify)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Launch a system prompt requesting user permission for the operation.</span></span><br><span class="line">startIntentSenderForResult(editPendingIntent.intentSender,</span><br><span class="line">                           EDIT_REQUEST_CODE, </span><br><span class="line">                           <span class="literal">null</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<h3 id="三、直接文件读写"><a href="#三、直接文件读写" class="headerlink" title="三、直接文件读写"></a>三、直接文件读写</h3><p>Android-11重新支持File对象访问文件的直接路径。<br>1、针对媒体文件<br>    - 归属于你应用的文件 和 你的私有目录 的文件 可以直接使用File API访问<br>    - 如果直接用File API访问没有权限的文件，抛出 FileNotFoundException<br>2、Media Store DATA 属性<br>DATA属性存储了媒体文件的绝对路径，在Android-10的时候废弃了该属性。由于Android-11又支持File对象，所以DATA属性也可以读取直接路径，但不一定有值。但是新增和更新操作不要再使用DATA了，请使用DISPLAY_NAME 和 RELATIVE_PATH 。</p>
-<h3 id="四、另外一扇窗"><a href="#四、另外一扇窗" class="headerlink" title="四、另外一扇窗"></a>四、另外一扇窗</h3><p>对于一些特殊的App，例如文件管理器，备份等。可以申请所有文件访问权限<br>1.声明 MANAGE_EXTERNAL_STORAGE 权限<br>2.使用 ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION  将用户引导至一个系统设置页面进行授权</p>
-<p>授权范围</p>
-<ul>
-<li>读写共享存储区的所有文件<ul>
-<li>Media content （MediaStore）</li>
-<li>Documents and other files （SAF）</li>
-<li>Datasets （BlobStoreManager）</li>
-</ul>
-</li>
-<li>MediaStore.Files数据库表</li>
-<li>USB 和 SD卡 根目录</li>
-<li>除 /Android/data/ 和 /sdcard/Android 之外的其他私有目录</li>
-</ul>
-<h3 id="五、应用截图"><a href="#五、应用截图" class="headerlink" title="五、应用截图"></a>五、应用截图</h3><table>
-    <tr>
-        <td><img src="../images/scoped_storage.png" width="200"/></td>
-        <td><img src="../images/scoped_storage_2.png" width="200"/></td>
-    </tr>
-</table>]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Android-11适配</title>
-    <url>/android-target-30.html</url>
-    <content><![CDATA[<h4 id="一、变更概览"><a href="#一、变更概览" class="headerlink" title="一、变更概览"></a>一、变更概览</h4><h5 id="1、隐私"><a href="#1、隐私" class="headerlink" title="1、隐私"></a>1、隐私</h5><ul>
-<li>分区存储</li>
-<li>自动释放权限</li>
-<li>后台定位</li>
-<li>包可见性</li>
-</ul>
-<h5 id="2、安全"><a href="#2、安全" class="headerlink" title="2、安全"></a>2、安全</h5><ul>
-<li><a href="https://source.android.com/devices/tech/debug/tagged-pointers">堆指针添加标记</a></li>
-<li>Toast<ul>
-<li>🚫禁止后台弹出含自定义View的Toast</li>
-<li>Toast支持显示/隐藏回调</li>
-<li>部分View相关API调整</li>
-</ul>
-</li>
-</ul>
-<h5 id="3、连接"><a href="#3、连接" class="headerlink" title="3、连接"></a>3、连接</h5><ul>
-<li>限制对APN数据库（Access Point Names）的读写</li>
-</ul>
-<h5 id="4、Accessibility"><a href="#4、Accessibility" class="headerlink" title="4、Accessibility"></a>4、Accessibility</h5><ul>
-<li>文本转语音（TTS）和语音识别 需要声明<queries></li>
-<li>在res/raw下声明对accessibility的使用</li>
-</ul>
-<h5 id="5、相机"><a href="#5、相机" class="headerlink" title="5、相机"></a>5、相机</h5><ul>
-<li>以下Action默认只能调起系统相机，除非指定包名<ul>
-<li>android.media.action.VIDEO_CAPTURE</li>
-<li>android.media.action.IMAGE_CAPTURE</li>
-<li>android.media.action.IMAGE_CAPTURE_SECURE</li>
-</ul>
-</li>
-</ul>
-<h5 id="6、应用打包和安装"><a href="#6、应用打包和安装" class="headerlink" title="6、应用打包和安装"></a>6、应用打包和安装</h5><ul>
-<li>🚫禁止压缩resources.arsc</li>
-<li>必须使用V2及以上版本进行apk签名<h5 id="7、Firebase"><a href="#7、Firebase" class="headerlink" title="7、Firebase"></a>7、Firebase</h5></li>
-<li>target-30的apk在6.0及以上设备，不能使用Firebase JobDispatcher 和 GCMNetworkManager</li>
-</ul>
-<h5 id="8、allowBackup属性调整"><a href="#8、allowBackup属性调整" class="headerlink" title="8、allowBackup属性调整"></a>8、allowBackup属性调整</h5><h5 id="9、修改SP的OnSharedPreferenceChangeListener回调"><a href="#9、修改SP的OnSharedPreferenceChangeListener回调" class="headerlink" title="9、修改SP的OnSharedPreferenceChangeListener回调"></a>9、修改SP的OnSharedPreferenceChangeListener回调</h5><h5 id="10、非SDK接口调用黑名单"><a href="#10、非SDK接口调用黑名单" class="headerlink" title="10、非SDK接口调用黑名单"></a>10、非SDK接口调用黑名单</h5><h4 id="二、变更详情"><a href="#二、变更详情" class="headerlink" title="二、变更详情"></a>二、变更详情</h4><h5 id="1、分区存储"><a href="#1、分区存储" class="headerlink" title="1、分区存储"></a>1、分区存储</h5><ul>
-<li><p>针对特殊类型应用(文件管理器、文件备份、文件加密)<br><br>这种类型的应用需要大规模的进行文件操作，迁移成本较高，推荐使用新的存储管理权限 MANAGE_EXTERNAL_STORAGE （参考1:此权限的授权范围）</p>
-<ul>
-<li>优点：<br><br>  1、开启后直接拥有所有读写权限（包括拔插的SD卡，USB等）<br><br>  2、清缓存不会丢失授权<br><br>  3、处理成本较低，只需兼容旧的动态权限申请部分的逻辑。<br></li>
-<li>缺点：<br><br>  1、需要跳转设置页面开启权限，有损产品数据（轮询权限，强制拉回）<br><br>  2、需要提交GP申请表单，审核通过才能上架<br></li>
-<li>实践：<br><br>  1、判断权限 Environment.isExternalStorageManager() <br><br>  2、跳转设置页面引导用户开启权限的方式：注意下面两个<strong>Action</strong>的区别<br><pre><code>  Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION&lt;br&gt;
-  Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-</code></pre>
-</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>针对普通应用<br>无法申请新的存储管理权限 MANAGE_EXTERNAL_STORAGE 。只能对旧的API进行改造兼容，将其迁移到存储访问框架SAF（Storage Access Framework）包括Document-API 或 MediaStore-API。<ul>
-<li>优点： <br><br>  1、交互逻辑，和代码逻辑结构比较统一 <br><br>  2、提高隐私与安全性，避免杂乱无章的文件系统 <br></li>
-<li>缺点： <br><br>  1、迁移成本较高，需要做大量的API兼容，可能影响产品逻辑 <br></li>
-<li>实践： <br><br>  1、分区存储文档 <br></li>
-<li>注意事项： <br><br>  1、做好数据迁移，避免升级后，原来的数据在不可访问区域 <br><br>  2、保留 [requestLegacyExternalStorage=true] 属性 <br></li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>我的应用1.0版本之前数据库存储在外部，为了适配target-30，我在1.1版本，写了数据迁移代码。1.2版本，我做了target-30升级。某用户直接跳过1.1版本升级到了1.2版本。无法运行迁移代码。怎么办！</p>
-</blockquote>
-<p>preserveLegacyExternalStorage 属性：针对升级用户，暂时维持兼容属性，卸载后失效。</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">  	<span class="attr">android:preserveLegacyExternalStorage</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-
-<h5 id="2、电话号码"><a href="#2、电话号码" class="headerlink" title="2、电话号码 "></a>2、电话号码 <br></h5><p>以下两个方法的调用需要申请新的权限： READ_PHONE_NUMBERS <br><br>getLine1Number()<br>getMsisdn()</p>
-<h5 id="3、定位"><a href="#3、定位" class="headerlink" title="3、定位 "></a>3、定位 <br></h5><ul>
-<li>增加Only this time 选项</li>
-<li>不能一次性申请前后台定位权限，要分两次单独申请</li>
-<li>后台位置访问需要跳转设置页面</li>
-</ul>
-<h5 id="4、包可见性"><a href="#4、包可见性" class="headerlink" title="4、包可见性 "></a>4、包可见性 <br></h5><p>概念： <br><br>在Android-10及以前的版本通过 queryIntentActivities、getPackageInfo、getInstalledApplications可以获取所有安装的App。但是在Android-11之后只能获取到一部分已安装应用列表。<br>解决方案： <br></p>
-<ul>
-<li>通过 <queries> 标签指定需要交互的应用</li>
-<li>申请查看所有安装列表<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">package</span>=<span class="string">&quot;com.example.game&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">queries</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 需要和你做交互的app --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.store&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.service&quot;</span> /&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 你需要查询的Intent --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.SEND&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">data</span> <span class="attr">android:mimeType</span>=<span class="string">&quot;image/jpeg&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">queries</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.QUERY_ALL_PACKAGES&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="三、参考文献"><a href="#三、参考文献" class="headerlink" title="三、参考文献"></a>三、参考文献</h4><p>1、<a href="https://developer.android.com/about/versions/11/behavior-changes-11#change-details">官方文档-behavior-changes-11</a> <br><br>2、<a href="https://support.google.com/googleplay/android-developer/answer/10467955">GP政策-MANAGE_EXTERNAL_STORAGE</a> <br><br>3、<a href="https://developer.android.com/training/data-storage/manage-all-files">存储权限-管理所有文件</a> <br><br>4、<a href="https://support.google.com/googleplay/android-developer/answer/10158779?hl=en#zippy=%2Cpermitted-uses-of-the-query-all-packages-permission">GP政策-all-packages-permission</a> <br> </p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>市盈率和市净率</title>
-    <url>/base-economic-concept.html</url>
-    <content><![CDATA[<h4 id="一、市盈率"><a href="#一、市盈率" class="headerlink" title="一、市盈率"></a>一、市盈率</h4><p>1.1 PE - 静态市盈率</p>
-<blockquote>
-<p>① 市盈率 = 当日收盘价 / 上一年度每股税后利润  </p>
-</blockquote>
-<blockquote>
-<p>② 市盈率 = 当前总市值 / 上年度净利润</p>
-</blockquote>
-<p>理解：</p>
-<ul>
-<li>公司需要累计多少年的盈利才能达到目前的市价水平。</li>
-<li>值越低说明投资回收期短，风险越小，投资价值越高。</li>
-<li>值越大说明翻本期长，风险大。</li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>取的是上一年度的净利润，是一个过去的值，有点滞后。</li>
-</ul>
-<p>例子：<br>你花了240w买了一套二手房，打算进行出租赚点外快，已知去年平均月租2w，一年收益大概24w。以去年这些数据为参考，你预计<strong>十年后</strong>才能赚回成本240w，所以市盈率 = 10。</p>
-<p>1.2 动态市盈率<br>为了弥补静态市盈率的滞后性，增加动态市盈率作为参考指标。</p>
-<blockquote>
-<p>市盈率 = 当前总市值 / X</p>
-</blockquote>
-<p>根据当前的时间节点不同计算X的值：<br>X = 当年最近一个季度的净利润 * 4<br>X = 最近半年净利润 * 2<br>X = 最近三季度净利润 * 1.5 </p>
-<p>1.3 静态市盈率 vs 动态市盈率</p>
-<ul>
-<li>静态市盈率反映的是过去的数据，动态市盈率反映的是未来的预估</li>
-<li>动态市盈率 &gt; 静态市盈率，说明最近（一个季度、半年、三个季度）公司的利润下降了。</li>
-</ul>
-<p>1.4 TTM-Trailing Twelve Months</p>
-<ul>
-<li>最近十二个月市盈率，也叫滚动市盈率。</li>
-<li>它也是一个对过去情况的分析说明。</li>
-</ul>
-<h4 id="二、每股净值产"><a href="#二、每股净值产" class="headerlink" title="二、每股净值产"></a>二、每股净值产</h4><blockquote>
-<p>每股净值产 = （总资产 - 总负债） / 总股数</p>
-</blockquote>
-<center>
-    <img src="../images/a_b_c.jpeg" width="300"/>
-</center>
-
-
-<h4 id="三、市净率"><a href="#三、市净率" class="headerlink" title="三、市净率"></a>三、市净率</h4><p>3.1 PB-市净率</p>
-<blockquote>
-<p>市净率 = 每股市价 / 每股净值产</p>
-</blockquote>
-<p>市净率越低那么它的投资价值就越高，这也就意味着它的风险越低。</p>
-]]></content>
-      <categories>
-        <category>Economics</category>
-      </categories>
-      <tags>
-        <tag>Economics</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>对称/非对称加密和数字签名</title>
-    <url>/basic-encryption-algorithm.html</url>
-    <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
-<p>一般加密和解密的算法是公开的，需要保持隐秘的是密钥k<br>流行的对称加密算法有：DES，Triple-DES，RC2和RC4，AES</p>
-<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
-<li>发送方和接收方首先需要共享相同的密钥，即存在密钥k的分发问题，如何安全的把共享密钥在双方进行分享，这本身也是一个如何安全通信的问题，一种方法是提前双方约定好，不通过具体的通信进行协商，避免被监听和截获。另外一种方式，将是下面我们介绍的通过非对称加密信道进行对称密码的分发和共享，即混合加密系统。</li>
-<li>密钥管理的复杂度问题。由于对称加密的密钥是一对一的使用方式，若一方要跟n方通信，则需要维护n对密钥。</li>
-</ul>
-<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
-<li>加密和解密的速度要比非对称加密快很多，因此常用非对称加密建立的安全信道进行共享密钥的分享，完成后，具体的加解密则使用对称加密。即混合加密系统。</li>
-</ul>
-<p>另外一个点需要重点说明的是，密钥k的长度对解密破解的难度有很重大的影响，k的长度越长，对应的密码空间就越大，遭到暴力破解或者词典破解的难度就更大，就更加安全。</p>
-<center>
-    <img src="../images/dcjm.png" width="400"/>
-</center>
-
-<h4 id="2-数字签名的过程："><a href="#2-数字签名的过程：" class="headerlink" title="2.数字签名的过程："></a>2.数字签名的过程：</h4><ul>
-<li>发送方A首先对变长的报文提取成一个定长的摘要，一般是md5等</li>
-<li>A对摘要应用了一个签名函数，并且用A自己的私钥作为参数，因为只有A才知道私钥，所以正确的签名会说明签名者就是其所有者。</li>
-<li>一旦计算出签名，节点A就将其附加到报文的末尾，并将报文和签名一起都发送给B</li>
-<li>在接收端B，首先会按照同样的算法计算出报文的摘要，然后对签名用A的公钥进行解码，得出解码后的摘要，两个摘要进行比较，则可以判断是否是A发送的且内容没被篡改过。</li>
-</ul>
-<center>
-    <img src="../images/szqm.png" width="400"/>
-</center>
-
-
-<h4 id="3-非对称加解密的过程："><a href="#3-非对称加解密的过程：" class="headerlink" title="3.非对称加解密的过程："></a>3.非对称加解密的过程：</h4><p>加密一方找到接收方的公钥e (如何找到呢？大部分的公钥查找工作实际上都是通过数字证书来实现的)，然后用公钥e对明文p进行加密后得到密文c，并将得到的密文发送给接收方，接收方收到密文后，用自己保留的私钥d进行解密，得到明文p，需要注意的是：用公钥加密的密文，只有拥有私钥的一方才能解密，这样就可以解决加密的各方可以统一使用一个公钥即可。</p>
-<p>常用的非对称加密算法有：RSA</p>
-<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
-<li>不存在密钥分发的问题，解码方可以自己生成密钥对，一个做私钥存起来，另外一个作为公钥进行发布。</li>
-<li>解决了密钥管理的复杂度问题，多个加密方都可以使用一个已知的公钥进行加密，但只有拥有私钥的一方才能解密。</li>
-</ul>
-<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
-<li>非对称加密不足的地方是加解密的速度没有对称加密快。</li>
-</ul>
-<p>综上，分析了对称加密和非对称加密各自的优缺点后，有没有一种办法是可以利用两者的优点但避开对应的缺点呢？答应是有的，实际上用得最多的是混合加密系统，比如在两个节点间通过便捷的公开密码加密技术建立起安全通信，然后再用安全的通信产生并发送临时的随机对称密钥，通过更快的对称加密技术对剩余的数据进行加密。</p>
-<center>
-    <img src="../images/fdcjm.png" width="400"/>
-</center>]]></content>
-      <tags>
-        <tag>cryptography</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>CPU的缓存</title>
     <url>/cpu-cache-overview.html</url>
     <content><![CDATA[<h4 id="一、性能"><a href="#一、性能" class="headerlink" title="一、性能"></a>一、性能</h4><p>1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。<a href="https://gist.github.com/jboner/2841832">参考</a></p>
@@ -662,6 +529,51 @@
 ]]></content>
       <tags>
         <tag>计算机基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>对称/非对称加密和数字签名</title>
+    <url>/basic-encryption-algorithm.html</url>
+    <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
+<p>一般加密和解密的算法是公开的，需要保持隐秘的是密钥k<br>流行的对称加密算法有：DES，Triple-DES，RC2和RC4，AES</p>
+<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>发送方和接收方首先需要共享相同的密钥，即存在密钥k的分发问题，如何安全的把共享密钥在双方进行分享，这本身也是一个如何安全通信的问题，一种方法是提前双方约定好，不通过具体的通信进行协商，避免被监听和截获。另外一种方式，将是下面我们介绍的通过非对称加密信道进行对称密码的分发和共享，即混合加密系统。</li>
+<li>密钥管理的复杂度问题。由于对称加密的密钥是一对一的使用方式，若一方要跟n方通信，则需要维护n对密钥。</li>
+</ul>
+<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>加密和解密的速度要比非对称加密快很多，因此常用非对称加密建立的安全信道进行共享密钥的分享，完成后，具体的加解密则使用对称加密。即混合加密系统。</li>
+</ul>
+<p>另外一个点需要重点说明的是，密钥k的长度对解密破解的难度有很重大的影响，k的长度越长，对应的密码空间就越大，遭到暴力破解或者词典破解的难度就更大，就更加安全。</p>
+<center>
+    <img src="../images/dcjm.png" width="400"/>
+</center>
+
+<h4 id="2-数字签名的过程："><a href="#2-数字签名的过程：" class="headerlink" title="2.数字签名的过程："></a>2.数字签名的过程：</h4><ul>
+<li>发送方A首先对变长的报文提取成一个定长的摘要，一般是md5等</li>
+<li>A对摘要应用了一个签名函数，并且用A自己的私钥作为参数，因为只有A才知道私钥，所以正确的签名会说明签名者就是其所有者。</li>
+<li>一旦计算出签名，节点A就将其附加到报文的末尾，并将报文和签名一起都发送给B</li>
+<li>在接收端B，首先会按照同样的算法计算出报文的摘要，然后对签名用A的公钥进行解码，得出解码后的摘要，两个摘要进行比较，则可以判断是否是A发送的且内容没被篡改过。</li>
+</ul>
+<center>
+    <img src="../images/szqm.png" width="400"/>
+</center>
+
+
+<h4 id="3-非对称加解密的过程："><a href="#3-非对称加解密的过程：" class="headerlink" title="3.非对称加解密的过程："></a>3.非对称加解密的过程：</h4><p>加密一方找到接收方的公钥e (如何找到呢？大部分的公钥查找工作实际上都是通过数字证书来实现的)，然后用公钥e对明文p进行加密后得到密文c，并将得到的密文发送给接收方，接收方收到密文后，用自己保留的私钥d进行解密，得到明文p，需要注意的是：用公钥加密的密文，只有拥有私钥的一方才能解密，这样就可以解决加密的各方可以统一使用一个公钥即可。</p>
+<p>常用的非对称加密算法有：RSA</p>
+<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>不存在密钥分发的问题，解码方可以自己生成密钥对，一个做私钥存起来，另外一个作为公钥进行发布。</li>
+<li>解决了密钥管理的复杂度问题，多个加密方都可以使用一个已知的公钥进行加密，但只有拥有私钥的一方才能解密。</li>
+</ul>
+<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>非对称加密不足的地方是加解密的速度没有对称加密快。</li>
+</ul>
+<p>综上，分析了对称加密和非对称加密各自的优缺点后，有没有一种办法是可以利用两者的优点但避开对应的缺点呢？答应是有的，实际上用得最多的是混合加密系统，比如在两个节点间通过便捷的公开密码加密技术建立起安全通信，然后再用安全的通信产生并发送临时的随机对称密钥，通过更快的对称加密技术对剩余的数据进行加密。</p>
+<center>
+    <img src="../images/fdcjm.png" width="400"/>
+</center>]]></content>
+      <tags>
+        <tag>cryptography</tag>
       </tags>
   </entry>
   <entry>
@@ -1075,6 +987,94 @@
       </tags>
   </entry>
   <entry>
+    <title>Android-11适配</title>
+    <url>/android-target-30.html</url>
+    <content><![CDATA[<h4 id="一、变更概览"><a href="#一、变更概览" class="headerlink" title="一、变更概览"></a>一、变更概览</h4><h5 id="1、隐私"><a href="#1、隐私" class="headerlink" title="1、隐私"></a>1、隐私</h5><ul>
+<li>分区存储</li>
+<li>自动释放权限</li>
+<li>后台定位</li>
+<li>包可见性</li>
+</ul>
+<h5 id="2、安全"><a href="#2、安全" class="headerlink" title="2、安全"></a>2、安全</h5><ul>
+<li><a href="https://source.android.com/devices/tech/debug/tagged-pointers">堆指针添加标记</a></li>
+<li>Toast<ul>
+<li>🚫禁止后台弹出含自定义View的Toast</li>
+<li>Toast支持显示/隐藏回调</li>
+<li>部分View相关API调整</li>
+</ul>
+</li>
+</ul>
+<h5 id="3、连接"><a href="#3、连接" class="headerlink" title="3、连接"></a>3、连接</h5><ul>
+<li>限制对APN数据库（Access Point Names）的读写</li>
+</ul>
+<h5 id="4、Accessibility"><a href="#4、Accessibility" class="headerlink" title="4、Accessibility"></a>4、Accessibility</h5><ul>
+<li>文本转语音（TTS）和语音识别 需要声明<queries></li>
+<li>在res/raw下声明对accessibility的使用</li>
+</ul>
+<h5 id="5、相机"><a href="#5、相机" class="headerlink" title="5、相机"></a>5、相机</h5><ul>
+<li>以下Action默认只能调起系统相机，除非指定包名<ul>
+<li>android.media.action.VIDEO_CAPTURE</li>
+<li>android.media.action.IMAGE_CAPTURE</li>
+<li>android.media.action.IMAGE_CAPTURE_SECURE</li>
+</ul>
+</li>
+</ul>
+<h5 id="6、应用打包和安装"><a href="#6、应用打包和安装" class="headerlink" title="6、应用打包和安装"></a>6、应用打包和安装</h5><ul>
+<li>🚫禁止压缩resources.arsc</li>
+<li>必须使用V2及以上版本进行apk签名<h5 id="7、Firebase"><a href="#7、Firebase" class="headerlink" title="7、Firebase"></a>7、Firebase</h5></li>
+<li>target-30的apk在6.0及以上设备，不能使用Firebase JobDispatcher 和 GCMNetworkManager</li>
+</ul>
+<h5 id="8、allowBackup属性调整"><a href="#8、allowBackup属性调整" class="headerlink" title="8、allowBackup属性调整"></a>8、allowBackup属性调整</h5><h5 id="9、修改SP的OnSharedPreferenceChangeListener回调"><a href="#9、修改SP的OnSharedPreferenceChangeListener回调" class="headerlink" title="9、修改SP的OnSharedPreferenceChangeListener回调"></a>9、修改SP的OnSharedPreferenceChangeListener回调</h5><h5 id="10、非SDK接口调用黑名单"><a href="#10、非SDK接口调用黑名单" class="headerlink" title="10、非SDK接口调用黑名单"></a>10、非SDK接口调用黑名单</h5><h4 id="二、变更详情"><a href="#二、变更详情" class="headerlink" title="二、变更详情"></a>二、变更详情</h4><h5 id="1、分区存储"><a href="#1、分区存储" class="headerlink" title="1、分区存储"></a>1、分区存储</h5><ul>
+<li><p>针对特殊类型应用(文件管理器、文件备份、文件加密)<br><br>这种类型的应用需要大规模的进行文件操作，迁移成本较高，推荐使用新的存储管理权限 MANAGE_EXTERNAL_STORAGE （参考1:此权限的授权范围）</p>
+<ul>
+<li>优点：<br><br>  1、开启后直接拥有所有读写权限（包括拔插的SD卡，USB等）<br><br>  2、清缓存不会丢失授权<br><br>  3、处理成本较低，只需兼容旧的动态权限申请部分的逻辑。<br></li>
+<li>缺点：<br><br>  1、需要跳转设置页面开启权限，有损产品数据（轮询权限，强制拉回）<br><br>  2、需要提交GP申请表单，审核通过才能上架<br></li>
+<li>实践：<br><br>  1、判断权限 Environment.isExternalStorageManager() <br><br>  2、跳转设置页面引导用户开启权限的方式：注意下面两个<strong>Action</strong>的区别<br><pre><code>  Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION&lt;br&gt;
+  Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>针对普通应用<br>无法申请新的存储管理权限 MANAGE_EXTERNAL_STORAGE 。只能对旧的API进行改造兼容，将其迁移到存储访问框架SAF（Storage Access Framework）包括Document-API 或 MediaStore-API。<ul>
+<li>优点： <br><br>  1、交互逻辑，和代码逻辑结构比较统一 <br><br>  2、提高隐私与安全性，避免杂乱无章的文件系统 <br></li>
+<li>缺点： <br><br>  1、迁移成本较高，需要做大量的API兼容，可能影响产品逻辑 <br></li>
+<li>实践： <br><br>  1、分区存储文档 <br></li>
+<li>注意事项： <br><br>  1、做好数据迁移，避免升级后，原来的数据在不可访问区域 <br><br>  2、保留 [requestLegacyExternalStorage=true] 属性 <br></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>我的应用1.0版本之前数据库存储在外部，为了适配target-30，我在1.1版本，写了数据迁移代码。1.2版本，我做了target-30升级。某用户直接跳过1.1版本升级到了1.2版本。无法运行迁移代码。怎么办！</p>
+</blockquote>
+<p>preserveLegacyExternalStorage 属性：针对升级用户，暂时维持兼容属性，卸载后失效。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">  	<span class="attr">android:preserveLegacyExternalStorage</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<h5 id="2、电话号码"><a href="#2、电话号码" class="headerlink" title="2、电话号码 "></a>2、电话号码 <br></h5><p>以下两个方法的调用需要申请新的权限： READ_PHONE_NUMBERS <br><br>getLine1Number()<br>getMsisdn()</p>
+<h5 id="3、定位"><a href="#3、定位" class="headerlink" title="3、定位 "></a>3、定位 <br></h5><ul>
+<li>增加Only this time 选项</li>
+<li>不能一次性申请前后台定位权限，要分两次单独申请</li>
+<li>后台位置访问需要跳转设置页面</li>
+</ul>
+<h5 id="4、包可见性"><a href="#4、包可见性" class="headerlink" title="4、包可见性 "></a>4、包可见性 <br></h5><p>概念： <br><br>在Android-10及以前的版本通过 queryIntentActivities、getPackageInfo、getInstalledApplications可以获取所有安装的App。但是在Android-11之后只能获取到一部分已安装应用列表。<br>解决方案： <br></p>
+<ul>
+<li>通过 <queries> 标签指定需要交互的应用</li>
+<li>申请查看所有安装列表<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">package</span>=<span class="string">&quot;com.example.game&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">queries</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 需要和你做交互的app --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.store&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.service&quot;</span> /&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 你需要查询的Intent --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.SEND&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">data</span> <span class="attr">android:mimeType</span>=<span class="string">&quot;image/jpeg&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">queries</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.QUERY_ALL_PACKAGES&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="三、参考文献"><a href="#三、参考文献" class="headerlink" title="三、参考文献"></a>三、参考文献</h4><p>1、<a href="https://developer.android.com/about/versions/11/behavior-changes-11#change-details">官方文档-behavior-changes-11</a> <br><br>2、<a href="https://support.google.com/googleplay/android-developer/answer/10467955">GP政策-MANAGE_EXTERNAL_STORAGE</a> <br><br>3、<a href="https://developer.android.com/training/data-storage/manage-all-files">存储权限-管理所有文件</a> <br><br>4、<a href="https://support.google.com/googleplay/android-developer/answer/10158779?hl=en#zippy=%2Cpermitted-uses-of-the-query-all-packages-permission">GP政策-all-packages-permission</a> <br> </p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>对象的内存布局</title>
     <url>/java-object-layout.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>很多时候我们都有一个疑问：一个对象在内存中占用多大的空间呢？</p>
@@ -1282,165 +1282,6 @@
       <categories>
         <category>Kotlin</category>
       </categories>
-      <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Effective Kotlin-51：使用Sequence优化集合操作</title>
-    <url>/kotlin-lang-sequence.html</url>
-    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>你可能对 <code>Iterable</code> 和 <code>Sequence</code> 傻傻分不清。看一下他们的代码：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Iterable</span>&lt;<span class="type">out T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">iterator</span><span class="params">()</span></span>: Iterator&lt;T&gt;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Sequence</span>&lt;<span class="type">out T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">iterator</span><span class="params">()</span></span>: Iterator&lt;T&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<p>好像只有名字不一样-_-||，但他们却有着本质的区别。<code>Sequence</code>属于懒加载，中间操作符不会触发计算，仅仅是对前一个Sequence的装饰，只有在遇到toList()或count()这些终止操作符时才会执行真正的计算工作。而Iterable每一步都返回一个新的集合。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">filter</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    predicate: (<span class="type">T</span>) -&gt; <span class="type">Boolean</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> filterTo(ArrayList&lt;T&gt;(), predicate)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Sequence<span class="type">&lt;T&gt;</span>.<span class="title">filter</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    predicate: (<span class="type">T</span>) -&gt; <span class="type">Boolean</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: Sequence&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> FilteringSequence(<span class="keyword">this</span>, <span class="literal">true</span>, predicate)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>下图中filter操作符不做任何计算操作，只是返回一个装饰器对象，在遇到toList()操作符才执行计算。</p>
-<center>
-    <img src="../images/kotlin_sequence_operation.jpeg" width="500"/>
-</center>
-
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> seq = sequenceOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"><span class="keyword">val</span> filtered = seq.filter &#123; print(<span class="string">&quot;f<span class="variable">$it</span> &quot;</span>); it % <span class="number">2</span> == <span class="number">1</span> &#125;</span><br><span class="line">println(filtered)  <span class="comment">// FilteringSequence@...</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> asList = filtered.toList()</span><br><span class="line"><span class="comment">// f1 f2 f3</span></span><br><span class="line">println(asList) <span class="comment">// [1, 3]</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> list = listOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"><span class="keyword">val</span> listFiltered = list</span><br><span class="line">    .filter &#123; print(<span class="string">&quot;f<span class="variable">$it</span> &quot;</span>); it % <span class="number">2</span> == <span class="number">1</span> &#125;</span><br><span class="line"><span class="comment">// f1 f2 f3</span></span><br><span class="line">println(listFiltered) <span class="comment">// [1, 3]</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="二、优势"><a href="#二、优势" class="headerlink" title="二、优势"></a>二、优势</h4><p>Sequence的惰性执行有以下几个优点：</p>
-<ul>
-<li>保证操作的顺序性</li>
-<li>保证操作执行次数最少化</li>
-<li>他们可以是无限的</li>
-<li>无需每一步创建新的集合</li>
-</ul>
-<p>下面依次讨论一下这些优点</p>
-<h5 id="一、顺序性很重要"><a href="#一、顺序性很重要" class="headerlink" title="一、顺序性很重要"></a>一、顺序性很重要</h5><table>
-    <tr>
-        <td>使用Sequence处理数据时，每个元素依次执行所有操作符。这是一种元素接元素的处理方式。</td>
-        <td>使用Iterable处理数据时，每个操作符依次执行所有数据。这是一种步骤接步骤的处理方式。</td>
-    </tr>
-     <tr>
-            <td>
-            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">sequenceOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    .filter &#123; </span><br><span class="line">        print(<span class="string">&quot;F<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it % <span class="number">2</span> == <span class="number">1</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .map &#123; </span><br><span class="line">        print(<span class="string">&quot;M<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it * <span class="number">2</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .forEach &#123; </span><br><span class="line">        print(<span class="string">&quot;E<span class="variable">$it</span>, &quot;</span>) </span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// Prints: F1, M1, E2, F2, F3, M3, E6, </span></span><br></pre></td></tr></table></figure>
-            </td>
-            <td>
-            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">listOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    .filter &#123; </span><br><span class="line">        print(<span class="string">&quot;F<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it % <span class="number">2</span> == <span class="number">1</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .map &#123; </span><br><span class="line">        print(<span class="string">&quot;M<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it * <span class="number">2</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .forEach &#123; </span><br><span class="line">        print(<span class="string">&quot;E<span class="variable">$it</span>, &quot;</span>) </span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// Prints: F1, F2, F3, M1, M3, E2, E6,</span></span><br></pre></td></tr></table></figure>
-            </td>
-        </tr>
-</table>
-
-
-<center>
-    <img src="../images/kotlin_sequence_order.jpeg" width="500"/>
-</center>
-
-<p>如果我们不用集合处理函数，而是用循环和条件语句，这和sequence一样，也是一种元素接元素的处理方式。这也为我们提供了一种编译器底层优化的思路：sequence操作可以被优化成循环和条件。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (e <span class="keyword">in</span> listOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)) &#123;</span><br><span class="line">    print(<span class="string">&quot;F<span class="variable">$e</span>, &quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> (e % <span class="number">2</span> == <span class="number">1</span>) &#123;</span><br><span class="line">        print(<span class="string">&quot;M<span class="variable">$e</span>, &quot;</span>)</span><br><span class="line">        <span class="keyword">val</span> mapped = e * <span class="number">2</span></span><br><span class="line">        print(<span class="string">&quot;E<span class="variable">$mapped</span>, &quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Prints: F1, M1, E2, F2, F3, M3, E6,</span></span><br></pre></td></tr></table></figure>
-
-
-<h5 id="二、Sequence执行最少的操作"><a href="#二、Sequence执行最少的操作" class="headerlink" title="二、Sequence执行最少的操作"></a>二、Sequence执行最少的操作</h5><p>我们没必要每一步都处理整个集合。假如我们有一百万个数据，我们只需要前十个，没必要处理十个之后的数据。所以sequence可以执行最少的操作。</p>
-<center>
-    <img src="../images/kotlin_sequence_min_op.jpeg" width="500"/>
-</center>
-
-<p>看下面的例子：</p>
-<table>
-     <tr>
-            <td>
-            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">(<span class="number">1.</span><span class="number">.10</span>).asSequence()</span><br><span class="line">    .filter &#123; </span><br><span class="line">        print(<span class="string">&quot;F<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it % <span class="number">2</span> == <span class="number">1</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .map &#123; </span><br><span class="line">        print(<span class="string">&quot;M<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it * <span class="number">2</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .find &#123; </span><br><span class="line">        it &gt; <span class="number">5</span> </span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// Prints: F1, M1, F2, F3, M3,</span></span><br></pre></td></tr></table></figure>
-            </td>
-            <td>
-            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">(<span class="number">1.</span><span class="number">.10</span>)</span><br><span class="line">    .filter &#123; </span><br><span class="line">        print(<span class="string">&quot;F<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it % <span class="number">2</span> == <span class="number">1</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .map &#123; </span><br><span class="line">        print(<span class="string">&quot;M<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it * <span class="number">2</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .find &#123; </span><br><span class="line">        it &gt; <span class="number">5</span> </span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// Prints: </span></span><br><span class="line"><span class="comment">//F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, </span></span><br><span class="line"><span class="comment">// M1, M3, M5, M7, M9,         </span></span><br></pre></td></tr></table></figure>
-            </td>
-        </tr>
-</table>
-
-<p>这个例子中，有很多个操作符，最后的终止操作符不需要处理所有的数据，因此sequence性能更好。类似的操作符还有：<code>first</code>, <code>find</code>, <code>take</code>, <code>any</code>, <code>all</code>, <code>none</code> 或 <code>indexOf</code>。</p>
-<h5 id="三、Sequence是无限的"><a href="#三、Sequence是无限的" class="headerlink" title="三、Sequence是无限的"></a>三、Sequence是无限的</h5><p>由于Sequence按需处理，我们可以定义无限序列。一种常用的方式是使用sequence生成器 <code>generateSequence</code> 或 <code>sequence</code> 。</p>
-<p><code>generateSequence</code>需要传如第一个值，以及如何产生下一个值：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">generateSequence(<span class="number">1</span>) &#123; it + <span class="number">1</span> &#125;</span><br><span class="line">    .map &#123; it * <span class="number">2</span> &#125;</span><br><span class="line">    .take(<span class="number">10</span>)</span><br><span class="line">    .forEach &#123; print(<span class="string">&quot;<span class="variable">$it</span>, &quot;</span>) &#125;</span><br><span class="line"><span class="comment">// Prints: 2, 4, 6, 8, 10, 12, 14, 16, 18, 20,</span></span><br></pre></td></tr></table></figure>
-
-<p><code>sequence</code> 则使用挂起函数按需生成数据。只要我们需要数据他就执行，一直到调用yield方法。然后挂起直到下次再向他请求数据。下面是一个无限生成斐波那契数列的例子：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.math.BigDecimal</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> fibonacci: Sequence&lt;BigDecimal&gt; = sequence &#123;</span><br><span class="line">    <span class="keyword">var</span> current = <span class="number">1.</span>toBigDecimal()</span><br><span class="line">    <span class="keyword">var</span> prev = <span class="number">1.</span>toBigDecimal()</span><br><span class="line">    yield(prev)</span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        yield(current)</span><br><span class="line">        <span class="keyword">val</span> temp = prev</span><br><span class="line">        prev = current</span><br><span class="line">        current += temp</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(fibonacci.take(<span class="number">10</span>).toList())</span><br><span class="line">    <span class="comment">// [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>需要注意的是，使用无限序列需要限制元素的数量，否则将无限的运行下去。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">print(fibonacci.toList()) <span class="comment">// Runs forever</span></span><br></pre></td></tr></table></figure>
-
-<p>为了不让它无限循环的运行，我们可以使用<code>take</code>限制元素数量，或者使用first、find、indexOf等。在不限制数量的情况下，不要使用any、all、none。</p>
-<h5 id="四、sequence每一步不产生新集合"><a href="#四、sequence每一步不产生新集合" class="headerlink" title="四、sequence每一步不产生新集合"></a>四、sequence每一步不产生新集合</h5><p>标准的集合处理函数每一步都返回新的集合，当我们处理大量数据时会分配很多临时内存。</p>
-<table>
-     <tr>
-         <td>
-            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">num</span><br><span class="line">   .filter &#123;<span class="comment">// 1                   </span></span><br><span class="line">       it % <span class="number">10</span> == <span class="number">0</span> </span><br><span class="line">   &#125; </span><br><span class="line">   .map &#123;<span class="comment">// 2      </span></span><br><span class="line">       it * <span class="number">2</span> </span><br><span class="line">   &#125; </span><br><span class="line">   .sum()</span><br><span class="line"><span class="comment">// In total, 2 collections </span></span><br><span class="line"><span class="comment">// created under the hood</span></span><br></pre></td></tr></table></figure>
-         </td>
-         <td>
-            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">num.asSequence()</span><br><span class="line">   .filter &#123;<span class="comment">//0 </span></span><br><span class="line">      it % <span class="number">10</span> == <span class="number">0</span> </span><br><span class="line">   &#125;</span><br><span class="line">   .map &#123;<span class="comment">//0</span></span><br><span class="line">      it * <span class="number">2</span> </span><br><span class="line">   &#125;</span><br><span class="line">   .sum()</span><br><span class="line"><span class="comment">// No collections created</span></span><br></pre></td></tr></table></figure>
-         </td>
-     </tr>
-</table>
-
-<p>一个极端又常见的例子：文件读取。文件可能是几个G，每执行一个操作符都分配这么多内存是一种极大的浪费。下面例子是读取大小1.53G的芝加哥犯罪记录中包含毒品交易信息的记录数量，其中readLines 返回 List<String>。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// BAD SOLUTION, DO NOT USE COLLECTIONS FOR </span></span><br><span class="line"><span class="comment">// POSSIBLY BIG FILES</span></span><br><span class="line">File(<span class="string">&quot;ChicagoCrimes.csv&quot;</span>)</span><br><span class="line">    .readLines()</span><br><span class="line">    .drop(<span class="number">1</span>) <span class="comment">// Drop descriptions of the columns</span></span><br><span class="line">    .mapNotNull &#123; it.split(<span class="string">&quot;,&quot;</span>).getOrNull(<span class="number">6</span>) &#125;</span><br><span class="line">    <span class="comment">// Find description</span></span><br><span class="line">    .filter &#123; <span class="string">&quot;CANNABIS&quot;</span> <span class="keyword">in</span> it &#125;</span><br><span class="line">    .count()</span><br><span class="line">    .let(::println)</span><br></pre></td></tr></table></figure>
-<p>这段程序在我电脑上的运行结果是：</p>
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">OutOfMemoryError.n&gt; Exception in thread &quot;main&quot; java.lang.OutOfMemoryError: Java heap space</span><br></pre></td></tr></table></figure>
-
-<p>我们创建了一个集合，中间三个操作符产生集合，一个四个集合。其中三个包含文件的主要主要数据记录，一共消耗4.59G。正确的实现应该使用sequence，我们使用<code>useLines</code>函数，每次只操作一行记录。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">File(<span class="string">&quot;ChicagoCrimes.csv&quot;</span>).useLines &#123; lines -&gt;</span><br><span class="line"><span class="comment">// The type of `lines` is Sequence&lt;String&gt;</span></span><br><span class="line">    lines.drop(<span class="number">1</span>) <span class="comment">// Drop descriptions of the columns</span></span><br><span class="line">        .mapNotNull &#123; it.split(<span class="string">&quot;,&quot;</span>).getOrNull(<span class="number">6</span>) &#125;</span><br><span class="line">        <span class="comment">// Find description</span></span><br><span class="line">        .filter &#123; <span class="string">&quot;CANNABIS&quot;</span> <span class="keyword">in</span> it &#125;</span><br><span class="line">        .count()</span><br><span class="line">        .let &#123; println(it) &#125; <span class="comment">// 318185</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>同样运行这段代码，只耗时8.3s。为了比较一下这两种方法的效率，我做了另外一个实验：删除数据中不必要的列以减少文件大小，得到<code>CrimeData.csv</code>只有728MB，然后做相同的操作。使用Collection处理函数，耗时13s，使用sequence函数，耗时4.5s。正如实验数据，使用sequence处理大文件不仅节约内存，而且提升性能。</p>
-<p>事实上，在每个步骤中，我们创建一个新的集合本身也是一种成本，当我们处理包含大量元素的集合时，这种成本就会显现出来。差别并不大——主要是因为在许多步骤中创建的集合都是用预期的大小初始化的，所以当我们添加元素时，我们只需要将它们放在下一个位置。尽管即使是廉价的集合复制也比完全不复制要昂贵，这也是为什么我们应该更喜欢对具有<em>多个处理步骤</em>的<em>大集合</em>使用Sequence的主要原因。</p>
-<blockquote>
-<p>大集合：元素多（含数万个元素的整数列表）、元素大（超长字符串）</p>
-<p>多个处理步骤：处理集合时使用很多操作符。</p>
-</blockquote>
-<p>如果对比下面两个函数：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">singleStepListProcessing</span><span class="params">()</span></span>: List&lt;Product&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList.filter &#123; it.bought &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">singleStepSequenceProcessing</span><span class="params">()</span></span>: List&lt;Product&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList.asSequence()</span><br><span class="line">        .filter &#123; it.bought &#125;</span><br><span class="line">        .toList()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>你会发现，在性能上区别不大（实际上，简单的list处理更快，因为它的filter函数是内联的）。但是，当你使用多个操作符，先filter再map，在大集合上性能问题就行显现出来。为了看到区别，我们比较一下2个操作符和3个操作符处理5000个数据的情况：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">twoStepListProcessing</span><span class="params">()</span></span>: List&lt;<span class="built_in">Double</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList</span><br><span class="line">        .filter &#123; it.bought &#125;</span><br><span class="line">        .map &#123; it.price &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">twoStepSequenceProcessing</span><span class="params">()</span></span>: List&lt;<span class="built_in">Double</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList.asSequence()</span><br><span class="line">        .filter &#123; it.bought &#125;</span><br><span class="line">        .map &#123; it.price &#125;</span><br><span class="line">        .toList()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">threeStepListProcessing</span><span class="params">()</span></span>: <span class="built_in">Double</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList</span><br><span class="line">        .filter &#123; it.bought &#125;</span><br><span class="line">        .map &#123; it.price &#125;</span><br><span class="line">        .average()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">threeStepSequenceProcessing</span><span class="params">()</span></span>: <span class="built_in">Double</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList.asSequence()</span><br><span class="line">        .filter &#123; it.bought &#125;</span><br><span class="line">        .map &#123; it.price &#125;</span><br><span class="line">        .average()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>下面是在MacBook Pro(Retina, 15-inch, Late 2013)处理5000个元素的平均结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">twoStepListProcessing                        81 095 ns</span><br><span class="line">twoStepSequenceProcessing                    55 685 ns</span><br><span class="line">twoStepListProcessingAndAcumulate            83 307 ns</span><br><span class="line">twoStepSequenceProcessingAndAcumulate         6 928 ns</span><br></pre></td></tr></table></figure>
-
-<p>很难预测我们能提升但是性能，根据我的观察，在一个包含多个步骤的典型集合处理中，对于至少几千个元素，我们可以预期大约20-40%的性能提升。</p>
-<h5 id="五、sequence什么时候没那么快？"><a href="#五、sequence什么时候没那么快？" class="headerlink" title="五、sequence什么时候没那么快？"></a>五、sequence什么时候没那么快？</h5><p>有些情况我们要处理整个集合，sequence并不能给我们带来什么收益。如<code>sorted</code>（当前来讲它是唯一一个例子）。sorted的最优实现：积攒Sequence并放入List，然后使用Java的sort函数。缺点是，与<code>Collection.sort</code>相比，积攒过程会消耗额外的时间。</p>
-<p>Sequence是否应该支持<code>sorted</code>函数是有争议的，因为当一个序列的方法需要所有元素才能完成计算时，后续操作只是部分延迟，并且它不支持无限序列。之所以添加sorted操作只是因为它很常用，好用。Kotlin开发者需要了解它的缺陷，尤其是它不能用于无限序列。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">generateSequence(<span class="number">0</span>) &#123; it + <span class="number">1</span> &#125;.take(<span class="number">10</span>).sorted().toList()</span><br><span class="line"><span class="comment">// [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</span></span><br><span class="line">generateSequence(<span class="number">0</span>) &#123; it + <span class="number">1</span> &#125;.sorted().take(<span class="number">10</span>).toList()</span><br><span class="line"><span class="comment">// Infinite time. Does not return.</span></span><br></pre></td></tr></table></figure>
-
-<p>在Collection上使用sorted比在Sequence上更快只是少数特例。当我们只使用很少操作符函数和单个sorted函数时，还是建议使用sequence来处理。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">productsList.asSequence()</span><br><span class="line">    .filter &#123; it.bought &#125;</span><br><span class="line">    .map &#123; it.price &#125;</span><br><span class="line">    .sorted()</span><br><span class="line">    .take(<span class="number">10</span>)</span><br><span class="line">    .sum()</span><br></pre></td></tr></table></figure>
-
-<h5 id="六、看看Java的Stream操作"><a href="#六、看看Java的Stream操作" class="headerlink" title="六、看看Java的Stream操作"></a>六、看看Java的Stream操作</h5><p>Java 8新增了集合处理流的特性，看起来和Kotlin的序列很像。</p>
-<table>
-     <tr>
-         <td>
-            <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">productsList.asSequence()</span><br><span class="line">    .filter &#123; it.bought &#125;</span><br><span class="line">    .map &#123; it.price &#125;</span><br><span class="line">    .average()</span><br></pre></td></tr></table></figure>
-         </td>
-         <td>
-            <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">productsList.stream()</span><br><span class="line">    .filter &#123; it.bought &#125;</span><br><span class="line">    .mapToDouble &#123; it.price &#125;</span><br><span class="line">    .average()</span><br><span class="line">    .orElse(<span class="number">0.0</span>)</span><br></pre></td></tr></table></figure>
-         </td>
-     </tr>
-</table>
-
-<p>Java 8的Stream也是惰性的在最后一个操作符触发计算。与Kotlin sequence的区别主要是：</p>
-<ul>
-<li>Kotlin sequence包含更多的处理函数（被定义为拓展函数），使用简单: <code>toList()</code> vs <code>collect(Collectors.toList())</code></li>
-<li>Java stream可以开启并行模式，在多核处理器上会有很大的性能提升。</li>
-<li>Kotlin sequence可以用于Kotlin/JVM、Kotlin/JS、Kotlin/Native模块中。Java stream只能用于Kotlin/JVM，且JVM版本至少是8</li>
-</ul>
-<p>总之，我们不用Java stream并行模式时很难将谁的性能更好，我建议少用Java stream，只有在处理重量级计算问题中使用并行模式可以显著带来收益的情况下使用，其他情况用Kotlin标准函数能带来清晰的代码结构和多平台支持。</p>
-<h5 id="七、调试Sequence"><a href="#七、调试Sequence" class="headerlink" title="七、调试Sequence"></a>七、调试Sequence</h5><p>Kotlin Sequence和Java Stream都支持debug每一步操作。Java需要使用”Java Stream Debugger”插件，Kotlin则需要”Kotlin Sequence Debugger”插件，现在已经被集成在了Kotlin插件中了。</p>
-<center>
-    <img src="../images/kotlin_sequence_debug.jpeg" width="500"/>
-</center>
-
-
-<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>集合和序列非常相似，都支持相同的处理函数。但他们也有很大的区别。Sequence处理是困难的，因为我们要保持原集合不变，执行相应转换后再放回原集合。Sequence是惰性的，带来很多优点：</p>
-<ul>
-<li>保证操作的顺序性</li>
-<li>保证操作执行次数最少化</li>
-<li>他们可以是无限的</li>
-<li>无需每一步创建新的集合</li>
-</ul>
-<p>基于这些优点，对于包含多个处理步骤的包含大对象或元素很多的集合来说使用Sequence更好。Sequence也包含调试器，能帮助我们可视化的分析元素处理过程。Sequence不是为了取代传统的集合处理方式，使用前应该分析清楚自己的目的和原因才能带来性能的提升以及更少的内存问题。</p>
-<h4 id="四、参考"><a href="#四、参考" class="headerlink" title="四、参考"></a>四、参考</h4><p><a href="https://kt.academy/article/ek-sequence">Effective Kotlin Item 51: Prefer Sequence for big collections with more than one processing step</a></p>
-]]></content>
       <tags>
         <tag>Kotlin</tag>
       </tags>
@@ -1702,6 +1543,219 @@
       </tags>
   </entry>
   <entry>
+    <title>LeetCode 反转单链表</title>
+    <url>/leetcode-reverse-list.html</url>
+    <content><![CDATA[<h3 id="LeetCode-206-反转单链表"><a href="#LeetCode-206-反转单链表" class="headerlink" title="LeetCode-206 反转单链表"></a>LeetCode-206 反转单链表</h3><blockquote>
+<p>给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</p>
+</blockquote>
+<p>问题分析：</p>
+<p>这是初始状态的链表</p>
+<center>
+    <img src="../images/revert_list_0.png" width="400"/>
+</center>
+由于反转链表后 **head** 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  
+
+<p>尝试一次反转后，我们发现，后续结点信息丢失了！我们不得不声明一个新的变量保存原链表的信息。</p>
+<center>
+    <img src="../images/revert_list_7.png" width="400"/>
+</center>
+
+<p>所以，我们一共需要三个指针来记录转换过程  </p>
+<ul>
+<li>prev、 head 用于交换</li>
+<li>next 用于记录  </li>
+</ul>
+<p>分析到这里，我们再回到初始状态  ：</p>
+<center>
+    <img src="../images/revert_list_4.png" width="400"/>
+</center>
+
+<p>接下来我们进行第一次反转，<strong>head.next</strong> 指向虚拟的空结点，且后续链表信息没有丢失。</p>
+<center>
+    <img src="../images/revert_list_5.png" width="400"/>
+</center>
+
+<p>三个指针一起往后移动一个单位。我们发现此时链表又回到了最初的状态。</p>
+<center>
+    <img src="../images/revert_list_6.png" width="400"/>
+</center>
+
+
+<p>至此，我们可以尝试写出如下代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">reverseIteratively</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">    ListNode pre = <span class="keyword">null</span>;</span><br><span class="line">    ListNode next = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = head.next;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//改变指针方向，对第一个节点来说，他的前一个节点是null</span></span><br><span class="line">        head.next = pre;</span><br><span class="line">        <span class="comment">//向前移动两个指针</span></span><br><span class="line">        pre = head;</span><br><span class="line">        head = next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>思考：<br>你能使用递归的方式改写上述代码逻辑吗？</p>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>Algorithm</tag>
+        <tag>List</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Effective Kotlin-51：使用Sequence优化集合操作</title>
+    <url>/kotlin-lang-sequence.html</url>
+    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>你可能对 <code>Iterable</code> 和 <code>Sequence</code> 傻傻分不清。看一下他们的代码：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Iterable</span>&lt;<span class="type">out T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">iterator</span><span class="params">()</span></span>: Iterator&lt;T&gt;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Sequence</span>&lt;<span class="type">out T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="title">iterator</span><span class="params">()</span></span>: Iterator&lt;T&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>好像只有名字不一样-_-||，但他们却有着本质的区别。<code>Sequence</code>属于懒加载，中间操作符不会触发计算，仅仅是对前一个Sequence的装饰，只有在遇到toList()或count()这些终止操作符时才会执行真正的计算工作。而Iterable每一步都返回一个新的集合。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">filter</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    predicate: (<span class="type">T</span>) -&gt; <span class="type">Boolean</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> filterTo(ArrayList&lt;T&gt;(), predicate)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Sequence<span class="type">&lt;T&gt;</span>.<span class="title">filter</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    predicate: (<span class="type">T</span>) -&gt; <span class="type">Boolean</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: Sequence&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> FilteringSequence(<span class="keyword">this</span>, <span class="literal">true</span>, predicate)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下图中filter操作符不做任何计算操作，只是返回一个装饰器对象，在遇到toList()操作符才执行计算。</p>
+<center>
+    <img src="../images/kotlin_sequence_operation.jpeg" width="500"/>
+</center>
+
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> seq = sequenceOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"><span class="keyword">val</span> filtered = seq.filter &#123; print(<span class="string">&quot;f<span class="variable">$it</span> &quot;</span>); it % <span class="number">2</span> == <span class="number">1</span> &#125;</span><br><span class="line">println(filtered)  <span class="comment">// FilteringSequence@...</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> asList = filtered.toList()</span><br><span class="line"><span class="comment">// f1 f2 f3</span></span><br><span class="line">println(asList) <span class="comment">// [1, 3]</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> list = listOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"><span class="keyword">val</span> listFiltered = list</span><br><span class="line">    .filter &#123; print(<span class="string">&quot;f<span class="variable">$it</span> &quot;</span>); it % <span class="number">2</span> == <span class="number">1</span> &#125;</span><br><span class="line"><span class="comment">// f1 f2 f3</span></span><br><span class="line">println(listFiltered) <span class="comment">// [1, 3]</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="二、优势"><a href="#二、优势" class="headerlink" title="二、优势"></a>二、优势</h4><p>Sequence的惰性执行有以下几个优点：</p>
+<ul>
+<li>保证操作的顺序性</li>
+<li>保证操作执行次数最少化</li>
+<li>他们可以是无限的</li>
+<li>无需每一步创建新的集合</li>
+</ul>
+<p>下面依次讨论一下这些优点</p>
+<h5 id="一、顺序性很重要"><a href="#一、顺序性很重要" class="headerlink" title="一、顺序性很重要"></a>一、顺序性很重要</h5><table>
+    <tr>
+        <td>使用Sequence处理数据时，每个元素依次执行所有操作符。这是一种元素接元素的处理方式。</td>
+        <td>使用Iterable处理数据时，每个操作符依次执行所有数据。这是一种步骤接步骤的处理方式。</td>
+    </tr>
+     <tr>
+            <td>
+            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">sequenceOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    .filter &#123; </span><br><span class="line">        print(<span class="string">&quot;F<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it % <span class="number">2</span> == <span class="number">1</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .map &#123; </span><br><span class="line">        print(<span class="string">&quot;M<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it * <span class="number">2</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .forEach &#123; </span><br><span class="line">        print(<span class="string">&quot;E<span class="variable">$it</span>, &quot;</span>) </span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// Prints: F1, M1, E2, F2, F3, M3, E6, </span></span><br></pre></td></tr></table></figure>
+            </td>
+            <td>
+            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">listOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    .filter &#123; </span><br><span class="line">        print(<span class="string">&quot;F<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it % <span class="number">2</span> == <span class="number">1</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .map &#123; </span><br><span class="line">        print(<span class="string">&quot;M<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it * <span class="number">2</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .forEach &#123; </span><br><span class="line">        print(<span class="string">&quot;E<span class="variable">$it</span>, &quot;</span>) </span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// Prints: F1, F2, F3, M1, M3, E2, E6,</span></span><br></pre></td></tr></table></figure>
+            </td>
+        </tr>
+</table>
+
+
+<center>
+    <img src="../images/kotlin_sequence_order.jpeg" width="500"/>
+</center>
+
+<p>如果我们不用集合处理函数，而是用循环和条件语句，这和sequence一样，也是一种元素接元素的处理方式。这也为我们提供了一种编译器底层优化的思路：sequence操作可以被优化成循环和条件。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (e <span class="keyword">in</span> listOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)) &#123;</span><br><span class="line">    print(<span class="string">&quot;F<span class="variable">$e</span>, &quot;</span>)</span><br><span class="line">    <span class="keyword">if</span> (e % <span class="number">2</span> == <span class="number">1</span>) &#123;</span><br><span class="line">        print(<span class="string">&quot;M<span class="variable">$e</span>, &quot;</span>)</span><br><span class="line">        <span class="keyword">val</span> mapped = e * <span class="number">2</span></span><br><span class="line">        print(<span class="string">&quot;E<span class="variable">$mapped</span>, &quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Prints: F1, M1, E2, F2, F3, M3, E6,</span></span><br></pre></td></tr></table></figure>
+
+
+<h5 id="二、Sequence执行最少的操作"><a href="#二、Sequence执行最少的操作" class="headerlink" title="二、Sequence执行最少的操作"></a>二、Sequence执行最少的操作</h5><p>我们没必要每一步都处理整个集合。假如我们有一百万个数据，我们只需要前十个，没必要处理十个之后的数据。所以sequence可以执行最少的操作。</p>
+<center>
+    <img src="../images/kotlin_sequence_min_op.jpeg" width="500"/>
+</center>
+
+<p>看下面的例子：</p>
+<table>
+     <tr>
+            <td>
+            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">(<span class="number">1.</span><span class="number">.10</span>).asSequence()</span><br><span class="line">    .filter &#123; </span><br><span class="line">        print(<span class="string">&quot;F<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it % <span class="number">2</span> == <span class="number">1</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .map &#123; </span><br><span class="line">        print(<span class="string">&quot;M<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it * <span class="number">2</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .find &#123; </span><br><span class="line">        it &gt; <span class="number">5</span> </span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// Prints: F1, M1, F2, F3, M3,</span></span><br></pre></td></tr></table></figure>
+            </td>
+            <td>
+            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">(<span class="number">1.</span><span class="number">.10</span>)</span><br><span class="line">    .filter &#123; </span><br><span class="line">        print(<span class="string">&quot;F<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it % <span class="number">2</span> == <span class="number">1</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .map &#123; </span><br><span class="line">        print(<span class="string">&quot;M<span class="variable">$it</span>, &quot;</span>); </span><br><span class="line">        it * <span class="number">2</span> </span><br><span class="line">    &#125;</span><br><span class="line">    .find &#123; </span><br><span class="line">        it &gt; <span class="number">5</span> </span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// Prints: </span></span><br><span class="line"><span class="comment">//F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, </span></span><br><span class="line"><span class="comment">// M1, M3, M5, M7, M9,         </span></span><br></pre></td></tr></table></figure>
+            </td>
+        </tr>
+</table>
+
+<p>这个例子中，有很多个操作符，最后的终止操作符不需要处理所有的数据，因此sequence性能更好。类似的操作符还有：<code>first</code>, <code>find</code>, <code>take</code>, <code>any</code>, <code>all</code>, <code>none</code> 或 <code>indexOf</code>。</p>
+<h5 id="三、Sequence是无限的"><a href="#三、Sequence是无限的" class="headerlink" title="三、Sequence是无限的"></a>三、Sequence是无限的</h5><p>由于Sequence按需处理，我们可以定义无限序列。一种常用的方式是使用sequence生成器 <code>generateSequence</code> 或 <code>sequence</code> 。</p>
+<p><code>generateSequence</code>需要传如第一个值，以及如何产生下一个值：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">generateSequence(<span class="number">1</span>) &#123; it + <span class="number">1</span> &#125;</span><br><span class="line">    .map &#123; it * <span class="number">2</span> &#125;</span><br><span class="line">    .take(<span class="number">10</span>)</span><br><span class="line">    .forEach &#123; print(<span class="string">&quot;<span class="variable">$it</span>, &quot;</span>) &#125;</span><br><span class="line"><span class="comment">// Prints: 2, 4, 6, 8, 10, 12, 14, 16, 18, 20,</span></span><br></pre></td></tr></table></figure>
+
+<p><code>sequence</code> 则使用挂起函数按需生成数据。只要我们需要数据他就执行，一直到调用yield方法。然后挂起直到下次再向他请求数据。下面是一个无限生成斐波那契数列的例子：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.math.BigDecimal</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> fibonacci: Sequence&lt;BigDecimal&gt; = sequence &#123;</span><br><span class="line">    <span class="keyword">var</span> current = <span class="number">1.</span>toBigDecimal()</span><br><span class="line">    <span class="keyword">var</span> prev = <span class="number">1.</span>toBigDecimal()</span><br><span class="line">    yield(prev)</span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        yield(current)</span><br><span class="line">        <span class="keyword">val</span> temp = prev</span><br><span class="line">        prev = current</span><br><span class="line">        current += temp</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(fibonacci.take(<span class="number">10</span>).toList())</span><br><span class="line">    <span class="comment">// [1, 1, 2, 3, 5, 8, 13, 21, 34, 55]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是，使用无限序列需要限制元素的数量，否则将无限的运行下去。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">print(fibonacci.toList()) <span class="comment">// Runs forever</span></span><br></pre></td></tr></table></figure>
+
+<p>为了不让它无限循环的运行，我们可以使用<code>take</code>限制元素数量，或者使用first、find、indexOf等。在不限制数量的情况下，不要使用any、all、none。</p>
+<h5 id="四、sequence每一步不产生新集合"><a href="#四、sequence每一步不产生新集合" class="headerlink" title="四、sequence每一步不产生新集合"></a>四、sequence每一步不产生新集合</h5><p>标准的集合处理函数每一步都返回新的集合，当我们处理大量数据时会分配很多临时内存。</p>
+<table>
+     <tr>
+         <td>
+            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">num</span><br><span class="line">   .filter &#123;<span class="comment">// 1                   </span></span><br><span class="line">       it % <span class="number">10</span> == <span class="number">0</span> </span><br><span class="line">   &#125; </span><br><span class="line">   .map &#123;<span class="comment">// 2      </span></span><br><span class="line">       it * <span class="number">2</span> </span><br><span class="line">   &#125; </span><br><span class="line">   .sum()</span><br><span class="line"><span class="comment">// In total, 2 collections </span></span><br><span class="line"><span class="comment">// created under the hood</span></span><br></pre></td></tr></table></figure>
+         </td>
+         <td>
+            <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">num.asSequence()</span><br><span class="line">   .filter &#123;<span class="comment">//0 </span></span><br><span class="line">      it % <span class="number">10</span> == <span class="number">0</span> </span><br><span class="line">   &#125;</span><br><span class="line">   .map &#123;<span class="comment">//0</span></span><br><span class="line">      it * <span class="number">2</span> </span><br><span class="line">   &#125;</span><br><span class="line">   .sum()</span><br><span class="line"><span class="comment">// No collections created</span></span><br></pre></td></tr></table></figure>
+         </td>
+     </tr>
+</table>
+
+<p>一个极端又常见的例子：文件读取。文件可能是几个G，每执行一个操作符都分配这么多内存是一种极大的浪费。下面例子是读取大小1.53G的芝加哥犯罪记录中包含毒品交易信息的记录数量，其中readLines 返回 List<String>。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// BAD SOLUTION, DO NOT USE COLLECTIONS FOR </span></span><br><span class="line"><span class="comment">// POSSIBLY BIG FILES</span></span><br><span class="line">File(<span class="string">&quot;ChicagoCrimes.csv&quot;</span>)</span><br><span class="line">    .readLines()</span><br><span class="line">    .drop(<span class="number">1</span>) <span class="comment">// Drop descriptions of the columns</span></span><br><span class="line">    .mapNotNull &#123; it.split(<span class="string">&quot;,&quot;</span>).getOrNull(<span class="number">6</span>) &#125;</span><br><span class="line">    <span class="comment">// Find description</span></span><br><span class="line">    .filter &#123; <span class="string">&quot;CANNABIS&quot;</span> <span class="keyword">in</span> it &#125;</span><br><span class="line">    .count()</span><br><span class="line">    .let(::println)</span><br></pre></td></tr></table></figure>
+<p>这段程序在我电脑上的运行结果是：</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">OutOfMemoryError.n&gt; Exception in thread &quot;main&quot; java.lang.OutOfMemoryError: Java heap space</span><br></pre></td></tr></table></figure>
+
+<p>我们创建了一个集合，中间三个操作符产生集合，一个四个集合。其中三个包含文件的主要主要数据记录，一共消耗4.59G。正确的实现应该使用sequence，我们使用<code>useLines</code>函数，每次只操作一行记录。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">File(<span class="string">&quot;ChicagoCrimes.csv&quot;</span>).useLines &#123; lines -&gt;</span><br><span class="line"><span class="comment">// The type of `lines` is Sequence&lt;String&gt;</span></span><br><span class="line">    lines.drop(<span class="number">1</span>) <span class="comment">// Drop descriptions of the columns</span></span><br><span class="line">        .mapNotNull &#123; it.split(<span class="string">&quot;,&quot;</span>).getOrNull(<span class="number">6</span>) &#125;</span><br><span class="line">        <span class="comment">// Find description</span></span><br><span class="line">        .filter &#123; <span class="string">&quot;CANNABIS&quot;</span> <span class="keyword">in</span> it &#125;</span><br><span class="line">        .count()</span><br><span class="line">        .let &#123; println(it) &#125; <span class="comment">// 318185</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样运行这段代码，只耗时8.3s。为了比较一下这两种方法的效率，我做了另外一个实验：删除数据中不必要的列以减少文件大小，得到<code>CrimeData.csv</code>只有728MB，然后做相同的操作。使用Collection处理函数，耗时13s，使用sequence函数，耗时4.5s。正如实验数据，使用sequence处理大文件不仅节约内存，而且提升性能。</p>
+<p>事实上，在每个步骤中，我们创建一个新的集合本身也是一种成本，当我们处理包含大量元素的集合时，这种成本就会显现出来。差别并不大——主要是因为在许多步骤中创建的集合都是用预期的大小初始化的，所以当我们添加元素时，我们只需要将它们放在下一个位置。尽管即使是廉价的集合复制也比完全不复制要昂贵，这也是为什么我们应该更喜欢对具有<em>多个处理步骤</em>的<em>大集合</em>使用Sequence的主要原因。</p>
+<blockquote>
+<p>大集合：元素多（含数万个元素的整数列表）、元素大（超长字符串）</p>
+<p>多个处理步骤：处理集合时使用很多操作符。</p>
+</blockquote>
+<p>如果对比下面两个函数：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">singleStepListProcessing</span><span class="params">()</span></span>: List&lt;Product&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList.filter &#123; it.bought &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">singleStepSequenceProcessing</span><span class="params">()</span></span>: List&lt;Product&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList.asSequence()</span><br><span class="line">        .filter &#123; it.bought &#125;</span><br><span class="line">        .toList()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>你会发现，在性能上区别不大（实际上，简单的list处理更快，因为它的filter函数是内联的）。但是，当你使用多个操作符，先filter再map，在大集合上性能问题就行显现出来。为了看到区别，我们比较一下2个操作符和3个操作符处理5000个数据的情况：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">twoStepListProcessing</span><span class="params">()</span></span>: List&lt;<span class="built_in">Double</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList</span><br><span class="line">        .filter &#123; it.bought &#125;</span><br><span class="line">        .map &#123; it.price &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">twoStepSequenceProcessing</span><span class="params">()</span></span>: List&lt;<span class="built_in">Double</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList.asSequence()</span><br><span class="line">        .filter &#123; it.bought &#125;</span><br><span class="line">        .map &#123; it.price &#125;</span><br><span class="line">        .toList()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">threeStepListProcessing</span><span class="params">()</span></span>: <span class="built_in">Double</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList</span><br><span class="line">        .filter &#123; it.bought &#125;</span><br><span class="line">        .map &#123; it.price &#125;</span><br><span class="line">        .average()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">threeStepSequenceProcessing</span><span class="params">()</span></span>: <span class="built_in">Double</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> productsList.asSequence()</span><br><span class="line">        .filter &#123; it.bought &#125;</span><br><span class="line">        .map &#123; it.price &#125;</span><br><span class="line">        .average()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面是在MacBook Pro(Retina, 15-inch, Late 2013)处理5000个元素的平均结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">twoStepListProcessing                        81 095 ns</span><br><span class="line">twoStepSequenceProcessing                    55 685 ns</span><br><span class="line">twoStepListProcessingAndAcumulate            83 307 ns</span><br><span class="line">twoStepSequenceProcessingAndAcumulate         6 928 ns</span><br></pre></td></tr></table></figure>
+
+<p>很难预测我们能提升但是性能，根据我的观察，在一个包含多个步骤的典型集合处理中，对于至少几千个元素，我们可以预期大约20-40%的性能提升。</p>
+<h5 id="五、sequence什么时候没那么快？"><a href="#五、sequence什么时候没那么快？" class="headerlink" title="五、sequence什么时候没那么快？"></a>五、sequence什么时候没那么快？</h5><p>有些情况我们要处理整个集合，sequence并不能给我们带来什么收益。如<code>sorted</code>（当前来讲它是唯一一个例子）。sorted的最优实现：积攒Sequence并放入List，然后使用Java的sort函数。缺点是，与<code>Collection.sort</code>相比，积攒过程会消耗额外的时间。</p>
+<p>Sequence是否应该支持<code>sorted</code>函数是有争议的，因为当一个序列的方法需要所有元素才能完成计算时，后续操作只是部分延迟，并且它不支持无限序列。之所以添加sorted操作只是因为它很常用，好用。Kotlin开发者需要了解它的缺陷，尤其是它不能用于无限序列。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">generateSequence(<span class="number">0</span>) &#123; it + <span class="number">1</span> &#125;.take(<span class="number">10</span>).sorted().toList()</span><br><span class="line"><span class="comment">// [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</span></span><br><span class="line">generateSequence(<span class="number">0</span>) &#123; it + <span class="number">1</span> &#125;.sorted().take(<span class="number">10</span>).toList()</span><br><span class="line"><span class="comment">// Infinite time. Does not return.</span></span><br></pre></td></tr></table></figure>
+
+<p>在Collection上使用sorted比在Sequence上更快只是少数特例。当我们只使用很少操作符函数和单个sorted函数时，还是建议使用sequence来处理。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">productsList.asSequence()</span><br><span class="line">    .filter &#123; it.bought &#125;</span><br><span class="line">    .map &#123; it.price &#125;</span><br><span class="line">    .sorted()</span><br><span class="line">    .take(<span class="number">10</span>)</span><br><span class="line">    .sum()</span><br></pre></td></tr></table></figure>
+
+<h5 id="六、看看Java的Stream操作"><a href="#六、看看Java的Stream操作" class="headerlink" title="六、看看Java的Stream操作"></a>六、看看Java的Stream操作</h5><p>Java 8新增了集合处理流的特性，看起来和Kotlin的序列很像。</p>
+<table>
+     <tr>
+         <td>
+            <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">productsList.asSequence()</span><br><span class="line">    .filter &#123; it.bought &#125;</span><br><span class="line">    .map &#123; it.price &#125;</span><br><span class="line">    .average()</span><br></pre></td></tr></table></figure>
+         </td>
+         <td>
+            <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">productsList.stream()</span><br><span class="line">    .filter &#123; it.bought &#125;</span><br><span class="line">    .mapToDouble &#123; it.price &#125;</span><br><span class="line">    .average()</span><br><span class="line">    .orElse(<span class="number">0.0</span>)</span><br></pre></td></tr></table></figure>
+         </td>
+     </tr>
+</table>
+
+<p>Java 8的Stream也是惰性的在最后一个操作符触发计算。与Kotlin sequence的区别主要是：</p>
+<ul>
+<li>Kotlin sequence包含更多的处理函数（被定义为拓展函数），使用简单: <code>toList()</code> vs <code>collect(Collectors.toList())</code></li>
+<li>Java stream可以开启并行模式，在多核处理器上会有很大的性能提升。</li>
+<li>Kotlin sequence可以用于Kotlin/JVM、Kotlin/JS、Kotlin/Native模块中。Java stream只能用于Kotlin/JVM，且JVM版本至少是8</li>
+</ul>
+<p>总之，我们不用Java stream并行模式时很难将谁的性能更好，我建议少用Java stream，只有在处理重量级计算问题中使用并行模式可以显著带来收益的情况下使用，其他情况用Kotlin标准函数能带来清晰的代码结构和多平台支持。</p>
+<h5 id="七、调试Sequence"><a href="#七、调试Sequence" class="headerlink" title="七、调试Sequence"></a>七、调试Sequence</h5><p>Kotlin Sequence和Java Stream都支持debug每一步操作。Java需要使用”Java Stream Debugger”插件，Kotlin则需要”Kotlin Sequence Debugger”插件，现在已经被集成在了Kotlin插件中了。</p>
+<center>
+    <img src="../images/kotlin_sequence_debug.jpeg" width="500"/>
+</center>
+
+
+<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>集合和序列非常相似，都支持相同的处理函数。但他们也有很大的区别。Sequence处理是困难的，因为我们要保持原集合不变，执行相应转换后再放回原集合。Sequence是惰性的，带来很多优点：</p>
+<ul>
+<li>保证操作的顺序性</li>
+<li>保证操作执行次数最少化</li>
+<li>他们可以是无限的</li>
+<li>无需每一步创建新的集合</li>
+</ul>
+<p>基于这些优点，对于包含多个处理步骤的包含大对象或元素很多的集合来说使用Sequence更好。Sequence也包含调试器，能帮助我们可视化的分析元素处理过程。Sequence不是为了取代传统的集合处理方式，使用前应该分析清楚自己的目的和原因才能带来性能的提升以及更少的内存问题。</p>
+<h4 id="四、参考"><a href="#四、参考" class="headerlink" title="四、参考"></a>四、参考</h4><p><a href="https://kt.academy/article/ek-sequence">Effective Kotlin Item 51: Prefer Sequence for big collections with more than one processing step</a></p>
+]]></content>
+      <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Effective Kotlin-56：考虑使用可变集合</title>
     <url>/kotlin-lang-use-mutable-collection.html</url>
     <content><![CDATA[<p>与不可变集合相比，使用可变集合最大的优点是性能更快。向不可变集合添加元素需要新建集合再拷贝所有元素，下面是kotlin标准库现在的实现：</p>
@@ -1761,60 +1815,6 @@
       </tags>
   </entry>
   <entry>
-    <title>LeetCode 反转单链表</title>
-    <url>/leetcode-reverse-list.html</url>
-    <content><![CDATA[<h3 id="LeetCode-206-反转单链表"><a href="#LeetCode-206-反转单链表" class="headerlink" title="LeetCode-206 反转单链表"></a>LeetCode-206 反转单链表</h3><blockquote>
-<p>给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</p>
-</blockquote>
-<p>问题分析：</p>
-<p>这是初始状态的链表</p>
-<center>
-    <img src="../images/revert_list_0.png" width="400"/>
-</center>
-由于反转链表后 **head** 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  
-
-<p>尝试一次反转后，我们发现，后续结点信息丢失了！我们不得不声明一个新的变量保存原链表的信息。</p>
-<center>
-    <img src="../images/revert_list_7.png" width="400"/>
-</center>
-
-<p>所以，我们一共需要三个指针来记录转换过程  </p>
-<ul>
-<li>prev、 head 用于交换</li>
-<li>next 用于记录  </li>
-</ul>
-<p>分析到这里，我们再回到初始状态  ：</p>
-<center>
-    <img src="../images/revert_list_4.png" width="400"/>
-</center>
-
-<p>接下来我们进行第一次反转，<strong>head.next</strong> 指向虚拟的空结点，且后续链表信息没有丢失。</p>
-<center>
-    <img src="../images/revert_list_5.png" width="400"/>
-</center>
-
-<p>三个指针一起往后移动一个单位。我们发现此时链表又回到了最初的状态。</p>
-<center>
-    <img src="../images/revert_list_6.png" width="400"/>
-</center>
-
-
-<p>至此，我们可以尝试写出如下代码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">reverseIteratively</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">    ListNode pre = <span class="keyword">null</span>;</span><br><span class="line">    ListNode next = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = head.next;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//改变指针方向，对第一个节点来说，他的前一个节点是null</span></span><br><span class="line">        head.next = pre;</span><br><span class="line">        <span class="comment">//向前移动两个指针</span></span><br><span class="line">        pre = head;</span><br><span class="line">        head = next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<p>思考：<br>你能使用递归的方式改写上述代码逻辑吗？</p>
-]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>LeetCode</tag>
-        <tag>Algorithm</tag>
-        <tag>List</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>无等级CSP中的死锁</title>
     <url>/model-csp-deadlocks.html</url>
     <content><![CDATA[<h4 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h4><p>本文是 Roman Elizarov 关于CSP中产生死锁问题的讨论，解释了其中的原因，并逐步给出了一种解决方案。部分翻译不恰当的可参考<a href="https://elizarov.medium.com/deadlocks-in-non-hierarchical-csp-e5910d137cc">原文</a></p>
@@ -1827,12 +1827,12 @@
 </center>
 
 
-<p>然而在我的演讲中，我草拟了一个数据处理循环的架构，下载器协程向任务池发送locations，并从任务池获取结果：</p>
+<p>然而在我的演讲中，我草拟了一个数据处理循环的架构，下载器协程向任务池发送<code>locations</code>，并从任务池获取结果：</p>
 <center>
     <img src="../images/deadlock-csp-downloader.png" width="500"/>
 </center>
 
-<p>我演讲中的例子的架构基于3个channel：references、locations、contents。下载协程包含以下逻辑：</p>
+<p>我演讲中的例子的架构基于3个channel：<code>references</code>、<code>locations</code>、<code>contents</code>。下载协程包含以下逻辑：</p>
 <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    select&lt;<span class="built_in">Unit</span>&gt; &#123;                                   </span><br><span class="line">        references.onReceive &#123; ref -&gt;                <span class="comment">// (1)</span></span><br><span class="line">            <span class="keyword">val</span> loc = ref.resolveLocation()</span><br><span class="line">            ... </span><br><span class="line">            locations.send(loc)                      <span class="comment">// (2)</span></span><br><span class="line">        &#125;</span><br><span class="line">        contents.onReceive &#123; (loc, content) -&gt; ... &#125; <span class="comment">// (3)</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>Downloader从<code>references</code>通道(1)接收，解析对位置的引用并将它们发送到<code>locations</code>通道(2)。它还通过从<code>contents</code>通道(3)接收来自workers的结果来更新其状态。另外，works有以下代码:</p>
 <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (loc <span class="keyword">in</span> locations) &#123;                             <span class="comment">// (4)</span></span><br><span class="line">    <span class="keyword">val</span> content = downloadContent(loc)         </span><br><span class="line">    contents.send(LocContent(loc, content))          <span class="comment">// (5)</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1843,32 +1843,32 @@
     <img src="../images/deadlock-csp-cfsm.png" width="500"/>
 </center>
 
-<p>为了简洁起见，上图中通道名简写。receive -&gt; rcv、send -&gt; snd 。下载器主循环中的<code>select</code>语句相当于D0状态，它能接收来自<code>references</code>通道的消息(1)或者来自<code>contents</code>通道的消息(3)，当接收到来自references消息，切换到状态D1，等待发送消息去<code>locations</code>通道，如图中：(2)l.snd</p>
+<p>为了简洁起见，上图中通道名简写。receive -&gt; rcv、send -&gt; snd 。下载器主循环中的<code>select</code>语句相当于D0状态，它能接收来自<code>references</code>通道的消息(1)或者来自<code>contents</code>通道的消息(3)，当接收到来自<code>references</code>消息，切换到状态D1，等待发送消息去<code>locations</code>通道，如图中：(2)l.snd</p>
 <h4 id="Deadlock-Demo"><a href="#Deadlock-Demo" class="headerlink" title="Deadlock Demo"></a>Deadlock <a href="https://github.com/elizarov/DeadlocksInCSP">Demo</a></h4><p>我用模拟数据类的方式完善了演讲中的代码，加入了<code>delay(10)</code>的<code>downloadContent</code>方法。main函数则持续发送请求给下载器的<code>references</code>通道，它有4个workers且带3秒超时限制。此项目可以完整的运行,正常情况下3s应该处理1000次请求。</p>
 <p>当你运行该项目时，你会发现只处理了4次请求（和我们定义的worker数量一样）就挂起了，直到3s超时。此外，它没有任何随机性，因为它是在单线程的runBlocking上下文中运行的。</p>
 <p>为了说服你（还有我自己），这是CSP内在的行为而不是Kotlin实现的bug，我用Go语言实现了一遍。Go语言内建的死锁检测器立即给出了提示：<em>all goroutines are asleep — deadlock</em> ，到底发生了什么呢？</p>
-<p>开始时所有的worker完成初始化处于W1状态，然后尝试发送回复下载器的消息去contents通道(5)，但它是一个对接通道，下载器不能立马收到。下载器处于D1正尝试发送消息去locations通道(2)，但由于worker都在尝试发送所以无法接收。死锁发生了，所有的协程都在等待。</p>
+<p>开始时所有的worker完成初始化处于W1状态，然后尝试发送回复下载器的消息去<code>contents</code>通道(5)，但它是一个对接通道，下载器不能立马收到。下载器处于D1正尝试发送消息去<code>locations</code>通道(2)，但由于worker都在尝试发送所以无法接收。死锁发生了，所有的协程都在等待。</p>
 <center>
     <img src="../images/deadlock-csp-why.png" width="500"/>
 </center>
 
-<h4 id="Solutions-that-do-not-work"><a href="#Solutions-that-do-not-work" class="headerlink" title="Solutions that do not work"></a>Solutions that do not work</h4><p>问题好像出在<code>select</code>表达式。修复它很简单。相对于由下载器通过select处理来自references和contents的消息，我们可以使用actor模型作为协程重写下载器，它有独立的mailbox通道来处理发送过来的消息。</p>
+<h4 id="Solutions-that-do-not-work"><a href="#Solutions-that-do-not-work" class="headerlink" title="Solutions that do not work"></a>Solutions that do not work</h4><p>问题好像出在<code>select</code>表达式。修复它很简单。相对于由下载器通过select处理来自<code>references</code>和<code>contents</code>的消息，我们可以使用actor模型作为协程重写下载器，它有独立的mailbox通道来处理发送过来的消息。</p>
 <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (msg <span class="keyword">in</span> mailbox) &#123;</span><br><span class="line">    <span class="keyword">when</span> (msg) &#123;</span><br><span class="line">        <span class="keyword">is</span> Reference -&gt; ...</span><br><span class="line">        <span class="keyword">is</span> LocContent -&gt; ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>然而，actor模型也不能避免死锁，这种方式和原来一样代码很快被挂起。他们的通讯状态机是相同的。</p>
-<p>另一个可能被指责的是集合信道——没有缓冲区的信道，因为它们在另一端没有接收器的情况下会暂停发送。即使我们给contents和locations添加buffer也不能解决此问题，只是减少了问题出现的概率或延迟出现。buffer越大出现的概率越低，但无法完全避免死锁的发生，一旦buffer满了发送器还是会挂起并发生死锁。</p>
-<h4 id="Unlimited-capacity-channels"><a href="#Unlimited-capacity-channels" class="headerlink" title="Unlimited-capacity channels"></a>Unlimited-capacity channels</h4><p>一种明确的避免死锁的解决方案是对被通讯死锁影响的channel中的至少一个使用不限大小的buffer，<a href="https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderWithUnlimitedBuffer.kt#L49">这里</a> 的代码对contents通道使用了无限制buffer，似乎能正常工作。</p>
+<p>另一个可能被指责的是集合信道——没有缓冲区的信道，因为它们在另一端没有接收器的情况下会暂停发送。即使我们给<code>contents</code>和<code>locations</code>添加buffer也不能解决此问题，只是减少了问题出现的概率或延迟出现。buffer越大出现的概率越低，但无法完全避免死锁的发生，一旦buffer满了发送器还是会挂起并发生死锁。</p>
+<h4 id="Unlimited-capacity-channels"><a href="#Unlimited-capacity-channels" class="headerlink" title="Unlimited-capacity channels"></a>Unlimited-capacity channels</h4><p>一种明确的避免死锁的解决方案是对被通讯死锁影响的channel中的至少一个使用不限大小的buffer，<a href="https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderWithUnlimitedBuffer.kt#L49">这里</a> 的代码对<code>contents</code>通道使用了无限制buffer，似乎能正常工作。</p>
 <p>然而，通过取消通道缓冲区的限制，我们丧失了CPS编程风格的利润丰厚的属性-自动背压传播.如果来自通道的消息的接收方比发送方慢，则发送方将挂起在全缓冲区上以自动减慢速度。有了无限容量的通道，就不会发生这种情况，管理背压的任务完全由应用程序开发人员承担。如果不能管理背压，系统最终可能会耗尽内存，在其缓冲区中收集越来越多的消息。</p>
-<p>在我们的例子中，把locations通道设置成无限buffer会完全移除对传入引用的背压管理，因为即使所有的worker都处于忙碌状态，下载器也将发送所有的消息去locations通道。<br>把contents通道设置成无限buffer会更安全，因为它只影响下载内容的最终处理。然而，在无限容量的情况下，我们面临的风险是，下载器会被传入的references淹没，永远无法处理下载的内容。这使我们离最终解决方案更近一步。</p>
-<h4 id="Solutions-that-do-work"><a href="#Solutions-that-do-work" class="headerlink" title="Solutions that do work"></a>Solutions that do work</h4><p>我们调整一下下载器协程中select表达式的顺序，以便先检查contents通道，也就是说contents通道的消息优先级高于references通道：</p>
+<p>在我们的例子中，把<code>locations</code>通道设置成无限buffer会完全移除对传入引用的背压管理，因为即使所有的worker都处于忙碌状态，下载器也将发送所有的消息去<code>locations</code>通道。<br>把contents通道设置成无限buffer会更安全，因为它只影响下载内容的最终处理。然而，在无限容量的情况下，我们面临的风险是，下载器会被传入的<code>references</code>淹没，永远无法处理下载的内容。这使我们离最终解决方案更近一步。</p>
+<h4 id="Solutions-that-do-work"><a href="#Solutions-that-do-work" class="headerlink" title="Solutions that do work"></a>Solutions that do work</h4><p>我们调整一下下载器协程中<code>select</code>表达式的顺序，以便先检查<code>contents</code>通道，也就是说<code>contents</code>通道的消息优先级高于<code>references</code>通道：</p>
 <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">select&lt;<span class="built_in">Unit</span>&gt; &#123;</span><br><span class="line">    contents.onReceive &#123; ... &#125;</span><br><span class="line">    references.onReceive &#123; </span><br><span class="line">        ... </span><br><span class="line">        locations.send(loc)                      <span class="comment">// (2)</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<p>它本身并没有解决这个问题(你可以在这里验证代码),但它给了一个有用的属性——<br>下载器只有在没有worker被挂起且worker准备发送消息去contents通道时，才发送消息去locations通道(2)。现在，提供至少一个buffer给contents通道就足够了，以确保至少有一个worker可以在(5)发送其内容，并在(4)再次开始从locations接收，从而允许下载程序继续进行:</p>
+<p>它本身并没有解决这个问题(你可以在这里验证代码),但它给了一个有用的属性——<br>下载器只有在没有worker被挂起且worker准备发送消息去<code>contents</code>通道时，才发送消息去<code>locations</code>通道(2)。现在，提供至少一个buffer给<code>contents</code>通道就足够了，以确保至少有一个worker可以在(5)发送其内容，并在(4)再次开始从<code>locations</code>接收，从而允许下载程序继续进行:</p>
 <figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> contents = Channel&lt;LocContent&gt;(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
 
 <p><a href="https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderFixedPriority.kt">这里</a> 是能运行的代码。</p>
-<p>注意，它是如何在3秒内处理比之前的无限渠道“解决方案”更多的下载的。此外，由于contents通道处理具有最高优先级，现在可以安全地拥有无限容量的contents通道。它在缓冲区中保存的消息永远不会超过工作人员的数量加1(为什么是加1 ?这是留给读者的练习)。</p>
-<p>还有一种替代解决方案，它完全不使用缓冲通道，可以完美地与任何容量的通道一起工作。它加倍<code>select</code>，以避免在locations.send(loc)上挂起下载程序，将这个发送操作折叠为一个<code>select</code>。它实际上是CFSM模型中表示和分析的最简单的一个，但是我现在不会详细介绍它，把它留给将来的故事。你可以看一下<a href="https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderFixedSelect.kt#L16">这里</a> 对应的代码并在playground中运行它。</p>
+<p>注意，它是如何在3秒内处理比之前的无限渠道“解决方案”更多的下载的。此外，由于<code>contents</code>通道处理具有最高优先级，现在可以安全地拥有无限容量的<code>contents</code>通道。它在缓冲区中保存的消息永远不会超过工作人员的数量加1(为什么是加1 ?这是留给读者的练习)。</p>
+<p>还有一种替代解决方案，它完全不使用缓冲通道，可以完美地与任何容量的通道一起工作。它加倍<code>select</code>，以避免在<code>locations.send(loc)</code>上挂起下载程序，将这个发送操作折叠为一个<code>select</code>。它实际上是CFSM模型中表示和分析的最简单的一个，但是我现在不会详细介绍它，把它留给将来的故事。你可以看一下<a href="https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderFixedSelect.kt#L16">这里</a> 对应的代码并在playground中运行它。</p>
 <h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>通信循环(非DAG模式)可能并将导致通道容量有限的通信死锁，除非使用一些死锁预防策略。如果在应用程序中遇到死锁，在了解发生了什么之前，不要尝试使用缓冲通道解决它，否则可能会把问题掩盖起来。</p>
 <p>请在本文的评论中分享更多解决这种特殊通信循环死锁的有效解决方案。Kotlin和其他CSP/actor运行时中的代码都是受欢迎的(请提供链接，不要将代码粘贴到评论中)。</p>
 <h4 id="Credits"><a href="#Credits" class="headerlink" title="Credits"></a>Credits</h4><p>我要感谢Alexey Semin，他通过<a href="https://github.com/Kotlin/kotlinx.coroutines/issues/797">这个</a> github-issue报告了这个问题，并感谢Alexander Gorynin在Kotlin Slack里联系了我。还要感谢Simon Wirtz和Sean McQuillan对本文草稿的有用评论。</p>
