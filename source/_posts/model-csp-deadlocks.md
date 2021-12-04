@@ -26,13 +26,13 @@ description:
 </center>
 
 
-然而在我的演讲中，我草拟了一个数据处理循环的架构，下载器协程向任务池发送locations，并从任务池获取结果：
+然而在我的演讲中，我草拟了一个数据处理循环的架构，下载器协程向任务池发送`locations`，并从任务池获取结果：
 
 <center>
     <img src="../images/deadlock-csp-downloader.png" width="500"/>
 </center>
 
-我演讲中的例子的架构基于3个channel：references、locations、contents。下载协程包含以下逻辑：
+我演讲中的例子的架构基于3个channel：`references`、`locations`、`contents`。下载协程包含以下逻辑：
 ```kotlin
 while (true) {
     select<Unit> {                                   
@@ -63,7 +63,7 @@ for (loc in locations) {                             // (4)
     <img src="../images/deadlock-csp-cfsm.png" width="500"/>
 </center>
 
-为了简洁起见，上图中通道名简写。receive -> rcv、send -> snd 。下载器主循环中的`select`语句相当于D0状态，它能接收来自`references`通道的消息(1)或者来自`contents`通道的消息(3)，当接收到来自references消息，切换到状态D1，等待发送消息去`locations`通道，如图中：(2)l.snd
+为了简洁起见，上图中通道名简写。receive -> rcv、send -> snd 。下载器主循环中的`select`语句相当于D0状态，它能接收来自`references`通道的消息(1)或者来自`contents`通道的消息(3)，当接收到来自`references`消息，切换到状态D1，等待发送消息去`locations`通道，如图中：(2)l.snd
 
 
 #### Deadlock [Demo](https://github.com/elizarov/DeadlocksInCSP)
@@ -76,7 +76,7 @@ for (loc in locations) {                             // (4)
 为了说服你（还有我自己），这是CSP内在的行为而不是Kotlin实现的bug，我用Go语言实现了一遍。Go语言内建的死锁检测器立即给出了提示：_all goroutines are asleep — deadlock_ ，到底发生了什么呢？
 
 
-开始时所有的worker完成初始化处于W1状态，然后尝试发送回复下载器的消息去contents通道(5)，但它是一个对接通道，下载器不能立马收到。下载器处于D1正尝试发送消息去locations通道(2)，但由于worker都在尝试发送所以无法接收。死锁发生了，所有的协程都在等待。
+开始时所有的worker完成初始化处于W1状态，然后尝试发送回复下载器的消息去`contents`通道(5)，但它是一个对接通道，下载器不能立马收到。下载器处于D1正尝试发送消息去`locations`通道(2)，但由于worker都在尝试发送所以无法接收。死锁发生了，所有的协程都在等待。
 
 
 <center>
@@ -85,7 +85,7 @@ for (loc in locations) {                             // (4)
 
 #### Solutions that do not work
 
-问题好像出在`select`表达式。修复它很简单。相对于由下载器通过select处理来自references和contents的消息，我们可以使用actor模型作为协程重写下载器，它有独立的mailbox通道来处理发送过来的消息。
+问题好像出在`select`表达式。修复它很简单。相对于由下载器通过select处理来自`references`和`contents`的消息，我们可以使用actor模型作为协程重写下载器，它有独立的mailbox通道来处理发送过来的消息。
 
 ```kotlin
 for (msg in mailbox) {
@@ -98,21 +98,21 @@ for (msg in mailbox) {
 
 然而，actor模型也不能避免死锁，这种方式和原来一样代码很快被挂起。他们的通讯状态机是相同的。
 
-另一个可能被指责的是集合信道——没有缓冲区的信道，因为它们在另一端没有接收器的情况下会暂停发送。即使我们给contents和locations添加buffer也不能解决此问题，只是减少了问题出现的概率或延迟出现。buffer越大出现的概率越低，但无法完全避免死锁的发生，一旦buffer满了发送器还是会挂起并发生死锁。
+另一个可能被指责的是集合信道——没有缓冲区的信道，因为它们在另一端没有接收器的情况下会暂停发送。即使我们给`contents`和`locations`添加buffer也不能解决此问题，只是减少了问题出现的概率或延迟出现。buffer越大出现的概率越低，但无法完全避免死锁的发生，一旦buffer满了发送器还是会挂起并发生死锁。
 
 #### Unlimited-capacity channels
 
-一种明确的避免死锁的解决方案是对被通讯死锁影响的channel中的至少一个使用不限大小的buffer，[这里](https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderWithUnlimitedBuffer.kt#L49) 的代码对contents通道使用了无限制buffer，似乎能正常工作。
+一种明确的避免死锁的解决方案是对被通讯死锁影响的channel中的至少一个使用不限大小的buffer，[这里](https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderWithUnlimitedBuffer.kt#L49) 的代码对`contents`通道使用了无限制buffer，似乎能正常工作。
 
 然而，通过取消通道缓冲区的限制，我们丧失了CPS编程风格的利润丰厚的属性-自动背压传播.如果来自通道的消息的接收方比发送方慢，则发送方将挂起在全缓冲区上以自动减慢速度。有了无限容量的通道，就不会发生这种情况，管理背压的任务完全由应用程序开发人员承担。如果不能管理背压，系统最终可能会耗尽内存，在其缓冲区中收集越来越多的消息。
 
-在我们的例子中，把locations通道设置成无限buffer会完全移除对传入引用的背压管理，因为即使所有的worker都处于忙碌状态，下载器也将发送所有的消息去locations通道。
-把contents通道设置成无限buffer会更安全，因为它只影响下载内容的最终处理。然而，在无限容量的情况下，我们面临的风险是，下载器会被传入的references淹没，永远无法处理下载的内容。这使我们离最终解决方案更近一步。
+在我们的例子中，把`locations`通道设置成无限buffer会完全移除对传入引用的背压管理，因为即使所有的worker都处于忙碌状态，下载器也将发送所有的消息去`locations`通道。
+把contents通道设置成无限buffer会更安全，因为它只影响下载内容的最终处理。然而，在无限容量的情况下，我们面临的风险是，下载器会被传入的`references`淹没，永远无法处理下载的内容。这使我们离最终解决方案更近一步。
 
 
 #### Solutions that do work
 
-我们调整一下下载器协程中select表达式的顺序，以便先检查contents通道，也就是说contents通道的消息优先级高于references通道：
+我们调整一下下载器协程中`select`表达式的顺序，以便先检查`contents`通道，也就是说`contents`通道的消息优先级高于`references`通道：
 
 ```kotlin
 select<Unit> {
@@ -126,7 +126,7 @@ select<Unit> {
 ```
 
 它本身并没有解决这个问题(你可以在这里验证代码),但它给了一个有用的属性——
-下载器只有在没有worker被挂起且worker准备发送消息去contents通道时，才发送消息去locations通道(2)。现在，提供至少一个buffer给contents通道就足够了，以确保至少有一个worker可以在(5)发送其内容，并在(4)再次开始从locations接收，从而允许下载程序继续进行:
+下载器只有在没有worker被挂起且worker准备发送消息去`contents`通道时，才发送消息去`locations`通道(2)。现在，提供至少一个buffer给`contents`通道就足够了，以确保至少有一个worker可以在(5)发送其内容，并在(4)再次开始从`locations`接收，从而允许下载程序继续进行:
 
 ```kotlin
 val contents = Channel<LocContent>(1)
@@ -134,9 +134,9 @@ val contents = Channel<LocContent>(1)
 
 [这里](https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderFixedPriority.kt) 是能运行的代码。
 
-注意，它是如何在3秒内处理比之前的无限渠道“解决方案”更多的下载的。此外，由于contents通道处理具有最高优先级，现在可以安全地拥有无限容量的contents通道。它在缓冲区中保存的消息永远不会超过工作人员的数量加1(为什么是加1 ?这是留给读者的练习)。
+注意，它是如何在3秒内处理比之前的无限渠道“解决方案”更多的下载的。此外，由于`contents`通道处理具有最高优先级，现在可以安全地拥有无限容量的`contents`通道。它在缓冲区中保存的消息永远不会超过工作人员的数量加1(为什么是加1 ?这是留给读者的练习)。
 
-还有一种替代解决方案，它完全不使用缓冲通道，可以完美地与任何容量的通道一起工作。它加倍`select`，以避免在locations.send(loc)上挂起下载程序，将这个发送操作折叠为一个`select`。它实际上是CFSM模型中表示和分析的最简单的一个，但是我现在不会详细介绍它，把它留给将来的故事。你可以看一下[这里](https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderFixedSelect.kt#L16) 对应的代码并在playground中运行它。
+还有一种替代解决方案，它完全不使用缓冲通道，可以完美地与任何容量的通道一起工作。它加倍`select`，以避免在`locations.send(loc)`上挂起下载程序，将这个发送操作折叠为一个`select`。它实际上是CFSM模型中表示和分析的最简单的一个，但是我现在不会详细介绍它，把它留给将来的故事。你可以看一下[这里](https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderFixedSelect.kt#L16) 对应的代码并在playground中运行它。
 
 
 #### 总结
