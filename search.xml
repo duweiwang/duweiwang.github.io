@@ -1916,4 +1916,36 @@
         <tag>Economics</tag>
       </tags>
   </entry>
+  <entry>
+    <title>源码分析-项目架构之SpaceX</title>
+    <url>/android-github-source-spacex.html</url>
+    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>此文是对Github开源项目<a href="https://github.com/ferPrieto/SpaceX-prepare-for-Clean-Architecture-liftoff">SpaceX-prepare-for-Clean-Architecture-liftoff</a> 的源码阅读记录。它是一个为了阐述对<strong>Clean Architecture</strong>的理解而作的Demo项目，是一个值得学习的项目。</p>
+<h4 id="二、源码分析"><a href="#二、源码分析" class="headerlink" title="二、源码分析"></a>二、源码分析</h4><h5 id="2-1-模块之间的依赖关系"><a href="#2-1-模块之间的依赖关系" class="headerlink" title="2.1 模块之间的依赖关系"></a>2.1 模块之间的依赖关系</h5><p>项目包含以下library：</p>
+<ul>
+<li>app</li>
+<li>buildSrc</li>
+<li>core</li>
+<li>core-android-test</li>
+<li>data</li>
+<li>data-api</li>
+<li>domain</li>
+<li>navigation</li>
+<li>presentation</li>
+</ul>
+<p>模块之间的依赖关系可用下图简述：</p>
+<center>
+    <img src="../images/android-source-spacex.jpeg" width="500"/>
+</center>
+
+<h5 id="2-2-类和模块之间的关系"><a href="#2-2-类和模块之间的关系" class="headerlink" title="2.2 类和模块之间的关系"></a>2.2 类和模块之间的关系</h5><center>
+    <img src="../images/android-source-spacex-overview.jpeg" width="600"/>
+</center>
+
+
+<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>项目重在阐述架构思想所以比较简单，其中很多东西值得我们在项目中借鉴。数据层的架构模式参看<a href="https://martinfowler.com/bliki/PresentationDomainDataLayering.html">martin fowler</a> 的文章。</p>
+]]></content>
+      <tags>
+        <tag>arch</tag>
+      </tags>
+  </entry>
 </search>
