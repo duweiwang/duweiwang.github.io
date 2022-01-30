@@ -186,6 +186,155 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-library-room-7-tips.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/android-library-room-7-tips.html" class="post-title-link" itemprop="url">Room数据库酷七条</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-30 22:01:39" itemprop="dateCreated datePublished" datetime="2022-01-30T22:01:39+08:00">2022-01-30</time>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/android-library-room-7-tips.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/android-library-room-7-tips.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="一、通过RoomDatabase-Callback预填充数据"><a href="#一、通过RoomDatabase-Callback预填充数据" class="headerlink" title="一、通过RoomDatabase#Callback预填充数据"></a>一、通过<code>RoomDatabase#Callback</code>预填充数据</h4><p>如果需要在数据库创建或数据库打开的时候添加一些默认数据，可以使用<code>RoomDatabase#Callback</code>接口并复写它的<code>onCreate</code>或<code>onOpen</code>方法。由于DAO对象只能在这两个方法返回后使用，所以我们创建一个新线程来插入数据：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">Room.databaseBuilder(context.applicationContext,</span><br><span class="line">        DataDatabase::<span class="keyword">class</span>.java, <span class="string">&quot;Sample.db&quot;</span>)</span><br><span class="line">        <span class="comment">// prepopulate the database after onCreate was called</span></span><br><span class="line">        .addCallback(<span class="keyword">object</span> : Callback() &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(db: <span class="type">SupportSQLiteDatabase</span>)</span></span> &#123;</span><br><span class="line">                <span class="keyword">super</span>.onCreate(db)</span><br><span class="line">                <span class="comment">// moving to a new thread</span></span><br><span class="line">                ioThread &#123;</span><br><span class="line">                    getInstance(context).dataDao()</span><br><span class="line">                                        .insert(PREPOPULATE_DATA)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        .build()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>需要注意的是</strong>：当app首次启动时，在create和insert之间崩溃的话，数据将永远不会被插入。</p>
+<h4 id="二、使用DAO的继承能力"><a href="#二、使用DAO的继承能力" class="headerlink" title="二、使用DAO的继承能力"></a>二、使用DAO的继承能力</h4><p>很多DAO里存在一样的<code>Insert</code>、<code>Update</code>、<code>Delete</code>方法。我们可以使用继承来避免这些重复的代码。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BaseDao</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">insert</span><span class="params">(<span class="keyword">vararg</span> obj: <span class="type">T</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">DataDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">Data</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;SELECT * FROM Data&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getData</span><span class="params">()</span></span>: List&lt;Data&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="三、通过-Transaction减少事务查询的模板代码"><a href="#三、通过-Transaction减少事务查询的模板代码" class="headerlink" title="三、通过@Transaction减少事务查询的模板代码"></a>三、通过<code>@Transaction</code>减少事务查询的模板代码</h4><p>用<code>@Transaction</code>注解的方法会在一个事务里面执行。当这些方法执行异常时，事务也会失败。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Transaction</span></span><br><span class="line">    <span class="keyword">open</span> <span class="function"><span class="keyword">fun</span> <span class="title">updateData</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span> &#123;</span><br><span class="line">        deleteAllUsers()</span><br><span class="line">        insertAll(users)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">insertAll</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span></span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;DELETE FROM Users&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">deleteAllUsers</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当<code>@Query</code>方法带有select语句时，在下列情况下你可能会使用<code>@Transation</code>注解</p>
+<ul>
+<li>当查询的结果集很大时，让查询在一次事务里完成能够保证：如果查询结果不满足单个游标窗口，它不会因为在游标窗口交换之间的数据库更改而中断。</li>
+<li>如果查询结果是一个带<code>@Relation</code>字段的POJO，此字段会单独查询，所以让他们运行在一个事务中可以确保结果一致。</li>
+</ul>
+<p><code>Delete</code>、<code>Update</code>、<code>Insert</code>方法包含多个参数时会自动在事务里执行。</p>
+<h4 id="四、只读需要的数据"><a href="#四、只读需要的数据" class="headerlink" title="四、只读需要的数据"></a>四、只读需要的数据</h4><p>关注App的内存消耗，只加载需要使用的字段，这能提高查询速度减少IO消耗。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;users&quot;</span>)</span></span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span></span>(<span class="meta">@PrimaryKey</span></span><br><span class="line">                <span class="keyword">val</span> id: String,</span><br><span class="line">                <span class="keyword">val</span> userName: String,</span><br><span class="line">                <span class="keyword">val</span> firstName: String, </span><br><span class="line">                <span class="keyword">val</span> lastName: String,</span><br><span class="line">                <span class="keyword">val</span> email: String,</span><br><span class="line">                <span class="keyword">val</span> dateOfBirth: Date, </span><br><span class="line">                <span class="keyword">val</span> registrationDate: Date)</span><br></pre></td></tr></table></figure>
+
+<p>上面的类中，很多字段我们用不到，定义一个类，只包含我们需要的字段：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserMinimal</span></span>(<span class="keyword">val</span> userId: String,</span><br><span class="line">                       <span class="keyword">val</span> firstName: String, </span><br><span class="line">                       <span class="keyword">val</span> lastName: String)</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，定义方法只查询所需字段：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT userId, firstName, lastName FROM Users)</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getUsersMinimal</span><span class="params">()</span></span>: List&lt;UserMinimal&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="五、使用外键"><a href="#五、使用外键" class="headerlink" title="五、使用外键"></a>五、使用外键</h4><p>即使Room不直接支持关系，但它允许你定义外键来约束实体之间的关系。</p>
+<p>Room的<code>@ForeignKey</code>是<code>@Entity</code>注解的一部分，用来支持Sqlite的外键特性。它强制表之间的约束，当你修改表时，保证关系一致性。</p>
+<p>看一下<code>User</code>和<code>Pet</code>类，<code>Pet</code>有主人，以userId关联。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;pets&quot;</span>,</span></span><br><span class="line"><span class="meta">        foreignKeys = arrayOf(</span></span><br><span class="line"><span class="meta">            ForeignKey(entity = User::class,</span></span><br><span class="line"><span class="meta">                       parentColumns = arrayOf(<span class="meta-string">&quot;userId&quot;</span>)</span>,</span><br><span class="line">                       childColumns = arrayOf(<span class="string">&quot;owner&quot;</span>))))</span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Pet</span></span>(<span class="meta">@PrimaryKey</span> <span class="keyword">val</span> petId: String,</span><br><span class="line">              <span class="keyword">val</span> name: String,</span><br><span class="line">              <span class="keyword">val</span> owner: String)</span><br></pre></td></tr></table></figure>
+
+<p>你可以定义一些行为，当例子中的<code>User</code>在数据库中被删除或修改。你可以做以下一些操作：<code>NO_ACTION</code>、<code>RESTRICT</code>、<code>SET_NULL</code>、<code>SET_DEFAULT</code>或<code>CASCADE</code>，这些操作和Sqlite保持一致。</p>
+<p><strong>注意：</strong> 在Room中<code>SET_DEFAULT</code>和<code>SET_NULL</code>效果一致，因为Room还不允许为数据列设置默认值。</p>
+<h4 id="六、使用-Relation简化一对多查询"><a href="#六、使用-Relation简化一对多查询" class="headerlink" title="六、使用@Relation简化一对多查询"></a>六、使用<code>@Relation</code>简化一对多查询</h4><p>在前面<code>User-Pet</code>的例子中，我们有个一对多的关系，一个人可以有多个宠物。当我们想获取主人和宠物集合时：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>(<span class="keyword">val</span> user: User,</span><br><span class="line">                           <span class="keyword">val</span> pets: List&lt;Pet&gt; = ArrayList())</span><br></pre></td></tr></table></figure>
+
+<p>需要两个查询：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;User&gt; getUsers();</span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Pets where owner = :userId”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;Pet&gt; getPetsForUser(String userId);</span><br></pre></td></tr></table></figure>
+
+<p>我们需要遍历用户来查宠物。</p>
+<p>为了简化此过程，Room的<code>@Relation</code>注解自动关联实体。此注解只能用于<code>List</code>和<code>Set</code>对象。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Embedded</span></span><br><span class="line">   <span class="keyword">var</span> user: User? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">   <span class="meta">@Relation(parentColumn = “userId”,</span></span><br><span class="line"><span class="meta">             entityColumn = “owner”)</span></span><br><span class="line">   <span class="keyword">var</span> pets: List&lt;Pet&gt; = ArrayList()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，我们定义一次查询：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transaction</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line">List&lt;UserAndAllPets&gt; getUsers();</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="七、避免可观察查询的假通知"><a href="#七、避免可观察查询的假通知" class="headerlink" title="七、避免可观察查询的假通知"></a>七、避免可观察查询的假通知</h4><p>可观察查询，只关心对应ID的对象：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; </span><br><span class="line"></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br></pre></td></tr></table></figure>
+
+<p>每次此用户更新的时候你都得到一个新通知。但是其他的一些不影响此ID的修改（delete、update、insert）会发送通知。</p>
+<p>这种场景背后的原因是什么：<br>1、Sqlite支持触发器，<code>DELETE</code>、<code>UPDATE</code>、<code>INSERT</code>发生时或触发。<br>2、Room创建了一个<code>InvalidationTracker</code>来跟踪观察表的变化。<br>3、<code>LiveData</code>和<code>Flowable</code>查询依赖<code>InvalidationTracker.Observer#onInvalidated</code>通知，收到通知就做一次再查询操作。</p>
+<p>Room只知道表被修改了，不知道为什么修改也不知道什么被修改。因此，再查询操作会重新通知。由于Room不在内存保存数据也不能保证object的equals方法所以他不知道对象是否变化了。</p>
+<p>你需要自己保证DAO过滤收到的事件，只对关心的数据做出响应。</p>
+<p>如果观察的是<code>Flowable</code>，使用<code>Flowable#distinctUntilChanged</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Get a user by id.</span></span><br><span class="line"><span class="comment">* <span class="doctag">@return</span> the user from the table with a specific id.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: </span><br><span class="line">    Flowable&lt;User&gt; = getUserById(id).distinctUntilChanged()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果观察的是<code>LiveData</code>，可以用<code>MediatorLiveData</code>处理只让有变化的数据发送事件。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> LiveData<span class="type">&lt;T&gt;</span>.<span class="title">getDistinct</span><span class="params">()</span></span>: LiveData&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> distinctLiveData = MediatorLiveData&lt;T&gt;()</span><br><span class="line">    distinctLiveData.addSource(<span class="keyword">this</span>, <span class="keyword">object</span> : Observer&lt;T&gt; &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> initialized = <span class="literal">false</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> lastObj: T? = <span class="literal">null</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onChanged</span><span class="params">(obj: <span class="type">T</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!initialized) &#123;</span><br><span class="line">                initialized = <span class="literal">true</span></span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((obj == <span class="literal">null</span> &amp;&amp; lastObj != <span class="literal">null</span>) </span><br><span class="line">                       || obj != lastObj) &#123;</span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> distinctLiveData</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，让真正关心变化的方法使用<code>public</code>修饰，查询方法用<code>protected</code>修饰</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; = getUserById(id).getDistinct()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong> 如果你返回列表用于展示，考虑使用<code>Paging</code>库，它能帮你处理数据的变化。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-github-source-retrofit.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1843,145 +1992,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/cpu-cache-overview.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/cpu-cache-overview.html" class="post-title-link" itemprop="url">CPU的缓存</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-10-13 15:28:59 / 修改时间：16:00:14" itemprop="dateCreated datePublished" datetime="2021-10-13T15:28:59+08:00">2021-10-13</time>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/cpu-cache-overview.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/cpu-cache-overview.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>971</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="一、性能"><a href="#一、性能" class="headerlink" title="一、性能"></a>一、性能</h4><p>1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。<a target="_blank" rel="noopener" href="https://gist.github.com/jboner/2841832">参考</a></p>
-<p>从数据可以看出，L1缓存和主存访问速度相差200倍。</p>
-<center>
-    <img src="../images/cpu_cache_speed.png" width="500"/>
-</center>
-
-
-<h4 id="二、缓存行"><a href="#二、缓存行" class="headerlink" title="二、缓存行"></a>二、缓存行</h4><p>CPU缓存的基本单位是缓存行，主存数据和缓存的映射存在下列关系：</p>
-<h5 id="2-1-直接映射缓存"><a href="#2-1-直接映射缓存" class="headerlink" title="2.1 直接映射缓存"></a>2.1 直接映射缓存</h5><center>
-    <img src="../images/cpu_cache_direct_map.jpeg" width="600"/>
-</center>
-
-<p>1、 index用于计算在哪一个缓存行<br>2、 offset用于计算在缓存行的哪个字节<br>3、 tag用于判断缓存是否命中（假设0x7f6601 和 0x8f6602两个地址，低位都一样，缓存行和字节偏移都命中了，tag不命中）</p>
-<p>缺点：<br>图中，cache缓存8行数据，当访问第0行、第8行、第16行时，缓存无法命中，每次都要去主存加载，发生<strong>缓存颠簸</strong></p>
-<h5 id="2-2-多路组相连"><a href="#2-2-多路组相连" class="headerlink" title="2.2 多路组相连"></a>2.2 多路组相连</h5><p>这是一个两路组相连的示意图：</p>
-<center>
-    <img src="../images/cpu_cache_n_way.png" width="500"/>
-</center>
-
-<p>1、index定位组<br>2、组内依次对tag进行对比（可以通过硬件并行比较增加性能）</p>
-<h4 id="三、缓存一致性"><a href="#三、缓存一致性" class="headerlink" title="三、缓存一致性"></a>三、缓存一致性</h4><h5 id="3-1-问题描述："><a href="#3-1-问题描述：" class="headerlink" title="3.1 问题描述："></a>3.1 问题描述：</h5><center>
-    <img src="../images/cpu_cache_problem.jpeg" width="500"/>
-</center>
-
-<p>处理器 1 读 X ：从内存读取24并缓存<br>处理器 2 读 X ：从内存读取24并缓存<br>处理器 1 写 X = 32 ：更新自己的缓存<br>处理器 3 读 X = ？  </p>
-<p>如何保证缓存的一致性？<a target="_blank" rel="noopener" href="https://people.eecs.berkeley.edu/~pattrsn/252F96/Lecture18.pdf">参考</a></p>
-<h5 id="3-2-解决方案"><a href="#3-2-解决方案" class="headerlink" title="3.2 解决方案"></a>3.2 解决方案</h5><p>3.1.1 嗅探-Snooping Solution(Snoopy Bus)</p>
-<p>根据写操作对缓存数据的影响嗅探协议可分为：<br>Write-invalidate：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并标志自己的缓存失效。这保证了全局只有一份缓存是有效的。</p>
-<ul>
-<li>MSI</li>
-<li>MESI</li>
-<li>MOSI</li>
-<li>MOESI</li>
-<li>MESIF </li>
-</ul>
-<p>Write-update：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并更新自己的缓存。通过总线广播给所有的缓存造成了总线繁忙，所以不常见。</p>
-<p>3.1.2 目录-Directory-Based Schemes</p>
-<h5 id="3-2-MESI协议参考"><a href="#3-2-MESI协议参考" class="headerlink" title="3.2 MESI协议参考"></a>3.2 MESI协议<a target="_blank" rel="noopener" href="https://people.cs.pitt.edu/~melhem/courses/2410p/ch5-4.pdf">参考</a></h5><p>MESI是四个状态的首字母缩写，在缓存行中用2个bit标志该缓存行的状态。</p>
-<ul>
-<li>M:Modified（只存在当前缓存行，已被修改，和主存不一致，需要更新回主存）</li>
-<li>E:Exclusive（只存在当前缓存行，和主存一致）</li>
-<li>S:Shared（其他缓存行也存在该数据，和主存一致）</li>
-<li>I:Invalid（此缓存行失效）</li>
-</ul>
-<p>MESI的状态迁移：</p>
-<center>
-    <img src="../images/cpu_cache_mesi_state.jpeg" width="500"/>
-</center>
-
-
-
-
-<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p><a target="_blank" rel="noopener" href="https://www.cnkirito.moe/cache-line/#%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%93%E5%AD%98%E8%A1%8C-Cache-Line-%EF%BC%9F">0.Java角度理解CPU缓存</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/102293437">1.Cache的基本原理</a><br><a target="_blank" rel="noopener" href="https://gist.github.com/jboner/2841832">2.每个开发者需要知道的数据</a><br><a target="_blank" rel="noopener" href="https://medium.com/fcamels-notes/%E5%BE%9E%E7%A1%AC%E9%AB%94%E8%A7%80%E9%BB%9E%E4%BA%86%E8%A7%A3-memry-barrier-%E7%9A%84%E5%AF%A6%E4%BD%9C%E5%92%8C%E6%95%88%E6%9E%9C-416ff0a64fc1">3.硬件角度看内存屏障</a><br><a target="_blank" rel="noopener" href="https://medium.com/fcamels-notes/%E5%BE%9E-double-checked-locking-%E4%BA%86%E8%A7%A3-memory-barrier-%E7%9A%84%E4%BD%9C%E7%94%A8-bb151a359c1b">4.软件角度内存屏障</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/3928995/how-do-cache-lines-work">5.stackoverflow-How do cache lines work?</a><br><a target="_blank" rel="noopener" href="https://courses.cs.duke.edu/spring09/cps104/lectures/2up-lecture17.pdf">6.courses-pdf</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2094,7 +2104,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -2104,13 +2114,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">74k</span>
+    <span title="站点总字数">78k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">1:07</span>
+    <span title="站点阅读时长">1:11</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>

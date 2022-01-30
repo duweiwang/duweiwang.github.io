@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2021-12-30T13:43:48.162Z</updated>
+  <updated>2022-01-30T14:01:39.388Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Room数据库酷七条</title>
+    <link href="https://wangduwei.top/android-library-room-7-tips.html"/>
+    <id>https://wangduwei.top/android-library-room-7-tips.html</id>
+    <published>2022-01-30T14:01:39.000Z</published>
+    <updated>2022-01-30T14:01:39.388Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、通过RoomDatabase-Callback预填充数据&quot;&gt;&lt;a href=&quot;#一、通过RoomDatabase-Callback预填充数据&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>源码分析-网络框架之Retrofit</title>
@@ -478,25 +499,6 @@
     <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
     
     <category term="File" scheme="https://wangduwei.top/tags/File/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Android-11适配</title>
-    <link href="https://wangduwei.top/android-target-30.html"/>
-    <id>https://wangduwei.top/android-target-30.html</id>
-    <published>2021-08-26T12:27:25.000Z</published>
-    <updated>2021-08-26T13:25:36.286Z</updated>
-    
-    
-    <summary type="html">Android-11,target-sdk 30 变更及适配指南</summary>
-    
-    
-    
-    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
-    
-    
-    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
   </entry>
   
