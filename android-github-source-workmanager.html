@@ -24,20 +24,25 @@
 
 <script data-ad-client="ca-pub-8087648226243491" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
-  <meta name="description" content="一、人们如何做出决策1.1 人们面临权衡取舍选择一样东西就意味着你要放弃另外一样东西。认识到生活中的权衡是重要的，因为人们只有了解他们可以得到的选择，才能作出良好的决策。 1.2 某种东西的成本是为了得到它而放弃的东西一种东西的机会成本是为了得到这种东西所放弃的东西 1.3 理性人考虑边际量生活中的许多决策涉及到对现有行动计划进行微小的增量调整。 经济学家把这些调整称为边际变动。个人和企业通过考虑">
+  <meta name="description" content="一、初始化流程1、WorkManager集成了androidx.startup 库，通过startup库的ContentProvider在应用启动时进行初始化。见work-runtime的Manifest文件： 123456789&lt;provider    android:name&#x3D;&quot;androidx.startup.InitializationProvider&quot;    a">
 <meta property="og:type" content="article">
-<meta property="og:title" content="经济学的十大原理">
-<meta property="og:url" content="https://wangduwei.top/principles-of-economics.html">
+<meta property="og:title" content="源码分析-WorkManager">
+<meta property="og:url" content="https://wangduwei.top/android-github-source-workmanager.html">
 <meta property="og:site_name" content="蓝色的笔记本">
-<meta property="og:description" content="一、人们如何做出决策1.1 人们面临权衡取舍选择一样东西就意味着你要放弃另外一样东西。认识到生活中的权衡是重要的，因为人们只有了解他们可以得到的选择，才能作出良好的决策。 1.2 某种东西的成本是为了得到它而放弃的东西一种东西的机会成本是为了得到这种东西所放弃的东西 1.3 理性人考虑边际量生活中的许多决策涉及到对现有行动计划进行微小的增量调整。 经济学家把这些调整称为边际变动。个人和企业通过考虑">
+<meta property="og:description" content="一、初始化流程1、WorkManager集成了androidx.startup 库，通过startup库的ContentProvider在应用启动时进行初始化。见work-runtime的Manifest文件： 123456789&lt;provider    android:name&#x3D;&quot;androidx.startup.InitializationProvider&quot;    a">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-09-09T14:58:09.000Z">
-<meta property="article:modified_time" content="2021-09-09T15:04:53.250Z">
+<meta property="og:image" content="https://wangduwei.top/images/android-workmanager_init.jpg">
+<meta property="og:image" content="https://wangduwei.top/images/android-workmanager-work.jpg">
+<meta property="og:image" content="https://wangduwei.top/images/android-workmanager-request.jpg">
+<meta property="og:image" content="https://wangduwei.top/images/android-workmanager-action.jpg">
+<meta property="article:published_time" content="2022-04-17T05:51:57.000Z">
+<meta property="article:modified_time" content="2022-04-17T06:40:32.422Z">
 <meta property="article:author" content="wangduwei">
-<meta property="article:tag" content="Economics">
+<meta property="article:tag" content="Android">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wangduwei.top/images/android-workmanager_init.jpg">
 
-<link rel="canonical" href="https://wangduwei.top/principles-of-economics.html">
+<link rel="canonical" href="https://wangduwei.top/android-github-source-workmanager.html">
 
 
 <script id="page-configurations">
@@ -50,7 +55,7 @@
   };
 </script>
 
-  <title>经济学的十大原理 | 蓝色的笔记本</title>
+  <title>源码分析-WorkManager | 蓝色的笔记本</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-69Z1P1CBTV"></script>
     <script>
@@ -190,7 +195,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/principles-of-economics.html">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-github-source-workmanager.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -203,7 +208,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          经济学的十大原理
+          源码分析-WorkManager
         </h1>
 
         <div class="post-meta">
@@ -214,16 +219,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-09-09 22:58:09 / 修改时间：23:04:53" itemprop="dateCreated datePublished" datetime="2021-09-09T22:58:09+08:00">2021-09-09</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Economics/" itemprop="url" rel="index"><span itemprop="name">Economics</span></a>
-                </span>
+              <time title="创建时间：2022-04-17 13:51:57 / 修改时间：14:40:32" itemprop="dateCreated datePublished" datetime="2022-04-17T13:51:57+08:00">2022-04-17</time>
             </span>
 
           
@@ -242,8 +238,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/principles-of-economics.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/principles-of-economics.html" itemprop="commentCount"></span>
+    <a title="valine" href="/android-github-source-workmanager.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/android-github-source-workmanager.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -253,14 +249,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>852</span>
+              <span>1.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -272,30 +268,40 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h4 id="一、人们如何做出决策"><a href="#一、人们如何做出决策" class="headerlink" title="一、人们如何做出决策"></a>一、人们如何做出决策</h4><h5 id="1-1-人们面临权衡取舍"><a href="#1-1-人们面临权衡取舍" class="headerlink" title="1.1 人们面临权衡取舍"></a>1.1 人们面临权衡取舍</h5><p>选择一样东西就意味着你要放弃另外一样东西。认识到生活中的权衡是重要的，因为人们只有了解他们可以得到的选择，才能作出良好的决策。</p>
-<h5 id="1-2-某种东西的成本是为了得到它而放弃的东西"><a href="#1-2-某种东西的成本是为了得到它而放弃的东西" class="headerlink" title="1.2 某种东西的成本是为了得到它而放弃的东西"></a>1.2 某种东西的成本是为了得到它而放弃的东西</h5><p>一种东西的机会成本是为了得到这种东西所放弃的东西</p>
-<h5 id="1-3-理性人考虑边际量"><a href="#1-3-理性人考虑边际量" class="headerlink" title="1.3 理性人考虑边际量"></a>1.3 理性人考虑边际量</h5><p>生活中的许多决策涉及到对现有行动计划进行微小的增量调整。 经济学家把这些调整称为边际变动。<br>个人和企业通过考虑边际量将会作出更好的决策。只有一种行动的边际收益大于边际成本，一个理性决策者才 会采取这项行动。</p>
-<h5 id="1-4-人们会对激励作出反应"><a href="#1-4-人们会对激励作出反应" class="headerlink" title="1.4 人们会对激励作出反应"></a>1.4 人们会对激励作出反应</h5><ul>
-<li>由于理性人通过比较成本与收益🉐做出决策，所以他们会对激励做出反应。</li>
-<li>在分析任何一种政策时，不仅应该考虑直接影响，而且还应该考 虑激励发生作用的间接影响。</li>
-<li>如果政策改变了激励，它就将使人们改 变自己的行为。</li>
-</ul>
-<h4 id="二、人们如何相互影响"><a href="#二、人们如何相互影响" class="headerlink" title="二、人们如何相互影响"></a>二、人们如何相互影响</h4><h5 id="2-1-贸易能使每个人的状况变得更好"><a href="#2-1-贸易能使每个人的状况变得更好" class="headerlink" title="2.1 贸易能使每个人的状况变得更好"></a>2.1 贸易能使每个人的状况变得更好</h5><p>贸易使各国可以专 门从事自己最擅长活动，并享有很多的各种各样物品与劳务</p>
-<h5 id="2-2-市场通常是组织经济活动的一种好方法"><a href="#2-2-市场通常是组织经济活动的一种好方法" class="headerlink" title="2.2 市场通常是组织经济活动的一种好方法"></a>2.2 市场通常是组织经济活动的一种好方法</h5><ul>
-<li>在市场经济中，中央计划者的决策被千百万企业和家庭的决策所取代。</li>
-<li>价格和利己引导人们决策</li>
-<li>价格就是看不见的手用来指引经济活动的工具</li>
-<li>当政府阻止价格根据供求状况自发调整时，他就限制了看不见的手🤚对组成经济的千百万家庭👪和企业的决策进行协调的能力</li>
-</ul>
-<h5 id="2-3-政府有时可以改善市场结果"><a href="#2-3-政府有时可以改善市场结果" class="headerlink" title="2.3 政府有时可以改善市场结果"></a>2.3 政府有时可以改善市场结果</h5><ul>
-<li>只有在政府实施规则并维护对市场经济至关重要的制度时，看不见的手才能施展其魔力。</li>
-<li>看不见的手🤚是强有力的，但并不是无所不能的。政府干预经济的原因有两类：促进效率和促进平等。</li>
-</ul>
-<h4 id="三、整体经济如何运行"><a href="#三、整体经济如何运行" class="headerlink" title="三、整体经济如何运行"></a>三、整体经济如何运行</h4><h5 id="3-1-一国的生活水平取决于它生产物品与服务的能力"><a href="#3-1-一国的生活水平取决于它生产物品与服务的能力" class="headerlink" title="3.1 一国的生活水平取决于它生产物品与服务的能力"></a>3.1 一国的生活水平取决于它生产物品与服务的能力</h5><p>生产率：每单位劳动投入所生产的物品与服务数量。</p>
-<h5 id="3-2-当政府发行了过多货币时，物价上升"><a href="#3-2-当政府发行了过多货币时，物价上升" class="headerlink" title="3.2 当政府发行了过多货币时，物价上升"></a>3.2 当政府发行了过多货币时，物价上升</h5><h5 id="3-3-社会面临通货膨胀与失业之间的短期权衡取舍"><a href="#3-3-社会面临通货膨胀与失业之间的短期权衡取舍" class="headerlink" title="3.3 社会面临通货膨胀与失业之间的短期权衡取舍"></a>3.3 社会面临通货膨胀与失业之间的短期权衡取舍</h5><ul>
-<li>货币的增加刺激社会的整体支出水平，从而增加对物品与服务的需求</li>
-<li>需求的增加随着时间的推移，会引起企业提高物价，同时它也鼓励企业雇佣更多的工人👷，并生产更多的物品与服务</li>
-<li>雇佣更多的工人👷意味着更少的失业。</li>
+        <h4 id="一、初始化流程"><a href="#一、初始化流程" class="headerlink" title="一、初始化流程"></a>一、初始化流程</h4><p>1、WorkManager集成了<code>androidx.startup</code> 库，通过<code>startup</code>库的<code>ContentProvider</code>在应用启动时进行初始化。<br>见<code>work-runtime</code>的Manifest文件：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">provider</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;androidx.startup.InitializationProvider&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:authorities</span>=<span class="string">&quot;$&#123;applicationId&#125;.androidx-startup&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:exported</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:node</span>=<span class="string">&quot;merge&quot;</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;androidx.work.WorkManagerInitializer&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:value</span>=<span class="string">&quot;androidx.startup&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>其初始化类为<code>WorkManagerInitializer</code>，其中调用了<code>WorkManager#initialize</code>，然后调用<code>WorkManager</code>的构造函数。<br>整个流程初始化了如下一些对象：</p>
+<center>
+    <img src="../images/android-workmanager_init.jpg" width="100%"/>
+</center>
+
+
+<h4 id="二、任务"><a href="#二、任务" class="headerlink" title="二、任务"></a>二、任务</h4><h5 id="2-1-定义任务"><a href="#2-1-定义任务" class="headerlink" title="2.1 定义任务"></a>2.1 定义任务</h5><p>当我们自定义任务时，需要继承<code>Work</code>类，WorkManager内部对<code>Work</code>的结构定义如下：</p>
+<center>
+    <img src="../images/android-workmanager-work.jpg" width="40%"/>
+</center>
+
+<p>其中<code>DiagnosticsWorker</code>和<code>CombineContinueationsWorker</code>是内部使用的两个任务。</p>
+<h5 id="2-2-提交任务"><a href="#2-2-提交任务" class="headerlink" title="2.2 提交任务"></a>2.2 提交任务</h5><p>我们将任务以请求（WorkRequest）的形式提交（enqueue）给WorkManager。WorkManager会将请求装换成内部的WorkContinuation对象。</p>
+<center>
+    <img src="../images/android-workmanager-request.jpg" width="70%"/>
+</center>
+
+<p>WorkContinuation可以将多个<code>OneTimeWorkrequest</code>构建成任意依赖关系的无环图。而WorkContinuation的<code>enqueue</code>方法则是任务被执行调度的入口。</p>
+<h5 id="2-3-执行任务"><a href="#2-3-执行任务" class="headerlink" title="2.3 执行任务"></a>2.3 执行任务</h5><p>对任务进行不同的操作，如：取消、结束、开始等。WorkManager内部会将这些行为转换成对应的Runnable交给调度系统进行执行。</p>
+<center>
+    <img src="../images/android-workmanager-action.jpg" width="70%"/>
+</center>
+
+
+<h4 id="三、任务的调度"><a href="#三、任务的调度" class="headerlink" title="三、任务的调度"></a>三、任务的调度</h4><p>提交给WorkManager的任务，会封装成<code>EnqueueRunnable</code>交给默认的<code>SerialExecutor</code>去执行。<br><code>EnqueueRunnable</code>的run方法会先将任务加入数据库中保存。然后进行任务调度。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (mWorkContinuation.hasCycles()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">                    String.format(<span class="string">&quot;WorkContinuation has cycles (%s)&quot;</span>, mWorkContinuation));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//加入数据库</span></span><br><span class="line">        <span class="keyword">boolean</span> needsScheduling = addToDatabase();</span><br><span class="line">        <span class="keyword">if</span> (needsScheduling) &#123;</span><br><span class="line">            <span class="comment">// Enable RescheduleReceiver, only when there are Worker&#x27;s that need scheduling.</span></span><br><span class="line">            <span class="keyword">final</span> Context context =</span><br><span class="line">                    mWorkContinuation.getWorkManagerImpl().getApplicationContext();</span><br><span class="line">            PackageManagerHelper.setComponentEnabled(context, RescheduleReceiver.class, <span class="keyword">true</span>);</span><br><span class="line">            <span class="comment">//进行任务调度</span></span><br><span class="line">            scheduleWorkInBackground();</span><br><span class="line">        &#125;</span><br><span class="line">        mOperation.setState(Operation.SUCCESS);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable exception) &#123;</span><br><span class="line">        mOperation.setState(<span class="keyword">new</span> Operation.State.FAILURE(exception));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="四、其他"><a href="#四、其他" class="headerlink" title="四、其他"></a>四、其他</h4><h5 id="4-1-任务的约束"><a href="#4-1-任务的约束" class="headerlink" title="4.1 任务的约束"></a>4.1 任务的约束</h5><h4 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h4><p>WorkManager库并不算复杂。这种对任务的管理和调度框架的源码，我们可以多看，学习一下里面的设计思路。有个大概的印象，后续写相关逻辑时可以借鉴。</p>
+<ul>
+<li>借助<code>startup</code>初始化你的框架</li>
+<li>构建有依赖关系的任务</li>
+<li>通过Runnable解耦任务的请求和执行。</li>
 </ul>
 
     </div>
@@ -332,7 +338,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://wangduwei.top/principles-of-economics.html" title="经济学的十大原理">https://wangduwei.top/principles-of-economics.html</a>
+    <a href="https://wangduwei.top/android-github-source-workmanager.html" title="源码分析-WorkManager">https://wangduwei.top/android-github-source-workmanager.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -343,7 +349,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Economics/" rel="tag"># Economics</a>
+              <a href="/tags/Android/" rel="tag"># Android</a>
           </div>
 
         
@@ -357,13 +363,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/file-format-elf-relocation.html" rel="prev" title="重定位">
-      <i class="fa fa-chevron-left"></i> 重定位
+    <a href="/android-library-room-7-tips.html" rel="prev" title="Room数据库酷七条">
+      <i class="fa fa-chevron-left"></i> Room数据库酷七条
     </a></div>
-      <div class="post-nav-item">
-    <a href="/basic-encryption-algorithm.html" rel="next" title="对称/非对称加密和数字签名">
-      对称/非对称加密和数字签名 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -436,7 +439,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BA%BA%E4%BB%AC%E5%A6%82%E4%BD%95%E5%81%9A%E5%87%BA%E5%86%B3%E7%AD%96"><span class="nav-number">1.</span> <span class="nav-text">一、人们如何做出决策</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-1-%E4%BA%BA%E4%BB%AC%E9%9D%A2%E4%B8%B4%E6%9D%83%E8%A1%A1%E5%8F%96%E8%88%8D"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 人们面临权衡取舍</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-2-%E6%9F%90%E7%A7%8D%E4%B8%9C%E8%A5%BF%E7%9A%84%E6%88%90%E6%9C%AC%E6%98%AF%E4%B8%BA%E4%BA%86%E5%BE%97%E5%88%B0%E5%AE%83%E8%80%8C%E6%94%BE%E5%BC%83%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 某种东西的成本是为了得到它而放弃的东西</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-3-%E7%90%86%E6%80%A7%E4%BA%BA%E8%80%83%E8%99%91%E8%BE%B9%E9%99%85%E9%87%8F"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 理性人考虑边际量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-4-%E4%BA%BA%E4%BB%AC%E4%BC%9A%E5%AF%B9%E6%BF%80%E5%8A%B1%E4%BD%9C%E5%87%BA%E5%8F%8D%E5%BA%94"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 人们会对激励作出反应</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%BA%BA%E4%BB%AC%E5%A6%82%E4%BD%95%E7%9B%B8%E4%BA%92%E5%BD%B1%E5%93%8D"><span class="nav-number">2.</span> <span class="nav-text">二、人们如何相互影响</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-%E8%B4%B8%E6%98%93%E8%83%BD%E4%BD%BF%E6%AF%8F%E4%B8%AA%E4%BA%BA%E7%9A%84%E7%8A%B6%E5%86%B5%E5%8F%98%E5%BE%97%E6%9B%B4%E5%A5%BD"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 贸易能使每个人的状况变得更好</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-%E5%B8%82%E5%9C%BA%E9%80%9A%E5%B8%B8%E6%98%AF%E7%BB%84%E7%BB%87%E7%BB%8F%E6%B5%8E%E6%B4%BB%E5%8A%A8%E7%9A%84%E4%B8%80%E7%A7%8D%E5%A5%BD%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 市场通常是组织经济活动的一种好方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-%E6%94%BF%E5%BA%9C%E6%9C%89%E6%97%B6%E5%8F%AF%E4%BB%A5%E6%94%B9%E5%96%84%E5%B8%82%E5%9C%BA%E7%BB%93%E6%9E%9C"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 政府有时可以改善市场结果</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%95%B4%E4%BD%93%E7%BB%8F%E6%B5%8E%E5%A6%82%E4%BD%95%E8%BF%90%E8%A1%8C"><span class="nav-number">3.</span> <span class="nav-text">三、整体经济如何运行</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-%E4%B8%80%E5%9B%BD%E7%9A%84%E7%94%9F%E6%B4%BB%E6%B0%B4%E5%B9%B3%E5%8F%96%E5%86%B3%E4%BA%8E%E5%AE%83%E7%94%9F%E4%BA%A7%E7%89%A9%E5%93%81%E4%B8%8E%E6%9C%8D%E5%8A%A1%E7%9A%84%E8%83%BD%E5%8A%9B"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 一国的生活水平取决于它生产物品与服务的能力</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-%E5%BD%93%E6%94%BF%E5%BA%9C%E5%8F%91%E8%A1%8C%E4%BA%86%E8%BF%87%E5%A4%9A%E8%B4%A7%E5%B8%81%E6%97%B6%EF%BC%8C%E7%89%A9%E4%BB%B7%E4%B8%8A%E5%8D%87"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 当政府发行了过多货币时，物价上升</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-3-%E7%A4%BE%E4%BC%9A%E9%9D%A2%E4%B8%B4%E9%80%9A%E8%B4%A7%E8%86%A8%E8%83%80%E4%B8%8E%E5%A4%B1%E4%B8%9A%E4%B9%8B%E9%97%B4%E7%9A%84%E7%9F%AD%E6%9C%9F%E6%9D%83%E8%A1%A1%E5%8F%96%E8%88%8D"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 社会面临通货膨胀与失业之间的短期权衡取舍</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">一、初始化流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.</span> <span class="nav-text">二、任务</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-%E5%AE%9A%E4%B9%89%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 定义任务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-%E6%8F%90%E4%BA%A4%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 提交任务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-%E6%89%A7%E8%A1%8C%E4%BB%BB%E5%8A%A1"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 执行任务</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%BB%BB%E5%8A%A1%E7%9A%84%E8%B0%83%E5%BA%A6"><span class="nav-number">3.</span> <span class="nav-text">三、任务的调度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%85%B6%E4%BB%96"><span class="nav-number">4.</span> <span class="nav-text">四、其他</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#4-1-%E4%BB%BB%E5%8A%A1%E7%9A%84%E7%BA%A6%E6%9D%9F"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 任务的约束</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">五、总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -642,7 +645,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'duweiwang.github.io',
       owner       : 'duweiwang',
       admin       : ['duweiwang'],
-      id          : '47bbabb48bceeecb7ee8e7de7f701072',
+      id          : 'f6e797a2cef4ab7907465dadd3bb03b7',
         language: '',
       distractionFreeMode: true
     });

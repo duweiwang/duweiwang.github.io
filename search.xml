@@ -1,167 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Android分区存储</title>
-    <url>/android-scoped-storage.html</url>
-    <content><![CDATA[<h3 id="一、What、Why（是什么、为什么）"><a href="#一、What、Why（是什么、为什么）" class="headerlink" title="一、What、Why（是什么、为什么）"></a>一、What、Why（是什么、为什么）</h3><p>1.1 什么是分区存储<br>了解传统的共享存储 (Shared Storage):</p>
-<ul>
-<li>每个app有独立的存储空间Android/data/pkg其他应用不可见（Context.getExternalFileDir）</li>
-<li>访问外部空间需要额外权限READ/WRITE_EXTERNAL_STORAGE、获取存储权限的应用可以访问整个外部存储空间</li>
-<li>应用卸载时，保存在外部存储空间文件不会被删除。</li>
-</ul>
-<span id="more"></span>
-
-<p>共享存储带来的问题</p>
-<ul>
-<li>数据安全</li>
-<li>存储空间浪费，难以管理</li>
-</ul>
-<p>分区存储解决方案(Scoped Storage):</p>
-<ul>
-<li>必须通过Media Store API和Storage Access FrameWork访问文件系统。=&gt;对传统共享存储系统的一种强制约束</li>
-<li>文件归属：操作自己创建的文件无需任何权限（自己创建的文件系统会记录此文件的归属app，应用卸载后清除该归属字段，重装后读取该文件仍需权限申请），非共享文件存入私有目录。=&gt;文件和应用挂钩，便于操作系统进行管理</li>
-</ul>
-<p>By The Way:<br>在Android-Q （API-29）中通过android:requestLegacyExternalStorage=”true”可以禁用分区存储<br>在Android-R （API-30）中必须使用分区存储<br>在Android-Q中完全禁用了File API，Android-R重新启用</p>
-<h3 id="二、How（分区存储实践-数据的增、删、改、查）"><a href="#二、How（分区存储实践-数据的增、删、改、查）" class="headerlink" title="二、How（分区存储实践-数据的增、删、改、查）"></a>二、How（分区存储实践-数据的增、删、改、查）</h3><p>2.1 对媒体文件的增删改查：</p>
-<ul>
-<li>增查：新增操作无需任何权限。查询其他应用的媒体资源需要READ_EXTERNAL_STORAGE权限。查询自己应用创建的媒体资源无需权限，当应用卸载重装后，自己创建的资源也需要申请权限。</li>
-</ul>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">saveImageToAlbum</span><span class="params">(context: <span class="type">Context</span>, imageFile: <span class="type">File</span>, imageName: <span class="type">String</span>)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> withContext(Dispatchers.IO) &#123;</span><br><span class="line">        <span class="keyword">val</span> contentValues = ContentValues().apply &#123;</span><br><span class="line">            put(MediaStore.Images.Media.DISPLAY_NAME, imageName)</span><br><span class="line">            put(MediaStore.Images.Media.DESCRIPTION, <span class="string">&quot;图片描述&quot;</span>)</span><br><span class="line">            put(MediaStore.Images.Media.MIME_TYPE, <span class="string">&quot;image/jpg&quot;</span>)</span><br><span class="line">            <span class="comment">// 文件待处理状态，本应用独占，其他应用暂时无法访问</span></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">                put(MediaStore.Images.Media.IS_PENDING, <span class="number">1</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 插入数据库，获得uri</span></span><br><span class="line">        <span class="keyword">val</span> uri = context.contentResolver</span><br><span class="line">            .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)</span><br><span class="line">            ?: <span class="keyword">return</span><span class="symbol">@withContext</span> <span class="literal">false</span></span><br><span class="line">        <span class="comment">// 根据uri打开输出流，写入imageFile文件</span></span><br><span class="line">        context.contentResolver.openOutputStream(uri)?.use &#123; it.write(imageFile.readBytes()) &#125;</span><br><span class="line">        <span class="comment">// 切换文件待处理状态</span></span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">            contentValues.clear()</span><br><span class="line">            contentValues.put(MediaStore.Images.Media.IS_PENDING, <span class="number">0</span>)</span><br><span class="line">            context.contentResolver.update(uri, contentValues, <span class="literal">null</span>, <span class="literal">null</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span><span class="symbol">@withContext</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<ul>
-<li>删改：删改自己创建的媒体资源无需权限。删改其他应用创建的资源需要捕获RecoverableSecurityException异常后，向用户申请删除权限。</li>
-</ul>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">performDeleteImage</span><span class="params">(image: <span class="type">MediaStoreModel</span>)</span></span> &#123;</span><br><span class="line">    withContext(Dispatchers.IO) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            getApplication&lt;Application&gt;().contentResolver.delete(</span><br><span class="line">                image.contentUri,</span><br><span class="line">                <span class="string">&quot;<span class="subst">$&#123;MediaStore.Images.Media._ID&#125;</span> = ?&quot;</span>,</span><br><span class="line">                arrayOf(image.id.toString())</span><br><span class="line">            )</span><br><span class="line">        &#125; <span class="keyword">catch</span> (securityException: SecurityException) &#123;</span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">               <span class="keyword">val</span> recoverableSecurityException = securityException <span class="keyword">as</span>? RecoverableSecurityException</span><br><span class="line">                        ?: <span class="keyword">throw</span> securityException</span><br><span class="line">               startIntentSenderForResult(</span><br><span class="line">                   recoverableSecurityException.userAction.actionIntent.intentSender,</span><br><span class="line">                   DELETE_PERMISSION_REQUEST,</span><br><span class="line">                   <span class="literal">null</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="literal">null</span>)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> securityException</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>2.2 对文档的增删改查：<br>对外部文档的读写操作需要使用Storage Access FrameWork，通过各种Intent交由系统处理。更多实例见[参考资料2]</p>
-<p>SAF存储的限制：</p>
-<ul>
-<li>Intent.ACTION_OPEN_DOCUMENT_TREE访问限制<ul>
-<li>内部存储根目录</li>
-<li>Download目录</li>
-<li>Android/data/  和  Android/obb/</li>
-</ul>
-</li>
-</ul>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建文档-返回Uri再进行写入</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply &#123;</span><br><span class="line">    addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">    type = <span class="string">&quot;text/plain&quot;</span></span><br><span class="line">    putExtra(Intent.EXTRA_TITLE, <span class="string">&quot;test.txt&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//读取&amp;删改</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply &#123;</span><br><span class="line">    addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">    type = <span class="string">&quot;*/*&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//目录操作</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply &#123;</span><br><span class="line">    flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<p>2.3 批量操作<br>通过MediaStore静态方法创建修改请求，征求用户同意后进行操作。Android-R后新增的API，旧版需走回contentResolver.delete()操作</p>
-<table>
-<thead>
-<tr>
-<th>操作</th>
-<th>解释</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>createWriteRequest</td>
-<td>向用户请求媒体文件组写入权限</td>
-</tr>
-<tr>
-<td>createFavoriteRequest</td>
-<td>用户将设备上指定的媒体文件标记为“收藏”的请求</td>
-</tr>
-<tr>
-<td>createTrashRequest</td>
-<td>用户将指定的媒体文件放入设备垃圾箱的请求。垃圾箱中的内容会在系统定义的时间段后被永久删除。</td>
-</tr>
-<tr>
-<td>createDeleteRequest</td>
-<td>用户立即永久删除指定的媒体文件</td>
-</tr>
-</tbody></table>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">val</span> uriList = <span class="comment">/* A collection of content URIs to modify. */</span></span><br><span class="line"><span class="keyword">val</span> pendingIntent = MediaStore.createWriteRequest(contentResolver,urisToModify)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Launch a system prompt requesting user permission for the operation.</span></span><br><span class="line">startIntentSenderForResult(editPendingIntent.intentSender,</span><br><span class="line">                           EDIT_REQUEST_CODE, </span><br><span class="line">                           <span class="literal">null</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<h3 id="三、直接文件读写"><a href="#三、直接文件读写" class="headerlink" title="三、直接文件读写"></a>三、直接文件读写</h3><p>Android-11重新支持File对象访问文件的直接路径。<br>1、针对媒体文件<br>    - 归属于你应用的文件 和 你的私有目录 的文件 可以直接使用File API访问<br>    - 如果直接用File API访问没有权限的文件，抛出 FileNotFoundException<br>2、Media Store DATA 属性<br>DATA属性存储了媒体文件的绝对路径，在Android-10的时候废弃了该属性。由于Android-11又支持File对象，所以DATA属性也可以读取直接路径，但不一定有值。但是新增和更新操作不要再使用DATA了，请使用DISPLAY_NAME 和 RELATIVE_PATH 。</p>
-<h3 id="四、另外一扇窗"><a href="#四、另外一扇窗" class="headerlink" title="四、另外一扇窗"></a>四、另外一扇窗</h3><p>对于一些特殊的App，例如文件管理器，备份等。可以申请所有文件访问权限<br>1.声明 MANAGE_EXTERNAL_STORAGE 权限<br>2.使用 ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION  将用户引导至一个系统设置页面进行授权</p>
-<p>授权范围</p>
-<ul>
-<li>读写共享存储区的所有文件<ul>
-<li>Media content （MediaStore）</li>
-<li>Documents and other files （SAF）</li>
-<li>Datasets （BlobStoreManager）</li>
-</ul>
-</li>
-<li>MediaStore.Files数据库表</li>
-<li>USB 和 SD卡 根目录</li>
-<li>除 /Android/data/ 和 /sdcard/Android 之外的其他私有目录</li>
-</ul>
-<h3 id="五、应用截图"><a href="#五、应用截图" class="headerlink" title="五、应用截图"></a>五、应用截图</h3><table>
-    <tr>
-        <td><img src="../images/scoped_storage.png" width="200"/></td>
-        <td><img src="../images/scoped_storage_2.png" width="200"/></td>
-    </tr>
-</table>]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>市盈率和市净率</title>
-    <url>/base-economic-concept.html</url>
-    <content><![CDATA[<h4 id="一、市盈率"><a href="#一、市盈率" class="headerlink" title="一、市盈率"></a>一、市盈率</h4><p>1.1 PE - 静态市盈率</p>
-<blockquote>
-<p>① 市盈率 = 当日收盘价 / 上一年度每股税后利润  </p>
-</blockquote>
-<blockquote>
-<p>② 市盈率 = 当前总市值 / 上年度净利润</p>
-</blockquote>
-<p>理解：</p>
-<ul>
-<li>公司需要累计多少年的盈利才能达到目前的市价水平。</li>
-<li>值越低说明投资回收期短，风险越小，投资价值越高。</li>
-<li>值越大说明翻本期长，风险大。</li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>取的是上一年度的净利润，是一个过去的值，有点滞后。</li>
-</ul>
-<p>例子：<br>你花了240w买了一套二手房，打算进行出租赚点外快，已知去年平均月租2w，一年收益大概24w。以去年这些数据为参考，你预计<strong>十年后</strong>才能赚回成本240w，所以市盈率 = 10。</p>
-<p>1.2 动态市盈率<br>为了弥补静态市盈率的滞后性，增加动态市盈率作为参考指标。</p>
-<blockquote>
-<p>市盈率 = 当前总市值 / X</p>
-</blockquote>
-<p>根据当前的时间节点不同计算X的值：<br>X = 当年最近一个季度的净利润 * 4<br>X = 最近半年净利润 * 2<br>X = 最近三季度净利润 * 1.5 </p>
-<p>1.3 静态市盈率 vs 动态市盈率</p>
-<ul>
-<li>静态市盈率反映的是过去的数据，动态市盈率反映的是未来的预估</li>
-<li>动态市盈率 &gt; 静态市盈率，说明最近（一个季度、半年、三个季度）公司的利润下降了。</li>
-</ul>
-<p>1.4 TTM-Trailing Twelve Months</p>
-<ul>
-<li>最近十二个月市盈率，也叫滚动市盈率。</li>
-<li>它也是一个对过去情况的分析说明。</li>
-</ul>
-<h4 id="二、每股净值产"><a href="#二、每股净值产" class="headerlink" title="二、每股净值产"></a>二、每股净值产</h4><blockquote>
-<p>每股净值产 = （总资产 - 总负债） / 总股数</p>
-</blockquote>
-<center>
-    <img src="../images/a_b_c.jpeg" width="300"/>
-</center>
-
-
-<h4 id="三、市净率"><a href="#三、市净率" class="headerlink" title="三、市净率"></a>三、市净率</h4><p>3.1 PB-市净率</p>
-<blockquote>
-<p>市净率 = 每股市价 / 每股净值产</p>
-</blockquote>
-<p>市净率越低那么它的投资价值就越高，这也就意味着它的风险越低。</p>
-]]></content>
-      <categories>
-        <category>Economics</category>
-      </categories>
-      <tags>
-        <tag>Economics</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Android中的约束布局</title>
     <url>/android-basic-constraintlayout.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>&ensp;&ensp;&ensp;&ensp;Android中的视图是以树的形式组织起来的，它是一种层次结构。在代码中体现为组合模式，一个ViewGroup可以包含一个或多个View，同时ViewGroup又是一个View。在布局文件中体现为xml的结点和缩进。<br>&ensp;&ensp;&ensp;&ensp;同时视图的渲染少不了对其进行遍历，这就涉及数据结构中树的深度优先遍历和广度优先遍历。有时候一些复杂的布局一次遍历还无法完全确定View的信息。如何通过算法方式降低树的层次呢？也许这就是约束布局存在的意义吧。<br>&ensp;&ensp;&ensp;&ensp;在Android中，灵活运用ConstraintLayout包括以下几个点：</p>
@@ -430,7 +269,9 @@
 
 <h5 id="2-9-Group分组约束"><a href="#2-9-Group分组约束" class="headerlink" title="2.9 Group分组约束"></a>2.9 Group分组约束</h5><p>将多个View作为一个组一起控制：</p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.Group</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:id</span>=<span class="string">&quot;@+id/group&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:visibility</span>=<span class="string">&quot;visible&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">app:constraint_referenced_ids</span>=<span class="string">&quot;button4,button9&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
-
+<ul>
+<li>无法通过group设置点击事件<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">group.referencedIds.forEach &#123; id -&gt;</span><br><span class="line">     view.findViewById(id).setOnClickListener &#123;</span><br><span class="line">        <span class="comment">//do something</span></span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
 <h5 id="2-10-Placeholder占位约束"><a href="#2-10-Placeholder占位约束" class="headerlink" title="2.10 Placeholder占位约束"></a>2.10 Placeholder占位约束</h5><p>&ensp;&ensp;&ensp;&ensp;Placeholder是一个虚拟的占位符View，界面上其他存在的View可以通过<code>placeholder.setContentId(R.id.xxx)</code>将自己的位置设置到placeholder的位置，原位置视图将不可见。<br>&ensp;&ensp;&ensp;&ensp;我们可以使用Placeholder搭建一个布局模板，include到其他布局当中，来填充模板中的视图，这将使所有的界面有一个通用的模板。</p>
 <h5 id="2-11-Guideline引导线约束"><a href="#2-11-Guideline引导线约束" class="headerlink" title="2.11 Guideline引导线约束"></a>2.11 Guideline引导线约束</h5><p>Guideline只能在ConstraintLayout中使用，在水平或垂直方向设置辅助布局的不可见线条。</p>
 <table>
@@ -468,6 +309,467 @@
       </categories>
       <tags>
         <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>源码分析-网络框架之Retrofit</title>
+    <url>/android-github-source-retrofit.html</url>
+    <content><![CDATA[<h4 id="一、使用"><a href="#一、使用" class="headerlink" title="一、使用"></a>一、使用</h4><h5 id="1-1-定义API方法"><a href="#1-1-定义API方法" class="headerlink" title="1.1 定义API方法"></a>1.1 定义API方法</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">RemoteApi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(<span class="meta-string">&quot;timeline&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">timeline</span><span class="params">()</span></span>: RemoteLaunchesResponse </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="1-2-获取服务"><a href="#1-2-获取服务" class="headerlink" title="1.2 获取服务"></a>1.2 获取服务</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> client = OkHttpClient.Builder()</span><br><span class="line">             .addInterceptor(loggingInterceptor)</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">             .client(client)</span><br><span class="line">             .baseUrl(<span class="string">&quot;http://10.0.0.2:8080/&quot;</span>)</span><br><span class="line">             .addConverterFactory(GsonConverterFactory.create())</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> api = retrofit.create(RemoteApi::<span class="keyword">class</span>.java) <span class="comment">//1、create做了什么？</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="1-3-发起请求"><a href="#1-3-发起请求" class="headerlink" title="1.3 发起请求"></a>1.3 发起请求</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">api.timeline() <span class="comment">//2、调用接口方法怎么发起请求?</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="二、原理"><a href="#二、原理" class="headerlink" title="二、原理"></a>二、原理</h4><center>
+    <img src="../images/android-source-retrofit.jpeg" width="100%"/>
+</center>
+
+<h5 id="2-1-create做了什么"><a href="#2-1-create做了什么" class="headerlink" title="2.1 create做了什么"></a>2.1 create做了什么</h5><p>Retrofit的网络请求方法都是定义在接口中的，它会在运行时利用Java的动态代理产生代理对象，所以<code>create()</code>就是创建代理对象的方法。</p>
+<h5 id="2-2-调用接口方法怎么发起请求"><a href="#2-2-调用接口方法怎么发起请求" class="headerlink" title="2.2 调用接口方法怎么发起请求"></a>2.2 调用接口方法怎么发起请求</h5><p>当调用接口方法时，实际上是调用了代理对象的方法。它会去Retrofit中找该方法对应的<code>ServiceMethod</code>，如果找到缓存直接使用，否则解析后再使用。</p>
+<p>解析的结果是<code>ServiceMethod</code>的子类<code>CallAdapted</code>、<code>SuspendForResponse</code>、<code>SuspendForBody</code>三者之一。</p>
+<p>解析结束后调用返回对象的<code>invoke</code>方法初始化OkHttpCall对象发起真正的请求。</p>
+<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>阅读源码的过程当中，画了详细的代码执行流程图供后续回顾。另外源码中还有两个重要的对外拓展接口<code>CallAdapter</code>和<code>Converter</code>没有详细分析。</p>
+]]></content>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>源码分析-项目架构之SpaceX</title>
+    <url>/android-github-source-spacex.html</url>
+    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>此文是对Github开源项目<a href="https://github.com/ferPrieto/SpaceX-prepare-for-Clean-Architecture-liftoff">SpaceX-prepare-for-Clean-Architecture-liftoff</a> 的源码阅读记录。它是一个为了阐述对<strong>Clean Architecture</strong>的理解而作的Demo项目，是一个值得学习的项目。</p>
+<h4 id="二、源码分析"><a href="#二、源码分析" class="headerlink" title="二、源码分析"></a>二、源码分析</h4><h5 id="2-1-模块之间的依赖关系"><a href="#2-1-模块之间的依赖关系" class="headerlink" title="2.1 模块之间的依赖关系"></a>2.1 模块之间的依赖关系</h5><p>项目包含以下library：</p>
+<ul>
+<li>app</li>
+<li>buildSrc</li>
+<li>core</li>
+<li>core-android-test</li>
+<li>data</li>
+<li>data-api</li>
+<li>domain</li>
+<li>navigation</li>
+<li>presentation</li>
+</ul>
+<p>模块之间的依赖关系可用下图简述：</p>
+<center>
+    <img src="../images/android-source-spacex.jpeg" width="500"/>
+</center>
+
+<h5 id="2-2-类和模块之间的关系"><a href="#2-2-类和模块之间的关系" class="headerlink" title="2.2 类和模块之间的关系"></a>2.2 类和模块之间的关系</h5><center>
+    <img src="../images/android-source-spacex-overview.jpeg" width="600"/>
+</center>
+
+
+<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>项目重在阐述架构思想所以比较简单，其中很多东西值得我们在项目中借鉴。数据层的架构模式参看<a href="https://martinfowler.com/bliki/PresentationDomainDataLayering.html">martin fowler</a> 的文章。</p>
+]]></content>
+      <tags>
+        <tag>Arch</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>源码分析-WorkManager</title>
+    <url>/android-github-source-workmanager.html</url>
+    <content><![CDATA[<h4 id="一、初始化流程"><a href="#一、初始化流程" class="headerlink" title="一、初始化流程"></a>一、初始化流程</h4><p>1、WorkManager集成了<code>androidx.startup</code> 库，通过<code>startup</code>库的<code>ContentProvider</code>在应用启动时进行初始化。<br>见<code>work-runtime</code>的Manifest文件：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">provider</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;androidx.startup.InitializationProvider&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:authorities</span>=<span class="string">&quot;$&#123;applicationId&#125;.androidx-startup&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:exported</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:node</span>=<span class="string">&quot;merge&quot;</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;androidx.work.WorkManagerInitializer&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:value</span>=<span class="string">&quot;androidx.startup&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>其初始化类为<code>WorkManagerInitializer</code>，其中调用了<code>WorkManager#initialize</code>，然后调用<code>WorkManager</code>的构造函数。<br>整个流程初始化了如下一些对象：</p>
+<center>
+    <img src="../images/android-workmanager_init.jpg" width="100%"/>
+</center>
+
+
+<h4 id="二、任务"><a href="#二、任务" class="headerlink" title="二、任务"></a>二、任务</h4><h5 id="2-1-定义任务"><a href="#2-1-定义任务" class="headerlink" title="2.1 定义任务"></a>2.1 定义任务</h5><p>当我们自定义任务时，需要继承<code>Work</code>类，WorkManager内部对<code>Work</code>的结构定义如下：</p>
+<center>
+    <img src="../images/android-workmanager-work.jpg" width="40%"/>
+</center>
+
+<p>其中<code>DiagnosticsWorker</code>和<code>CombineContinueationsWorker</code>是内部使用的两个任务。</p>
+<h5 id="2-2-提交任务"><a href="#2-2-提交任务" class="headerlink" title="2.2 提交任务"></a>2.2 提交任务</h5><p>我们将任务以请求（WorkRequest）的形式提交（enqueue）给WorkManager。WorkManager会将请求装换成内部的WorkContinuation对象。</p>
+<center>
+    <img src="../images/android-workmanager-request.jpg" width="70%"/>
+</center>
+
+<p>WorkContinuation可以将多个<code>OneTimeWorkrequest</code>构建成任意依赖关系的无环图。而WorkContinuation的<code>enqueue</code>方法则是任务被执行调度的入口。</p>
+<h5 id="2-3-执行任务"><a href="#2-3-执行任务" class="headerlink" title="2.3 执行任务"></a>2.3 执行任务</h5><p>对任务进行不同的操作，如：取消、结束、开始等。WorkManager内部会将这些行为转换成对应的Runnable交给调度系统进行执行。</p>
+<center>
+    <img src="../images/android-workmanager-action.jpg" width="70%"/>
+</center>
+
+
+<h4 id="三、任务的调度"><a href="#三、任务的调度" class="headerlink" title="三、任务的调度"></a>三、任务的调度</h4><p>提交给WorkManager的任务，会封装成<code>EnqueueRunnable</code>交给默认的<code>SerialExecutor</code>去执行。<br><code>EnqueueRunnable</code>的run方法会先将任务加入数据库中保存。然后进行任务调度。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (mWorkContinuation.hasCycles()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">                    String.format(<span class="string">&quot;WorkContinuation has cycles (%s)&quot;</span>, mWorkContinuation));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//加入数据库</span></span><br><span class="line">        <span class="keyword">boolean</span> needsScheduling = addToDatabase();</span><br><span class="line">        <span class="keyword">if</span> (needsScheduling) &#123;</span><br><span class="line">            <span class="comment">// Enable RescheduleReceiver, only when there are Worker&#x27;s that need scheduling.</span></span><br><span class="line">            <span class="keyword">final</span> Context context =</span><br><span class="line">                    mWorkContinuation.getWorkManagerImpl().getApplicationContext();</span><br><span class="line">            PackageManagerHelper.setComponentEnabled(context, RescheduleReceiver.class, <span class="keyword">true</span>);</span><br><span class="line">            <span class="comment">//进行任务调度</span></span><br><span class="line">            scheduleWorkInBackground();</span><br><span class="line">        &#125;</span><br><span class="line">        mOperation.setState(Operation.SUCCESS);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable exception) &#123;</span><br><span class="line">        mOperation.setState(<span class="keyword">new</span> Operation.State.FAILURE(exception));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="四、其他"><a href="#四、其他" class="headerlink" title="四、其他"></a>四、其他</h4><h5 id="4-1-任务的约束"><a href="#4-1-任务的约束" class="headerlink" title="4.1 任务的约束"></a>4.1 任务的约束</h5><h4 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h4><p>WorkManager库并不算复杂。这种对任务的管理和调度框架的源码，我们可以多看，学习一下里面的设计思路。有个大概的印象，后续写相关逻辑时可以借鉴。</p>
+<ul>
+<li>借助<code>startup</code>初始化你的框架</li>
+<li>构建有依赖关系的任务</li>
+<li>通过Runnable解耦任务的请求和执行。</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Room数据库酷七条</title>
+    <url>/android-library-room-7-tips.html</url>
+    <content><![CDATA[<h4 id="一、通过RoomDatabase-Callback预填充数据"><a href="#一、通过RoomDatabase-Callback预填充数据" class="headerlink" title="一、通过RoomDatabase#Callback预填充数据"></a>一、通过<code>RoomDatabase#Callback</code>预填充数据</h4><p>如果需要在数据库创建或数据库打开的时候添加一些默认数据，可以使用<code>RoomDatabase#Callback</code>接口并复写它的<code>onCreate</code>或<code>onOpen</code>方法。由于DAO对象只能在这两个方法返回后使用，所以我们创建一个新线程来插入数据：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">Room.databaseBuilder(context.applicationContext,</span><br><span class="line">        DataDatabase::<span class="keyword">class</span>.java, <span class="string">&quot;Sample.db&quot;</span>)</span><br><span class="line">        <span class="comment">// prepopulate the database after onCreate was called</span></span><br><span class="line">        .addCallback(<span class="keyword">object</span> : Callback() &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(db: <span class="type">SupportSQLiteDatabase</span>)</span></span> &#123;</span><br><span class="line">                <span class="keyword">super</span>.onCreate(db)</span><br><span class="line">                <span class="comment">// moving to a new thread</span></span><br><span class="line">                ioThread &#123;</span><br><span class="line">                    getInstance(context).dataDao()</span><br><span class="line">                                        .insert(PREPOPULATE_DATA)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        .build()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>需要注意的是</strong>：当app首次启动时，在create和insert之间崩溃的话，数据将永远不会被插入。</p>
+<h4 id="二、使用DAO的继承能力"><a href="#二、使用DAO的继承能力" class="headerlink" title="二、使用DAO的继承能力"></a>二、使用DAO的继承能力</h4><p>很多DAO里存在一样的<code>Insert</code>、<code>Update</code>、<code>Delete</code>方法。我们可以使用继承来避免这些重复的代码。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BaseDao</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">insert</span><span class="params">(<span class="keyword">vararg</span> obj: <span class="type">T</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">DataDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">Data</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;SELECT * FROM Data&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getData</span><span class="params">()</span></span>: List&lt;Data&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="三、通过-Transaction减少事务查询的模板代码"><a href="#三、通过-Transaction减少事务查询的模板代码" class="headerlink" title="三、通过@Transaction减少事务查询的模板代码"></a>三、通过<code>@Transaction</code>减少事务查询的模板代码</h4><p>用<code>@Transaction</code>注解的方法会在一个事务里面执行。当这些方法执行异常时，事务也会失败。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Transaction</span></span><br><span class="line">    <span class="keyword">open</span> <span class="function"><span class="keyword">fun</span> <span class="title">updateData</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span> &#123;</span><br><span class="line">        deleteAllUsers()</span><br><span class="line">        insertAll(users)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">insertAll</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span></span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;DELETE FROM Users&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">deleteAllUsers</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当<code>@Query</code>方法带有select语句时，在下列情况下你可能会使用<code>@Transation</code>注解</p>
+<ul>
+<li>当查询的结果集很大时，让查询在一次事务里完成能够保证：如果查询结果不满足单个游标窗口，它不会因为在游标窗口交换之间的数据库更改而中断。</li>
+<li>如果查询结果是一个带<code>@Relation</code>字段的POJO，此字段会单独查询，所以让他们运行在一个事务中可以确保结果一致。</li>
+</ul>
+<p><code>Delete</code>、<code>Update</code>、<code>Insert</code>方法包含多个参数时会自动在事务里执行。</p>
+<h4 id="四、只读需要的数据"><a href="#四、只读需要的数据" class="headerlink" title="四、只读需要的数据"></a>四、只读需要的数据</h4><p>关注App的内存消耗，只加载需要使用的字段，这能提高查询速度减少IO消耗。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;users&quot;</span>)</span></span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span></span>(<span class="meta">@PrimaryKey</span></span><br><span class="line">                <span class="keyword">val</span> id: String,</span><br><span class="line">                <span class="keyword">val</span> userName: String,</span><br><span class="line">                <span class="keyword">val</span> firstName: String, </span><br><span class="line">                <span class="keyword">val</span> lastName: String,</span><br><span class="line">                <span class="keyword">val</span> email: String,</span><br><span class="line">                <span class="keyword">val</span> dateOfBirth: Date, </span><br><span class="line">                <span class="keyword">val</span> registrationDate: Date)</span><br></pre></td></tr></table></figure>
+
+<p>上面的类中，很多字段我们用不到，定义一个类，只包含我们需要的字段：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserMinimal</span></span>(<span class="keyword">val</span> userId: String,</span><br><span class="line">                       <span class="keyword">val</span> firstName: String, </span><br><span class="line">                       <span class="keyword">val</span> lastName: String)</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，定义方法只查询所需字段：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT userId, firstName, lastName FROM Users)</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getUsersMinimal</span><span class="params">()</span></span>: List&lt;UserMinimal&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="五、使用外键"><a href="#五、使用外键" class="headerlink" title="五、使用外键"></a>五、使用外键</h4><p>即使Room不直接支持关系，但它允许你定义外键来约束实体之间的关系。</p>
+<p>Room的<code>@ForeignKey</code>是<code>@Entity</code>注解的一部分，用来支持Sqlite的外键特性。它强制表之间的约束，当你修改表时，保证关系一致性。</p>
+<p>看一下<code>User</code>和<code>Pet</code>类，<code>Pet</code>有主人，以userId关联。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;pets&quot;</span>,</span></span><br><span class="line"><span class="meta">        foreignKeys = arrayOf(</span></span><br><span class="line"><span class="meta">            ForeignKey(entity = User::class,</span></span><br><span class="line"><span class="meta">                       parentColumns = arrayOf(<span class="meta-string">&quot;userId&quot;</span>)</span>,</span><br><span class="line">                       childColumns = arrayOf(<span class="string">&quot;owner&quot;</span>))))</span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Pet</span></span>(<span class="meta">@PrimaryKey</span> <span class="keyword">val</span> petId: String,</span><br><span class="line">              <span class="keyword">val</span> name: String,</span><br><span class="line">              <span class="keyword">val</span> owner: String)</span><br></pre></td></tr></table></figure>
+
+<p>你可以定义一些行为，当例子中的<code>User</code>在数据库中被删除或修改。你可以做以下一些操作：<code>NO_ACTION</code>、<code>RESTRICT</code>、<code>SET_NULL</code>、<code>SET_DEFAULT</code>或<code>CASCADE</code>，这些操作和Sqlite保持一致。</p>
+<p><strong>注意：</strong> 在Room中<code>SET_DEFAULT</code>和<code>SET_NULL</code>效果一致，因为Room还不允许为数据列设置默认值。</p>
+<h4 id="六、使用-Relation简化一对多查询"><a href="#六、使用-Relation简化一对多查询" class="headerlink" title="六、使用@Relation简化一对多查询"></a>六、使用<code>@Relation</code>简化一对多查询</h4><p>在前面<code>User-Pet</code>的例子中，我们有个一对多的关系，一个人可以有多个宠物。当我们想获取主人和宠物集合时：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>(<span class="keyword">val</span> user: User,</span><br><span class="line">                           <span class="keyword">val</span> pets: List&lt;Pet&gt; = ArrayList())</span><br></pre></td></tr></table></figure>
+
+<p>需要两个查询：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;User&gt; getUsers();</span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Pets where owner = :userId”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;Pet&gt; getPetsForUser(String userId);</span><br></pre></td></tr></table></figure>
+
+<p>我们需要遍历用户来查宠物。</p>
+<p>为了简化此过程，Room的<code>@Relation</code>注解自动关联实体。此注解只能用于<code>List</code>和<code>Set</code>对象。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Embedded</span></span><br><span class="line">   <span class="keyword">var</span> user: User? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">   <span class="meta">@Relation(parentColumn = “userId”,</span></span><br><span class="line"><span class="meta">             entityColumn = “owner”)</span></span><br><span class="line">   <span class="keyword">var</span> pets: List&lt;Pet&gt; = ArrayList()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，我们定义一次查询：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Transaction</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line">List&lt;UserAndAllPets&gt; getUsers();</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="七、避免可观察查询的假通知"><a href="#七、避免可观察查询的假通知" class="headerlink" title="七、避免可观察查询的假通知"></a>七、避免可观察查询的假通知</h4><p>可观察查询，只关心对应ID的对象：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; </span><br><span class="line"></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br></pre></td></tr></table></figure>
+
+<p>每次此用户更新的时候你都得到一个新通知。但是其他的一些不影响此ID的修改（delete、update、insert）会发送通知。</p>
+<p>这种场景背后的原因是什么：<br>1、Sqlite支持触发器，<code>DELETE</code>、<code>UPDATE</code>、<code>INSERT</code>发生时或触发。<br>2、Room创建了一个<code>InvalidationTracker</code>来跟踪观察表的变化。<br>3、<code>LiveData</code>和<code>Flowable</code>查询依赖<code>InvalidationTracker.Observer#onInvalidated</code>通知，收到通知就做一次再查询操作。</p>
+<p>Room只知道表被修改了，不知道为什么修改也不知道什么被修改。因此，再查询操作会重新通知。由于Room不在内存保存数据也不能保证object的equals方法所以他不知道对象是否变化了。</p>
+<p>你需要自己保证DAO过滤收到的事件，只对关心的数据做出响应。</p>
+<p>如果观察的是<code>Flowable</code>，使用<code>Flowable#distinctUntilChanged</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Get a user by id.</span></span><br><span class="line"><span class="comment">* <span class="doctag">@return</span> the user from the table with a specific id.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: </span><br><span class="line">    Flowable&lt;User&gt; = getUserById(id).distinctUntilChanged()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果观察的是<code>LiveData</code>，可以用<code>MediatorLiveData</code>处理只让有变化的数据发送事件。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> LiveData<span class="type">&lt;T&gt;</span>.<span class="title">getDistinct</span><span class="params">()</span></span>: LiveData&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> distinctLiveData = MediatorLiveData&lt;T&gt;()</span><br><span class="line">    distinctLiveData.addSource(<span class="keyword">this</span>, <span class="keyword">object</span> : Observer&lt;T&gt; &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> initialized = <span class="literal">false</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> lastObj: T? = <span class="literal">null</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onChanged</span><span class="params">(obj: <span class="type">T</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!initialized) &#123;</span><br><span class="line">                initialized = <span class="literal">true</span></span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((obj == <span class="literal">null</span> &amp;&amp; lastObj != <span class="literal">null</span>) </span><br><span class="line">                       || obj != lastObj) &#123;</span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> distinctLiveData</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，让真正关心变化的方法使用<code>public</code>修饰，查询方法用<code>protected</code>修饰</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; = getUserById(id).getDistinct()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong> 如果你返回列表用于展示，考虑使用<code>Paging</code>库，它能帮你处理数据的变化。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>Android-11适配</title>
+    <url>/android-target-30.html</url>
+    <content><![CDATA[<h4 id="一、变更概览"><a href="#一、变更概览" class="headerlink" title="一、变更概览"></a>一、变更概览</h4><h5 id="1、隐私"><a href="#1、隐私" class="headerlink" title="1、隐私"></a>1、隐私</h5><ul>
+<li>分区存储</li>
+<li>自动释放权限</li>
+<li>后台定位</li>
+<li>包可见性</li>
+</ul>
+<h5 id="2、安全"><a href="#2、安全" class="headerlink" title="2、安全"></a>2、安全</h5><ul>
+<li><a href="https://source.android.com/devices/tech/debug/tagged-pointers">堆指针添加标记</a></li>
+<li>Toast<ul>
+<li>🚫禁止后台弹出含自定义View的Toast</li>
+<li>Toast支持显示/隐藏回调</li>
+<li>部分View相关API调整</li>
+</ul>
+</li>
+</ul>
+<h5 id="3、连接"><a href="#3、连接" class="headerlink" title="3、连接"></a>3、连接</h5><ul>
+<li>限制对APN数据库（Access Point Names）的读写</li>
+</ul>
+<h5 id="4、Accessibility"><a href="#4、Accessibility" class="headerlink" title="4、Accessibility"></a>4、Accessibility</h5><ul>
+<li>文本转语音（TTS）和语音识别 需要声明<queries></li>
+<li>在res/raw下声明对accessibility的使用</li>
+</ul>
+<h5 id="5、相机"><a href="#5、相机" class="headerlink" title="5、相机"></a>5、相机</h5><ul>
+<li>以下Action默认只能调起系统相机，除非指定包名<ul>
+<li>android.media.action.VIDEO_CAPTURE</li>
+<li>android.media.action.IMAGE_CAPTURE</li>
+<li>android.media.action.IMAGE_CAPTURE_SECURE</li>
+</ul>
+</li>
+</ul>
+<h5 id="6、应用打包和安装"><a href="#6、应用打包和安装" class="headerlink" title="6、应用打包和安装"></a>6、应用打包和安装</h5><ul>
+<li>🚫禁止压缩resources.arsc</li>
+<li>必须使用V2及以上版本进行apk签名<h5 id="7、Firebase"><a href="#7、Firebase" class="headerlink" title="7、Firebase"></a>7、Firebase</h5></li>
+<li>target-30的apk在6.0及以上设备，不能使用Firebase JobDispatcher 和 GCMNetworkManager</li>
+</ul>
+<h5 id="8、allowBackup属性调整"><a href="#8、allowBackup属性调整" class="headerlink" title="8、allowBackup属性调整"></a>8、allowBackup属性调整</h5><h5 id="9、修改SP的OnSharedPreferenceChangeListener回调"><a href="#9、修改SP的OnSharedPreferenceChangeListener回调" class="headerlink" title="9、修改SP的OnSharedPreferenceChangeListener回调"></a>9、修改SP的OnSharedPreferenceChangeListener回调</h5><h5 id="10、非SDK接口调用黑名单"><a href="#10、非SDK接口调用黑名单" class="headerlink" title="10、非SDK接口调用黑名单"></a>10、非SDK接口调用黑名单</h5><h4 id="二、变更详情"><a href="#二、变更详情" class="headerlink" title="二、变更详情"></a>二、变更详情</h4><h5 id="1、分区存储"><a href="#1、分区存储" class="headerlink" title="1、分区存储"></a>1、分区存储</h5><ul>
+<li><p>针对特殊类型应用(文件管理器、文件备份、文件加密)<br><br>这种类型的应用需要大规模的进行文件操作，迁移成本较高，推荐使用新的存储管理权限 MANAGE_EXTERNAL_STORAGE （参考1:此权限的授权范围）</p>
+<ul>
+<li>优点：<br><br>  1、开启后直接拥有所有读写权限（包括拔插的SD卡，USB等）<br><br>  2、清缓存不会丢失授权<br><br>  3、处理成本较低，只需兼容旧的动态权限申请部分的逻辑。<br></li>
+<li>缺点：<br><br>  1、需要跳转设置页面开启权限，有损产品数据（轮询权限，强制拉回）<br><br>  2、需要提交GP申请表单，审核通过才能上架<br></li>
+<li>实践：<br><br>  1、判断权限 Environment.isExternalStorageManager() <br><br>  2、跳转设置页面引导用户开启权限的方式：注意下面两个<strong>Action</strong>的区别<br><pre><code>  Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION&lt;br&gt;
+  Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>针对普通应用<br>无法申请新的存储管理权限 MANAGE_EXTERNAL_STORAGE 。只能对旧的API进行改造兼容，将其迁移到存储访问框架SAF（Storage Access Framework）包括Document-API 或 MediaStore-API。<ul>
+<li>优点： <br><br>  1、交互逻辑，和代码逻辑结构比较统一 <br><br>  2、提高隐私与安全性，避免杂乱无章的文件系统 <br></li>
+<li>缺点： <br><br>  1、迁移成本较高，需要做大量的API兼容，可能影响产品逻辑 <br></li>
+<li>实践： <br><br>  1、分区存储文档 <br></li>
+<li>注意事项： <br><br>  1、做好数据迁移，避免升级后，原来的数据在不可访问区域 <br><br>  2、保留 [requestLegacyExternalStorage=true] 属性 <br></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>我的应用1.0版本之前数据库存储在外部，为了适配target-30，我在1.1版本，写了数据迁移代码。1.2版本，我做了target-30升级。某用户直接跳过1.1版本升级到了1.2版本。无法运行迁移代码。怎么办！</p>
+</blockquote>
+<p>preserveLegacyExternalStorage 属性：针对升级用户，暂时维持兼容属性，卸载后失效。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">  	<span class="attr">android:preserveLegacyExternalStorage</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<h5 id="2、电话号码"><a href="#2、电话号码" class="headerlink" title="2、电话号码 "></a>2、电话号码 <br></h5><p>以下两个方法的调用需要申请新的权限： READ_PHONE_NUMBERS <br><br>getLine1Number()<br>getMsisdn()</p>
+<h5 id="3、定位"><a href="#3、定位" class="headerlink" title="3、定位 "></a>3、定位 <br></h5><ul>
+<li>增加Only this time 选项</li>
+<li>不能一次性申请前后台定位权限，要分两次单独申请</li>
+<li>后台位置访问需要跳转设置页面</li>
+</ul>
+<h5 id="4、包可见性"><a href="#4、包可见性" class="headerlink" title="4、包可见性 "></a>4、包可见性 <br></h5><p>概念： <br><br>在Android-10及以前的版本通过 queryIntentActivities、getPackageInfo、getInstalledApplications可以获取所有安装的App。但是在Android-11之后只能获取到一部分已安装应用列表。<br>解决方案： <br></p>
+<ul>
+<li>通过 <queries> 标签指定需要交互的应用</li>
+<li>申请查看所有安装列表<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">package</span>=<span class="string">&quot;com.example.game&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">queries</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 需要和你做交互的app --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.store&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.service&quot;</span> /&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 你需要查询的Intent --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.SEND&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">data</span> <span class="attr">android:mimeType</span>=<span class="string">&quot;image/jpeg&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">queries</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.QUERY_ALL_PACKAGES&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="三、参考文献"><a href="#三、参考文献" class="headerlink" title="三、参考文献"></a>三、参考文献</h4><p>1、<a href="https://developer.android.com/about/versions/11/behavior-changes-11#change-details">官方文档-behavior-changes-11</a> <br><br>2、<a href="https://support.google.com/googleplay/android-developer/answer/10467955">GP政策-MANAGE_EXTERNAL_STORAGE</a> <br><br>3、<a href="https://developer.android.com/training/data-storage/manage-all-files">存储权限-管理所有文件</a> <br><br>4、<a href="https://support.google.com/googleplay/android-developer/answer/10158779?hl=en#zippy=%2Cpermitted-uses-of-the-query-all-packages-permission">GP政策-all-packages-permission</a> <br> </p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android分区存储</title>
+    <url>/android-scoped-storage.html</url>
+    <content><![CDATA[<h3 id="一、What、Why（是什么、为什么）"><a href="#一、What、Why（是什么、为什么）" class="headerlink" title="一、What、Why（是什么、为什么）"></a>一、What、Why（是什么、为什么）</h3><p>1.1 什么是分区存储<br>了解传统的共享存储 (Shared Storage):</p>
+<ul>
+<li>每个app有独立的存储空间Android/data/pkg其他应用不可见（Context.getExternalFileDir）</li>
+<li>访问外部空间需要额外权限READ/WRITE_EXTERNAL_STORAGE、获取存储权限的应用可以访问整个外部存储空间</li>
+<li>应用卸载时，保存在外部存储空间文件不会被删除。</li>
+</ul>
+<span id="more"></span>
+
+<p>共享存储带来的问题</p>
+<ul>
+<li>数据安全</li>
+<li>存储空间浪费，难以管理</li>
+</ul>
+<p>分区存储解决方案(Scoped Storage):</p>
+<ul>
+<li>必须通过Media Store API和Storage Access FrameWork访问文件系统。=&gt;对传统共享存储系统的一种强制约束</li>
+<li>文件归属：操作自己创建的文件无需任何权限（自己创建的文件系统会记录此文件的归属app，应用卸载后清除该归属字段，重装后读取该文件仍需权限申请），非共享文件存入私有目录。=&gt;文件和应用挂钩，便于操作系统进行管理</li>
+</ul>
+<p>By The Way:<br>在Android-Q （API-29）中通过android:requestLegacyExternalStorage=”true”可以禁用分区存储<br>在Android-R （API-30）中必须使用分区存储<br>在Android-Q中完全禁用了File API，Android-R重新启用</p>
+<h3 id="二、How（分区存储实践-数据的增、删、改、查）"><a href="#二、How（分区存储实践-数据的增、删、改、查）" class="headerlink" title="二、How（分区存储实践-数据的增、删、改、查）"></a>二、How（分区存储实践-数据的增、删、改、查）</h3><p>2.1 对媒体文件的增删改查：</p>
+<ul>
+<li>增查：新增操作无需任何权限。查询其他应用的媒体资源需要READ_EXTERNAL_STORAGE权限。查询自己应用创建的媒体资源无需权限，当应用卸载重装后，自己创建的资源也需要申请权限。</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">saveImageToAlbum</span><span class="params">(context: <span class="type">Context</span>, imageFile: <span class="type">File</span>, imageName: <span class="type">String</span>)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> withContext(Dispatchers.IO) &#123;</span><br><span class="line">        <span class="keyword">val</span> contentValues = ContentValues().apply &#123;</span><br><span class="line">            put(MediaStore.Images.Media.DISPLAY_NAME, imageName)</span><br><span class="line">            put(MediaStore.Images.Media.DESCRIPTION, <span class="string">&quot;图片描述&quot;</span>)</span><br><span class="line">            put(MediaStore.Images.Media.MIME_TYPE, <span class="string">&quot;image/jpg&quot;</span>)</span><br><span class="line">            <span class="comment">// 文件待处理状态，本应用独占，其他应用暂时无法访问</span></span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">                put(MediaStore.Images.Media.IS_PENDING, <span class="number">1</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 插入数据库，获得uri</span></span><br><span class="line">        <span class="keyword">val</span> uri = context.contentResolver</span><br><span class="line">            .insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)</span><br><span class="line">            ?: <span class="keyword">return</span><span class="symbol">@withContext</span> <span class="literal">false</span></span><br><span class="line">        <span class="comment">// 根据uri打开输出流，写入imageFile文件</span></span><br><span class="line">        context.contentResolver.openOutputStream(uri)?.use &#123; it.write(imageFile.readBytes()) &#125;</span><br><span class="line">        <span class="comment">// 切换文件待处理状态</span></span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">            contentValues.clear()</span><br><span class="line">            contentValues.put(MediaStore.Images.Media.IS_PENDING, <span class="number">0</span>)</span><br><span class="line">            context.contentResolver.update(uri, contentValues, <span class="literal">null</span>, <span class="literal">null</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span><span class="symbol">@withContext</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li>删改：删改自己创建的媒体资源无需权限。删改其他应用创建的资源需要捕获RecoverableSecurityException异常后，向用户申请删除权限。</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">performDeleteImage</span><span class="params">(image: <span class="type">MediaStoreModel</span>)</span></span> &#123;</span><br><span class="line">    withContext(Dispatchers.IO) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            getApplication&lt;Application&gt;().contentResolver.delete(</span><br><span class="line">                image.contentUri,</span><br><span class="line">                <span class="string">&quot;<span class="subst">$&#123;MediaStore.Images.Media._ID&#125;</span> = ?&quot;</span>,</span><br><span class="line">                arrayOf(image.id.toString())</span><br><span class="line">            )</span><br><span class="line">        &#125; <span class="keyword">catch</span> (securityException: SecurityException) &#123;</span><br><span class="line">            <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">               <span class="keyword">val</span> recoverableSecurityException = securityException <span class="keyword">as</span>? RecoverableSecurityException</span><br><span class="line">                        ?: <span class="keyword">throw</span> securityException</span><br><span class="line">               startIntentSenderForResult(</span><br><span class="line">                   recoverableSecurityException.userAction.actionIntent.intentSender,</span><br><span class="line">                   DELETE_PERMISSION_REQUEST,</span><br><span class="line">                   <span class="literal">null</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="number">0</span>,</span><br><span class="line">                   <span class="literal">null</span>)</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> securityException</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>2.2 对文档的增删改查：<br>对外部文档的读写操作需要使用Storage Access FrameWork，通过各种Intent交由系统处理。更多实例见[参考资料2]</p>
+<p>SAF存储的限制：</p>
+<ul>
+<li>Intent.ACTION_OPEN_DOCUMENT_TREE访问限制<ul>
+<li>内部存储根目录</li>
+<li>Download目录</li>
+<li>Android/data/  和  Android/obb/</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建文档-返回Uri再进行写入</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply &#123;</span><br><span class="line">    addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">    type = <span class="string">&quot;text/plain&quot;</span></span><br><span class="line">    putExtra(Intent.EXTRA_TITLE, <span class="string">&quot;test.txt&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//读取&amp;删改</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply &#123;</span><br><span class="line">    addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">    type = <span class="string">&quot;*/*&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//目录操作</span></span><br><span class="line"><span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply &#123;</span><br><span class="line">    flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p>2.3 批量操作<br>通过MediaStore静态方法创建修改请求，征求用户同意后进行操作。Android-R后新增的API，旧版需走回contentResolver.delete()操作</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>createWriteRequest</td>
+<td>向用户请求媒体文件组写入权限</td>
+</tr>
+<tr>
+<td>createFavoriteRequest</td>
+<td>用户将设备上指定的媒体文件标记为“收藏”的请求</td>
+</tr>
+<tr>
+<td>createTrashRequest</td>
+<td>用户将指定的媒体文件放入设备垃圾箱的请求。垃圾箱中的内容会在系统定义的时间段后被永久删除。</td>
+</tr>
+<tr>
+<td>createDeleteRequest</td>
+<td>用户立即永久删除指定的媒体文件</td>
+</tr>
+</tbody></table>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">val</span> uriList = <span class="comment">/* A collection of content URIs to modify. */</span></span><br><span class="line"><span class="keyword">val</span> pendingIntent = MediaStore.createWriteRequest(contentResolver,urisToModify)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Launch a system prompt requesting user permission for the operation.</span></span><br><span class="line">startIntentSenderForResult(editPendingIntent.intentSender,</span><br><span class="line">                           EDIT_REQUEST_CODE, </span><br><span class="line">                           <span class="literal">null</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="三、直接文件读写"><a href="#三、直接文件读写" class="headerlink" title="三、直接文件读写"></a>三、直接文件读写</h3><p>Android-11重新支持File对象访问文件的直接路径。<br>1、针对媒体文件<br>    - 归属于你应用的文件 和 你的私有目录 的文件 可以直接使用File API访问<br>    - 如果直接用File API访问没有权限的文件，抛出 FileNotFoundException<br>2、Media Store DATA 属性<br>DATA属性存储了媒体文件的绝对路径，在Android-10的时候废弃了该属性。由于Android-11又支持File对象，所以DATA属性也可以读取直接路径，但不一定有值。但是新增和更新操作不要再使用DATA了，请使用DISPLAY_NAME 和 RELATIVE_PATH 。</p>
+<h3 id="四、另外一扇窗"><a href="#四、另外一扇窗" class="headerlink" title="四、另外一扇窗"></a>四、另外一扇窗</h3><p>对于一些特殊的App，例如文件管理器，备份等。可以申请所有文件访问权限<br>1.声明 MANAGE_EXTERNAL_STORAGE 权限<br>2.使用 ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION  将用户引导至一个系统设置页面进行授权</p>
+<p>授权范围</p>
+<ul>
+<li>读写共享存储区的所有文件<ul>
+<li>Media content （MediaStore）</li>
+<li>Documents and other files （SAF）</li>
+<li>Datasets （BlobStoreManager）</li>
+</ul>
+</li>
+<li>MediaStore.Files数据库表</li>
+<li>USB 和 SD卡 根目录</li>
+<li>除 /Android/data/ 和 /sdcard/Android 之外的其他私有目录</li>
+</ul>
+<h3 id="五、应用截图"><a href="#五、应用截图" class="headerlink" title="五、应用截图"></a>五、应用截图</h3><table>
+    <tr>
+        <td><img src="../images/scoped_storage.png" width="200"/></td>
+        <td><img src="../images/scoped_storage_2.png" width="200"/></td>
+    </tr>
+</table>]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>市盈率和市净率</title>
+    <url>/base-economic-concept.html</url>
+    <content><![CDATA[<h4 id="一、市盈率"><a href="#一、市盈率" class="headerlink" title="一、市盈率"></a>一、市盈率</h4><p>1.1 PE - 静态市盈率</p>
+<blockquote>
+<p>① 市盈率 = 当日收盘价 / 上一年度每股税后利润  </p>
+</blockquote>
+<blockquote>
+<p>② 市盈率 = 当前总市值 / 上年度净利润</p>
+</blockquote>
+<p>理解：</p>
+<ul>
+<li>公司需要累计多少年的盈利才能达到目前的市价水平。</li>
+<li>值越低说明投资回收期短，风险越小，投资价值越高。</li>
+<li>值越大说明翻本期长，风险大。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>取的是上一年度的净利润，是一个过去的值，有点滞后。</li>
+</ul>
+<p>例子：<br>你花了240w买了一套二手房，打算进行出租赚点外快，已知去年平均月租2w，一年收益大概24w。以去年这些数据为参考，你预计<strong>十年后</strong>才能赚回成本240w，所以市盈率 = 10。</p>
+<p>1.2 动态市盈率<br>为了弥补静态市盈率的滞后性，增加动态市盈率作为参考指标。</p>
+<blockquote>
+<p>市盈率 = 当前总市值 / X</p>
+</blockquote>
+<p>根据当前的时间节点不同计算X的值：<br>X = 当年最近一个季度的净利润 * 4<br>X = 最近半年净利润 * 2<br>X = 最近三季度净利润 * 1.5 </p>
+<p>1.3 静态市盈率 vs 动态市盈率</p>
+<ul>
+<li>静态市盈率反映的是过去的数据，动态市盈率反映的是未来的预估</li>
+<li>动态市盈率 &gt; 静态市盈率，说明最近（一个季度、半年、三个季度）公司的利润下降了。</li>
+</ul>
+<p>1.4 TTM-Trailing Twelve Months</p>
+<ul>
+<li>最近十二个月市盈率，也叫滚动市盈率。</li>
+<li>它也是一个对过去情况的分析说明。</li>
+</ul>
+<h4 id="二、每股净值产"><a href="#二、每股净值产" class="headerlink" title="二、每股净值产"></a>二、每股净值产</h4><blockquote>
+<p>每股净值产 = （总资产 - 总负债） / 总股数</p>
+</blockquote>
+<center>
+    <img src="../images/a_b_c.jpeg" width="300"/>
+</center>
+
+
+<h4 id="三、市净率"><a href="#三、市净率" class="headerlink" title="三、市净率"></a>三、市净率</h4><p>3.1 PB-市净率</p>
+<blockquote>
+<p>市净率 = 每股市价 / 每股净值产</p>
+</blockquote>
+<p>市净率越低那么它的投资价值就越高，这也就意味着它的风险越低。</p>
+]]></content>
+      <categories>
+        <category>Economics</category>
+      </categories>
+      <tags>
+        <tag>Economics</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>对称/非对称加密和数字签名</title>
+    <url>/basic-encryption-algorithm.html</url>
+    <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
+<p>一般加密和解密的算法是公开的，需要保持隐秘的是密钥k<br>流行的对称加密算法有：DES，Triple-DES，RC2和RC4，AES</p>
+<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>发送方和接收方首先需要共享相同的密钥，即存在密钥k的分发问题，如何安全的把共享密钥在双方进行分享，这本身也是一个如何安全通信的问题，一种方法是提前双方约定好，不通过具体的通信进行协商，避免被监听和截获。另外一种方式，将是下面我们介绍的通过非对称加密信道进行对称密码的分发和共享，即混合加密系统。</li>
+<li>密钥管理的复杂度问题。由于对称加密的密钥是一对一的使用方式，若一方要跟n方通信，则需要维护n对密钥。</li>
+</ul>
+<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>加密和解密的速度要比非对称加密快很多，因此常用非对称加密建立的安全信道进行共享密钥的分享，完成后，具体的加解密则使用对称加密。即混合加密系统。</li>
+</ul>
+<p>另外一个点需要重点说明的是，密钥k的长度对解密破解的难度有很重大的影响，k的长度越长，对应的密码空间就越大，遭到暴力破解或者词典破解的难度就更大，就更加安全。</p>
+<center>
+    <img src="../images/dcjm.png" width="400"/>
+</center>
+
+<h4 id="2-数字签名的过程："><a href="#2-数字签名的过程：" class="headerlink" title="2.数字签名的过程："></a>2.数字签名的过程：</h4><ul>
+<li>发送方A首先对变长的报文提取成一个定长的摘要，一般是md5等</li>
+<li>A对摘要应用了一个签名函数，并且用A自己的私钥作为参数，因为只有A才知道私钥，所以正确的签名会说明签名者就是其所有者。</li>
+<li>一旦计算出签名，节点A就将其附加到报文的末尾，并将报文和签名一起都发送给B</li>
+<li>在接收端B，首先会按照同样的算法计算出报文的摘要，然后对签名用A的公钥进行解码，得出解码后的摘要，两个摘要进行比较，则可以判断是否是A发送的且内容没被篡改过。</li>
+</ul>
+<center>
+    <img src="../images/szqm.png" width="400"/>
+</center>
+
+
+<h4 id="3-非对称加解密的过程："><a href="#3-非对称加解密的过程：" class="headerlink" title="3.非对称加解密的过程："></a>3.非对称加解密的过程：</h4><p>加密一方找到接收方的公钥e (如何找到呢？大部分的公钥查找工作实际上都是通过数字证书来实现的)，然后用公钥e对明文p进行加密后得到密文c，并将得到的密文发送给接收方，接收方收到密文后，用自己保留的私钥d进行解密，得到明文p，需要注意的是：用公钥加密的密文，只有拥有私钥的一方才能解密，这样就可以解决加密的各方可以统一使用一个公钥即可。</p>
+<p>常用的非对称加密算法有：RSA</p>
+<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>不存在密钥分发的问题，解码方可以自己生成密钥对，一个做私钥存起来，另外一个作为公钥进行发布。</li>
+<li>解决了密钥管理的复杂度问题，多个加密方都可以使用一个已知的公钥进行加密，但只有拥有私钥的一方才能解密。</li>
+</ul>
+<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>非对称加密不足的地方是加解密的速度没有对称加密快。</li>
+</ul>
+<p>综上，分析了对称加密和非对称加密各自的优缺点后，有没有一种办法是可以利用两者的优点但避开对应的缺点呢？答应是有的，实际上用得最多的是混合加密系统，比如在两个节点间通过便捷的公开密码加密技术建立起安全通信，然后再用安全的通信产生并发送临时的随机对称密钥，通过更快的对称加密技术对剩余的数据进行加密。</p>
+<center>
+    <img src="../images/fdcjm.png" width="400"/>
+</center>]]></content>
+      <tags>
+        <tag>cryptography</tag>
       </tags>
   </entry>
   <entry>
@@ -529,51 +831,6 @@
 ]]></content>
       <tags>
         <tag>计算机基础</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>对称/非对称加密和数字签名</title>
-    <url>/basic-encryption-algorithm.html</url>
-    <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
-<p>一般加密和解密的算法是公开的，需要保持隐秘的是密钥k<br>流行的对称加密算法有：DES，Triple-DES，RC2和RC4，AES</p>
-<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
-<li>发送方和接收方首先需要共享相同的密钥，即存在密钥k的分发问题，如何安全的把共享密钥在双方进行分享，这本身也是一个如何安全通信的问题，一种方法是提前双方约定好，不通过具体的通信进行协商，避免被监听和截获。另外一种方式，将是下面我们介绍的通过非对称加密信道进行对称密码的分发和共享，即混合加密系统。</li>
-<li>密钥管理的复杂度问题。由于对称加密的密钥是一对一的使用方式，若一方要跟n方通信，则需要维护n对密钥。</li>
-</ul>
-<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
-<li>加密和解密的速度要比非对称加密快很多，因此常用非对称加密建立的安全信道进行共享密钥的分享，完成后，具体的加解密则使用对称加密。即混合加密系统。</li>
-</ul>
-<p>另外一个点需要重点说明的是，密钥k的长度对解密破解的难度有很重大的影响，k的长度越长，对应的密码空间就越大，遭到暴力破解或者词典破解的难度就更大，就更加安全。</p>
-<center>
-    <img src="../images/dcjm.png" width="400"/>
-</center>
-
-<h4 id="2-数字签名的过程："><a href="#2-数字签名的过程：" class="headerlink" title="2.数字签名的过程："></a>2.数字签名的过程：</h4><ul>
-<li>发送方A首先对变长的报文提取成一个定长的摘要，一般是md5等</li>
-<li>A对摘要应用了一个签名函数，并且用A自己的私钥作为参数，因为只有A才知道私钥，所以正确的签名会说明签名者就是其所有者。</li>
-<li>一旦计算出签名，节点A就将其附加到报文的末尾，并将报文和签名一起都发送给B</li>
-<li>在接收端B，首先会按照同样的算法计算出报文的摘要，然后对签名用A的公钥进行解码，得出解码后的摘要，两个摘要进行比较，则可以判断是否是A发送的且内容没被篡改过。</li>
-</ul>
-<center>
-    <img src="../images/szqm.png" width="400"/>
-</center>
-
-
-<h4 id="3-非对称加解密的过程："><a href="#3-非对称加解密的过程：" class="headerlink" title="3.非对称加解密的过程："></a>3.非对称加解密的过程：</h4><p>加密一方找到接收方的公钥e (如何找到呢？大部分的公钥查找工作实际上都是通过数字证书来实现的)，然后用公钥e对明文p进行加密后得到密文c，并将得到的密文发送给接收方，接收方收到密文后，用自己保留的私钥d进行解密，得到明文p，需要注意的是：用公钥加密的密文，只有拥有私钥的一方才能解密，这样就可以解决加密的各方可以统一使用一个公钥即可。</p>
-<p>常用的非对称加密算法有：RSA</p>
-<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
-<li>不存在密钥分发的问题，解码方可以自己生成密钥对，一个做私钥存起来，另外一个作为公钥进行发布。</li>
-<li>解决了密钥管理的复杂度问题，多个加密方都可以使用一个已知的公钥进行加密，但只有拥有私钥的一方才能解密。</li>
-</ul>
-<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
-<li>非对称加密不足的地方是加解密的速度没有对称加密快。</li>
-</ul>
-<p>综上，分析了对称加密和非对称加密各自的优缺点后，有没有一种办法是可以利用两者的优点但避开对应的缺点呢？答应是有的，实际上用得最多的是混合加密系统，比如在两个节点间通过便捷的公开密码加密技术建立起安全通信，然后再用安全的通信产生并发送临时的随机对称密钥，通过更快的对称加密技术对剩余的数据进行加密。</p>
-<center>
-    <img src="../images/fdcjm.png" width="400"/>
-</center>]]></content>
-      <tags>
-        <tag>cryptography</tag>
       </tags>
   </entry>
   <entry>
@@ -987,94 +1244,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Android-11适配</title>
-    <url>/android-target-30.html</url>
-    <content><![CDATA[<h4 id="一、变更概览"><a href="#一、变更概览" class="headerlink" title="一、变更概览"></a>一、变更概览</h4><h5 id="1、隐私"><a href="#1、隐私" class="headerlink" title="1、隐私"></a>1、隐私</h5><ul>
-<li>分区存储</li>
-<li>自动释放权限</li>
-<li>后台定位</li>
-<li>包可见性</li>
-</ul>
-<h5 id="2、安全"><a href="#2、安全" class="headerlink" title="2、安全"></a>2、安全</h5><ul>
-<li><a href="https://source.android.com/devices/tech/debug/tagged-pointers">堆指针添加标记</a></li>
-<li>Toast<ul>
-<li>🚫禁止后台弹出含自定义View的Toast</li>
-<li>Toast支持显示/隐藏回调</li>
-<li>部分View相关API调整</li>
-</ul>
-</li>
-</ul>
-<h5 id="3、连接"><a href="#3、连接" class="headerlink" title="3、连接"></a>3、连接</h5><ul>
-<li>限制对APN数据库（Access Point Names）的读写</li>
-</ul>
-<h5 id="4、Accessibility"><a href="#4、Accessibility" class="headerlink" title="4、Accessibility"></a>4、Accessibility</h5><ul>
-<li>文本转语音（TTS）和语音识别 需要声明<queries></li>
-<li>在res/raw下声明对accessibility的使用</li>
-</ul>
-<h5 id="5、相机"><a href="#5、相机" class="headerlink" title="5、相机"></a>5、相机</h5><ul>
-<li>以下Action默认只能调起系统相机，除非指定包名<ul>
-<li>android.media.action.VIDEO_CAPTURE</li>
-<li>android.media.action.IMAGE_CAPTURE</li>
-<li>android.media.action.IMAGE_CAPTURE_SECURE</li>
-</ul>
-</li>
-</ul>
-<h5 id="6、应用打包和安装"><a href="#6、应用打包和安装" class="headerlink" title="6、应用打包和安装"></a>6、应用打包和安装</h5><ul>
-<li>🚫禁止压缩resources.arsc</li>
-<li>必须使用V2及以上版本进行apk签名<h5 id="7、Firebase"><a href="#7、Firebase" class="headerlink" title="7、Firebase"></a>7、Firebase</h5></li>
-<li>target-30的apk在6.0及以上设备，不能使用Firebase JobDispatcher 和 GCMNetworkManager</li>
-</ul>
-<h5 id="8、allowBackup属性调整"><a href="#8、allowBackup属性调整" class="headerlink" title="8、allowBackup属性调整"></a>8、allowBackup属性调整</h5><h5 id="9、修改SP的OnSharedPreferenceChangeListener回调"><a href="#9、修改SP的OnSharedPreferenceChangeListener回调" class="headerlink" title="9、修改SP的OnSharedPreferenceChangeListener回调"></a>9、修改SP的OnSharedPreferenceChangeListener回调</h5><h5 id="10、非SDK接口调用黑名单"><a href="#10、非SDK接口调用黑名单" class="headerlink" title="10、非SDK接口调用黑名单"></a>10、非SDK接口调用黑名单</h5><h4 id="二、变更详情"><a href="#二、变更详情" class="headerlink" title="二、变更详情"></a>二、变更详情</h4><h5 id="1、分区存储"><a href="#1、分区存储" class="headerlink" title="1、分区存储"></a>1、分区存储</h5><ul>
-<li><p>针对特殊类型应用(文件管理器、文件备份、文件加密)<br><br>这种类型的应用需要大规模的进行文件操作，迁移成本较高，推荐使用新的存储管理权限 MANAGE_EXTERNAL_STORAGE （参考1:此权限的授权范围）</p>
-<ul>
-<li>优点：<br><br>  1、开启后直接拥有所有读写权限（包括拔插的SD卡，USB等）<br><br>  2、清缓存不会丢失授权<br><br>  3、处理成本较低，只需兼容旧的动态权限申请部分的逻辑。<br></li>
-<li>缺点：<br><br>  1、需要跳转设置页面开启权限，有损产品数据（轮询权限，强制拉回）<br><br>  2、需要提交GP申请表单，审核通过才能上架<br></li>
-<li>实践：<br><br>  1、判断权限 Environment.isExternalStorageManager() <br><br>  2、跳转设置页面引导用户开启权限的方式：注意下面两个<strong>Action</strong>的区别<br><pre><code>  Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION&lt;br&gt;
-  Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-</code></pre>
-</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>针对普通应用<br>无法申请新的存储管理权限 MANAGE_EXTERNAL_STORAGE 。只能对旧的API进行改造兼容，将其迁移到存储访问框架SAF（Storage Access Framework）包括Document-API 或 MediaStore-API。<ul>
-<li>优点： <br><br>  1、交互逻辑，和代码逻辑结构比较统一 <br><br>  2、提高隐私与安全性，避免杂乱无章的文件系统 <br></li>
-<li>缺点： <br><br>  1、迁移成本较高，需要做大量的API兼容，可能影响产品逻辑 <br></li>
-<li>实践： <br><br>  1、分区存储文档 <br></li>
-<li>注意事项： <br><br>  1、做好数据迁移，避免升级后，原来的数据在不可访问区域 <br><br>  2、保留 [requestLegacyExternalStorage=true] 属性 <br></li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>我的应用1.0版本之前数据库存储在外部，为了适配target-30，我在1.1版本，写了数据迁移代码。1.2版本，我做了target-30升级。某用户直接跳过1.1版本升级到了1.2版本。无法运行迁移代码。怎么办！</p>
-</blockquote>
-<p>preserveLegacyExternalStorage 属性：针对升级用户，暂时维持兼容属性，卸载后失效。</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">  	<span class="attr">android:preserveLegacyExternalStorage</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-
-<h5 id="2、电话号码"><a href="#2、电话号码" class="headerlink" title="2、电话号码 "></a>2、电话号码 <br></h5><p>以下两个方法的调用需要申请新的权限： READ_PHONE_NUMBERS <br><br>getLine1Number()<br>getMsisdn()</p>
-<h5 id="3、定位"><a href="#3、定位" class="headerlink" title="3、定位 "></a>3、定位 <br></h5><ul>
-<li>增加Only this time 选项</li>
-<li>不能一次性申请前后台定位权限，要分两次单独申请</li>
-<li>后台位置访问需要跳转设置页面</li>
-</ul>
-<h5 id="4、包可见性"><a href="#4、包可见性" class="headerlink" title="4、包可见性 "></a>4、包可见性 <br></h5><p>概念： <br><br>在Android-10及以前的版本通过 queryIntentActivities、getPackageInfo、getInstalledApplications可以获取所有安装的App。但是在Android-11之后只能获取到一部分已安装应用列表。<br>解决方案： <br></p>
-<ul>
-<li>通过 <queries> 标签指定需要交互的应用</li>
-<li>申请查看所有安装列表<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">package</span>=<span class="string">&quot;com.example.game&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">queries</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 需要和你做交互的app --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.store&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.service&quot;</span> /&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 你需要查询的Intent --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.SEND&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">data</span> <span class="attr">android:mimeType</span>=<span class="string">&quot;image/jpeg&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">queries</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.QUERY_ALL_PACKAGES&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="三、参考文献"><a href="#三、参考文献" class="headerlink" title="三、参考文献"></a>三、参考文献</h4><p>1、<a href="https://developer.android.com/about/versions/11/behavior-changes-11#change-details">官方文档-behavior-changes-11</a> <br><br>2、<a href="https://support.google.com/googleplay/android-developer/answer/10467955">GP政策-MANAGE_EXTERNAL_STORAGE</a> <br><br>3、<a href="https://developer.android.com/training/data-storage/manage-all-files">存储权限-管理所有文件</a> <br><br>4、<a href="https://support.google.com/googleplay/android-developer/answer/10158779?hl=en#zippy=%2Cpermitted-uses-of-the-query-all-packages-permission">GP政策-all-packages-permission</a> <br> </p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>对象的内存布局</title>
     <url>/java-object-layout.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>很多时候我们都有一个疑问：一个对象在内存中占用多大的空间呢？</p>
@@ -1429,174 +1598,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Effective Kotlin-35：用DSL创建复杂对象</title>
-    <url>/kotlin-lang-use-dsl.html</url>
-    <content><![CDATA[<h4 id="一、概述："><a href="#一、概述：" class="headerlink" title="一、概述："></a>一、概述：</h4><p>利用Kotlin的语言特性可以创建可配置的领域语言-DSL（Domain Specific Language）。这种DSL用于表示复杂对象和对象继承结构很有用，它能隐藏模板代码和复杂性，让使用者更好的表达自己的意图。</p>
-<p>例如，用Kotlin DSL的方式表示HTML的结构：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">body &#123;</span><br><span class="line">    div &#123;</span><br><span class="line">        a(<span class="string">&quot;https://kotlinlang.org&quot;</span>) &#123;</span><br><span class="line">            target = ATarget.blank</span><br><span class="line">            +<span class="string">&quot;Main site&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    +<span class="string">&quot;Some content&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>其他平台的视图也可以使用DSL来定义。下面是Android上使用Anko库定义的界面：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">verticalLayout &#123;</span><br><span class="line">    <span class="keyword">val</span> name = editText()</span><br><span class="line">    button(<span class="string">&quot;Say Hello&quot;</span>) &#123;</span><br><span class="line">        onClick &#123; toast(<span class="string">&quot;Hello, <span class="subst">$&#123;name.text&#125;</span>!&quot;</span>) &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>同样的，使用TornadorFX库定义的桌面应用如下：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> : <span class="type">View</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">val</span> root = hbox &#123;</span><br><span class="line">        label(<span class="string">&quot;Hello world&quot;</span>) &#123;</span><br><span class="line">            addClass(heading)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        textfield &#123;</span><br><span class="line">            promptText = <span class="string">&quot;Enter your name&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>DSL通常也被用于定义数据和配置。下面是Ktor定义的API：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> Routing.<span class="title">api</span><span class="params">()</span></span> &#123;</span><br><span class="line">    route(<span class="string">&quot;news&quot;</span>) &#123;</span><br><span class="line">        <span class="keyword">get</span> &#123;</span><br><span class="line">            <span class="keyword">val</span> newsData = NewsUseCase.getAcceptedNews()</span><br><span class="line">            call.respond(newsData)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">get</span>(<span class="string">&quot;propositions&quot;</span>) &#123;</span><br><span class="line">            requireSecret()</span><br><span class="line">            <span class="keyword">val</span> newsData = NewsUseCase.getPropositions()</span><br><span class="line">            call.respond(newsData)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这是在Kotlin Test中定义的测试用例：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyTests</span> : <span class="type">StringSpec</span></span>(&#123;</span><br><span class="line">    <span class="string">&quot;length should return size of string&quot;</span> &#123;</span><br><span class="line">        <span class="string">&quot;hello&quot;</span>.length shouldBe <span class="number">5</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="string">&quot;startsWith should test for a prefix&quot;</span> &#123;</span><br><span class="line">        <span class="string">&quot;world&quot;</span> should startWith(<span class="string">&quot;wor&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<p>我们甚至可以使用Gradle DSL定义Gradle配置：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    `java-library`</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dependencies &#123;</span><br><span class="line">    api(<span class="string">&quot;junit:junit:4.12&quot;</span>)</span><br><span class="line">    implementation(<span class="string">&quot;junit:junit:4.12&quot;</span>)</span><br><span class="line">    testImplementation(<span class="string">&quot;junit:junit:4.12&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">configurations &#123;</span><br><span class="line">    implementation &#123;</span><br><span class="line">        resolutionStrategy.failOnVersionConflict()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">sourceSets &#123;</span><br><span class="line">    main &#123;</span><br><span class="line">        java.srcDir(<span class="string">&quot;src/core/java&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">java &#123;</span><br><span class="line">    sourceCompatibility = JavaVersion.VERSION_11</span><br><span class="line">    targetCompatibility = JavaVersion.VERSION_11</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">tasks &#123;</span><br><span class="line">    test &#123;</span><br><span class="line">        testLogging.showExceptions = <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>使用DSL简化了层次结构和复杂对象的创建。在DSL构建块中，你可以使用Kotlin语法和代码提示。也许你用过Kotlin DSL，但你更应该学会如何定义它。</p>
-<h4 id="二、定义自己的DSL"><a href="#二、定义自己的DSL" class="headerlink" title="二、定义自己的DSL"></a>二、定义自己的DSL</h4><p>在理解如何定义DSL前，先明白带接收者的函数类型。首先什么是函数类型呢？它是一个能被当成函数使用的对象。例如：<code>filter</code>函数，参数predicate决定集合是否包含此元素。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">filter</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    predicate: (<span class="type">T</span>) -&gt; <span class="type">Boolean</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> list = arrayListOf&lt;T&gt;()</span><br><span class="line">    <span class="keyword">for</span> (elem <span class="keyword">in</span> <span class="keyword">this</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (predicate(elem)) &#123;</span><br><span class="line">            list.add(elem)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> list</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>函数类型的例子：  </p>
-<ul>
-<li>()-&gt;Unit - 无参函数，返回Unit</li>
-<li>(Int)-&gt;Unit - 单参Int函数，返回Unit</li>
-<li>(Int)-&gt;Int - 单参Int函数，返回Int</li>
-<li>(Int, Int)-&gt;Int - 双参Int函数，返回Int。</li>
-<li>(Int)-&gt;()-&gt;Unit - 单参Int函数，返回无参函数。 </li>
-<li>(()-&gt;Unit)-&gt;Unit - 参数为函数的函数，返回Unit</li>
-</ul>
-<p>创建函数类型实例的方式有：  </p>
-<ul>
-<li>使用lambda表达式</li>
-<li>使用匿名函数</li>
-<li>使用函数引用</li>
-</ul>
-<p>例如，下面的函数</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span> = a + b</span><br></pre></td></tr></table></figure>
-<p>同样可以声明成这样：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> plus1: (<span class="built_in">Int</span>, <span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> = &#123; a, b -&gt; a + b &#125;</span><br><span class="line"><span class="keyword">val</span> plus2: (<span class="built_in">Int</span>, <span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> = <span class="function"><span class="title">fun</span><span class="params">(a, b)</span></span> = a + b</span><br><span class="line"><span class="keyword">val</span> plus3: (<span class="built_in">Int</span>, <span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> = ::plus</span><br></pre></td></tr></table></figure>
-
-<p>上面的例子中，由于指明了属性的类型，所以lambda和匿名函数中的参数能被推导出来。换一种方式说：如果指定参数类型，函数类型可以被推导。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> plus4 = &#123; a: <span class="built_in">Int</span>, b: <span class="built_in">Int</span> -&gt; a + b &#125;</span><br><span class="line"><span class="keyword">val</span> plus5 = <span class="function"><span class="title">fun</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span> = a + b</span><br></pre></td></tr></table></figure>
-
-<p>函数类型以对象来表达函数，匿名函数也是一个普通函数只是没名字而已。lambda则是匿名函数的简短书写方式。</p>
-<p>我们可以使用函数类型去表示函数，那拓展函数呢？</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="built_in">Int</span>.<span class="title">myPlus</span><span class="params">(other: <span class="type">Int</span>)</span></span> = <span class="keyword">this</span> + other</span><br></pre></td></tr></table></figure>
-
-<p>之前提到匿名函数只是没名字而已，匿名拓展函数也一样：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="built_in">Int</span>.<span class="title">myPlus</span><span class="params">(other: <span class="type">Int</span>)</span></span> = <span class="keyword">this</span> + other</span><br></pre></td></tr></table></figure>
-
-<p>那此函数的类型是什么呢？一种表示拓展函数的特殊类型，叫：带接收者的函数类型。它看起来和普通函数很像，只是在参数之前额外的指定了接收者的类型，他们之间用一个点分割开来。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> myPlus: <span class="built_in">Int</span>.(<span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> =</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="built_in">Int</span>.<span class="params">(other: <span class="type">Int</span>)</span></span> = <span class="keyword">this</span> + other</span><br></pre></td></tr></table></figure>
-
-<p>这种函数能通过lambda表达式定义，尤其是一个带接收者的lambda表达式，因为作用域内部的this关键字引用了拓展接收者。（此例中是一个Int类型的实例）：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> myPlus: <span class="built_in">Int</span>.(<span class="built_in">Int</span>)-&gt;<span class="built_in">Int</span> = &#123; <span class="keyword">this</span> + it &#125;</span><br></pre></td></tr></table></figure>
-
-<p>用匿名拓展函数或带接收者的lambda表达式创建的对象能被三种方式调用：</p>
-<ul>
-<li>像对象一样使用<code>invoke</code>方法调用</li>
-<li>像非拓展函数一样</li>
-<li>和普通的拓展函数一样</li>
-</ul>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">myPlus.invoke(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">myPlus(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"><span class="number">1.</span>myPlus(<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
-
-<p>带接收者的函数类型最大的特点是，它改变了<code>this</code>的指向。这种特点如何使用呢？假设一个类需要依次设置属性：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dialog</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> title: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">var</span> text: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">show</span><span class="params">()</span></span> &#123; <span class="comment">/*...*/</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> dialog = Dialog()</span><br><span class="line">    dialog.title = <span class="string">&quot;My dialog&quot;</span></span><br><span class="line">    dialog.text = <span class="string">&quot;Some text&quot;</span></span><br><span class="line">    dialog.show()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>重复引用此dialog很不方便，如果我们使用带接收者的lambda，this就指向dialog，我们可以省略this，因为接收者能够隐式调用</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dialog</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> title: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">var</span> text: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">show</span><span class="params">()</span></span> &#123; <span class="comment">/*...*/</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> dialog = Dialog()</span><br><span class="line">    <span class="keyword">val</span> <span class="keyword">init</span>: Dialog.() -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        title = <span class="string">&quot;My dialog&quot;</span></span><br><span class="line">        text = <span class="string">&quot;Some text&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">init</span>.invoke(dialog)</span><br><span class="line">    dialog.show()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>按照这个思路，你可以定义一个包含创建此dialog对象所需的所有公共部分的逻辑，只把需要变化的属性的设置给调用者。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dialog</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> title: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">var</span> text: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">show</span><span class="params">()</span></span> &#123; <span class="comment">/*...*/</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">showDialog</span><span class="params">(<span class="keyword">init</span>: <span class="type">Dialog</span>.() -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> dialog = Dialog()</span><br><span class="line">    <span class="keyword">init</span>.invoke(dialog)</span><br><span class="line">    dialog.show()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    showDialog &#123;</span><br><span class="line">        title = <span class="string">&quot;My dialog&quot;</span></span><br><span class="line">        text = <span class="string">&quot;Some text&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这就是最简单的DSL例子。因为大部分这些构建函数都是重复的，已经被抽取到一个apply函数内，能被直接使用，不用再定义DSL构建器去设置属性了。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> T.<span class="title">apply</span><span class="params">(block: <span class="type">T</span>.() -&gt; <span class="type">Unit</span>)</span></span>: T &#123;</span><br><span class="line">    <span class="keyword">this</span>.block()</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Dialog().apply &#123;</span><br><span class="line">    title = <span class="string">&quot;My dialog&quot;</span></span><br><span class="line">    text = <span class="string">&quot;Some text&quot;</span></span><br><span class="line">&#125;.show()</span><br></pre></td></tr></table></figure>
-
-<p>对于DSL来说，带接收者的函数类型是最基本的构建块。我们一起来写一个简单的DSL用于创建下面的HTML表格：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">createTable</span><span class="params">()</span></span>: TableBuilder = table &#123;</span><br><span class="line">    tr &#123;</span><br><span class="line">        <span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1.</span><span class="number">.2</span>) &#123;</span><br><span class="line">            td &#123;</span><br><span class="line">                +<span class="string">&quot;This is column <span class="variable">$i</span>&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在DSL开头我们定义了table函数。由于是最外层定义，所以它没用接收者。在table的内部可以使用tr，所以tr函数只能用于table内部。同理，td只能用于tr内部。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">table</span><span class="params">(<span class="keyword">init</span>: <span class="type">TableBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span>: TableBuilder &#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TableBuilder</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">tr</span><span class="params">(<span class="keyword">init</span>: <span class="type">TrBuilder</span>.() -&gt; <span class="type">Unit</span>)</span></span> &#123; <span class="comment">/*...*/</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TrBuilder</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">td</span><span class="params">(<span class="keyword">init</span>: <span class="type">TdBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span> &#123; <span class="comment">/*...*/</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TdBuilder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> String.<span class="title">unaryPlus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        text += <span class="keyword">this</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>现在，我们定义好了DSL。为了让它运行，每一步我们都需要创建一个builder并用参数里面的函数初始化它（下面例子中的<code>init</code>）。builder将包含所有init函数指定的数据。这些数据是我们需要的。我们可以直接返回这个构建器也可以返回另一个包含这些数据的新对象。此例中我们直接返回构建器。下面是<code>table</code>函数的定义：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">table</span><span class="params">(<span class="keyword">init</span>: <span class="type">TableBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span>: TableBuilder &#123;</span><br><span class="line">    <span class="keyword">val</span> tableBuilder = TableBuilder()</span><br><span class="line">    <span class="keyword">init</span>.invoke(tableBuilder)</span><br><span class="line">    <span class="keyword">return</span> tableBuilder</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>我们可以使用apply函数简化函数：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">table</span><span class="params">(<span class="keyword">init</span>: <span class="type">TableBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span> =</span><br><span class="line">    TableBuilder().apply(<span class="keyword">init</span>)</span><br></pre></td></tr></table></figure>
-
-<p>其他函数也使用apply简化：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TableBuilder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> trs = listOf&lt;TrBuilder&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">tr</span><span class="params">(<span class="keyword">init</span>: <span class="type">TrBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">        trs = trs + TrBuilder().apply(<span class="keyword">init</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TrBuilder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> tds = listOf&lt;TdBuilder&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">td</span><span class="params">(<span class="keyword">init</span>: <span class="type">TdBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">        tds = tds + TdBuilder().apply(<span class="keyword">init</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="三、何时使用？"><a href="#三、何时使用？" class="headerlink" title="三、何时使用？"></a>三、何时使用？</h4><p>DSL给了我们一种定义信息的方式。它能用于表达你所想表达的东西。但是对于用户而言这些信息之后如何使用不是很清晰。在Anko、TornadoFX或HTML DSL中，我们相信视图会根据我们的定义形式被构建，但很难跟踪准确跟踪如何构建。一些复杂的使用方式很难发现。用法也会让那些不习惯的人感到困惑。更不用说维护了。它们的定义方式可能是一种成本——在开发人员困惑和性能方面都是如此。当我们可以使用其他更简单的特性时，dsl就太过了。虽然当我们需要表达下面的内容时，它们真的很有用:</p>
-<ul>
-<li>复杂的数据结构</li>
-<li>继承结构</li>
-<li>大量数据</li>
-</ul>
-<p>描述事物不止DSL方式，还可以用builder、或只用构造器代替。dsl是关于此类结构的模板代码消除。当您看到可重复的样板代码，并且没有更简单的Kotlin特性可以提供帮助时，您应该考虑使用DSL。</p>
-<h4 id="四、总结："><a href="#四、总结：" class="headerlink" title="四、总结："></a>四、总结：</h4><p>DSL是语言中的一种特殊形式。它可以非常简单地创建复杂的对象，甚至整个对象层次结构，如HTML代码或复杂的配置文件。另一方面，DSL实现可能会让新开发人员感到困惑或困难。它们也很难定义。这就是为什么只有当它们提供真正的价值时才应该使用它们的原因。例如，用于创建一个真正复杂的对象，或者可能用于复杂的对象层次结构。这就是为什么最好在库中而不是在项目中定义它们的原因。制作一个好的DSL并不容易，但是一个定义良好的DSL可以让我们的项目做得更好。</p>
-<p>参考：<br><a href="https://kt.academy/article/ek-dsl">Effective Kotlin Item 35: Consider defining a DSL for complex object creation</a></p>
-]]></content>
-      <categories>
-        <category>Kotlin</category>
-      </categories>
-      <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>LeetCode 反转单链表</title>
-    <url>/leetcode-reverse-list.html</url>
-    <content><![CDATA[<h3 id="LeetCode-206-反转单链表"><a href="#LeetCode-206-反转单链表" class="headerlink" title="LeetCode-206 反转单链表"></a>LeetCode-206 反转单链表</h3><blockquote>
-<p>给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</p>
-</blockquote>
-<p>问题分析：</p>
-<p>这是初始状态的链表</p>
-<center>
-    <img src="../images/revert_list_0.png" width="400"/>
-</center>
-由于反转链表后 **head** 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  
-
-<p>尝试一次反转后，我们发现，后续结点信息丢失了！我们不得不声明一个新的变量保存原链表的信息。</p>
-<center>
-    <img src="../images/revert_list_7.png" width="400"/>
-</center>
-
-<p>所以，我们一共需要三个指针来记录转换过程  </p>
-<ul>
-<li>prev、 head 用于交换</li>
-<li>next 用于记录  </li>
-</ul>
-<p>分析到这里，我们再回到初始状态  ：</p>
-<center>
-    <img src="../images/revert_list_4.png" width="400"/>
-</center>
-
-<p>接下来我们进行第一次反转，<strong>head.next</strong> 指向虚拟的空结点，且后续链表信息没有丢失。</p>
-<center>
-    <img src="../images/revert_list_5.png" width="400"/>
-</center>
-
-<p>三个指针一起往后移动一个单位。我们发现此时链表又回到了最初的状态。</p>
-<center>
-    <img src="../images/revert_list_6.png" width="400"/>
-</center>
-
-
-<p>至此，我们可以尝试写出如下代码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">reverseIteratively</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">    ListNode pre = <span class="keyword">null</span>;</span><br><span class="line">    ListNode next = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = head.next;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//改变指针方向，对第一个节点来说，他的前一个节点是null</span></span><br><span class="line">        head.next = pre;</span><br><span class="line">        <span class="comment">//向前移动两个指针</span></span><br><span class="line">        pre = head;</span><br><span class="line">        head = next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<p>思考：<br>你能使用递归的方式改写上述代码逻辑吗？</p>
-]]></content>
-      <categories>
-        <category>LeetCode</category>
-      </categories>
-      <tags>
-        <tag>LeetCode</tag>
-        <tag>Algorithm</tag>
-        <tag>List</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Effective Kotlin-51：使用Sequence优化集合操作</title>
     <url>/kotlin-lang-sequence.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>你可能对 <code>Iterable</code> 和 <code>Sequence</code> 傻傻分不清。看一下他们的代码：</p>
@@ -1756,6 +1757,120 @@
       </tags>
   </entry>
   <entry>
+    <title>Effective Kotlin-35：用DSL创建复杂对象</title>
+    <url>/kotlin-lang-use-dsl.html</url>
+    <content><![CDATA[<h4 id="一、概述："><a href="#一、概述：" class="headerlink" title="一、概述："></a>一、概述：</h4><p>利用Kotlin的语言特性可以创建可配置的领域语言-DSL（Domain Specific Language）。这种DSL用于表示复杂对象和对象继承结构很有用，它能隐藏模板代码和复杂性，让使用者更好的表达自己的意图。</p>
+<p>例如，用Kotlin DSL的方式表示HTML的结构：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">body &#123;</span><br><span class="line">    div &#123;</span><br><span class="line">        a(<span class="string">&quot;https://kotlinlang.org&quot;</span>) &#123;</span><br><span class="line">            target = ATarget.blank</span><br><span class="line">            +<span class="string">&quot;Main site&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    +<span class="string">&quot;Some content&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其他平台的视图也可以使用DSL来定义。下面是Android上使用Anko库定义的界面：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">verticalLayout &#123;</span><br><span class="line">    <span class="keyword">val</span> name = editText()</span><br><span class="line">    button(<span class="string">&quot;Say Hello&quot;</span>) &#123;</span><br><span class="line">        onClick &#123; toast(<span class="string">&quot;Hello, <span class="subst">$&#123;name.text&#125;</span>!&quot;</span>) &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同样的，使用TornadorFX库定义的桌面应用如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HelloWorld</span> : <span class="type">View</span></span>() &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">val</span> root = hbox &#123;</span><br><span class="line">        label(<span class="string">&quot;Hello world&quot;</span>) &#123;</span><br><span class="line">            addClass(heading)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        textfield &#123;</span><br><span class="line">            promptText = <span class="string">&quot;Enter your name&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>DSL通常也被用于定义数据和配置。下面是Ktor定义的API：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> Routing.<span class="title">api</span><span class="params">()</span></span> &#123;</span><br><span class="line">    route(<span class="string">&quot;news&quot;</span>) &#123;</span><br><span class="line">        <span class="keyword">get</span> &#123;</span><br><span class="line">            <span class="keyword">val</span> newsData = NewsUseCase.getAcceptedNews()</span><br><span class="line">            call.respond(newsData)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">get</span>(<span class="string">&quot;propositions&quot;</span>) &#123;</span><br><span class="line">            requireSecret()</span><br><span class="line">            <span class="keyword">val</span> newsData = NewsUseCase.getPropositions()</span><br><span class="line">            call.respond(newsData)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是在Kotlin Test中定义的测试用例：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyTests</span> : <span class="type">StringSpec</span></span>(&#123;</span><br><span class="line">    <span class="string">&quot;length should return size of string&quot;</span> &#123;</span><br><span class="line">        <span class="string">&quot;hello&quot;</span>.length shouldBe <span class="number">5</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="string">&quot;startsWith should test for a prefix&quot;</span> &#123;</span><br><span class="line">        <span class="string">&quot;world&quot;</span> should startWith(<span class="string">&quot;wor&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>我们甚至可以使用Gradle DSL定义Gradle配置：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    `java-library`</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dependencies &#123;</span><br><span class="line">    api(<span class="string">&quot;junit:junit:4.12&quot;</span>)</span><br><span class="line">    implementation(<span class="string">&quot;junit:junit:4.12&quot;</span>)</span><br><span class="line">    testImplementation(<span class="string">&quot;junit:junit:4.12&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">configurations &#123;</span><br><span class="line">    implementation &#123;</span><br><span class="line">        resolutionStrategy.failOnVersionConflict()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">sourceSets &#123;</span><br><span class="line">    main &#123;</span><br><span class="line">        java.srcDir(<span class="string">&quot;src/core/java&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">java &#123;</span><br><span class="line">    sourceCompatibility = JavaVersion.VERSION_11</span><br><span class="line">    targetCompatibility = JavaVersion.VERSION_11</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">tasks &#123;</span><br><span class="line">    test &#123;</span><br><span class="line">        testLogging.showExceptions = <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用DSL简化了层次结构和复杂对象的创建。在DSL构建块中，你可以使用Kotlin语法和代码提示。也许你用过Kotlin DSL，但你更应该学会如何定义它。</p>
+<h4 id="二、定义自己的DSL"><a href="#二、定义自己的DSL" class="headerlink" title="二、定义自己的DSL"></a>二、定义自己的DSL</h4><p>在理解如何定义DSL前，先明白带接收者的函数类型。首先什么是函数类型呢？它是一个能被当成函数使用的对象。例如：<code>filter</code>函数，参数predicate决定集合是否包含此元素。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">filter</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    predicate: (<span class="type">T</span>) -&gt; <span class="type">Boolean</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> list = arrayListOf&lt;T&gt;()</span><br><span class="line">    <span class="keyword">for</span> (elem <span class="keyword">in</span> <span class="keyword">this</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (predicate(elem)) &#123;</span><br><span class="line">            list.add(elem)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> list</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数类型的例子：  </p>
+<ul>
+<li>()-&gt;Unit - 无参函数，返回Unit</li>
+<li>(Int)-&gt;Unit - 单参Int函数，返回Unit</li>
+<li>(Int)-&gt;Int - 单参Int函数，返回Int</li>
+<li>(Int, Int)-&gt;Int - 双参Int函数，返回Int。</li>
+<li>(Int)-&gt;()-&gt;Unit - 单参Int函数，返回无参函数。 </li>
+<li>(()-&gt;Unit)-&gt;Unit - 参数为函数的函数，返回Unit</li>
+</ul>
+<p>创建函数类型实例的方式有：  </p>
+<ul>
+<li>使用lambda表达式</li>
+<li>使用匿名函数</li>
+<li>使用函数引用</li>
+</ul>
+<p>例如，下面的函数</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">plus</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span> = a + b</span><br></pre></td></tr></table></figure>
+<p>同样可以声明成这样：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> plus1: (<span class="built_in">Int</span>, <span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> = &#123; a, b -&gt; a + b &#125;</span><br><span class="line"><span class="keyword">val</span> plus2: (<span class="built_in">Int</span>, <span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> = <span class="function"><span class="title">fun</span><span class="params">(a, b)</span></span> = a + b</span><br><span class="line"><span class="keyword">val</span> plus3: (<span class="built_in">Int</span>, <span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> = ::plus</span><br></pre></td></tr></table></figure>
+
+<p>上面的例子中，由于指明了属性的类型，所以lambda和匿名函数中的参数能被推导出来。换一种方式说：如果指定参数类型，函数类型可以被推导。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> plus4 = &#123; a: <span class="built_in">Int</span>, b: <span class="built_in">Int</span> -&gt; a + b &#125;</span><br><span class="line"><span class="keyword">val</span> plus5 = <span class="function"><span class="title">fun</span><span class="params">(a: <span class="type">Int</span>, b: <span class="type">Int</span>)</span></span> = a + b</span><br></pre></td></tr></table></figure>
+
+<p>函数类型以对象来表达函数，匿名函数也是一个普通函数只是没名字而已。lambda则是匿名函数的简短书写方式。</p>
+<p>我们可以使用函数类型去表示函数，那拓展函数呢？</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="built_in">Int</span>.<span class="title">myPlus</span><span class="params">(other: <span class="type">Int</span>)</span></span> = <span class="keyword">this</span> + other</span><br></pre></td></tr></table></figure>
+
+<p>之前提到匿名函数只是没名字而已，匿名拓展函数也一样：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="built_in">Int</span>.<span class="title">myPlus</span><span class="params">(other: <span class="type">Int</span>)</span></span> = <span class="keyword">this</span> + other</span><br></pre></td></tr></table></figure>
+
+<p>那此函数的类型是什么呢？一种表示拓展函数的特殊类型，叫：带接收者的函数类型。它看起来和普通函数很像，只是在参数之前额外的指定了接收者的类型，他们之间用一个点分割开来。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> myPlus: <span class="built_in">Int</span>.(<span class="built_in">Int</span>) -&gt; <span class="built_in">Int</span> =</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="built_in">Int</span>.<span class="params">(other: <span class="type">Int</span>)</span></span> = <span class="keyword">this</span> + other</span><br></pre></td></tr></table></figure>
+
+<p>这种函数能通过lambda表达式定义，尤其是一个带接收者的lambda表达式，因为作用域内部的this关键字引用了拓展接收者。（此例中是一个Int类型的实例）：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> myPlus: <span class="built_in">Int</span>.(<span class="built_in">Int</span>)-&gt;<span class="built_in">Int</span> = &#123; <span class="keyword">this</span> + it &#125;</span><br></pre></td></tr></table></figure>
+
+<p>用匿名拓展函数或带接收者的lambda表达式创建的对象能被三种方式调用：</p>
+<ul>
+<li>像对象一样使用<code>invoke</code>方法调用</li>
+<li>像非拓展函数一样</li>
+<li>和普通的拓展函数一样</li>
+</ul>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">myPlus.invoke(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">myPlus(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"><span class="number">1.</span>myPlus(<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+
+<p>带接收者的函数类型最大的特点是，它改变了<code>this</code>的指向。这种特点如何使用呢？假设一个类需要依次设置属性：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dialog</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> title: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">var</span> text: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">show</span><span class="params">()</span></span> &#123; <span class="comment">/*...*/</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> dialog = Dialog()</span><br><span class="line">    dialog.title = <span class="string">&quot;My dialog&quot;</span></span><br><span class="line">    dialog.text = <span class="string">&quot;Some text&quot;</span></span><br><span class="line">    dialog.show()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>重复引用此dialog很不方便，如果我们使用带接收者的lambda，this就指向dialog，我们可以省略this，因为接收者能够隐式调用</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dialog</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> title: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">var</span> text: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">show</span><span class="params">()</span></span> &#123; <span class="comment">/*...*/</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> dialog = Dialog()</span><br><span class="line">    <span class="keyword">val</span> <span class="keyword">init</span>: Dialog.() -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        title = <span class="string">&quot;My dialog&quot;</span></span><br><span class="line">        text = <span class="string">&quot;Some text&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">init</span>.invoke(dialog)</span><br><span class="line">    dialog.show()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>按照这个思路，你可以定义一个包含创建此dialog对象所需的所有公共部分的逻辑，只把需要变化的属性的设置给调用者。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Dialog</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> title: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="keyword">var</span> text: String = <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">show</span><span class="params">()</span></span> &#123; <span class="comment">/*...*/</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">showDialog</span><span class="params">(<span class="keyword">init</span>: <span class="type">Dialog</span>.() -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> dialog = Dialog()</span><br><span class="line">    <span class="keyword">init</span>.invoke(dialog)</span><br><span class="line">    dialog.show()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    showDialog &#123;</span><br><span class="line">        title = <span class="string">&quot;My dialog&quot;</span></span><br><span class="line">        text = <span class="string">&quot;Some text&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这就是最简单的DSL例子。因为大部分这些构建函数都是重复的，已经被抽取到一个apply函数内，能被直接使用，不用再定义DSL构建器去设置属性了。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> T.<span class="title">apply</span><span class="params">(block: <span class="type">T</span>.() -&gt; <span class="type">Unit</span>)</span></span>: T &#123;</span><br><span class="line">    <span class="keyword">this</span>.block()</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Dialog().apply &#123;</span><br><span class="line">    title = <span class="string">&quot;My dialog&quot;</span></span><br><span class="line">    text = <span class="string">&quot;Some text&quot;</span></span><br><span class="line">&#125;.show()</span><br></pre></td></tr></table></figure>
+
+<p>对于DSL来说，带接收者的函数类型是最基本的构建块。我们一起来写一个简单的DSL用于创建下面的HTML表格：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">createTable</span><span class="params">()</span></span>: TableBuilder = table &#123;</span><br><span class="line">    tr &#123;</span><br><span class="line">        <span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1.</span><span class="number">.2</span>) &#123;</span><br><span class="line">            td &#123;</span><br><span class="line">                +<span class="string">&quot;This is column <span class="variable">$i</span>&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在DSL开头我们定义了table函数。由于是最外层定义，所以它没用接收者。在table的内部可以使用tr，所以tr函数只能用于table内部。同理，td只能用于tr内部。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">table</span><span class="params">(<span class="keyword">init</span>: <span class="type">TableBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span>: TableBuilder &#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TableBuilder</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">tr</span><span class="params">(<span class="keyword">init</span>: <span class="type">TrBuilder</span>.() -&gt; <span class="type">Unit</span>)</span></span> &#123; <span class="comment">/*...*/</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TrBuilder</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">td</span><span class="params">(<span class="keyword">init</span>: <span class="type">TdBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span> &#123; <span class="comment">/*...*/</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TdBuilder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> String.<span class="title">unaryPlus</span><span class="params">()</span></span> &#123;</span><br><span class="line">        text += <span class="keyword">this</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在，我们定义好了DSL。为了让它运行，每一步我们都需要创建一个builder并用参数里面的函数初始化它（下面例子中的<code>init</code>）。builder将包含所有init函数指定的数据。这些数据是我们需要的。我们可以直接返回这个构建器也可以返回另一个包含这些数据的新对象。此例中我们直接返回构建器。下面是<code>table</code>函数的定义：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">table</span><span class="params">(<span class="keyword">init</span>: <span class="type">TableBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span>: TableBuilder &#123;</span><br><span class="line">    <span class="keyword">val</span> tableBuilder = TableBuilder()</span><br><span class="line">    <span class="keyword">init</span>.invoke(tableBuilder)</span><br><span class="line">    <span class="keyword">return</span> tableBuilder</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们可以使用apply函数简化函数：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">table</span><span class="params">(<span class="keyword">init</span>: <span class="type">TableBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span> =</span><br><span class="line">    TableBuilder().apply(<span class="keyword">init</span>)</span><br></pre></td></tr></table></figure>
+
+<p>其他函数也使用apply简化：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TableBuilder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> trs = listOf&lt;TrBuilder&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">tr</span><span class="params">(<span class="keyword">init</span>: <span class="type">TrBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">        trs = trs + TrBuilder().apply(<span class="keyword">init</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TrBuilder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> tds = listOf&lt;TdBuilder&gt;()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">td</span><span class="params">(<span class="keyword">init</span>: <span class="type">TdBuilder</span>.()-&gt;<span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">        tds = tds + TdBuilder().apply(<span class="keyword">init</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="三、何时使用？"><a href="#三、何时使用？" class="headerlink" title="三、何时使用？"></a>三、何时使用？</h4><p>DSL给了我们一种定义信息的方式。它能用于表达你所想表达的东西。但是对于用户而言这些信息之后如何使用不是很清晰。在Anko、TornadoFX或HTML DSL中，我们相信视图会根据我们的定义形式被构建，但很难跟踪准确跟踪如何构建。一些复杂的使用方式很难发现。用法也会让那些不习惯的人感到困惑。更不用说维护了。它们的定义方式可能是一种成本——在开发人员困惑和性能方面都是如此。当我们可以使用其他更简单的特性时，dsl就太过了。虽然当我们需要表达下面的内容时，它们真的很有用:</p>
+<ul>
+<li>复杂的数据结构</li>
+<li>继承结构</li>
+<li>大量数据</li>
+</ul>
+<p>描述事物不止DSL方式，还可以用builder、或只用构造器代替。dsl是关于此类结构的模板代码消除。当您看到可重复的样板代码，并且没有更简单的Kotlin特性可以提供帮助时，您应该考虑使用DSL。</p>
+<h4 id="四、总结："><a href="#四、总结：" class="headerlink" title="四、总结："></a>四、总结：</h4><p>DSL是语言中的一种特殊形式。它可以非常简单地创建复杂的对象，甚至整个对象层次结构，如HTML代码或复杂的配置文件。另一方面，DSL实现可能会让新开发人员感到困惑或困难。它们也很难定义。这就是为什么只有当它们提供真正的价值时才应该使用它们的原因。例如，用于创建一个真正复杂的对象，或者可能用于复杂的对象层次结构。这就是为什么最好在库中而不是在项目中定义它们的原因。制作一个好的DSL并不容易，但是一个定义良好的DSL可以让我们的项目做得更好。</p>
+<p>参考：<br><a href="https://kt.academy/article/ek-dsl">Effective Kotlin Item 35: Consider defining a DSL for complex object creation</a></p>
+]]></content>
+      <categories>
+        <category>Kotlin</category>
+      </categories>
+      <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Effective Kotlin-56：考虑使用可变集合</title>
     <url>/kotlin-lang-use-mutable-collection.html</url>
     <content><![CDATA[<p>与不可变集合相比，使用可变集合最大的优点是性能更快。向不可变集合添加元素需要新建集合再拷贝所有元素，下面是kotlin标准库现在的实现：</p>
@@ -1881,6 +1996,60 @@
       </tags>
   </entry>
   <entry>
+    <title>LeetCode 反转单链表</title>
+    <url>/leetcode-reverse-list.html</url>
+    <content><![CDATA[<h3 id="LeetCode-206-反转单链表"><a href="#LeetCode-206-反转单链表" class="headerlink" title="LeetCode-206 反转单链表"></a>LeetCode-206 反转单链表</h3><blockquote>
+<p>给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</p>
+</blockquote>
+<p>问题分析：</p>
+<p>这是初始状态的链表</p>
+<center>
+    <img src="../images/revert_list_0.png" width="400"/>
+</center>
+由于反转链表后 **head** 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  
+
+<p>尝试一次反转后，我们发现，后续结点信息丢失了！我们不得不声明一个新的变量保存原链表的信息。</p>
+<center>
+    <img src="../images/revert_list_7.png" width="400"/>
+</center>
+
+<p>所以，我们一共需要三个指针来记录转换过程  </p>
+<ul>
+<li>prev、 head 用于交换</li>
+<li>next 用于记录  </li>
+</ul>
+<p>分析到这里，我们再回到初始状态  ：</p>
+<center>
+    <img src="../images/revert_list_4.png" width="400"/>
+</center>
+
+<p>接下来我们进行第一次反转，<strong>head.next</strong> 指向虚拟的空结点，且后续链表信息没有丢失。</p>
+<center>
+    <img src="../images/revert_list_5.png" width="400"/>
+</center>
+
+<p>三个指针一起往后移动一个单位。我们发现此时链表又回到了最初的状态。</p>
+<center>
+    <img src="../images/revert_list_6.png" width="400"/>
+</center>
+
+
+<p>至此，我们可以尝试写出如下代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">reverseIteratively</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">    ListNode pre = <span class="keyword">null</span>;</span><br><span class="line">    ListNode next = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = head.next;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//改变指针方向，对第一个节点来说，他的前一个节点是null</span></span><br><span class="line">        head.next = pre;</span><br><span class="line">        <span class="comment">//向前移动两个指针</span></span><br><span class="line">        pre = head;</span><br><span class="line">        head = next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>思考：<br>你能使用递归的方式改写上述代码逻辑吗？</p>
+]]></content>
+      <categories>
+        <category>LeetCode</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>Algorithm</tag>
+        <tag>List</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>经济学的十大原理</title>
     <url>/principles-of-economics.html</url>
     <content><![CDATA[<h4 id="一、人们如何做出决策"><a href="#一、人们如何做出决策" class="headerlink" title="一、人们如何做出决策"></a>一、人们如何做出决策</h4><h5 id="1-1-人们面临权衡取舍"><a href="#1-1-人们面临权衡取舍" class="headerlink" title="1.1 人们面临权衡取舍"></a>1.1 人们面临权衡取舍</h5><p>选择一样东西就意味着你要放弃另外一样东西。认识到生活中的权衡是重要的，因为人们只有了解他们可以得到的选择，才能作出良好的决策。</p>
@@ -1915,129 +2084,5 @@
       <tags>
         <tag>Economics</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>源码分析-项目架构之SpaceX</title>
-    <url>/android-github-source-spacex.html</url>
-    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>此文是对Github开源项目<a href="https://github.com/ferPrieto/SpaceX-prepare-for-Clean-Architecture-liftoff">SpaceX-prepare-for-Clean-Architecture-liftoff</a> 的源码阅读记录。它是一个为了阐述对<strong>Clean Architecture</strong>的理解而作的Demo项目，是一个值得学习的项目。</p>
-<h4 id="二、源码分析"><a href="#二、源码分析" class="headerlink" title="二、源码分析"></a>二、源码分析</h4><h5 id="2-1-模块之间的依赖关系"><a href="#2-1-模块之间的依赖关系" class="headerlink" title="2.1 模块之间的依赖关系"></a>2.1 模块之间的依赖关系</h5><p>项目包含以下library：</p>
-<ul>
-<li>app</li>
-<li>buildSrc</li>
-<li>core</li>
-<li>core-android-test</li>
-<li>data</li>
-<li>data-api</li>
-<li>domain</li>
-<li>navigation</li>
-<li>presentation</li>
-</ul>
-<p>模块之间的依赖关系可用下图简述：</p>
-<center>
-    <img src="../images/android-source-spacex.jpeg" width="500"/>
-</center>
-
-<h5 id="2-2-类和模块之间的关系"><a href="#2-2-类和模块之间的关系" class="headerlink" title="2.2 类和模块之间的关系"></a>2.2 类和模块之间的关系</h5><center>
-    <img src="../images/android-source-spacex-overview.jpeg" width="600"/>
-</center>
-
-
-<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>项目重在阐述架构思想所以比较简单，其中很多东西值得我们在项目中借鉴。数据层的架构模式参看<a href="https://martinfowler.com/bliki/PresentationDomainDataLayering.html">martin fowler</a> 的文章。</p>
-]]></content>
-      <tags>
-        <tag>Arch</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>源码分析-网络框架之Retrofit</title>
-    <url>/android-github-source-retrofit.html</url>
-    <content><![CDATA[<h4 id="一、使用"><a href="#一、使用" class="headerlink" title="一、使用"></a>一、使用</h4><h5 id="1-1-定义API方法"><a href="#1-1-定义API方法" class="headerlink" title="1.1 定义API方法"></a>1.1 定义API方法</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">RemoteApi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(<span class="meta-string">&quot;timeline&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">timeline</span><span class="params">()</span></span>: RemoteLaunchesResponse </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="1-2-获取服务"><a href="#1-2-获取服务" class="headerlink" title="1.2 获取服务"></a>1.2 获取服务</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> client = OkHttpClient.Builder()</span><br><span class="line">             .addInterceptor(loggingInterceptor)</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">             .client(client)</span><br><span class="line">             .baseUrl(<span class="string">&quot;http://10.0.0.2:8080/&quot;</span>)</span><br><span class="line">             .addConverterFactory(GsonConverterFactory.create())</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> api = retrofit.create(RemoteApi::<span class="keyword">class</span>.java) <span class="comment">//1、create做了什么？</span></span><br></pre></td></tr></table></figure>
-
-<h5 id="1-3-发起请求"><a href="#1-3-发起请求" class="headerlink" title="1.3 发起请求"></a>1.3 发起请求</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">api.timeline() <span class="comment">//2、调用接口方法怎么发起请求?</span></span><br></pre></td></tr></table></figure>
-
-
-<h4 id="二、原理"><a href="#二、原理" class="headerlink" title="二、原理"></a>二、原理</h4><center>
-    <img src="../images/android-source-retrofit.jpeg" width="100%"/>
-</center>
-
-<h5 id="2-1-create做了什么"><a href="#2-1-create做了什么" class="headerlink" title="2.1 create做了什么"></a>2.1 create做了什么</h5><p>Retrofit的网络请求方法都是定义在接口中的，它会在运行时利用Java的动态代理产生代理对象，所以<code>create()</code>就是创建代理对象的方法。</p>
-<h5 id="2-2-调用接口方法怎么发起请求"><a href="#2-2-调用接口方法怎么发起请求" class="headerlink" title="2.2 调用接口方法怎么发起请求"></a>2.2 调用接口方法怎么发起请求</h5><p>当调用接口方法时，实际上是调用了代理对象的方法。它会去Retrofit中找该方法对应的<code>ServiceMethod</code>，如果找到缓存直接使用，否则解析后再使用。</p>
-<p>解析的结果是<code>ServiceMethod</code>的子类<code>CallAdapted</code>、<code>SuspendForResponse</code>、<code>SuspendForBody</code>三者之一。</p>
-<p>解析结束后调用返回对象的<code>invoke</code>方法初始化OkHttpCall对象发起真正的请求。</p>
-<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>阅读源码的过程当中，画了详细的代码执行流程图供后续回顾。另外源码中还有两个重要的对外拓展接口<code>CallAdapter</code>和<code>Converter</code>没有详细分析。</p>
-]]></content>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Room数据库酷七条</title>
-    <url>/android-library-room-7-tips.html</url>
-    <content><![CDATA[<h4 id="一、通过RoomDatabase-Callback预填充数据"><a href="#一、通过RoomDatabase-Callback预填充数据" class="headerlink" title="一、通过RoomDatabase#Callback预填充数据"></a>一、通过<code>RoomDatabase#Callback</code>预填充数据</h4><p>如果需要在数据库创建或数据库打开的时候添加一些默认数据，可以使用<code>RoomDatabase#Callback</code>接口并复写它的<code>onCreate</code>或<code>onOpen</code>方法。由于DAO对象只能在这两个方法返回后使用，所以我们创建一个新线程来插入数据：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">Room.databaseBuilder(context.applicationContext,</span><br><span class="line">        DataDatabase::<span class="keyword">class</span>.java, <span class="string">&quot;Sample.db&quot;</span>)</span><br><span class="line">        <span class="comment">// prepopulate the database after onCreate was called</span></span><br><span class="line">        .addCallback(<span class="keyword">object</span> : Callback() &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(db: <span class="type">SupportSQLiteDatabase</span>)</span></span> &#123;</span><br><span class="line">                <span class="keyword">super</span>.onCreate(db)</span><br><span class="line">                <span class="comment">// moving to a new thread</span></span><br><span class="line">                ioThread &#123;</span><br><span class="line">                    getInstance(context).dataDao()</span><br><span class="line">                                        .insert(PREPOPULATE_DATA)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        .build()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><strong>需要注意的是</strong>：当app首次启动时，在create和insert之间崩溃的话，数据将永远不会被插入。</p>
-<h4 id="二、使用DAO的继承能力"><a href="#二、使用DAO的继承能力" class="headerlink" title="二、使用DAO的继承能力"></a>二、使用DAO的继承能力</h4><p>很多DAO里存在一样的<code>Insert</code>、<code>Update</code>、<code>Delete</code>方法。我们可以使用继承来避免这些重复的代码。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BaseDao</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">insert</span><span class="params">(<span class="keyword">vararg</span> obj: <span class="type">T</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">DataDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">Data</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;SELECT * FROM Data&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getData</span><span class="params">()</span></span>: List&lt;Data&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="三、通过-Transaction减少事务查询的模板代码"><a href="#三、通过-Transaction减少事务查询的模板代码" class="headerlink" title="三、通过@Transaction减少事务查询的模板代码"></a>三、通过<code>@Transaction</code>减少事务查询的模板代码</h4><p>用<code>@Transaction</code>注解的方法会在一个事务里面执行。当这些方法执行异常时，事务也会失败。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Transaction</span></span><br><span class="line">    <span class="keyword">open</span> <span class="function"><span class="keyword">fun</span> <span class="title">updateData</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span> &#123;</span><br><span class="line">        deleteAllUsers()</span><br><span class="line">        insertAll(users)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">insertAll</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span></span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;DELETE FROM Users&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">deleteAllUsers</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当<code>@Query</code>方法带有select语句时，在下列情况下你可能会使用<code>@Transation</code>注解</p>
-<ul>
-<li>当查询的结果集很大时，让查询在一次事务里完成能够保证：如果查询结果不满足单个游标窗口，它不会因为在游标窗口交换之间的数据库更改而中断。</li>
-<li>如果查询结果是一个带<code>@Relation</code>字段的POJO，此字段会单独查询，所以让他们运行在一个事务中可以确保结果一致。</li>
-</ul>
-<p><code>Delete</code>、<code>Update</code>、<code>Insert</code>方法包含多个参数时会自动在事务里执行。</p>
-<h4 id="四、只读需要的数据"><a href="#四、只读需要的数据" class="headerlink" title="四、只读需要的数据"></a>四、只读需要的数据</h4><p>关注App的内存消耗，只加载需要使用的字段，这能提高查询速度减少IO消耗。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;users&quot;</span>)</span></span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span></span>(<span class="meta">@PrimaryKey</span></span><br><span class="line">                <span class="keyword">val</span> id: String,</span><br><span class="line">                <span class="keyword">val</span> userName: String,</span><br><span class="line">                <span class="keyword">val</span> firstName: String, </span><br><span class="line">                <span class="keyword">val</span> lastName: String,</span><br><span class="line">                <span class="keyword">val</span> email: String,</span><br><span class="line">                <span class="keyword">val</span> dateOfBirth: Date, </span><br><span class="line">                <span class="keyword">val</span> registrationDate: Date)</span><br></pre></td></tr></table></figure>
-
-<p>上面的类中，很多字段我们用不到，定义一个类，只包含我们需要的字段：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserMinimal</span></span>(<span class="keyword">val</span> userId: String,</span><br><span class="line">                       <span class="keyword">val</span> firstName: String, </span><br><span class="line">                       <span class="keyword">val</span> lastName: String)</span><br></pre></td></tr></table></figure>
-
-<p>在DAO中，定义方法只查询所需字段：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT userId, firstName, lastName FROM Users)</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getUsersMinimal</span><span class="params">()</span></span>: List&lt;UserMinimal&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="五、使用外键"><a href="#五、使用外键" class="headerlink" title="五、使用外键"></a>五、使用外键</h4><p>即使Room不直接支持关系，但它允许你定义外键来约束实体之间的关系。</p>
-<p>Room的<code>@ForeignKey</code>是<code>@Entity</code>注解的一部分，用来支持Sqlite的外键特性。它强制表之间的约束，当你修改表时，保证关系一致性。</p>
-<p>看一下<code>User</code>和<code>Pet</code>类，<code>Pet</code>有主人，以userId关联。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;pets&quot;</span>,</span></span><br><span class="line"><span class="meta">        foreignKeys = arrayOf(</span></span><br><span class="line"><span class="meta">            ForeignKey(entity = User::class,</span></span><br><span class="line"><span class="meta">                       parentColumns = arrayOf(<span class="meta-string">&quot;userId&quot;</span>)</span>,</span><br><span class="line">                       childColumns = arrayOf(<span class="string">&quot;owner&quot;</span>))))</span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Pet</span></span>(<span class="meta">@PrimaryKey</span> <span class="keyword">val</span> petId: String,</span><br><span class="line">              <span class="keyword">val</span> name: String,</span><br><span class="line">              <span class="keyword">val</span> owner: String)</span><br></pre></td></tr></table></figure>
-
-<p>你可以定义一些行为，当例子中的<code>User</code>在数据库中被删除或修改。你可以做以下一些操作：<code>NO_ACTION</code>、<code>RESTRICT</code>、<code>SET_NULL</code>、<code>SET_DEFAULT</code>或<code>CASCADE</code>，这些操作和Sqlite保持一致。</p>
-<p><strong>注意：</strong> 在Room中<code>SET_DEFAULT</code>和<code>SET_NULL</code>效果一致，因为Room还不允许为数据列设置默认值。</p>
-<h4 id="六、使用-Relation简化一对多查询"><a href="#六、使用-Relation简化一对多查询" class="headerlink" title="六、使用@Relation简化一对多查询"></a>六、使用<code>@Relation</code>简化一对多查询</h4><p>在前面<code>User-Pet</code>的例子中，我们有个一对多的关系，一个人可以有多个宠物。当我们想获取主人和宠物集合时：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>(<span class="keyword">val</span> user: User,</span><br><span class="line">                           <span class="keyword">val</span> pets: List&lt;Pet&gt; = ArrayList())</span><br></pre></td></tr></table></figure>
-
-<p>需要两个查询：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;User&gt; getUsers();</span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Pets where owner = :userId”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;Pet&gt; getPetsForUser(String userId);</span><br></pre></td></tr></table></figure>
-
-<p>我们需要遍历用户来查宠物。</p>
-<p>为了简化此过程，Room的<code>@Relation</code>注解自动关联实体。此注解只能用于<code>List</code>和<code>Set</code>对象。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Embedded</span></span><br><span class="line">   <span class="keyword">var</span> user: User? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">   <span class="meta">@Relation(parentColumn = “userId”,</span></span><br><span class="line"><span class="meta">             entityColumn = “owner”)</span></span><br><span class="line">   <span class="keyword">var</span> pets: List&lt;Pet&gt; = ArrayList()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在DAO中，我们定义一次查询：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Transaction</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line">List&lt;UserAndAllPets&gt; getUsers();</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="七、避免可观察查询的假通知"><a href="#七、避免可观察查询的假通知" class="headerlink" title="七、避免可观察查询的假通知"></a>七、避免可观察查询的假通知</h4><p>可观察查询，只关心对应ID的对象：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; </span><br><span class="line"></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br></pre></td></tr></table></figure>
-
-<p>每次此用户更新的时候你都得到一个新通知。但是其他的一些不影响此ID的修改（delete、update、insert）会发送通知。</p>
-<p>这种场景背后的原因是什么：<br>1、Sqlite支持触发器，<code>DELETE</code>、<code>UPDATE</code>、<code>INSERT</code>发生时或触发。<br>2、Room创建了一个<code>InvalidationTracker</code>来跟踪观察表的变化。<br>3、<code>LiveData</code>和<code>Flowable</code>查询依赖<code>InvalidationTracker.Observer#onInvalidated</code>通知，收到通知就做一次再查询操作。</p>
-<p>Room只知道表被修改了，不知道为什么修改也不知道什么被修改。因此，再查询操作会重新通知。由于Room不在内存保存数据也不能保证object的equals方法所以他不知道对象是否变化了。</p>
-<p>你需要自己保证DAO过滤收到的事件，只对关心的数据做出响应。</p>
-<p>如果观察的是<code>Flowable</code>，使用<code>Flowable#distinctUntilChanged</code>。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Get a user by id.</span></span><br><span class="line"><span class="comment">* <span class="doctag">@return</span> the user from the table with a specific id.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: </span><br><span class="line">    Flowable&lt;User&gt; = getUserById(id).distinctUntilChanged()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果观察的是<code>LiveData</code>，可以用<code>MediatorLiveData</code>处理只让有变化的数据发送事件。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> LiveData<span class="type">&lt;T&gt;</span>.<span class="title">getDistinct</span><span class="params">()</span></span>: LiveData&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> distinctLiveData = MediatorLiveData&lt;T&gt;()</span><br><span class="line">    distinctLiveData.addSource(<span class="keyword">this</span>, <span class="keyword">object</span> : Observer&lt;T&gt; &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> initialized = <span class="literal">false</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> lastObj: T? = <span class="literal">null</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onChanged</span><span class="params">(obj: <span class="type">T</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!initialized) &#123;</span><br><span class="line">                initialized = <span class="literal">true</span></span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((obj == <span class="literal">null</span> &amp;&amp; lastObj != <span class="literal">null</span>) </span><br><span class="line">                       || obj != lastObj) &#123;</span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> distinctLiveData</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在DAO中，让真正关心变化的方法使用<code>public</code>修饰，查询方法用<code>protected</code>修饰</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; = getUserById(id).getDistinct()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>注意：</strong> 如果你返回列表用于展示，考虑使用<code>Paging</code>库，它能帮你处理数据的变化。</p>
-]]></content>
   </entry>
 </search>
