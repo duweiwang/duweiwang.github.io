@@ -187,6 +187,7 @@ description:
 
 ##### 2.9 Group分组约束
 将多个View作为一个组一起控制：
+
 ```xml
 <androidx.constraintlayout.widget.Group
               android:id="@+id/group"
@@ -194,6 +195,14 @@ description:
               android:layout_height="wrap_content"
               android:visibility="visible"
               app:constraint_referenced_ids="button4,button9" />
+```
++ 无法通过group设置点击事件
+```kotlin
+group.referencedIds.forEach { id ->
+     view.findViewById(id).setOnClickListener {
+        //do something
+     }
+}
 ```
 
 ##### 2.10 Placeholder占位约束
