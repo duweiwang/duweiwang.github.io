@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2022-04-17T06:40:32.422Z</updated>
+  <updated>2022-05-02T02:15:59.237Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Kotlin中的JVM注解</title>
+    <link href="https://wangduwei.top/kotlin-lang-jvm-annotation.html"/>
+    <id>https://wangduwei.top/kotlin-lang-jvm-annotation.html</id>
+    <published>2022-05-01T07:29:44.000Z</published>
+    <updated>2022-05-02T02:15:59.237Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。&lt;/p&gt;
+&lt;h4 id=&quot;1、-JvmName&quot;&gt;&lt;a href=&quot;#1、-JvmName&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>源码分析-WorkManager</title>
@@ -470,29 +492,6 @@
     
     
     <category term="Economics" scheme="https://wangduwei.top/tags/Economics/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>ELF文件的结构</title>
-    <link href="https://wangduwei.top/file-format-elf.html"/>
-    <id>https://wangduwei.top/file-format-elf.html</id>
-    <published>2021-08-30T07:22:49.000Z</published>
-    <updated>2021-10-30T07:11:19.874Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    
-    <category term="File" scheme="https://wangduwei.top/tags/File/"/>
     
   </entry>
   

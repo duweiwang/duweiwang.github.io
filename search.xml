@@ -335,38 +335,6 @@
       </tags>
   </entry>
   <entry>
-    <title>源码分析-项目架构之SpaceX</title>
-    <url>/android-github-source-spacex.html</url>
-    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>此文是对Github开源项目<a href="https://github.com/ferPrieto/SpaceX-prepare-for-Clean-Architecture-liftoff">SpaceX-prepare-for-Clean-Architecture-liftoff</a> 的源码阅读记录。它是一个为了阐述对<strong>Clean Architecture</strong>的理解而作的Demo项目，是一个值得学习的项目。</p>
-<h4 id="二、源码分析"><a href="#二、源码分析" class="headerlink" title="二、源码分析"></a>二、源码分析</h4><h5 id="2-1-模块之间的依赖关系"><a href="#2-1-模块之间的依赖关系" class="headerlink" title="2.1 模块之间的依赖关系"></a>2.1 模块之间的依赖关系</h5><p>项目包含以下library：</p>
-<ul>
-<li>app</li>
-<li>buildSrc</li>
-<li>core</li>
-<li>core-android-test</li>
-<li>data</li>
-<li>data-api</li>
-<li>domain</li>
-<li>navigation</li>
-<li>presentation</li>
-</ul>
-<p>模块之间的依赖关系可用下图简述：</p>
-<center>
-    <img src="../images/android-source-spacex.jpeg" width="500"/>
-</center>
-
-<h5 id="2-2-类和模块之间的关系"><a href="#2-2-类和模块之间的关系" class="headerlink" title="2.2 类和模块之间的关系"></a>2.2 类和模块之间的关系</h5><center>
-    <img src="../images/android-source-spacex-overview.jpeg" width="600"/>
-</center>
-
-
-<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>项目重在阐述架构思想所以比较简单，其中很多东西值得我们在项目中借鉴。数据层的架构模式参看<a href="https://martinfowler.com/bliki/PresentationDomainDataLayering.html">martin fowler</a> 的文章。</p>
-]]></content>
-      <tags>
-        <tag>Arch</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>源码分析-WorkManager</title>
     <url>/android-github-source-workmanager.html</url>
     <content><![CDATA[<h4 id="一、初始化流程"><a href="#一、初始化流程" class="headerlink" title="一、初始化流程"></a>一、初始化流程</h4><p>1、WorkManager集成了<code>androidx.startup</code> 库，通过<code>startup</code>库的<code>ContentProvider</code>在应用启动时进行初始化。<br>见<code>work-runtime</code>的Manifest文件：</p>
@@ -410,160 +378,35 @@
       </tags>
   </entry>
   <entry>
-    <title>Room数据库酷七条</title>
-    <url>/android-library-room-7-tips.html</url>
-    <content><![CDATA[<h4 id="一、通过RoomDatabase-Callback预填充数据"><a href="#一、通过RoomDatabase-Callback预填充数据" class="headerlink" title="一、通过RoomDatabase#Callback预填充数据"></a>一、通过<code>RoomDatabase#Callback</code>预填充数据</h4><p>如果需要在数据库创建或数据库打开的时候添加一些默认数据，可以使用<code>RoomDatabase#Callback</code>接口并复写它的<code>onCreate</code>或<code>onOpen</code>方法。由于DAO对象只能在这两个方法返回后使用，所以我们创建一个新线程来插入数据：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">Room.databaseBuilder(context.applicationContext,</span><br><span class="line">        DataDatabase::<span class="keyword">class</span>.java, <span class="string">&quot;Sample.db&quot;</span>)</span><br><span class="line">        <span class="comment">// prepopulate the database after onCreate was called</span></span><br><span class="line">        .addCallback(<span class="keyword">object</span> : Callback() &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(db: <span class="type">SupportSQLiteDatabase</span>)</span></span> &#123;</span><br><span class="line">                <span class="keyword">super</span>.onCreate(db)</span><br><span class="line">                <span class="comment">// moving to a new thread</span></span><br><span class="line">                ioThread &#123;</span><br><span class="line">                    getInstance(context).dataDao()</span><br><span class="line">                                        .insert(PREPOPULATE_DATA)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        .build()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><strong>需要注意的是</strong>：当app首次启动时，在create和insert之间崩溃的话，数据将永远不会被插入。</p>
-<h4 id="二、使用DAO的继承能力"><a href="#二、使用DAO的继承能力" class="headerlink" title="二、使用DAO的继承能力"></a>二、使用DAO的继承能力</h4><p>很多DAO里存在一样的<code>Insert</code>、<code>Update</code>、<code>Delete</code>方法。我们可以使用继承来避免这些重复的代码。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BaseDao</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">insert</span><span class="params">(<span class="keyword">vararg</span> obj: <span class="type">T</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">DataDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">Data</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;SELECT * FROM Data&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getData</span><span class="params">()</span></span>: List&lt;Data&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="三、通过-Transaction减少事务查询的模板代码"><a href="#三、通过-Transaction减少事务查询的模板代码" class="headerlink" title="三、通过@Transaction减少事务查询的模板代码"></a>三、通过<code>@Transaction</code>减少事务查询的模板代码</h4><p>用<code>@Transaction</code>注解的方法会在一个事务里面执行。当这些方法执行异常时，事务也会失败。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Transaction</span></span><br><span class="line">    <span class="keyword">open</span> <span class="function"><span class="keyword">fun</span> <span class="title">updateData</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span> &#123;</span><br><span class="line">        deleteAllUsers()</span><br><span class="line">        insertAll(users)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">insertAll</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span></span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;DELETE FROM Users&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">deleteAllUsers</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当<code>@Query</code>方法带有select语句时，在下列情况下你可能会使用<code>@Transation</code>注解</p>
+    <title>源码分析-项目架构之SpaceX</title>
+    <url>/android-github-source-spacex.html</url>
+    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>此文是对Github开源项目<a href="https://github.com/ferPrieto/SpaceX-prepare-for-Clean-Architecture-liftoff">SpaceX-prepare-for-Clean-Architecture-liftoff</a> 的源码阅读记录。它是一个为了阐述对<strong>Clean Architecture</strong>的理解而作的Demo项目，是一个值得学习的项目。</p>
+<h4 id="二、源码分析"><a href="#二、源码分析" class="headerlink" title="二、源码分析"></a>二、源码分析</h4><h5 id="2-1-模块之间的依赖关系"><a href="#2-1-模块之间的依赖关系" class="headerlink" title="2.1 模块之间的依赖关系"></a>2.1 模块之间的依赖关系</h5><p>项目包含以下library：</p>
 <ul>
-<li>当查询的结果集很大时，让查询在一次事务里完成能够保证：如果查询结果不满足单个游标窗口，它不会因为在游标窗口交换之间的数据库更改而中断。</li>
-<li>如果查询结果是一个带<code>@Relation</code>字段的POJO，此字段会单独查询，所以让他们运行在一个事务中可以确保结果一致。</li>
+<li>app</li>
+<li>buildSrc</li>
+<li>core</li>
+<li>core-android-test</li>
+<li>data</li>
+<li>data-api</li>
+<li>domain</li>
+<li>navigation</li>
+<li>presentation</li>
 </ul>
-<p><code>Delete</code>、<code>Update</code>、<code>Insert</code>方法包含多个参数时会自动在事务里执行。</p>
-<h4 id="四、只读需要的数据"><a href="#四、只读需要的数据" class="headerlink" title="四、只读需要的数据"></a>四、只读需要的数据</h4><p>关注App的内存消耗，只加载需要使用的字段，这能提高查询速度减少IO消耗。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;users&quot;</span>)</span></span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span></span>(<span class="meta">@PrimaryKey</span></span><br><span class="line">                <span class="keyword">val</span> id: String,</span><br><span class="line">                <span class="keyword">val</span> userName: String,</span><br><span class="line">                <span class="keyword">val</span> firstName: String, </span><br><span class="line">                <span class="keyword">val</span> lastName: String,</span><br><span class="line">                <span class="keyword">val</span> email: String,</span><br><span class="line">                <span class="keyword">val</span> dateOfBirth: Date, </span><br><span class="line">                <span class="keyword">val</span> registrationDate: Date)</span><br></pre></td></tr></table></figure>
+<p>模块之间的依赖关系可用下图简述：</p>
+<center>
+    <img src="../images/android-source-spacex.jpeg" width="500"/>
+</center>
 
-<p>上面的类中，很多字段我们用不到，定义一个类，只包含我们需要的字段：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserMinimal</span></span>(<span class="keyword">val</span> userId: String,</span><br><span class="line">                       <span class="keyword">val</span> firstName: String, </span><br><span class="line">                       <span class="keyword">val</span> lastName: String)</span><br></pre></td></tr></table></figure>
-
-<p>在DAO中，定义方法只查询所需字段：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT userId, firstName, lastName FROM Users)</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getUsersMinimal</span><span class="params">()</span></span>: List&lt;UserMinimal&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="五、使用外键"><a href="#五、使用外键" class="headerlink" title="五、使用外键"></a>五、使用外键</h4><p>即使Room不直接支持关系，但它允许你定义外键来约束实体之间的关系。</p>
-<p>Room的<code>@ForeignKey</code>是<code>@Entity</code>注解的一部分，用来支持Sqlite的外键特性。它强制表之间的约束，当你修改表时，保证关系一致性。</p>
-<p>看一下<code>User</code>和<code>Pet</code>类，<code>Pet</code>有主人，以userId关联。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;pets&quot;</span>,</span></span><br><span class="line"><span class="meta">        foreignKeys = arrayOf(</span></span><br><span class="line"><span class="meta">            ForeignKey(entity = User::class,</span></span><br><span class="line"><span class="meta">                       parentColumns = arrayOf(<span class="meta-string">&quot;userId&quot;</span>)</span>,</span><br><span class="line">                       childColumns = arrayOf(<span class="string">&quot;owner&quot;</span>))))</span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Pet</span></span>(<span class="meta">@PrimaryKey</span> <span class="keyword">val</span> petId: String,</span><br><span class="line">              <span class="keyword">val</span> name: String,</span><br><span class="line">              <span class="keyword">val</span> owner: String)</span><br></pre></td></tr></table></figure>
-
-<p>你可以定义一些行为，当例子中的<code>User</code>在数据库中被删除或修改。你可以做以下一些操作：<code>NO_ACTION</code>、<code>RESTRICT</code>、<code>SET_NULL</code>、<code>SET_DEFAULT</code>或<code>CASCADE</code>，这些操作和Sqlite保持一致。</p>
-<p><strong>注意：</strong> 在Room中<code>SET_DEFAULT</code>和<code>SET_NULL</code>效果一致，因为Room还不允许为数据列设置默认值。</p>
-<h4 id="六、使用-Relation简化一对多查询"><a href="#六、使用-Relation简化一对多查询" class="headerlink" title="六、使用@Relation简化一对多查询"></a>六、使用<code>@Relation</code>简化一对多查询</h4><p>在前面<code>User-Pet</code>的例子中，我们有个一对多的关系，一个人可以有多个宠物。当我们想获取主人和宠物集合时：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>(<span class="keyword">val</span> user: User,</span><br><span class="line">                           <span class="keyword">val</span> pets: List&lt;Pet&gt; = ArrayList())</span><br></pre></td></tr></table></figure>
-
-<p>需要两个查询：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;User&gt; getUsers();</span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Pets where owner = :userId”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;Pet&gt; getPetsForUser(String userId);</span><br></pre></td></tr></table></figure>
-
-<p>我们需要遍历用户来查宠物。</p>
-<p>为了简化此过程，Room的<code>@Relation</code>注解自动关联实体。此注解只能用于<code>List</code>和<code>Set</code>对象。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Embedded</span></span><br><span class="line">   <span class="keyword">var</span> user: User? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">   <span class="meta">@Relation(parentColumn = “userId”,</span></span><br><span class="line"><span class="meta">             entityColumn = “owner”)</span></span><br><span class="line">   <span class="keyword">var</span> pets: List&lt;Pet&gt; = ArrayList()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在DAO中，我们定义一次查询：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Transaction</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line">List&lt;UserAndAllPets&gt; getUsers();</span><br></pre></td></tr></table></figure>
+<h5 id="2-2-类和模块之间的关系"><a href="#2-2-类和模块之间的关系" class="headerlink" title="2.2 类和模块之间的关系"></a>2.2 类和模块之间的关系</h5><center>
+    <img src="../images/android-source-spacex-overview.jpeg" width="600"/>
+</center>
 
 
-<h4 id="七、避免可观察查询的假通知"><a href="#七、避免可观察查询的假通知" class="headerlink" title="七、避免可观察查询的假通知"></a>七、避免可观察查询的假通知</h4><p>可观察查询，只关心对应ID的对象：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; </span><br><span class="line"></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br></pre></td></tr></table></figure>
-
-<p>每次此用户更新的时候你都得到一个新通知。但是其他的一些不影响此ID的修改（delete、update、insert）会发送通知。</p>
-<p>这种场景背后的原因是什么：<br>1、Sqlite支持触发器，<code>DELETE</code>、<code>UPDATE</code>、<code>INSERT</code>发生时或触发。<br>2、Room创建了一个<code>InvalidationTracker</code>来跟踪观察表的变化。<br>3、<code>LiveData</code>和<code>Flowable</code>查询依赖<code>InvalidationTracker.Observer#onInvalidated</code>通知，收到通知就做一次再查询操作。</p>
-<p>Room只知道表被修改了，不知道为什么修改也不知道什么被修改。因此，再查询操作会重新通知。由于Room不在内存保存数据也不能保证object的equals方法所以他不知道对象是否变化了。</p>
-<p>你需要自己保证DAO过滤收到的事件，只对关心的数据做出响应。</p>
-<p>如果观察的是<code>Flowable</code>，使用<code>Flowable#distinctUntilChanged</code>。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Get a user by id.</span></span><br><span class="line"><span class="comment">* <span class="doctag">@return</span> the user from the table with a specific id.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: </span><br><span class="line">    Flowable&lt;User&gt; = getUserById(id).distinctUntilChanged()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果观察的是<code>LiveData</code>，可以用<code>MediatorLiveData</code>处理只让有变化的数据发送事件。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> LiveData<span class="type">&lt;T&gt;</span>.<span class="title">getDistinct</span><span class="params">()</span></span>: LiveData&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> distinctLiveData = MediatorLiveData&lt;T&gt;()</span><br><span class="line">    distinctLiveData.addSource(<span class="keyword">this</span>, <span class="keyword">object</span> : Observer&lt;T&gt; &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> initialized = <span class="literal">false</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> lastObj: T? = <span class="literal">null</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onChanged</span><span class="params">(obj: <span class="type">T</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!initialized) &#123;</span><br><span class="line">                initialized = <span class="literal">true</span></span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((obj == <span class="literal">null</span> &amp;&amp; lastObj != <span class="literal">null</span>) </span><br><span class="line">                       || obj != lastObj) &#123;</span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> distinctLiveData</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在DAO中，让真正关心变化的方法使用<code>public</code>修饰，查询方法用<code>protected</code>修饰</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; = getUserById(id).getDistinct()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>注意：</strong> 如果你返回列表用于展示，考虑使用<code>Paging</code>库，它能帮你处理数据的变化。</p>
+<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>项目重在阐述架构思想所以比较简单，其中很多东西值得我们在项目中借鉴。数据层的架构模式参看<a href="https://martinfowler.com/bliki/PresentationDomainDataLayering.html">martin fowler</a> 的文章。</p>
 ]]></content>
-  </entry>
-  <entry>
-    <title>Android-11适配</title>
-    <url>/android-target-30.html</url>
-    <content><![CDATA[<h4 id="一、变更概览"><a href="#一、变更概览" class="headerlink" title="一、变更概览"></a>一、变更概览</h4><h5 id="1、隐私"><a href="#1、隐私" class="headerlink" title="1、隐私"></a>1、隐私</h5><ul>
-<li>分区存储</li>
-<li>自动释放权限</li>
-<li>后台定位</li>
-<li>包可见性</li>
-</ul>
-<h5 id="2、安全"><a href="#2、安全" class="headerlink" title="2、安全"></a>2、安全</h5><ul>
-<li><a href="https://source.android.com/devices/tech/debug/tagged-pointers">堆指针添加标记</a></li>
-<li>Toast<ul>
-<li>🚫禁止后台弹出含自定义View的Toast</li>
-<li>Toast支持显示/隐藏回调</li>
-<li>部分View相关API调整</li>
-</ul>
-</li>
-</ul>
-<h5 id="3、连接"><a href="#3、连接" class="headerlink" title="3、连接"></a>3、连接</h5><ul>
-<li>限制对APN数据库（Access Point Names）的读写</li>
-</ul>
-<h5 id="4、Accessibility"><a href="#4、Accessibility" class="headerlink" title="4、Accessibility"></a>4、Accessibility</h5><ul>
-<li>文本转语音（TTS）和语音识别 需要声明<queries></li>
-<li>在res/raw下声明对accessibility的使用</li>
-</ul>
-<h5 id="5、相机"><a href="#5、相机" class="headerlink" title="5、相机"></a>5、相机</h5><ul>
-<li>以下Action默认只能调起系统相机，除非指定包名<ul>
-<li>android.media.action.VIDEO_CAPTURE</li>
-<li>android.media.action.IMAGE_CAPTURE</li>
-<li>android.media.action.IMAGE_CAPTURE_SECURE</li>
-</ul>
-</li>
-</ul>
-<h5 id="6、应用打包和安装"><a href="#6、应用打包和安装" class="headerlink" title="6、应用打包和安装"></a>6、应用打包和安装</h5><ul>
-<li>🚫禁止压缩resources.arsc</li>
-<li>必须使用V2及以上版本进行apk签名<h5 id="7、Firebase"><a href="#7、Firebase" class="headerlink" title="7、Firebase"></a>7、Firebase</h5></li>
-<li>target-30的apk在6.0及以上设备，不能使用Firebase JobDispatcher 和 GCMNetworkManager</li>
-</ul>
-<h5 id="8、allowBackup属性调整"><a href="#8、allowBackup属性调整" class="headerlink" title="8、allowBackup属性调整"></a>8、allowBackup属性调整</h5><h5 id="9、修改SP的OnSharedPreferenceChangeListener回调"><a href="#9、修改SP的OnSharedPreferenceChangeListener回调" class="headerlink" title="9、修改SP的OnSharedPreferenceChangeListener回调"></a>9、修改SP的OnSharedPreferenceChangeListener回调</h5><h5 id="10、非SDK接口调用黑名单"><a href="#10、非SDK接口调用黑名单" class="headerlink" title="10、非SDK接口调用黑名单"></a>10、非SDK接口调用黑名单</h5><h4 id="二、变更详情"><a href="#二、变更详情" class="headerlink" title="二、变更详情"></a>二、变更详情</h4><h5 id="1、分区存储"><a href="#1、分区存储" class="headerlink" title="1、分区存储"></a>1、分区存储</h5><ul>
-<li><p>针对特殊类型应用(文件管理器、文件备份、文件加密)<br><br>这种类型的应用需要大规模的进行文件操作，迁移成本较高，推荐使用新的存储管理权限 MANAGE_EXTERNAL_STORAGE （参考1:此权限的授权范围）</p>
-<ul>
-<li>优点：<br><br>  1、开启后直接拥有所有读写权限（包括拔插的SD卡，USB等）<br><br>  2、清缓存不会丢失授权<br><br>  3、处理成本较低，只需兼容旧的动态权限申请部分的逻辑。<br></li>
-<li>缺点：<br><br>  1、需要跳转设置页面开启权限，有损产品数据（轮询权限，强制拉回）<br><br>  2、需要提交GP申请表单，审核通过才能上架<br></li>
-<li>实践：<br><br>  1、判断权限 Environment.isExternalStorageManager() <br><br>  2、跳转设置页面引导用户开启权限的方式：注意下面两个<strong>Action</strong>的区别<br><pre><code>  Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION&lt;br&gt;
-  Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-</code></pre>
-</li>
-</ul>
-</li>
-</ul>
-<ul>
-<li>针对普通应用<br>无法申请新的存储管理权限 MANAGE_EXTERNAL_STORAGE 。只能对旧的API进行改造兼容，将其迁移到存储访问框架SAF（Storage Access Framework）包括Document-API 或 MediaStore-API。<ul>
-<li>优点： <br><br>  1、交互逻辑，和代码逻辑结构比较统一 <br><br>  2、提高隐私与安全性，避免杂乱无章的文件系统 <br></li>
-<li>缺点： <br><br>  1、迁移成本较高，需要做大量的API兼容，可能影响产品逻辑 <br></li>
-<li>实践： <br><br>  1、分区存储文档 <br></li>
-<li>注意事项： <br><br>  1、做好数据迁移，避免升级后，原来的数据在不可访问区域 <br><br>  2、保留 [requestLegacyExternalStorage=true] 属性 <br></li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p>我的应用1.0版本之前数据库存储在外部，为了适配target-30，我在1.1版本，写了数据迁移代码。1.2版本，我做了target-30升级。某用户直接跳过1.1版本升级到了1.2版本。无法运行迁移代码。怎么办！</p>
-</blockquote>
-<p>preserveLegacyExternalStorage 属性：针对升级用户，暂时维持兼容属性，卸载后失效。</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">  	<span class="attr">android:preserveLegacyExternalStorage</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-
-<h5 id="2、电话号码"><a href="#2、电话号码" class="headerlink" title="2、电话号码 "></a>2、电话号码 <br></h5><p>以下两个方法的调用需要申请新的权限： READ_PHONE_NUMBERS <br><br>getLine1Number()<br>getMsisdn()</p>
-<h5 id="3、定位"><a href="#3、定位" class="headerlink" title="3、定位 "></a>3、定位 <br></h5><ul>
-<li>增加Only this time 选项</li>
-<li>不能一次性申请前后台定位权限，要分两次单独申请</li>
-<li>后台位置访问需要跳转设置页面</li>
-</ul>
-<h5 id="4、包可见性"><a href="#4、包可见性" class="headerlink" title="4、包可见性 "></a>4、包可见性 <br></h5><p>概念： <br><br>在Android-10及以前的版本通过 queryIntentActivities、getPackageInfo、getInstalledApplications可以获取所有安装的App。但是在Android-11之后只能获取到一部分已安装应用列表。<br>解决方案： <br></p>
-<ul>
-<li>通过 <queries> 标签指定需要交互的应用</li>
-<li>申请查看所有安装列表<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">package</span>=<span class="string">&quot;com.example.game&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">queries</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 需要和你做交互的app --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.store&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.service&quot;</span> /&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 你需要查询的Intent --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.SEND&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">data</span> <span class="attr">android:mimeType</span>=<span class="string">&quot;image/jpeg&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">queries</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.QUERY_ALL_PACKAGES&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="三、参考文献"><a href="#三、参考文献" class="headerlink" title="三、参考文献"></a>三、参考文献</h4><p>1、<a href="https://developer.android.com/about/versions/11/behavior-changes-11#change-details">官方文档-behavior-changes-11</a> <br><br>2、<a href="https://support.google.com/googleplay/android-developer/answer/10467955">GP政策-MANAGE_EXTERNAL_STORAGE</a> <br><br>3、<a href="https://developer.android.com/training/data-storage/manage-all-files">存储权限-管理所有文件</a> <br><br>4、<a href="https://support.google.com/googleplay/android-developer/answer/10158779?hl=en#zippy=%2Cpermitted-uses-of-the-query-all-packages-permission">GP政策-all-packages-permission</a> <br> </p>
-]]></content>
-      <categories>
-        <category>Android</category>
-      </categories>
       <tags>
-        <tag>Android</tag>
+        <tag>Arch</tag>
       </tags>
   </entry>
   <entry>
@@ -669,6 +512,163 @@
       <tags>
         <tag>Android</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>Android-11适配</title>
+    <url>/android-target-30.html</url>
+    <content><![CDATA[<h4 id="一、变更概览"><a href="#一、变更概览" class="headerlink" title="一、变更概览"></a>一、变更概览</h4><h5 id="1、隐私"><a href="#1、隐私" class="headerlink" title="1、隐私"></a>1、隐私</h5><ul>
+<li>分区存储</li>
+<li>自动释放权限</li>
+<li>后台定位</li>
+<li>包可见性</li>
+</ul>
+<h5 id="2、安全"><a href="#2、安全" class="headerlink" title="2、安全"></a>2、安全</h5><ul>
+<li><a href="https://source.android.com/devices/tech/debug/tagged-pointers">堆指针添加标记</a></li>
+<li>Toast<ul>
+<li>🚫禁止后台弹出含自定义View的Toast</li>
+<li>Toast支持显示/隐藏回调</li>
+<li>部分View相关API调整</li>
+</ul>
+</li>
+</ul>
+<h5 id="3、连接"><a href="#3、连接" class="headerlink" title="3、连接"></a>3、连接</h5><ul>
+<li>限制对APN数据库（Access Point Names）的读写</li>
+</ul>
+<h5 id="4、Accessibility"><a href="#4、Accessibility" class="headerlink" title="4、Accessibility"></a>4、Accessibility</h5><ul>
+<li>文本转语音（TTS）和语音识别 需要声明<queries></li>
+<li>在res/raw下声明对accessibility的使用</li>
+</ul>
+<h5 id="5、相机"><a href="#5、相机" class="headerlink" title="5、相机"></a>5、相机</h5><ul>
+<li>以下Action默认只能调起系统相机，除非指定包名<ul>
+<li>android.media.action.VIDEO_CAPTURE</li>
+<li>android.media.action.IMAGE_CAPTURE</li>
+<li>android.media.action.IMAGE_CAPTURE_SECURE</li>
+</ul>
+</li>
+</ul>
+<h5 id="6、应用打包和安装"><a href="#6、应用打包和安装" class="headerlink" title="6、应用打包和安装"></a>6、应用打包和安装</h5><ul>
+<li>🚫禁止压缩resources.arsc</li>
+<li>必须使用V2及以上版本进行apk签名<h5 id="7、Firebase"><a href="#7、Firebase" class="headerlink" title="7、Firebase"></a>7、Firebase</h5></li>
+<li>target-30的apk在6.0及以上设备，不能使用Firebase JobDispatcher 和 GCMNetworkManager</li>
+</ul>
+<h5 id="8、allowBackup属性调整"><a href="#8、allowBackup属性调整" class="headerlink" title="8、allowBackup属性调整"></a>8、allowBackup属性调整</h5><h5 id="9、修改SP的OnSharedPreferenceChangeListener回调"><a href="#9、修改SP的OnSharedPreferenceChangeListener回调" class="headerlink" title="9、修改SP的OnSharedPreferenceChangeListener回调"></a>9、修改SP的OnSharedPreferenceChangeListener回调</h5><h5 id="10、非SDK接口调用黑名单"><a href="#10、非SDK接口调用黑名单" class="headerlink" title="10、非SDK接口调用黑名单"></a>10、非SDK接口调用黑名单</h5><h4 id="二、变更详情"><a href="#二、变更详情" class="headerlink" title="二、变更详情"></a>二、变更详情</h4><h5 id="1、分区存储"><a href="#1、分区存储" class="headerlink" title="1、分区存储"></a>1、分区存储</h5><ul>
+<li><p>针对特殊类型应用(文件管理器、文件备份、文件加密)<br><br>这种类型的应用需要大规模的进行文件操作，迁移成本较高，推荐使用新的存储管理权限 MANAGE_EXTERNAL_STORAGE （参考1:此权限的授权范围）</p>
+<ul>
+<li>优点：<br><br>  1、开启后直接拥有所有读写权限（包括拔插的SD卡，USB等）<br><br>  2、清缓存不会丢失授权<br><br>  3、处理成本较低，只需兼容旧的动态权限申请部分的逻辑。<br></li>
+<li>缺点：<br><br>  1、需要跳转设置页面开启权限，有损产品数据（轮询权限，强制拉回）<br><br>  2、需要提交GP申请表单，审核通过才能上架<br></li>
+<li>实践：<br><br>  1、判断权限 Environment.isExternalStorageManager() <br><br>  2、跳转设置页面引导用户开启权限的方式：注意下面两个<strong>Action</strong>的区别<br><pre><code>  Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION&lt;br&gt;
+  Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>针对普通应用<br>无法申请新的存储管理权限 MANAGE_EXTERNAL_STORAGE 。只能对旧的API进行改造兼容，将其迁移到存储访问框架SAF（Storage Access Framework）包括Document-API 或 MediaStore-API。<ul>
+<li>优点： <br><br>  1、交互逻辑，和代码逻辑结构比较统一 <br><br>  2、提高隐私与安全性，避免杂乱无章的文件系统 <br></li>
+<li>缺点： <br><br>  1、迁移成本较高，需要做大量的API兼容，可能影响产品逻辑 <br></li>
+<li>实践： <br><br>  1、分区存储文档 <br></li>
+<li>注意事项： <br><br>  1、做好数据迁移，避免升级后，原来的数据在不可访问区域 <br><br>  2、保留 [requestLegacyExternalStorage=true] 属性 <br></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>我的应用1.0版本之前数据库存储在外部，为了适配target-30，我在1.1版本，写了数据迁移代码。1.2版本，我做了target-30升级。某用户直接跳过1.1版本升级到了1.2版本。无法运行迁移代码。怎么办！</p>
+</blockquote>
+<p>preserveLegacyExternalStorage 属性：针对升级用户，暂时维持兼容属性，卸载后失效。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">  	<span class="attr">android:preserveLegacyExternalStorage</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<h5 id="2、电话号码"><a href="#2、电话号码" class="headerlink" title="2、电话号码 "></a>2、电话号码 <br></h5><p>以下两个方法的调用需要申请新的权限： READ_PHONE_NUMBERS <br><br>getLine1Number()<br>getMsisdn()</p>
+<h5 id="3、定位"><a href="#3、定位" class="headerlink" title="3、定位 "></a>3、定位 <br></h5><ul>
+<li>增加Only this time 选项</li>
+<li>不能一次性申请前后台定位权限，要分两次单独申请</li>
+<li>后台位置访问需要跳转设置页面</li>
+</ul>
+<h5 id="4、包可见性"><a href="#4、包可见性" class="headerlink" title="4、包可见性 "></a>4、包可见性 <br></h5><p>概念： <br><br>在Android-10及以前的版本通过 queryIntentActivities、getPackageInfo、getInstalledApplications可以获取所有安装的App。但是在Android-11之后只能获取到一部分已安装应用列表。<br>解决方案： <br></p>
+<ul>
+<li>通过 <queries> 标签指定需要交互的应用</li>
+<li>申请查看所有安装列表<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">package</span>=<span class="string">&quot;com.example.game&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">queries</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 需要和你做交互的app --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.store&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.service&quot;</span> /&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 你需要查询的Intent --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.SEND&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">data</span> <span class="attr">android:mimeType</span>=<span class="string">&quot;image/jpeg&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">queries</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.QUERY_ALL_PACKAGES&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="三、参考文献"><a href="#三、参考文献" class="headerlink" title="三、参考文献"></a>三、参考文献</h4><p>1、<a href="https://developer.android.com/about/versions/11/behavior-changes-11#change-details">官方文档-behavior-changes-11</a> <br><br>2、<a href="https://support.google.com/googleplay/android-developer/answer/10467955">GP政策-MANAGE_EXTERNAL_STORAGE</a> <br><br>3、<a href="https://developer.android.com/training/data-storage/manage-all-files">存储权限-管理所有文件</a> <br><br>4、<a href="https://support.google.com/googleplay/android-developer/answer/10158779?hl=en#zippy=%2Cpermitted-uses-of-the-query-all-packages-permission">GP政策-all-packages-permission</a> <br> </p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Room数据库酷七条</title>
+    <url>/android-library-room-7-tips.html</url>
+    <content><![CDATA[<h4 id="一、通过RoomDatabase-Callback预填充数据"><a href="#一、通过RoomDatabase-Callback预填充数据" class="headerlink" title="一、通过RoomDatabase#Callback预填充数据"></a>一、通过<code>RoomDatabase#Callback</code>预填充数据</h4><p>如果需要在数据库创建或数据库打开的时候添加一些默认数据，可以使用<code>RoomDatabase#Callback</code>接口并复写它的<code>onCreate</code>或<code>onOpen</code>方法。由于DAO对象只能在这两个方法返回后使用，所以我们创建一个新线程来插入数据：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">Room.databaseBuilder(context.applicationContext,</span><br><span class="line">        DataDatabase::<span class="keyword">class</span>.java, <span class="string">&quot;Sample.db&quot;</span>)</span><br><span class="line">        <span class="comment">// prepopulate the database after onCreate was called</span></span><br><span class="line">        .addCallback(<span class="keyword">object</span> : Callback() &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(db: <span class="type">SupportSQLiteDatabase</span>)</span></span> &#123;</span><br><span class="line">                <span class="keyword">super</span>.onCreate(db)</span><br><span class="line">                <span class="comment">// moving to a new thread</span></span><br><span class="line">                ioThread &#123;</span><br><span class="line">                    getInstance(context).dataDao()</span><br><span class="line">                                        .insert(PREPOPULATE_DATA)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        .build()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>需要注意的是</strong>：当app首次启动时，在create和insert之间崩溃的话，数据将永远不会被插入。</p>
+<h4 id="二、使用DAO的继承能力"><a href="#二、使用DAO的继承能力" class="headerlink" title="二、使用DAO的继承能力"></a>二、使用DAO的继承能力</h4><p>很多DAO里存在一样的<code>Insert</code>、<code>Update</code>、<code>Delete</code>方法。我们可以使用继承来避免这些重复的代码。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BaseDao</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">insert</span><span class="params">(<span class="keyword">vararg</span> obj: <span class="type">T</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">DataDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">Data</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;SELECT * FROM Data&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getData</span><span class="params">()</span></span>: List&lt;Data&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="三、通过-Transaction减少事务查询的模板代码"><a href="#三、通过-Transaction减少事务查询的模板代码" class="headerlink" title="三、通过@Transaction减少事务查询的模板代码"></a>三、通过<code>@Transaction</code>减少事务查询的模板代码</h4><p>用<code>@Transaction</code>注解的方法会在一个事务里面执行。当这些方法执行异常时，事务也会失败。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Transaction</span></span><br><span class="line">    <span class="keyword">open</span> <span class="function"><span class="keyword">fun</span> <span class="title">updateData</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span> &#123;</span><br><span class="line">        deleteAllUsers()</span><br><span class="line">        insertAll(users)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">insertAll</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span></span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;DELETE FROM Users&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">deleteAllUsers</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当<code>@Query</code>方法带有select语句时，在下列情况下你可能会使用<code>@Transation</code>注解</p>
+<ul>
+<li>当查询的结果集很大时，让查询在一次事务里完成能够保证：如果查询结果不满足单个游标窗口，它不会因为在游标窗口交换之间的数据库更改而中断。</li>
+<li>如果查询结果是一个带<code>@Relation</code>字段的POJO，此字段会单独查询，所以让他们运行在一个事务中可以确保结果一致。</li>
+</ul>
+<p><code>Delete</code>、<code>Update</code>、<code>Insert</code>方法包含多个参数时会自动在事务里执行。</p>
+<h4 id="四、只读需要的数据"><a href="#四、只读需要的数据" class="headerlink" title="四、只读需要的数据"></a>四、只读需要的数据</h4><p>关注App的内存消耗，只加载需要使用的字段，这能提高查询速度减少IO消耗。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;users&quot;</span>)</span></span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span></span>(<span class="meta">@PrimaryKey</span></span><br><span class="line">                <span class="keyword">val</span> id: String,</span><br><span class="line">                <span class="keyword">val</span> userName: String,</span><br><span class="line">                <span class="keyword">val</span> firstName: String, </span><br><span class="line">                <span class="keyword">val</span> lastName: String,</span><br><span class="line">                <span class="keyword">val</span> email: String,</span><br><span class="line">                <span class="keyword">val</span> dateOfBirth: Date, </span><br><span class="line">                <span class="keyword">val</span> registrationDate: Date)</span><br></pre></td></tr></table></figure>
+
+<p>上面的类中，很多字段我们用不到，定义一个类，只包含我们需要的字段：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserMinimal</span></span>(<span class="keyword">val</span> userId: String,</span><br><span class="line">                       <span class="keyword">val</span> firstName: String, </span><br><span class="line">                       <span class="keyword">val</span> lastName: String)</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，定义方法只查询所需字段：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT userId, firstName, lastName FROM Users)</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getUsersMinimal</span><span class="params">()</span></span>: List&lt;UserMinimal&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="五、使用外键"><a href="#五、使用外键" class="headerlink" title="五、使用外键"></a>五、使用外键</h4><p>即使Room不直接支持关系，但它允许你定义外键来约束实体之间的关系。</p>
+<p>Room的<code>@ForeignKey</code>是<code>@Entity</code>注解的一部分，用来支持Sqlite的外键特性。它强制表之间的约束，当你修改表时，保证关系一致性。</p>
+<p>看一下<code>User</code>和<code>Pet</code>类，<code>Pet</code>有主人，以userId关联。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;pets&quot;</span>,</span></span><br><span class="line"><span class="meta">        foreignKeys = arrayOf(</span></span><br><span class="line"><span class="meta">            ForeignKey(entity = User::class,</span></span><br><span class="line"><span class="meta">                       parentColumns = arrayOf(<span class="meta-string">&quot;userId&quot;</span>)</span>,</span><br><span class="line">                       childColumns = arrayOf(<span class="string">&quot;owner&quot;</span>))))</span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Pet</span></span>(<span class="meta">@PrimaryKey</span> <span class="keyword">val</span> petId: String,</span><br><span class="line">              <span class="keyword">val</span> name: String,</span><br><span class="line">              <span class="keyword">val</span> owner: String)</span><br></pre></td></tr></table></figure>
+
+<p>你可以定义一些行为，当例子中的<code>User</code>在数据库中被删除或修改。你可以做以下一些操作：<code>NO_ACTION</code>、<code>RESTRICT</code>、<code>SET_NULL</code>、<code>SET_DEFAULT</code>或<code>CASCADE</code>，这些操作和Sqlite保持一致。</p>
+<p><strong>注意：</strong> 在Room中<code>SET_DEFAULT</code>和<code>SET_NULL</code>效果一致，因为Room还不允许为数据列设置默认值。</p>
+<h4 id="六、使用-Relation简化一对多查询"><a href="#六、使用-Relation简化一对多查询" class="headerlink" title="六、使用@Relation简化一对多查询"></a>六、使用<code>@Relation</code>简化一对多查询</h4><p>在前面<code>User-Pet</code>的例子中，我们有个一对多的关系，一个人可以有多个宠物。当我们想获取主人和宠物集合时：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>(<span class="keyword">val</span> user: User,</span><br><span class="line">                           <span class="keyword">val</span> pets: List&lt;Pet&gt; = ArrayList())</span><br></pre></td></tr></table></figure>
+
+<p>需要两个查询：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;User&gt; getUsers();</span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Pets where owner = :userId”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;Pet&gt; getPetsForUser(String userId);</span><br></pre></td></tr></table></figure>
+
+<p>我们需要遍历用户来查宠物。</p>
+<p>为了简化此过程，Room的<code>@Relation</code>注解自动关联实体。此注解只能用于<code>List</code>和<code>Set</code>对象。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Embedded</span></span><br><span class="line">   <span class="keyword">var</span> user: User? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">   <span class="meta">@Relation(parentColumn = “userId”,</span></span><br><span class="line"><span class="meta">             entityColumn = “owner”)</span></span><br><span class="line">   <span class="keyword">var</span> pets: List&lt;Pet&gt; = ArrayList()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，我们定义一次查询：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Transaction</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line">List&lt;UserAndAllPets&gt; getUsers();</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="七、避免可观察查询的假通知"><a href="#七、避免可观察查询的假通知" class="headerlink" title="七、避免可观察查询的假通知"></a>七、避免可观察查询的假通知</h4><p>可观察查询，只关心对应ID的对象：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; </span><br><span class="line"></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br></pre></td></tr></table></figure>
+
+<p>每次此用户更新的时候你都得到一个新通知。但是其他的一些不影响此ID的修改（delete、update、insert）会发送通知。</p>
+<p>这种场景背后的原因是什么：<br>1、Sqlite支持触发器，<code>DELETE</code>、<code>UPDATE</code>、<code>INSERT</code>发生时或触发。<br>2、Room创建了一个<code>InvalidationTracker</code>来跟踪观察表的变化。<br>3、<code>LiveData</code>和<code>Flowable</code>查询依赖<code>InvalidationTracker.Observer#onInvalidated</code>通知，收到通知就做一次再查询操作。</p>
+<p>Room只知道表被修改了，不知道为什么修改也不知道什么被修改。因此，再查询操作会重新通知。由于Room不在内存保存数据也不能保证object的equals方法所以他不知道对象是否变化了。</p>
+<p>你需要自己保证DAO过滤收到的事件，只对关心的数据做出响应。</p>
+<p>如果观察的是<code>Flowable</code>，使用<code>Flowable#distinctUntilChanged</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Get a user by id.</span></span><br><span class="line"><span class="comment">* <span class="doctag">@return</span> the user from the table with a specific id.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: </span><br><span class="line">    Flowable&lt;User&gt; = getUserById(id).distinctUntilChanged()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果观察的是<code>LiveData</code>，可以用<code>MediatorLiveData</code>处理只让有变化的数据发送事件。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> LiveData<span class="type">&lt;T&gt;</span>.<span class="title">getDistinct</span><span class="params">()</span></span>: LiveData&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> distinctLiveData = MediatorLiveData&lt;T&gt;()</span><br><span class="line">    distinctLiveData.addSource(<span class="keyword">this</span>, <span class="keyword">object</span> : Observer&lt;T&gt; &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> initialized = <span class="literal">false</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> lastObj: T? = <span class="literal">null</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onChanged</span><span class="params">(obj: <span class="type">T</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!initialized) &#123;</span><br><span class="line">                initialized = <span class="literal">true</span></span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((obj == <span class="literal">null</span> &amp;&amp; lastObj != <span class="literal">null</span>) </span><br><span class="line">                       || obj != lastObj) &#123;</span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> distinctLiveData</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，让真正关心变化的方法使用<code>public</code>修饰，查询方法用<code>protected</code>修饰</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; = getUserById(id).getDistinct()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong> 如果你返回列表用于展示，考虑使用<code>Paging</code>库，它能帮你处理数据的变化。</p>
+]]></content>
   </entry>
   <entry>
     <title>市盈率和市净率</title>
@@ -1596,6 +1596,74 @@
       <tags>
         <tag>Kotlin</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>Kotlin中的JVM注解</title>
+    <url>/kotlin-lang-jvm-annotation.html</url>
+    <content><![CDATA[<p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
+<h4 id="1、-JvmName"><a href="#1、-JvmName" class="headerlink" title="1、@JvmName"></a>1、@JvmName</h4><p>用于文件、函数、属性、getter和setter。</p>
+<h5 id="1-1-给文件添加-JvmName注解"><a href="#1-1-给文件添加-JvmName注解" class="headerlink" title="1.1 给文件添加@JvmName注解"></a>1.1 给文件添加@JvmName注解</h5><p>默认情况下，一个Kotlin文件中的<strong>function</strong>和<strong>properties</strong>会被编译成<em>filenameKt.class</em>，其中的<strong>class</strong>会被编译成classname.class:</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmname-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmname-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h5 id="1-2-给函数名添加-JvmName注解"><a href="#1-2-给函数名添加-JvmName注解" class="headerlink" title="1.2 给函数名添加@JvmName注解"></a>1.2 给函数名添加@JvmName注解</h5><center>
+    <img src="../images/kotlin-annotation-jvmname-3.jpeg" width="500"/>
+</center>
+
+<h5 id="1-3-给getter和setting添加-JvmName"><a href="#1-3-给getter和setting添加-JvmName" class="headerlink" title="1.3 给getter和setting添加@JvmName"></a>1.3 给getter和setting添加@JvmName</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@get:JvmName</span>(<span class="string">&quot;getContent&quot;</span>)</span><br><span class="line"><span class="meta">@set:JvmName</span>(<span class="string">&quot;setContent&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="2、-JvmDefault"><a href="#2、-JvmDefault" class="headerlink" title="2、@JvmDefault"></a>2、@JvmDefault</h4><p>和Java8一样，Kotlin的接口也支持默认方法实现。即使针对Java7及以下版本，他也能正常编译，因为Kotlin使用静态内部类实现默认方法。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmdefault-1.jpeg" width="500"/>
+</center>
+
+<p>当在Java中实现此接口时，需要复写对应的方法，否则将报错。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmdefault-2.jpeg" width="100%"/>
+</center>
+
+<p>如果我们希望它在Java8中不报错，可以使用@JvmDefault注解标识方法：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Document</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JvmDefault</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getType</span><span class="params">()</span></span> = <span class="string">&quot;document&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3、-JvmStatic"><a href="#3、-JvmStatic" class="headerlink" title="3、@JvmStatic"></a>3、@JvmStatic</h4><p>针对<code>object class</code> 或<code>companion object</code>使用此注解,可以避免Java访问时的INSTANCE调用</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h4 id="4、-JvmOverloads"><a href="#4、-JvmOverloads" class="headerlink" title="4、@JvmOverloads"></a>4、@JvmOverloads</h4><p>Kotlin的默认参数可以帮助我们减少函数重载，简化方法调用参数。在Java中调用含默认参数的Kotlin函数时，需要提供全部参数。</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmoverloads-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmoverloads-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h4 id="5、-Throws"><a href="#5、-Throws" class="headerlink" title="5、@Throws"></a>5、@Throws</h4><p>Kotlin没有受检测异常，try-catch是非必须的。如果希望在Java调用中检测到异常，可以使用@Throws注解</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmthrows.jpeg" width="100%"/>
+</center>
+
+<h4 id="6、-JvmWildcard-amp-JvmSuppressWildcard"><a href="#6、-JvmWildcard-amp-JvmSuppressWildcard" class="headerlink" title="6、@JvmWildcard &amp; @JvmSuppressWildcard"></a>6、@JvmWildcard &amp; @JvmSuppressWildcard</h4><p>略</p>
+<h4 id="7、-JvmMultifileClass"><a href="#7、-JvmMultifileClass" class="headerlink" title="7、@JvmMultifileClass"></a>7、@JvmMultifileClass</h4><p>当在多个文件中定义的顶层函数或属性想要合并到一个编译的class中时，可以使用此注解。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmmultifileclass.jpeg" width="500"/>
+</center>
+
+
+<h4 id="8、-JvmPackageName"><a href="#8、-JvmPackageName" class="headerlink" title="8、@JvmPackageName"></a>8、@JvmPackageName</h4><p>和@JvmName一样，此注解可以修改包名，但是他被标记为internal，只能在kotlin库内部使用，这里不做过多介绍。</p>
+<h4 id="9、注解一览"><a href="#9、注解一览" class="headerlink" title="9、注解一览"></a>9、注解一览</h4><center>
+    <img src="../images/kotlin-annotation-overview.png" width="100%"/>
+</center>
+
+<h4 id="参考"><a href="#参考" class="headerlink" title="[参考]"></a>[参考]</h4><p><a href="https://www.baeldung.com/kotlin/jvm-annotations">1.Guide to JVM Platform Annotations in Kotlin</a></p>
+]]></content>
   </entry>
   <entry>
     <title>Effective Kotlin-51：使用Sequence优化集合操作</title>
