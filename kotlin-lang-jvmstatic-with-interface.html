@@ -24,20 +24,23 @@
 
 <script data-ad-client="ca-pub-8087648226243491" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
-  <meta name="description" content="与不可变集合相比，使用可变集合最大的优点是性能更快。向不可变集合添加元素需要新建集合再拷贝所有元素，下面是kotlin标准库现在的实现： 1234567operator fun &lt;T&gt; Iterable&lt;T&gt;.plus(element: T): List&lt;T&gt; &amp;#123;    if (this is Collection) return this.plus(">
+  <meta name="description" content="一、问题   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加@JvmStatic注解。                                然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。          二、解决要想解决上述问题，只需要将object类的实现做一些转换：  1234567891011121">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Effective Kotlin-56：考虑使用可变集合">
-<meta property="og:url" content="https://wangduwei.top/kotlin-lang-use-mutable-collection.html">
+<meta property="og:title" content="Kotlin之JvmStatic和override冲突问题">
+<meta property="og:url" content="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html">
 <meta property="og:site_name" content="蓝色的笔记本">
-<meta property="og:description" content="与不可变集合相比，使用可变集合最大的优点是性能更快。向不可变集合添加元素需要新建集合再拷贝所有元素，下面是kotlin标准库现在的实现： 1234567operator fun &lt;T&gt; Iterable&lt;T&gt;.plus(element: T): List&lt;T&gt; &amp;#123;    if (this is Collection) return this.plus(">
+<meta property="og:description" content="一、问题   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加@JvmStatic注解。                                然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。          二、解决要想解决上述问题，只需要将object类的实现做一些转换：  1234567891011121">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-11-20T00:47:24.000Z">
-<meta property="article:modified_time" content="2021-11-20T00:51:41.857Z">
+<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmstatic-1.jpeg">
+<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmstatic-2.jpeg">
+<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmstatic-error.jpg">
+<meta property="article:published_time" content="2022-05-09T08:35:18.000Z">
+<meta property="article:modified_time" content="2022-05-09T08:36:52.699Z">
 <meta property="article:author" content="wangduwei">
-<meta property="article:tag" content="Kotlin">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wangduwei.top/images/kotlin-annotation-jvmstatic-1.jpeg">
 
-<link rel="canonical" href="https://wangduwei.top/kotlin-lang-use-mutable-collection.html">
+<link rel="canonical" href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html">
 
 
 <script id="page-configurations">
@@ -50,7 +53,7 @@
   };
 </script>
 
-  <title>Effective Kotlin-56：考虑使用可变集合 | 蓝色的笔记本</title>
+  <title>Kotlin之JvmStatic和override冲突问题 | 蓝色的笔记本</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-69Z1P1CBTV"></script>
     <script>
@@ -190,7 +193,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-lang-use-mutable-collection.html">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -203,7 +206,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Effective Kotlin-56：考虑使用可变集合
+          Kotlin之JvmStatic和override冲突问题
         </h1>
 
         <div class="post-meta">
@@ -214,7 +217,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-11-20 08:47:24 / 修改时间：08:51:41" itemprop="dateCreated datePublished" datetime="2021-11-20T08:47:24+08:00">2021-11-20</time>
+              <time title="创建时间：2022-05-09 16:35:18 / 修改时间：16:36:52" itemprop="dateCreated datePublished" datetime="2022-05-09T16:35:18+08:00">2022-05-09</time>
             </span>
 
           
@@ -233,8 +236,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/kotlin-lang-use-mutable-collection.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/kotlin-lang-use-mutable-collection.html" itemprop="commentCount"></span>
+    <a title="valine" href="/kotlin-lang-jvmstatic-with-interface.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/kotlin-lang-jvmstatic-with-interface.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -244,7 +247,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1k</span>
+              <span>1.2k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -263,17 +266,34 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>与不可变集合相比，使用可变集合最大的优点是性能更快。向不可变集合添加元素需要新建集合再拷贝所有元素，下面是kotlin标准库现在的实现：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">plus</span><span class="params">(element: <span class="type">T</span>)</span></span>: List&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span> <span class="keyword">is</span> Collection) <span class="keyword">return</span> <span class="keyword">this</span>.plus(element)</span><br><span class="line">    <span class="keyword">val</span> result = ArrayList&lt;T&gt;()</span><br><span class="line">    result.addAll(<span class="keyword">this</span>)</span><br><span class="line">    result.add(element)</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        <h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
 
-<p>当集合很大时，拷贝操作就比较耗性能了。所以对于需要添加元素的集合使用可变集合性能更好。我们知道，不可变集合是线程安全的。但是对于不需要同步的局部变量来说则不适用。这也是为什么对于局部处理，使用可变集合通常更有意义。这个事实可以在标准库中反映出来，在标准库中，所有的集合处理函数都是使用可变集合内部实现的:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">map</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    transform: (<span class="type">T</span>) -&gt; <span class="type">R</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;R&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> size =</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span> <span class="keyword">is</span> Collection&lt;*&gt;) <span class="keyword">this</span>.size <span class="keyword">else</span> <span class="number">10</span></span><br><span class="line">    <span class="keyword">val</span> destination = ArrayList&lt;R&gt;(size)</span><br><span class="line">    <span class="keyword">for</span> (item <span class="keyword">in</span> <span class="keyword">this</span>)</span><br><span class="line">        destination.add(transform(item))</span><br><span class="line">    <span class="keyword">return</span> destination</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
+</center>
 
-<p>而不是不可变集合：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// This is not how map is implemented</span></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">map</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    transform: (<span class="type">T</span>) -&gt; <span class="type">R</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;R&gt; &#123;</span><br><span class="line">    <span class="keyword">var</span> destination = listOf&lt;R&gt;()</span><br><span class="line">    <span class="keyword">for</span> (item <span class="keyword">in</span> <span class="keyword">this</span>)</span><br><span class="line">        destination += transform(item)</span><br><span class="line">    <span class="keyword">return</span> destination</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
+</code></pre>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>总结：<br>如果是增加元素，可变集合是很快的，而不可变集合则给我们给多的控制，知道集合是如何变化的。但对于本地作用域来讲，我们不需要这种控制，所以使用可变集合更好。尤其在一些工具类，插入操作可能很频繁。</p>
+<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
+<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
+</blockquote>
+<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
 
     </div>
 
@@ -309,7 +329,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://wangduwei.top/kotlin-lang-use-mutable-collection.html" title="Effective Kotlin-56：考虑使用可变集合">https://wangduwei.top/kotlin-lang-use-mutable-collection.html</a>
+    <a href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html" title="Kotlin之JvmStatic和override冲突问题">https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -319,9 +339,6 @@
 
 
       <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/Kotlin/" rel="tag"># Kotlin</a>
-          </div>
 
         
   <div class="post-widgets">
@@ -334,13 +351,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/kotlin-lang-inline-func-param.html" rel="prev" title="Effective Kotlin-48：为参数包含函数的方法内联">
-      <i class="fa fa-chevron-left"></i> Effective Kotlin-48：为参数包含函数的方法内联
+    <a href="/kotlin-lang-jvm-annotation.html" rel="prev" title="Kotlin中的JVM注解">
+      <i class="fa fa-chevron-left"></i> Kotlin中的JVM注解
     </a></div>
-      <div class="post-nav-item">
-    <a href="/kotlin-lang-use-dsl.html" rel="next" title="Effective Kotlin-35：用DSL创建复杂对象">
-      Effective Kotlin-35：用DSL创建复杂对象 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -413,6 +427,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E9%97%AE%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">一、问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%A7%A3%E5%86%B3"><span class="nav-number">2.</span> <span class="nav-text">二、解决</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%80%9D%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">三、思考</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -618,7 +633,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'duweiwang.github.io',
       owner       : 'duweiwang',
       admin       : ['duweiwang'],
-      id          : 'b73df9032f4a6207b99fdaf06ec36091',
+      id          : '6be61753041d5d21cf9e1ddf4914d176',
         language: '',
       distractionFreeMode: true
     });
