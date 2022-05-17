@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2022-05-09T08:36:52.699Z</updated>
+  <updated>2022-05-17T08:16:21.006Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -17,11 +17,38 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Jetpack Compose Side Effects</title>
+    <link href="https://wangduwei.top/android-jetpack-compose-sideeffect.html"/>
+    <id>https://wangduwei.top/android-jetpack-compose-sideeffect.html</id>
+    <published>2022-05-17T08:11:13.000Z</published>
+    <updated>2022-05-17T08:16:21.006Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、什么是Side-Effect&quot;&gt;&lt;a href=&quot;#一、什么是Side-Effect&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
+    
+    <category term="Compose" scheme="https://wangduwei.top/tags/Compose/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Kotlin之JvmStatic和override冲突问题</title>
     <link href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html"/>
     <id>https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html</id>
     <published>2022-05-09T08:35:18.000Z</published>
-    <updated>2022-05-09T08:36:52.699Z</updated>
+    <updated>2022-05-12T02:28:34.277Z</updated>
     
     
       
@@ -42,7 +69,7 @@
     <link href="https://wangduwei.top/kotlin-lang-jvm-annotation.html"/>
     <id>https://wangduwei.top/kotlin-lang-jvm-annotation.html</id>
     <published>2022-05-01T07:29:44.000Z</published>
-    <updated>2022-05-02T02:15:59.237Z</updated>
+    <updated>2022-05-17T08:16:20.977Z</updated>
     
     
       
@@ -56,6 +83,10 @@
     
     
     
+    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
     
   </entry>
   
@@ -64,7 +95,7 @@
     <link href="https://wangduwei.top/android-github-source-workmanager.html"/>
     <id>https://wangduwei.top/android-github-source-workmanager.html</id>
     <published>2022-04-17T05:51:57.000Z</published>
-    <updated>2022-04-17T06:40:32.422Z</updated>
+    <updated>2022-05-17T08:16:20.935Z</updated>
     
     
       
@@ -77,6 +108,8 @@
     
     
     
+    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
@@ -87,7 +120,7 @@
     <link href="https://wangduwei.top/android-library-room-7-tips.html"/>
     <id>https://wangduwei.top/android-library-room-7-tips.html</id>
     <published>2022-01-30T14:01:39.000Z</published>
-    <updated>2022-01-30T14:01:39.388Z</updated>
+    <updated>2022-05-17T08:16:20.963Z</updated>
     
     
       
@@ -100,6 +133,10 @@
     
     
     
+    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
   </entry>
   
@@ -108,7 +145,7 @@
     <link href="https://wangduwei.top/android-github-source-retrofit.html"/>
     <id>https://wangduwei.top/android-github-source-retrofit.html</id>
     <published>2021-12-30T13:37:29.000Z</published>
-    <updated>2021-12-30T13:43:48.162Z</updated>
+    <updated>2022-05-17T08:16:20.996Z</updated>
     
     
       
@@ -121,6 +158,8 @@
     
     
     
+    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
@@ -131,7 +170,7 @@
     <link href="https://wangduwei.top/android-github-source-spacex.html"/>
     <id>https://wangduwei.top/android-github-source-spacex.html</id>
     <published>2021-12-26T04:10:14.000Z</published>
-    <updated>2021-12-27T12:42:16.867Z</updated>
+    <updated>2022-05-17T08:16:21.001Z</updated>
     
     
       
@@ -144,6 +183,8 @@
     
     
     
+    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    
     
     <category term="Arch" scheme="https://wangduwei.top/tags/Arch/"/>
     
@@ -154,7 +195,7 @@
     <link href="https://wangduwei.top/model-csp-deadlocks.html"/>
     <id>https://wangduwei.top/model-csp-deadlocks.html</id>
     <published>2021-12-04T03:54:49.000Z</published>
-    <updated>2021-12-04T04:10:46.811Z</updated>
+    <updated>2022-05-17T08:16:20.942Z</updated>
     
     
       
@@ -171,6 +212,8 @@
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
+    
+    <category term="Concurrency" scheme="https://wangduwei.top/tags/Concurrency/"/>
     
   </entry>
   
@@ -204,7 +247,7 @@
     <link href="https://wangduwei.top/kotlin-lang-use-mutable-collection.html"/>
     <id>https://wangduwei.top/kotlin-lang-use-mutable-collection.html</id>
     <published>2021-11-20T00:47:24.000Z</published>
-    <updated>2021-11-20T00:51:41.857Z</updated>
+    <updated>2022-05-17T08:16:20.989Z</updated>
     
     
       
@@ -218,6 +261,8 @@
     
     
     
+    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
     
@@ -228,7 +273,7 @@
     <link href="https://wangduwei.top/kotlin-lang-inline-func-param.html"/>
     <id>https://wangduwei.top/kotlin-lang-inline-func-param.html</id>
     <published>2021-11-09T13:57:29.000Z</published>
-    <updated>2021-11-20T00:52:51.148Z</updated>
+    <updated>2022-05-17T08:16:20.983Z</updated>
     
     
       
@@ -242,6 +287,8 @@
     
     
     
+    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
     
@@ -252,7 +299,7 @@
     <link href="https://wangduwei.top/kotlin-lang-sequence.html"/>
     <id>https://wangduwei.top/kotlin-lang-sequence.html</id>
     <published>2021-11-06T13:37:43.000Z</published>
-    <updated>2021-11-20T00:52:51.155Z</updated>
+    <updated>2022-05-17T08:16:20.971Z</updated>
     
     
       
@@ -264,6 +311,8 @@
       
     
     
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
@@ -349,7 +398,7 @@
     <link href="https://wangduwei.top/java-object-layout.html"/>
     <id>https://wangduwei.top/java-object-layout.html</id>
     <published>2021-10-03T07:59:09.000Z</published>
-    <updated>2021-10-05T08:03:56.098Z</updated>
+    <updated>2022-05-17T08:16:20.950Z</updated>
     
     
       
@@ -363,8 +412,10 @@
     
     
     
-    <category term="JVM" scheme="https://wangduwei.top/categories/JVM/"/>
+    <category term="Java" scheme="https://wangduwei.top/categories/Java/"/>
     
+    
+    <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
     
     <category term="JVM" scheme="https://wangduwei.top/tags/JVM/"/>
     
@@ -375,7 +426,7 @@
     <link href="https://wangduwei.top/java-multithreading-synchronized.html"/>
     <id>https://wangduwei.top/java-multithreading-synchronized.html</id>
     <published>2021-09-26T14:29:34.000Z</published>
-    <updated>2021-10-05T08:01:43.479Z</updated>
+    <updated>2022-05-17T08:16:20.928Z</updated>
     
     
       
@@ -392,6 +443,8 @@
     
     
     <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
+    
+    <category term="Concurrency" scheme="https://wangduwei.top/tags/Concurrency/"/>
     
   </entry>
   
@@ -465,27 +518,6 @@
     
     
     <category term="Economics" scheme="https://wangduwei.top/tags/Economics/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>重定位</title>
-    <link href="https://wangduwei.top/file-format-elf-relocation.html"/>
-    <id>https://wangduwei.top/file-format-elf-relocation.html</id>
-    <published>2021-09-04T13:53:33.000Z</published>
-    <updated>2021-09-07T15:12:26.754Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、可重定位文件&quot;&gt;&lt;a href=&quot;#一、可重定位文件&quot; class=&quot;headerlink&quot; title=&quot;一、可重定位文件&quot;&gt;&lt;/a&gt;一、可重定位文件&lt;/h4&gt;&lt;figure class=&quot;highlight</summary>
-        
-      
-    
-    
-    
     
   </entry>
   

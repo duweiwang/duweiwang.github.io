@@ -186,6 +186,152 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-jetpack-compose-sideeffect.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/android-jetpack-compose-sideeffect.html" class="post-title-link" itemprop="url">Jetpack Compose Side Effects</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-05-17 16:11:13 / 修改时间：16:16:21" itemprop="dateCreated datePublished" datetime="2022-05-17T16:11:13+08:00">2022-05-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/android-jetpack-compose-sideeffect.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/android-jetpack-compose-sideeffect.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="一、什么是Side-Effect"><a href="#一、什么是Side-Effect" class="headerlink" title="一、什么是Side-Effect"></a>一、什么是Side-Effect</h4><blockquote>
+<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Side_effect_(computer_science)">wiki</a>:在计算机科学中，当函数、表达式、操作会修改它作用域之外的状态变量值时，我们就说它具有副作用。也就是说除返回值之外其他的对外修改都叫副作用。<br>常见的例子包括：修改非本地变量、修改参数传进来的可变引用、执行I/O等。</p>
+</blockquote>
+<h4 id="二、Compose中的Side-Effect"><a href="#二、Compose中的Side-Effect" class="headerlink" title="二、Compose中的Side-Effect"></a>二、Compose中的Side-Effect</h4><p>因为Jetpack Compose是由一系列的<code>@Composable</code>函数组成的，<code>@Composable</code>函数在执行时可能会被跳过（出于优化的角度）或执行多次（recomposition）。<br>那对于函数内部的网络请求、对外部状态的修改怎么办？有可能执行多次？有可能不执行？这就产生了某种不可预期的错误状态，或者泄露。<br>为了解决此类问题，Compose提供了相应的API，这些API主要聚焦于对这些副作用的生命周期进行管理。</p>
+<p>这些API可以分成两大类：</p>
+<ul>
+<li>SuspendedEffect<ul>
+<li>rememberCoroutineScope</li>
+<li>launchedEffect</li>
+</ul>
+</li>
+<li>Non-Suspended Side Effects<ul>
+<li>DisposableEffect</li>
+<li>SideEffect</li>
+</ul>
+</li>
+</ul>
+<h4 id="三、SuspendedEffect"><a href="#三、SuspendedEffect" class="headerlink" title="三、SuspendedEffect"></a>三、SuspendedEffect</h4><h5 id="3-1-LaunchedEffect"><a href="#3-1-LaunchedEffect" class="headerlink" title="3.1 LaunchedEffect"></a>3.1 LaunchedEffect</h5><p>在首次composition的时候被调用。recomposition时不会再次调用。可以通过改变Key让其重新调用。<br>它是一个协程作用域，我们可以执行一些挂起函数，当composable函数退出时，协程会被取消。</p>
+<center>
+    <img src="../images/android-jetpack-compose-launcheffect.jpg" width="80%"/>
+</center>
+
+<p>下面的例子中，启动即执行循环逻辑，每秒修改一次状态值并触发recomposition，但recomposition并不影响LaunchedEffect内的逻辑。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LaunchedEffect</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> timer <span class="keyword">by</span> remember &#123; mutableStateOf(<span class="number">0</span>) &#125;</span><br><span class="line">    Box(modifier = Modifier.fillMaxSize(), </span><br><span class="line">        contentAlignment = Alignment.Center) &#123;</span><br><span class="line">        Text(<span class="string">&quot;Time <span class="variable">$timer</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    LaunchedEffect(key1 = <span class="built_in">Unit</span>) &#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            delay(<span class="number">1000</span>)</span><br><span class="line">            timer++</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-2-RememberCoroutineScope"><a href="#3-2-RememberCoroutineScope" class="headerlink" title="3.2 RememberCoroutineScope"></a>3.2 RememberCoroutineScope</h5><p><code>LaunchedEffect</code>的启动和取消跟随Composable函数的生命周期。如果想自己控制生命周期可以使用<code>RememberCoroutineScope</code></p>
+<p>下面的例子中，协程的控制权转移到我们自己手中：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">JustRememberCoroutineScope</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> scope = rememberCoroutineScope()</span><br><span class="line">    <span class="keyword">var</span> timer <span class="keyword">by</span> remember &#123; mutableStateOf(<span class="number">0</span>) &#125;</span><br><span class="line">    <span class="keyword">var</span> timerStartStop <span class="keyword">by</span> remember &#123; mutableStateOf(<span class="literal">false</span>) &#125;</span><br><span class="line">    <span class="keyword">var</span> job: Job? <span class="keyword">by</span> remember &#123; mutableStateOf(<span class="literal">null</span>) &#125;</span><br><span class="line"></span><br><span class="line">    Box(modifier = Modifier.fillMaxSize(),</span><br><span class="line">        contentAlignment = Alignment.Center) &#123;</span><br><span class="line">        Column(horizontalAlignment = Alignment.CenterHorizontally) &#123;</span><br><span class="line">            Text(<span class="string">&quot;Time <span class="variable">$timer</span>&quot;</span>)</span><br><span class="line">            Button(onClick = &#123;</span><br><span class="line">                timerStartStop = !timerStartStop</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (timerStartStop) &#123;</span><br><span class="line">                    job?.cancel()</span><br><span class="line">                    job = scope.launch &#123;</span><br><span class="line">                        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">                            delay(<span class="number">1000</span>)</span><br><span class="line">                            timer++</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    job?.cancel()</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125;) &#123;</span><br><span class="line">                Text(<span class="keyword">if</span> (timerStartStop) <span class="string">&quot;Stop&quot;</span> <span class="keyword">else</span> <span class="string">&quot;Start&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="四、Non-Suspended-Side-Effects"><a href="#四、Non-Suspended-Side-Effects" class="headerlink" title="四、Non-Suspended Side Effects"></a>四、Non-Suspended Side Effects</h4><h5 id="4-1-DisposableEffect"><a href="#4-1-DisposableEffect" class="headerlink" title="4.1 DisposableEffect"></a>4.1 DisposableEffect</h5><p>与<code>LaunchedEffect</code>一样，立即启动，通过修改key可以再次启动。它提供了一个销毁时的回调，当再次启动时，前一个的<code>onDispose</code>方法会被回调。</p>
+<p>下面的例子每次点击按钮改变状态进行recompose，同时会改变<code>DisposableEffect</code>的key，销毁上一个Effect并收到回调。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">JustDisposableEffect</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> timerStartStop <span class="keyword">by</span> remember &#123; mutableStateOf(<span class="literal">false</span>) &#125;</span><br><span class="line">    Box(modifier = Modifier.fillMaxSize(),</span><br><span class="line">        contentAlignment = Alignment.Center) &#123;</span><br><span class="line">        Column(horizontalAlignment = Alignment.CenterHorizontally) &#123;</span><br><span class="line">            Button(onClick = &#123;</span><br><span class="line">                timerStartStop = !timerStartStop</span><br><span class="line">            &#125;) &#123;</span><br><span class="line">                Text(<span class="keyword">if</span> (timerStartStop) <span class="string">&quot;Stop&quot;</span> <span class="keyword">else</span> <span class="string">&quot;Start&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> context = LocalContext.current</span><br><span class="line"></span><br><span class="line">    DisposableEffect(key1 = timerStartStop) &#123;</span><br><span class="line">        <span class="keyword">val</span> x = (<span class="number">1.</span><span class="number">.10</span>).random()</span><br><span class="line">        Toast.makeText(context, <span class="string">&quot;Start <span class="variable">$x</span>&quot;</span>, LENGTH_SHORT).show()</span><br><span class="line"></span><br><span class="line">        onDispose &#123;</span><br><span class="line">            Toast.makeText(context, <span class="string">&quot;Stop <span class="variable">$x</span>&quot;</span>, LENGTH_SHORT).show()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-2-SideEffect"><a href="#4-2-SideEffect" class="headerlink" title="4.2 SideEffect"></a>4.2 SideEffect</h5><p>使用场景：</p>
+<ul>
+<li>每次composition / recomposition成功后被调用</li>
+<li>用于对外部状态的更新</li>
+<li>无需做清理回收操作时</li>
+</ul>
+<center>
+    <img src="../images/android-jetpack-compose-sideeffects.jpg" width="80%"/>
+</center>
+
+<p>例1：对外部状态的更新</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">MyScreen</span><span class="params">(drawerTouchHandler: <span class="type">TouchHandler</span>)</span></span> &#123;</span><br><span class="line">  <span class="keyword">val</span> drawerState = rememberDrawerState(DrawerValue.Closed)</span><br><span class="line"></span><br><span class="line">  SideEffect &#123;</span><br><span class="line">    drawerTouchHandler.enabled = drawerState.isOpen</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>例2：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> i = <span class="number">0</span></span><br><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">MyComposable</span><span class="params">()</span></span>&#123;</span><br><span class="line">    SideEffect &#123; <span class="comment">//this will handle the side effect that may occur</span></span><br><span class="line">        i++</span><br><span class="line">    &#125;</span><br><span class="line">    Button(onClick = &#123;&#125;)&#123;</span><br><span class="line">        Text(text = <span class="string">&quot;Click&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="五、参考"><a href="#五、参考" class="headerlink" title="五、参考"></a>五、参考</h4><p><a target="_blank" rel="noopener" href="https://jorgecastillo.dev/jetpack-compose-effect-handlers">Jetpack Compose Effect Handlers</a><br><a target="_blank" rel="noopener" href="https://www.section.io/engineering-education/side-effects-and-effects-handling-in-jetpack-compose/">SideEffects and Effects Handling in Jetpack Compose</a><br><a target="_blank" rel="noopener" href="https://medium.com/mobile-app-development-publication/jetpack-compose-side-effects-made-easy-a4867f876928">Jetpack Compose Side Effects Made Easy</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -209,10 +355,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-05-09 16:35:18 / 修改时间：16:36:52" itemprop="dateCreated datePublished" datetime="2022-05-09T16:35:18+08:00">2022-05-09</time>
+              <time title="创建时间：2022-05-09 16:35:18" itemprop="dateCreated datePublished" datetime="2022-05-09T16:35:18+08:00">2022-05-09</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-12 10:28:34" itemprop="dateModified" datetime="2022-05-12T10:28:34+08:00">2022-05-12</time>
+              </span>
 
           
   
@@ -281,6 +433,7 @@
 <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a target="_blank" rel="noopener" href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
 
       
     </div>
@@ -331,8 +484,17 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-02 10:15:59" itemprop="dateModified" datetime="2022-05-02T10:15:59+08:00">2022-05-02</time>
+                <time title="修改时间：2022-05-17 16:16:20" itemprop="dateModified" datetime="2022-05-17T16:16:20+08:00">2022-05-17</time>
               </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kotlin/" itemprop="url" rel="index"><span itemprop="name">Kotlin</span></a>
+                </span>
+            </span>
 
           
   
@@ -478,9 +640,24 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-04-17 13:51:57 / 修改时间：14:40:32" itemprop="dateCreated datePublished" datetime="2022-04-17T13:51:57+08:00">2022-04-17</time>
+              <time title="创建时间：2022-04-17 13:51:57" itemprop="dateCreated datePublished" datetime="2022-04-17T13:51:57+08:00">2022-04-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-17 16:16:20" itemprop="dateModified" datetime="2022-05-17T16:16:20+08:00">2022-05-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
             </span>
 
           
@@ -601,6 +778,22 @@
               <span class="post-meta-item-text">发表于</span>
 
               <time title="创建时间：2022-01-30 22:01:39" itemprop="dateCreated datePublished" datetime="2022-01-30T22:01:39+08:00">2022-01-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-17 16:16:20" itemprop="dateModified" datetime="2022-05-17T16:16:20+08:00">2022-05-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
             </span>
 
           
@@ -748,9 +941,24 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-12-30 21:37:29 / 修改时间：21:43:48" itemprop="dateCreated datePublished" datetime="2021-12-30T21:37:29+08:00">2021-12-30</time>
+              <time title="创建时间：2021-12-30 21:37:29" itemprop="dateCreated datePublished" datetime="2021-12-30T21:37:29+08:00">2021-12-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-17 16:16:20" itemprop="dateModified" datetime="2022-05-17T16:16:20+08:00">2022-05-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
             </span>
 
           
@@ -857,8 +1065,17 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-12-27 20:42:16" itemprop="dateModified" datetime="2021-12-27T20:42:16+08:00">2021-12-27</time>
+                <time title="修改时间：2022-05-17 16:16:21" itemprop="dateModified" datetime="2022-05-17T16:16:21+08:00">2022-05-17</time>
               </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
 
           
   
@@ -965,10 +1182,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-12-04 11:54:49 / 修改时间：12:10:46" itemprop="dateCreated datePublished" datetime="2021-12-04T11:54:49+08:00">2021-12-04</time>
+              <time title="创建时间：2021-12-04 11:54:49" itemprop="dateCreated datePublished" datetime="2021-12-04T11:54:49+08:00">2021-12-04</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-17 16:16:20" itemprop="dateModified" datetime="2022-05-17T16:16:20+08:00">2022-05-17</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -1313,9 +1536,24 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-11-20 08:47:24 / 修改时间：08:51:41" itemprop="dateCreated datePublished" datetime="2021-11-20T08:47:24+08:00">2021-11-20</time>
+              <time title="创建时间：2021-11-20 08:47:24" itemprop="dateCreated datePublished" datetime="2021-11-20T08:47:24+08:00">2021-11-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-17 16:16:20" itemprop="dateModified" datetime="2022-05-17T16:16:20+08:00">2022-05-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kotlin/" itemprop="url" rel="index"><span itemprop="name">Kotlin</span></a>
+                </span>
             </span>
 
           
@@ -1368,232 +1606,6 @@
 
 
 <p>总结：<br>如果是增加元素，可变集合是很快的，而不可变集合则给我们给多的控制，知道集合是如何变化的。但对于本地作用域来讲，我们不需要这种控制，所以使用可变集合更好。尤其在一些工具类，插入操作可能很频繁。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-lang-inline-func-param.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/kotlin-lang-inline-func-param.html" class="post-title-link" itemprop="url">Effective Kotlin-48：为参数包含函数的方法内联</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-11-09 21:57:29" itemprop="dateCreated datePublished" datetime="2021-11-09T21:57:29+08:00">2021-11-09</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-11-20 08:52:51" itemprop="dateModified" datetime="2021-11-20T08:52:51+08:00">2021-11-20</time>
-              </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/kotlin-lang-inline-func-param.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/kotlin-lang-inline-func-param.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>7.7k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>7 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>你可能注意到了几乎所有的Kotlin标准库里面的高阶函数都是inline类型的。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">repeat</span><span class="params">(times: <span class="type">Int</span>, action: (<span class="type">Int</span>) -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (index <span class="keyword">in</span> <span class="number">0</span> until times) &#123;</span><br><span class="line">        action(index)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">map</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    transform: (<span class="type">T</span>) -&gt; <span class="type">R</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;R&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> mapTo(</span><br><span class="line">        ArrayList&lt;R&gt;(collectionSizeOrDefault(<span class="number">10</span>)),</span><br><span class="line">        transform</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">filter</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    predicate: (<span class="type">T</span>) -&gt; <span class="type">Boolean</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> filterTo(ArrayList&lt;T&gt;(), predicate)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这些函数的调用在编译时会被展开到调用处。如下所示:<code>repeat</code>函数会被它本身的函数体替换掉。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">repeat(<span class="number">10</span>) &#123;</span><br><span class="line">    print(it)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓</span></span><br><span class="line"><span class="keyword">for</span> (index <span class="keyword">in</span> <span class="number">0</span> until <span class="number">10</span>) &#123;</span><br><span class="line">    print(index)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>一般的函数调用通常是：跳进函数体，执行代码，然后跳出函数体，回到调用点。而用函数体替换函数调用是一种完全不同的方式，这种方式有以下一些优点：</p>
-<ul>
-<li>类型参数具体化</li>
-<li>参数包含函数的方法内联后执行更快</li>
-<li>不允许非本地的return语句</li>
-</ul>
-<p>使用inline标识符也会有一些缺点，下面👇🏻我们一起来看一下它的优缺点：</p>
-<h5 id="一、类型参数具体化："><a href="#一、类型参数具体化：" class="headerlink" title="一、类型参数具体化："></a>一、类型参数具体化：</h5><p>早期的Java版本不支持泛型，在2004年的J2SE-5.0才支持。由于泛型会在编译期间被擦除，所以在字节码层面是不存在的。例如：<code>List&lt;Int&gt;</code> 编译后成为 <code>List</code> ，所以我们只需要检查一个对象是否是List实例，而不用检查它是否是一个<code>List&lt;Int&gt;</code>：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">any <span class="keyword">is</span> List&lt;<span class="built_in">Int</span>&gt; <span class="comment">// Error</span></span><br><span class="line">any <span class="keyword">is</span> List&lt;*&gt; <span class="comment">// OK</span></span><br></pre></td></tr></table></figure>
-
-<center>
-    <img src="../images/kotlin_type_check.png" width="500"/>
-</center>
-
-<p>由于这个原因，我们不能操作类型参数：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">printTypeName</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(T::<span class="keyword">class</span>.simpleName) <span class="comment">// ERROR</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>通过内联函数我们可以突破这种限制。由于函数调用被函数体替换，通过使用<code>reified</code>修饰符，泛型被真实的类型参数替换。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;<span class="keyword">reified</span> T&gt;</span> <span class="title">printTypeName</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(T::<span class="keyword">class</span>.simpleName)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Usage</span></span><br><span class="line">printTypeName&lt;<span class="built_in">Int</span>&gt;()    <span class="comment">//→print(Int::class.simpleName) // Int</span></span><br><span class="line">printTypeName&lt;<span class="built_in">Char</span>&gt;()   <span class="comment">//→print(Char::class.simpleName)// Char</span></span><br><span class="line">printTypeName&lt;String&gt;() <span class="comment">//→print(String::class.simpleName)// String</span></span><br></pre></td></tr></table></figure>
-
-<p><code>reified</code>是一个非常有用的修饰符，例如标准库里面的<code>filterIsInstance</code>用来过滤某一种类型的元素。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Worker</span></span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Manager</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> employees: List&lt;Any&gt; =</span><br><span class="line">    listOf(Worker(), Manager(), Worker())</span><br><span class="line"></span><br><span class="line"><span class="keyword">val</span> workers: List&lt;Worker&gt; =</span><br><span class="line">    employees.filterIsInstance&lt;Worker&gt;()</span><br></pre></td></tr></table></figure>
-
-<p>它经常被用在我们自己写的代码库或工具类中。下面的例子是使用Gson库实现的通用函数，它能帮助我们简化依赖注入和模块申明。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;<span class="keyword">reified</span> T : Any&gt;</span> String.<span class="title">fromJsonOrNull</span><span class="params">()</span></span>: T? =</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        gson.fromJson(json, T::<span class="keyword">class</span>.java)</span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: JsonSyntaxException) &#123;</span><br><span class="line">        <span class="literal">null</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// usage</span></span><br><span class="line"><span class="keyword">val</span> user: User? = userAsText.fromJsonOrNull()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Koin module declaration</span></span><br><span class="line"><span class="keyword">val</span> myModule = module &#123;</span><br><span class="line">    single &#123; Controller(<span class="keyword">get</span>()) &#125; <span class="comment">// get is reified</span></span><br><span class="line">    single &#123; BusinessService() &#125; <span class="comment">// get is reified</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Koin injection</span></span><br><span class="line"><span class="keyword">val</span> service: BusinessService <span class="keyword">by</span> inject()</span><br><span class="line"><span class="comment">// inject is reified</span></span><br></pre></td></tr></table></figure>
-
-<h5 id="二、函数类型的参数内联后执行更快"><a href="#二、函数类型的参数内联后执行更快" class="headerlink" title="二、函数类型的参数内联后执行更快"></a>二、函数类型的参数内联后执行更快</h5><p>更确切的讲，短小的函数内联会更快，它无需跳转执行和跟踪调用栈。这也是为什么标准库里面很多小函数都是inline类型的原因。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">print</span><span class="params">(message: <span class="type">Any</span>?)</span></span> &#123;</span><br><span class="line">    System.<span class="keyword">out</span>.print(message)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>当方法没有函数类型的参数时，没必要内联且IntelliJ会给出以下提示⚠️：</p>
-<center>
-    <img src="../images/kotlin_intelij_waring_inline.jpeg" width="500"/>
-</center>
-
-
-<p>要理解其中的原因，我们首先需要理解将函数作为对象进行操作的问题是什么。这些类型的对象(使用函数字面量创建)需要以某种方式保存。在Kotlin/JVM上，需要使用JVM匿名类或普通类创建一些对象。因此，下面的lambda表达式:</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> lambda: () -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">    <span class="comment">// code</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>将会被编译为一个类。或JVM匿名类。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Java</span></span><br><span class="line">Function0&lt;Unit&gt; lambda = <span class="keyword">new</span> Function0&lt;Unit&gt;() &#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Unit <span class="title">invoke</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// code</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<p>或者被编译成一个普通的类，被定义在一个单独的文件中。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Java</span></span><br><span class="line"><span class="comment">// Additional class in separate file</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span>$<span class="title">lambda</span> <span class="keyword">implements</span> <span class="title">Function0</span> &lt; <span class="title">Unit</span> &gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Unit <span class="title">invoke</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// code</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Usage</span></span><br><span class="line">Function0 lambda = <span class="keyword">new</span> Test$lambda();</span><br></pre></td></tr></table></figure>
-
-<p>这两种方式没有特别大的区别。</p>
-<p>我们注意到，这个函数类型被转换成Function0类型。在Kotlin中，无参类型会被编译器转换成Function0，同理单参数，两参数转换成Function1, Function2,Function3等</p>
-<ul>
-<li>()-&gt;Unit 编译成 Function0<Unit></li>
-<li>()-&gt;Int 编译成 Function0<Int></li>
-<li>(Int)-&gt;Int 编译成 Function1&lt;Int, Int&gt;</li>
-<li>(Int, Int)-&gt;Int 编译成 Function2&lt;Int, Int, Int&gt;</li>
-</ul>
-<p>这些所有的接口都是Kotlin编译器生成的。你不能在Kotlin里显示的使用他们，因为它们是按需生成的，而应该使用函数类型。知道函数类型只是接口为你开启了很多的可能性。比如：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">OnClickListener</span> : <span class="type"></span></span>() -&gt; <span class="built_in">Unit</span> &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">invoke</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>正如在<em>高效Kotlin-47</em>中所述：避免不必要的对象创建，把函数体包装成对象拖慢代码。这就是为什么下面的代码中，第一个更快。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">repeat</span><span class="params">(times: <span class="type">Int</span>, action: (<span class="type">Int</span>) -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (index <span class="keyword">in</span> <span class="number">0</span> until times) &#123;</span><br><span class="line">        action(index)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">repeatNoinline</span><span class="params">(times: <span class="type">Int</span>, action: (<span class="type">Int</span>) -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (index <span class="keyword">in</span> <span class="number">0</span> until times) &#123;</span><br><span class="line">        action(index)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这种差异是显而易见的，但在现实生活中的例子中很少有显著差异。我们把测试用例设计一下，放大这种差异：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Benchmark</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">nothingInline</span><span class="params">(blackhole: <span class="type">Blackhole</span>)</span></span> &#123;</span><br><span class="line">    repeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">        blackhole.consume(it)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Benchmark</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">nothingNoninline</span><span class="params">(blackhole: <span class="type">Blackhole</span>)</span></span> &#123;</span><br><span class="line">    noinlineRepeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">        blackhole.consume(it)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>第一个在我们电脑平均运行189ms。第二个平均447ms。这种差距体现在：第一个例子迭代调用空函数。第二个例子迭代调用对象，这个对象调用一个空函数。这里使用了额外的对象。</p>
-<p>看一个更典型的例子。我们有5000个产品，计算我们购买物品的价格：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">users.filter &#123; it.bought &#125;.sumByDouble &#123; it.price &#125;</span><br></pre></td></tr></table></figure>
-
-<p>在我的机器上平均耗时38ms。如果filter和sumByDouble不内联耗时多少呢？平均42ms！看起来不多，但每次调用也有10%的差异。</p>
-<p>内联和非内联函数最大的区别在于，当我们在函数字面量里捕获变量时。变量被使用时需要被包装成对象。例如：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> l = <span class="number">1L</span></span><br><span class="line">noinlineRepeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">    l += it</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>一个本地变量不能直接在非内联lambda中使用。这就是为什么要被包装成引用对象：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> a = Ref.LongRef()</span><br><span class="line">a.element = <span class="number">1L</span></span><br><span class="line">noinlineRepeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">    a.element = a.element + it</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>区别很大是因为，通常这个对象会被使用很多次，上面代码中的a变量使用了两次。因此，额外的对象调用2*100_000_000。再看一下这个例子👇🏻：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Benchmark</span></span><br><span class="line"><span class="comment">// On average 30 ms</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">nothingInline</span><span class="params">(blackhole: <span class="type">Blackhole</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> l = <span class="number">0L</span></span><br><span class="line">    repeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">        l += it</span><br><span class="line">    &#125;</span><br><span class="line">    blackhole.consume(l)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Benchmark</span></span><br><span class="line"><span class="comment">// On average 274 ms</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">nothingNoninline</span><span class="params">(blackhole: <span class="type">Blackhole</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> l = <span class="number">0L</span></span><br><span class="line">    noinlineRepeat(<span class="number">100_000_000</span>) &#123;</span><br><span class="line">        l += it</span><br><span class="line">    &#125;</span><br><span class="line">    blackhole.consume(l)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>第一个在我电脑运行30ms，第二个274ms。差距的原因是，函数是一个对象，本地变量需要被包装。小的影响累计放大了。大多数情况下，我们不知道有函数类型参数的方法被如何使用，当我们定义这种函数时，最好内联一下。这也是标准库经常这么写的原因。</p>
-<h5 id="三、不允许非本地返回"><a href="#三、不允许非本地返回" class="headerlink" title="三、不允许非本地返回"></a>三、不允许非本地返回</h5><p>前面定义的<code>repeatNoninline</code>像是一个控制结构，拿它和if语句或for循环对比一下。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (value != <span class="literal">null</span>) &#123;</span><br><span class="line">    print(value)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1.</span><span class="number">.10</span>) &#123;</span><br><span class="line">    print(i)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">repeatNoninline(<span class="number">10</span>) &#123;</span><br><span class="line">    print(it)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>明显的区别是，内部不能返回</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    repeatNoinline(<span class="number">10</span>) &#123;</span><br><span class="line">        print(it)</span><br><span class="line">        <span class="keyword">return</span> <span class="comment">// ERROR: Not allowed</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这是函数字面量编译的结果。当我们的代码处于另外一个类时，不能从main函数返回。但是，当使用内联时，就没限制。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    repeat(<span class="number">10</span>) &#123;</span><br><span class="line">        print(it)</span><br><span class="line">        <span class="keyword">return</span> <span class="comment">// OK</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>得益于此，函数可以看起来更像控制结构：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getSomeMoney</span><span class="params">()</span></span>: Money? &#123;</span><br><span class="line">    repeat(<span class="number">100</span>) &#123;</span><br><span class="line">        <span class="keyword">val</span> money = searchForMoney()</span><br><span class="line">        <span class="keyword">if</span> (money != <span class="literal">null</span>) <span class="keyword">return</span> money</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h5 id="四、内联修饰符的缺陷"><a href="#四、内联修饰符的缺陷" class="headerlink" title="四、内联修饰符的缺陷"></a>四、内联修饰符的缺陷</h5><p>inline很有用，但不应该随处使用。有些情况下不建议使用。再来看看最重要的限制。</p>
-<ul>
-<li>内联函数不能递归，否则调用展开将无限循环。周期性循环尤其危险，因为Intellij不报错：</li>
-</ul>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">a</span><span class="params">()</span></span> &#123;</span><br><span class="line">    b()</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">b</span><span class="params">()</span></span> &#123;</span><br><span class="line">    c()</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">c</span><span class="params">()</span></span> &#123;</span><br><span class="line">    a()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>内联函数不能使用可见性约束的元素</li>
-</ul>
-<p>在<code>public inline fun</code>中不能使用private 、internal修饰的函数或属性</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">internal</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">read</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> reader = Reader() <span class="comment">// Error</span></span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">Reader</span> </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这也是为什么它不能用于隐藏实现，并且很少在类中使用。</p>
-<ul>
-<li>内联函数使代码膨胀</li>
-</ul>
-<p>定义一个打印3的函数：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">printThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>调用三次：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    printThree()</span><br><span class="line">    printThree()</span><br><span class="line">    printThree()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>又定义下面函数：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threeThreePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    threePrintThree()</span><br><span class="line">    threePrintThree()</span><br><span class="line">    threePrintThree()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threeThreeThreePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    threeThreePrintThree()</span><br><span class="line">    threeThreePrintThree()</span><br><span class="line">    threeThreePrintThree()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>看一下它们的编译结果，前两个还能看：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">printThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>后两个：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threeThreePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">threeThreeThreePrintThree</span><span class="params">()</span></span> &#123;</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)    </span><br><span class="line"> ...</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">    print(<span class="number">3</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这个例子展示了内联函数的弊端：过度使用时代码膨胀严重。</p>
-<h5 id="五、crossinline-和noinline"><a href="#五、crossinline-和noinline" class="headerlink" title="五、crossinline 和noinline"></a>五、crossinline 和noinline</h5><p>有时候我们想内联一个函数，由于某些原因，不能内联全部的函数类型参数。这种情况下我们使用下面的修饰符：</p>
-<p>crossinline：用于内联函数的参数，表示此参数内联范围扩大。对内联函数内部的lambda生效：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">hello</span><span class="params">(postAction:()-&gt;<span class="type">Unit</span>)</span></span>&#123;</span><br><span class="line">    println(<span class="string">&quot;Hello&quot;</span>)</span><br><span class="line">    runOnUiThread &#123; </span><br><span class="line">        postAction()</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>noinline：用于内联函数的参数，表示此参数不能被内联。可以局部性关闭内联。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="title">requestNewToken</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    hasToken: <span class="type">Boolean</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">crossinline</span> onRefresh: () -&gt; <span class="type">Unit</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">noinline</span> onGenerate: () -&gt; <span class="type">Unit</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (hasToken) &#123;</span><br><span class="line">        httpCall(<span class="string">&quot;get-token&quot;</span>, onGenerate) <span class="comment">// We must use </span></span><br><span class="line">        <span class="comment">// noinline to pass function as an argument to a</span></span><br><span class="line">        <span class="comment">// function that is not inlined</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        httpCall(<span class="string">&quot;refresh-token&quot;</span>) &#123;</span><br><span class="line">            onRefresh() <span class="comment">// We must use crossinline to </span></span><br><span class="line">            <span class="comment">// inline function in a context where </span></span><br><span class="line">            <span class="comment">// non-local return is not allowed</span></span><br><span class="line">            onGenerate()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">httpCall</span><span class="params">(url: <span class="type">String</span>, callback: () -&gt; <span class="type">Unit</span>)</span></span> &#123;</span><br><span class="line">    <span class="comment">/*...*/</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>能记住这两个修饰符最好，记不住也没事，IntelliJ会有提示：</p>
-<h5 id="六、总结："><a href="#六、总结：" class="headerlink" title="六、总结："></a>六、总结：</h5><p>使用inline的主要场景是：</p>
-<ul>
-<li>经常被使用的函数</li>
-<li>具体化的类型参数，像：<code>filterIsInstance</code></li>
-<li>定义带有函数类型的参数的顶层函数。尤其是辅助函数，如集合处理（map、filter）、作用域函数（also、apply、let）、顶层工具函数（repeat、run、with）</li>
-</ul>
-<p>我们很少用inline定义API，注意内联函数调用内联函数的情景。记住代码膨胀。</p>
-<p>参考：<br><a target="_blank" rel="noopener" href="https://kt.academy/article/ek-inline-functions">Effective Kotlin Item 48: Use inline modifier for functions with parameters of functional types</a></p>
 
       
     </div>
@@ -1686,7 +1698,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1731,13 +1743,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">83k</span>
+    <span title="站点总字数">86k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">1:15</span>
+    <span title="站点阅读时长">1:18</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
