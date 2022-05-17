@@ -1,8 +1,10 @@
 ---
 title: 对象的内存布局
 date: 2021-10-03 15:59:09
-tags: JVM
-categories: JVM
+tags:
+- Java
+- JVM
+categories: Java
 description:
 ---
 #### 一、概述  

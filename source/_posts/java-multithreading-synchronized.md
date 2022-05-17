@@ -1,7 +1,9 @@
 ---
 title: Java synchronized
 date: 2021-09-26 22:29:34
-tags: Java
+tags:
+- Java
+- Concurrency
 categories: Java
 description:
 ---

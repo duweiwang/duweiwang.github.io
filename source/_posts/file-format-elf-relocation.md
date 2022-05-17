@@ -1,8 +1,8 @@
 ---
 title: 重定位
 date: 2021-09-04 21:53:33
-tags:
-categories:
+tags: C/C++
+categories: C/C++
 description:
 ---
 

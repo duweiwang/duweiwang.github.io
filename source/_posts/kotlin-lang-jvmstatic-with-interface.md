@@ -94,3 +94,7 @@ public final class Singleton2 {
 ```
 
 由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。
+
+
+#### 参考
+[issue-KT-21342](https://youtrack.jetbrains.com/issue/KT-21342)
