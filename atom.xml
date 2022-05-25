@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2022-05-17T08:16:21.006Z</updated>
+  <updated>2022-05-25T03:08:23.524Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -17,11 +17,66 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Kotlin Flow的工作原理</title>
+    <link href="https://wangduwei.top/kotlin-lang-flow-under-the-hood.html"/>
+    <id>https://wangduwei.top/kotlin-lang-flow-under-the-hood.html</id>
+    <published>2022-05-25T03:08:23.000Z</published>
+    <updated>2022-05-25T03:08:23.524Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;p&gt;我们有一个会被重复调用的lambda表达式：&lt;/p&gt;
+&lt;figure class=&quot;highlight kotlin&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Jetpack Compose State Management</title>
+    <link href="https://wangduwei.top/android-jetpack-compose-state-management.html"/>
+    <id>https://wangduwei.top/android-jetpack-compose-state-management.html</id>
+    <published>2022-05-18T06:34:49.000Z</published>
+    <updated>2022-05-18T06:35:38.161Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;–&lt;/p&gt;
+&lt;center&gt;
+    &lt;img src=&quot;../images/ui-equals-function-of-state.png&quot; width=&quot;100%&quot;/&gt;
+&lt;/center&gt;
+
+&lt;h4 id=&quot;一、什么是状态&quot;&gt;&lt;a href=&quot;#一、什么是状态&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Jetpack Compose Side Effects</title>
     <link href="https://wangduwei.top/android-jetpack-compose-sideeffect.html"/>
     <id>https://wangduwei.top/android-jetpack-compose-sideeffect.html</id>
     <published>2022-05-17T08:11:13.000Z</published>
-    <updated>2022-05-17T08:16:21.006Z</updated>
+    <updated>2022-05-17T08:18:54.892Z</updated>
     
     
       
@@ -470,54 +525,6 @@
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>对称/非对称加密和数字签名</title>
-    <link href="https://wangduwei.top/basic-encryption-algorithm.html"/>
-    <id>https://wangduwei.top/basic-encryption-algorithm.html</id>
-    <published>2021-09-14T13:31:08.000Z</published>
-    <updated>2021-09-14T13:42:28.423Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;1-对称加解密的过程：&quot;&gt;&lt;a href=&quot;#1-对称加解密的过程：&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    
-    <category term="cryptography" scheme="https://wangduwei.top/tags/cryptography/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>经济学的十大原理</title>
-    <link href="https://wangduwei.top/principles-of-economics.html"/>
-    <id>https://wangduwei.top/principles-of-economics.html</id>
-    <published>2021-09-09T14:58:09.000Z</published>
-    <updated>2021-09-09T15:04:53.250Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、人们如何做出决策&quot;&gt;&lt;a href=&quot;#一、人们如何做出决策&quot; class=&quot;headerlink&quot; title=&quot;一、人们如何做出决策&quot;&gt;&lt;/a&gt;一、人们如何做出决策&lt;/h4&gt;&lt;h5 id=&quot;1-1-人们面临权衡取舍&quot;&gt;&lt;a</summary>
-        
-      
-    
-    
-    
-    <category term="Economics" scheme="https://wangduwei.top/categories/Economics/"/>
-    
-    
-    <category term="Economics" scheme="https://wangduwei.top/tags/Economics/"/>
     
   </entry>
   
