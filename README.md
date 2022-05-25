@@ -1,6 +1,10 @@
 # duweiwang.github.io
 blog
 
+<p align="center">
+  
+</p>
+
 
 ##### 新建博客
 
