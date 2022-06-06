@@ -2,7 +2,9 @@
 title: Kotlin之JvmStatic和override冲突问题
 date: 2022-05-09 16:35:18
 tags:
-categories:
+- Kotlin
+- Java
+categories: 计算机
 description:
 ---
 

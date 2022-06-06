@@ -3,7 +3,7 @@ title: Android-11适配
 date: 2021-08-26 20:27:25
 tags:
 - Android
-categories: Android
+categories: 计算机
 description: Android-11,target-sdk 30 变更及适配指南
 ---
 

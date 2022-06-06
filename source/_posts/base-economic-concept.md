@@ -2,7 +2,7 @@
 title: 市盈率和市净率
 tags:
   - Economics
-categories: Economics
+categories: 经济学
 date: 2021-09-02 17:30:12
 description:
 ---

@@ -1,8 +1,9 @@
 ---
 title: 源码分析-WorkManager
 date: 2022-04-17 13:51:57
-tags: Android
-categories: Android
+tags:
+- Android
+categories: 计算机
 description:
 ---
 

@@ -2,7 +2,7 @@
 title: CPU的缓存
 tags: 计算机基础
 date: 2021-10-13 15:28:59
-categories:
+categories: 计算机
 description:
 ---
 

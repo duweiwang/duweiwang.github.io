@@ -2,7 +2,7 @@
 title: Effective Kotlin-56：考虑使用可变集合
 tags: Kotlin
 date: 2021-11-20 08:47:24
-categories: Kotlin
+categories: 计算机
 description:
 ---
 

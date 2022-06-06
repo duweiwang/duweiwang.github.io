@@ -3,9 +3,9 @@ title: LeetCode 两数相加
 date: 2021-08-25 11:54:07
 tags: 
 - LeetCode
-- Algorithm
-- List
-categories: LeetCode
+- 算法
+- 链表
+categories: 计算机
 description: 
 ---
 
