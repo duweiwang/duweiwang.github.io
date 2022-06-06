@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2022-05-25T03:08:23.524Z</updated>
+  <updated>2022-06-06T05:56:35.654Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://wangduwei.top/kotlin-lang-flow-under-the-hood.html"/>
     <id>https://wangduwei.top/kotlin-lang-flow-under-the-hood.html</id>
     <published>2022-05-25T03:08:23.000Z</published>
-    <updated>2022-05-25T03:08:23.524Z</updated>
+    <updated>2022-06-06T05:56:35.654Z</updated>
     
     
       
@@ -36,6 +36,8 @@
     
     
     
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
     
@@ -46,7 +48,7 @@
     <link href="https://wangduwei.top/android-jetpack-compose-state-management.html"/>
     <id>https://wangduwei.top/android-jetpack-compose-state-management.html</id>
     <published>2022-05-18T06:34:49.000Z</published>
-    <updated>2022-05-18T06:35:38.161Z</updated>
+    <updated>2022-06-06T05:56:35.608Z</updated>
     
     
       
@@ -64,7 +66,7 @@
     
     
     
-    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
@@ -76,7 +78,7 @@
     <link href="https://wangduwei.top/android-jetpack-compose-sideeffect.html"/>
     <id>https://wangduwei.top/android-jetpack-compose-sideeffect.html</id>
     <published>2022-05-17T08:11:13.000Z</published>
-    <updated>2022-05-17T08:18:54.892Z</updated>
+    <updated>2022-06-06T05:56:35.601Z</updated>
     
     
       
@@ -89,7 +91,7 @@
     
     
     
-    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
@@ -103,7 +105,7 @@
     <link href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html"/>
     <id>https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html</id>
     <published>2022-05-09T08:35:18.000Z</published>
-    <updated>2022-05-12T02:28:34.277Z</updated>
+    <updated>2022-06-06T05:56:35.490Z</updated>
     
     
       
@@ -116,6 +118,12 @@
     
     
     
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
+    
+    <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
     
   </entry>
   
@@ -124,7 +132,7 @@
     <link href="https://wangduwei.top/kotlin-lang-jvm-annotation.html"/>
     <id>https://wangduwei.top/kotlin-lang-jvm-annotation.html</id>
     <published>2022-05-01T07:29:44.000Z</published>
-    <updated>2022-05-17T08:16:20.977Z</updated>
+    <updated>2022-06-06T05:56:35.496Z</updated>
     
     
       
@@ -138,7 +146,7 @@
     
     
     
-    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
@@ -150,7 +158,7 @@
     <link href="https://wangduwei.top/android-github-source-workmanager.html"/>
     <id>https://wangduwei.top/android-github-source-workmanager.html</id>
     <published>2022-04-17T05:51:57.000Z</published>
-    <updated>2022-05-17T08:16:20.935Z</updated>
+    <updated>2022-06-06T05:56:35.638Z</updated>
     
     
       
@@ -163,7 +171,7 @@
     
     
     
-    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
@@ -175,7 +183,7 @@
     <link href="https://wangduwei.top/android-library-room-7-tips.html"/>
     <id>https://wangduwei.top/android-library-room-7-tips.html</id>
     <published>2022-01-30T14:01:39.000Z</published>
-    <updated>2022-05-17T08:16:20.963Z</updated>
+    <updated>2022-06-06T05:56:35.643Z</updated>
     
     
       
@@ -188,7 +196,7 @@
     
     
     
-    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
@@ -200,7 +208,7 @@
     <link href="https://wangduwei.top/android-github-source-retrofit.html"/>
     <id>https://wangduwei.top/android-github-source-retrofit.html</id>
     <published>2021-12-30T13:37:29.000Z</published>
-    <updated>2022-05-17T08:16:20.996Z</updated>
+    <updated>2022-06-06T05:56:35.474Z</updated>
     
     
       
@@ -213,7 +221,7 @@
     
     
     
-    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
@@ -225,7 +233,7 @@
     <link href="https://wangduwei.top/android-github-source-spacex.html"/>
     <id>https://wangduwei.top/android-github-source-spacex.html</id>
     <published>2021-12-26T04:10:14.000Z</published>
-    <updated>2022-05-17T08:16:21.001Z</updated>
+    <updated>2022-06-06T05:56:35.561Z</updated>
     
     
       
@@ -238,8 +246,10 @@
     
     
     
-    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
     <category term="Arch" scheme="https://wangduwei.top/tags/Arch/"/>
     
@@ -250,7 +260,7 @@
     <link href="https://wangduwei.top/model-csp-deadlocks.html"/>
     <id>https://wangduwei.top/model-csp-deadlocks.html</id>
     <published>2021-12-04T03:54:49.000Z</published>
-    <updated>2022-05-17T08:16:20.942Z</updated>
+    <updated>2022-06-06T05:56:35.631Z</updated>
     
     
       
@@ -263,7 +273,7 @@
     
     
     
-    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
@@ -277,7 +287,7 @@
     <link href="https://wangduwei.top/kotlin-lang-use-dsl.html"/>
     <id>https://wangduwei.top/kotlin-lang-use-dsl.html</id>
     <published>2021-11-23T12:19:39.000Z</published>
-    <updated>2021-11-23T12:36:45.997Z</updated>
+    <updated>2022-06-06T05:56:35.502Z</updated>
     
     
       
@@ -290,7 +300,7 @@
     
     
     
-    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
@@ -302,7 +312,7 @@
     <link href="https://wangduwei.top/kotlin-lang-use-mutable-collection.html"/>
     <id>https://wangduwei.top/kotlin-lang-use-mutable-collection.html</id>
     <published>2021-11-20T00:47:24.000Z</published>
-    <updated>2022-05-17T08:16:20.989Z</updated>
+    <updated>2022-06-06T05:56:35.695Z</updated>
     
     
       
@@ -316,7 +326,7 @@
     
     
     
-    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
@@ -328,7 +338,7 @@
     <link href="https://wangduwei.top/kotlin-lang-inline-func-param.html"/>
     <id>https://wangduwei.top/kotlin-lang-inline-func-param.html</id>
     <published>2021-11-09T13:57:29.000Z</published>
-    <updated>2022-05-17T08:16:20.983Z</updated>
+    <updated>2022-06-06T05:56:35.684Z</updated>
     
     
       
@@ -342,7 +352,7 @@
     
     
     
-    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
@@ -354,7 +364,7 @@
     <link href="https://wangduwei.top/kotlin-lang-sequence.html"/>
     <id>https://wangduwei.top/kotlin-lang-sequence.html</id>
     <published>2021-11-06T13:37:43.000Z</published>
-    <updated>2022-05-17T08:16:20.971Z</updated>
+    <updated>2022-06-06T05:56:35.730Z</updated>
     
     
       
@@ -367,7 +377,7 @@
     
     
     
-    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
@@ -379,7 +389,7 @@
     <link href="https://wangduwei.top/kotlin-coroutine-deep-recursion.html"/>
     <id>https://wangduwei.top/kotlin-coroutine-deep-recursion.html</id>
     <published>2021-10-30T02:38:30.000Z</published>
-    <updated>2021-10-30T07:07:42.377Z</updated>
+    <updated>2022-06-06T05:56:35.521Z</updated>
     
     
       
@@ -393,7 +403,7 @@
     
     
     
-    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
@@ -405,7 +415,7 @@
     <link href="https://wangduwei.top/android-basic-constraintlayout.html"/>
     <id>https://wangduwei.top/android-basic-constraintlayout.html</id>
     <published>2021-10-23T07:03:23.000Z</published>
-    <updated>2022-03-20T03:12:07.442Z</updated>
+    <updated>2022-06-06T05:56:35.510Z</updated>
     
     
       
@@ -418,7 +428,7 @@
     
     
     
-    <category term="Android" scheme="https://wangduwei.top/categories/Android/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
@@ -430,7 +440,7 @@
     <link href="https://wangduwei.top/cpu-cache-overview.html"/>
     <id>https://wangduwei.top/cpu-cache-overview.html</id>
     <published>2021-10-13T07:28:59.000Z</published>
-    <updated>2021-10-13T08:00:14.035Z</updated>
+    <updated>2022-06-06T05:56:35.482Z</updated>
     
     
       
@@ -443,6 +453,8 @@
     
     
     
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
     
     <category term="计算机基础" scheme="https://wangduwei.top/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/"/>
     
@@ -453,7 +465,7 @@
     <link href="https://wangduwei.top/java-object-layout.html"/>
     <id>https://wangduwei.top/java-object-layout.html</id>
     <published>2021-10-03T07:59:09.000Z</published>
-    <updated>2022-05-17T08:16:20.950Z</updated>
+    <updated>2022-06-06T05:56:35.575Z</updated>
     
     
       
@@ -467,7 +479,7 @@
     
     
     
-    <category term="Java" scheme="https://wangduwei.top/categories/Java/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
@@ -481,7 +493,7 @@
     <link href="https://wangduwei.top/java-multithreading-synchronized.html"/>
     <id>https://wangduwei.top/java-multithreading-synchronized.html</id>
     <published>2021-09-26T14:29:34.000Z</published>
-    <updated>2022-05-17T08:16:20.928Z</updated>
+    <updated>2022-06-06T05:56:35.625Z</updated>
     
     
       
@@ -494,7 +506,7 @@
     
     
     
-    <category term="Java" scheme="https://wangduwei.top/categories/Java/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
@@ -508,7 +520,7 @@
     <link href="https://wangduwei.top/kotlin-lang-flow.html"/>
     <id>https://wangduwei.top/kotlin-lang-flow.html</id>
     <published>2021-09-25T07:27:31.000Z</published>
-    <updated>2021-09-25T09:40:43.784Z</updated>
+    <updated>2022-06-06T05:56:35.723Z</updated>
     
     
       
@@ -521,7 +533,7 @@
     
     
     
-    <category term="Kotlin" scheme="https://wangduwei.top/categories/Kotlin/"/>
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
