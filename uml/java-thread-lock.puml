@@ -1,0 +1,38 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface Lock{
+    + lock():void
+    + tryLock():boolean
+    + unlock():void
+    + newCondition():Condition
+}
+
+interface Condition{}
+class ConditionObject{}
+
+class ReentrantLock{
+
+}
+
+abstract class Sync{}
+
+abstract class AbstractQueuedSynchronizer{
+ + acquire():void
+}
+
+class NonfairSync{}
+class FairSync{}
+
+Lock <|.. ReentrantLock
+
+AbstractQueuedSynchronizer <|-- Sync
+
+Sync <|-- NonfairSync
+Sync <|-- FairSync
+
+ReentrantLock *-- Sync
+
+Condition <|.. ConditionObject
+
+@enduml

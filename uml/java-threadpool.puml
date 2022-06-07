@@ -1,0 +1,27 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+interface Executor{}
+interface ExecutorService{}
+abstract class AbstractExecutorService{}
+class ThreadPoolExecutor{}
+
+
+interface Runnable{}
+abstract class AbstractOwnableSynchronizer{}
+abstract class AbstractQueuedSynchronizer{}
+class Worker{}
+
+
+Runnable <|.. Worker
+AbstractQueuedSynchronizer <|-- Worker
+AbstractOwnableSynchronizer <|-- AbstractQueuedSynchronizer
+ThreadPoolExecutor *-- Worker
+
+
+
+Executor <|-- ExecutorService
+ExecutorService <|.. AbstractExecutorService
+AbstractExecutorService <|-- ThreadPoolExecutor
+
+@enduml
