@@ -12,27 +12,55 @@ interface Condition{}
 class ConditionObject{}
 
 class ReentrantLock{
-
 }
+
+class CountDownLatch{
+}
+
+class Semaphore{}
+
+class "Sync" as CountDownLatchSync{
+}
+
+abstract class "Sync" as SemaphoreSync{}
 
 abstract class Sync{}
 
 abstract class AbstractQueuedSynchronizer{
- + acquire():void
+    - state:int
+    + acquire():void
+}
+
+class Node{
+    waitStatus:int
+    next:Node
+    prev:Node
 }
 
 class NonfairSync{}
 class FairSync{}
 
+class "NonfairSync" as SemaphoreNonfairSync{}
+class "FairSync" as SemaphoreFairSync{}
+
 Lock <|.. ReentrantLock
 
 AbstractQueuedSynchronizer <|-- Sync
+AbstractQueuedSynchronizer <|-- CountDownLatchSync
+AbstractQueuedSynchronizer <|-- SemaphoreSync
 
 Sync <|-- NonfairSync
 Sync <|-- FairSync
 
+SemaphoreSync <|-- SemaphoreNonfairSync
+SemaphoreSync <|-- SemaphoreFairSync
+
 ReentrantLock *-- Sync
+CountDownLatch *-- CountDownLatchSync
+Semaphore *-- SemaphoreSync
 
 Condition <|.. ConditionObject
+
+Node --* AbstractQueuedSynchronizer
 
 @enduml
