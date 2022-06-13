@@ -1,7 +1,9 @@
 ---
 title: Android中的约束布局
 date: 2021-10-23 15:03:23
-tags: Android
+tags:
+- Android
+- View
 categories: 计算机
 description:
 ---

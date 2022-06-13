@@ -36,7 +36,10 @@ package java{
 package jni{
 
  class android_os_MessageQueue{
-
+    nativeInit()
+    nativeDestroy()
+    nativePollOnce(ptr:long,timeout:int)
+    nativeWake()
  }
 }
 

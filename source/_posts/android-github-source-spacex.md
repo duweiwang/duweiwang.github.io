@@ -1,7 +1,7 @@
 ---
 title: 源码分析-项目架构之SpaceX
 tags:
-- Arch
+- 架构
 - Android
 date: 2021-12-26 12:10:14
 categories: 计算机
