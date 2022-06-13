@@ -2,8 +2,9 @@
 title: 经济学的十大原理
 date: 2021-09-09 22:58:09
 tags:
- - Economics
-categories: 经济学
+- 经济学
+categories:
+- 经济学
 description:
 ---
 
