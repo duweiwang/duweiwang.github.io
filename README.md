@@ -36,3 +36,12 @@ hexo s
 ```script
 hexo d
 ```
+
+
+
+##### 建站记录
+
+
+数学公式的支持：
+需要手动安装pandoc程序
+https://github.com/theme-next/hexo-theme-next/blob/master/docs/zh-CN/MATH.md

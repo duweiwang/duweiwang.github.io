@@ -1,0 +1,43 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface IAppWidgetService
+
+abstract class Stub
+
+class Proxy{
+    - mRemote:IBinder
+}
+
+class AppWidgetServiceImpl
+
+
+Stub <|-- AppWidgetServiceImpl
+
+
+interface IInterface
+
+interface IBinder
+
+class Binder
+
+class AppWidgetManager{
+    - mService:IAppWidgetService
+}
+
+
+IBinder <|-- Binder
+
+IInterface <|-- IAppWidgetService
+
+Binder <|-- Stub
+
+IAppWidgetService <|..Stub
+
+IAppWidgetService <|.. Proxy
+
+Proxy "1"*-- IBinder :包含
+
+AppWidgetManager "1"*-- IAppWidgetService :包含
+
+@enduml
