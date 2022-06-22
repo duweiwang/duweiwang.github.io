@@ -6,7 +6,7 @@ tags:
 
 
 ####  一、概览：
-1.1 分类
+1.1 小部件的分类
 + 信息展示小部件：天气小部件主要展示天气信息
 + 集合小部件：多个相同类型元素的集合，相册预览小部件、文章预览小部件，可垂直滚动。
 + 控制类小部件：常用功能的开关等
@@ -91,7 +91,8 @@ tags:
 ```
 
 2.2.1 尺寸属性:
-+ `targetCellWidth` & `targetCellHeight`(Android-12)
++ `targetCellWidth` & `targetCellHeight` (Android-12新增)
++ `maxResizeWidth` & `maxResizeHeight` (Android-12新增)
 + `minWidth` & `minHeight`
 + `minResizeWidth` & `minResizeHeight`
 + `resizeMode`
@@ -176,8 +177,7 @@ Android-12新增的参数：
 </center>
 
 
-#### 三、增强你的小部件
-    这里讨论一些可选项，Android-12中的体验增强。
+#### 三、Android-12的变更
 
 ##### 3.1 添加设备主题
     3.1.1 使用动态颜色向后兼容
@@ -214,11 +214,34 @@ remoteView.setViewLayoutMargin(R.id.text, RemoteViews.MARGIN_END, 8f, TypedValue
 ```
 
 
+#### 四、高级小部件
+
+4.1 小部件的更新
+4.1.1 更新类型
++ 全量更新：`AppWidgetManager.updateAppWidget(int, android.widget.RemoteViews)` ，新RemoteView全量替换旧RemoteView
++ 部分更新：`AppWidgetManager.partiallyUpdateAppWidget`，新RemoteView合并入旧RemoteView
++ 数据更新：`AppWidgetManager.notifyAppWidgetViewDataChanged`，刷新一组View的数据
+
+4.1.2 更新频率
+
++ 周期更新
+`updatePeriodMillis`参数控制更新频率但不能小于30分钟当设置为0时，屏蔽周期更新。每次更新回调`AppWidgetProvider.onUpdate()`方法
+
++ 用户事件更新
+  - App内的点击事件
+  - notification类型的远端事件
+
++ 广播事件更新
+
+4.1.3 通过广播更新
++ 更新间隔
+  广播的ANR是10秒，如果执行耗时操作考虑使用WorkManager，或者使用`goAsync`方法可以使广播运行30s，但会堵塞后面的广播。
++ 更新优先级
+  由于广播📢在后台进程，资源过载会导致延迟，可以通过设置前台进程提高优先级。例如当使用`PendingIntent.getBroadcast` 时给Intent添加`Intent.FLAG_RECEIVER_FOREGROUND`
 
 
-
-
-
+#### [1.App Widget Design Guidelines](https://developer.android.com/guide/practices/ui_guidelines/widget_design#anatomy)
+#### [2.App widgets overview](https://developer.android.com/guide/topics/appwidgets/overview)
 
 
 
