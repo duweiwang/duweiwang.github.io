@@ -20,7 +20,9 @@ tags:
 + 手势
     由于小部件在主屏幕展示，需要和导航共存，所以左右滑动只能交给导航来处理。小部件只能处理触摸和垂直滑动。
 + 元素
-    由于上述手势交互的约束，一些UI元素就不能使用了。
+    由于上述手势交互的约束，一些UI元素就不能使用了。可用元素：
+  + FrameLayout、LinearLayout、RelativeLayout、GridLayout
+  + AnalogClock、Button、Chronometer、ImageButton、ImageView、ProgressBar、TextView、ViewFlipper、ListView、GridView、StackView、AdapterViewFlipper
 
 1.4 设计指引
 + 小部件内容
@@ -240,9 +242,22 @@ remoteView.setViewLayoutMargin(R.id.text, RemoteViews.MARGIN_END, 8f, TypedValue
   由于广播📢在后台进程，资源过载会导致延迟，可以通过设置前台进程提高优先级。例如当使用`PendingIntent.getBroadcast` 时给Intent添加`Intent.FLAG_RECEIVER_FOREGROUND`
 
 
+
+
+#### 五、一些系统通知
+
+5.1 时间改变
+
+
+5.2 电量和状态
++ android.intent.action.BATTERY_CHANGED
++ android.intent.action.ACTION_POWER_CONNECTED
++ android.intent.action.ACTION_POWER_DISCONNECTED
+
+
+
 #### [1.App Widget Design Guidelines](https://developer.android.com/guide/practices/ui_guidelines/widget_design#anatomy)
 #### [2.App widgets overview](https://developer.android.com/guide/topics/appwidgets/overview)
-
-
+#### [3.App Widgets](https://android-doc.github.io/guide/topics/appwidgets/index.html)
 
 

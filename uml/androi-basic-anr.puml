@@ -1,0 +1,40 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class AnrHelper{
+    + void appNotResponding()
+}
+
+class AnrConsumerThread{}
+class AnrRecord{}
+
+class ContentProviderHelper{
+      -mService:ActivityManagerService
+      + void appNotRespondingViaProvider()
+}
+
+
+class ActivityManagerService{
+    + mAnrHelper:AnrHelper
+    + boolean inputDispatchingTimedOut()
+}
+
+
+class ActiveService{
+    -mAm:ActivityManagerService
+    + void serviceTimeout()
+}
+
+
+class BroadcastQueue{
+    -mService:ActivityManagerService
+    + void broadcastTimeoutLocked()
+}
+
+ActivityManagerService *-- AnrHelper
+
+ActivityManagerService --* BroadcastQueue:mService
+ActivityManagerService --* ActiveService:mAm
+ActivityManagerService --* ContentProviderHelper:mService
+
+@enduml
