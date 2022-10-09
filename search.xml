@@ -1011,27 +1011,6 @@
       </tags>
   </entry>
   <entry>
-    <title>开发者七条</title>
-    <url>/ep-good-developer-manifesto.html</url>
-    <content><![CDATA[<p>软件开发不只是API调用和基础语法，以下是应用开发的全貌：</p>
-<h4 id="一、相信数据"><a href="#一、相信数据" class="headerlink" title="一、相信数据"></a>一、相信数据</h4><p>如果你觉得系统正常运转，你应该拿出数据支撑你的想法。更重要的是，当研究证明你是错的时，你应该欣然接受实事。<br>这就需要做测试来验证你的代码，也需要一些流程来生成对应的数据。<br>你做的任何事都需要数据来辅助你下一步的决策。否则你将不知道自己做的事是对还是错。</p>
-<h4 id="二、软件开发不只是编码"><a href="#二、软件开发不只是编码" class="headerlink" title="二、软件开发不只是编码"></a>二、软件开发不只是编码</h4><p>除了编码，开发人员还需要协调、沟通、分析、设计、测试、项目管理等</p>
-<h4 id="三、代码就是和人沟通"><a href="#三、代码就是和人沟通" class="headerlink" title="三、代码就是和人沟通"></a>三、代码就是和人沟通</h4><p>如果我们真的只是“为计算机编程”，那么我们都将编写字节码。计算机最能理解它。但我们用的是一种“折衷”语言，这种语言其他人可以理解，也可以翻译成计算机可以理解的东西。</p>
-<p>好的软件开发是一个交流的过程。这是为了确保人们理解你在做什么。你的工作是与下一个阅读它的人交流。找到最好的表达方式可能需要同理心。</p>
-<h4 id="四、好的流程很重要"><a href="#四、好的流程很重要" class="headerlink" title="四、好的流程很重要"></a>四、好的流程很重要</h4><p>康威定律预言，你的软件注定要反映你的团队及其沟通结构。流程是沟通的结构。</p>
-<p>想象一下一架起飞的飞机:飞行员、副驾驶、机组人员和空中交通管制人员之间有一段非常有条理的对话。这确保了每个人都关注关键问题，每个人都有发言权。“机翼还在飞机上吗?””“检查。“没有别的飞机挡住我们的去路吗?”“可以起飞了。”</p>
-<h4 id="五、用结果证明自己，而不是身份低位"><a href="#五、用结果证明自己，而不是身份低位" class="headerlink" title="五、用结果证明自己，而不是身份低位"></a>五、用结果证明自己，而不是身份低位</h4><p>最糟糕的开发组织要么等级森严，要么每个开发人员有太多老板。这通常反映了管理者对地位的渴望。</p>
-<p>考虑“角色”，而不是“地位”。我工作过的最好的组织都首先认可那些推动事情的人，而不管他们在组织中扮演什么角色。</p>
-<h4 id="六、每个人都能从别人那学到"><a href="#六、每个人都能从别人那学到" class="headerlink" title="六、每个人都能从别人那学到"></a>六、每个人都能从别人那学到</h4><p>如果您认为人们的种族、性别或其他因素是判断他们的技能或他们必须教给您的东西的好方法，那么您就限制了自己作为软件开发人员的发展。</p>
-<h4 id="七、测试你所有的猜想，并随时准备改变这些猜想"><a href="#七、测试你所有的猜想，并随时准备改变这些猜想" class="headerlink" title="七、测试你所有的猜想，并随时准备改变这些猜想"></a>七、测试你所有的猜想，并随时准备改变这些猜想</h4><p>当指导年轻的开发者时，我总是强调你不应该证明自己是对的，而应该证明自己是错的。我还鼓励他们用证明自己正确的热情去做这件事。</p>
-<p>逻辑理论往往有一种方法可以证明你是错的。如果没有，这可能不是一个很好的理论。如果你不能证明它是错的，那么，只有那时，也许你可以试着证明它是对的。这与“相信数据”类似，但这不仅仅是关于数据，还有你使用数据的方式。</p>
-<p><a href="https://www.infoworld.com/article/3214481/the-good-software-development-manifesto.html">参考来源</a></p>
-]]></content>
-      <tags>
-        <tag>软件哲学</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>投资回报率</title>
     <url>/econonmics-roa-roe-roic-roce.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><ul>
@@ -1119,37 +1098,24 @@
       </tags>
   </entry>
   <entry>
-    <title>重定位</title>
-    <url>/file-format-elf-relocation.html</url>
-    <content><![CDATA[<h4 id="一、可重定位文件"><a href="#一、可重定位文件" class="headerlink" title="一、可重定位文件"></a>一、可重定位文件</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//main.c                    //x.c</span><br><span class="line"></span><br><span class="line">extern void foo(void);      |   #include &lt;stdio.h&gt;</span><br><span class="line">                            |</span><br><span class="line">int main(void)              |   void foo()</span><br><span class="line">&#123;                           |   &#123;</span><br><span class="line">    foo();                  |       printf(&quot;foo\n&quot;);</span><br><span class="line">    return 0;               |   &#125;</span><br><span class="line">&#125;                           |</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt; objdump -d main.o</span><br><span class="line">00000000 &lt;main&gt;:</span><br><span class="line">   0:	55                   	push   %ebp</span><br><span class="line">   1:	89 e5                	mov    %esp,%ebp</span><br><span class="line">   3:	83 e4 f0             	and    $0xfffffff0,%esp</span><br><span class="line">   6:	e8 fc ff ff ff       	call   7 &lt;main+0x7&gt;</span><br><span class="line">   b:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  10:	c9                   	leave</span><br><span class="line">  11:	c3                   	ret</span><br></pre></td></tr></table></figure>
-
-<p>在编译和汇编阶段，[main.c -&gt; main.o] 汇编器无法确定外部定义的函数和全局变量的地址，所以它只能使用一个假地址占位，并产生一条额外的记录，让后面的链接器使用这条记录帮它完成地址修正。这条记录对于代码段来说放在[.rel.text] ，对于数据段来说放在[.rel.data],它们都是重定位文件的一个section。</p>
-<p>对于每一条记录都对应于如下的一个数据结构：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr r_offset;</span><br><span class="line">        uint32_t   r_info;</span><br><span class="line">        int32_t    r_addend;</span><br><span class="line">&#125; Elf32_Rela;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="二、静态链接"><a href="#二、静态链接" class="headerlink" title="二、静态链接"></a>二、静态链接</h4><p>1、多个目标文件的合并:</p>
-<center>
-    <img src="../images/elf_obj_file_merge.png" width="500"/>
-</center>
-
-<p>2、对代码段，数据段以及各符号进行地址分配<br>3、根据 [relocation entries] 重新计算代码和数据段中的假地址。</p>
-<h4 id="三、动态链接"><a href="#三、动态链接" class="headerlink" title="三、动态链接"></a>三、动态链接</h4><h5 id="1、静态链接的缺点"><a href="#1、静态链接的缺点" class="headerlink" title="1、静态链接的缺点"></a>1、静态链接的缺点</h5><ul>
-<li>静态链接将使一些公用代码如libc库产生冗余，浪费内存和磁盘空间</li>
-<li>如果模块化开发，一个模块更新就得重新链接</li>
-</ul>
-<h5 id="2、动态链接的概念"><a href="#2、动态链接的概念" class="headerlink" title="2、动态链接的概念"></a>2、动态链接的概念</h5><p>相较于静态链接在编译期进行链接操作，将链接过程推迟到运行时进行的过程叫动态链接。</p>
-<h5 id="3、动态链接的实现"><a href="#3、动态链接的实现" class="headerlink" title="3、动态链接的实现"></a>3、动态链接的实现</h5><p>   3.1 地址无关代码<br>    由于在运行时，代码段是共享的，只能读不能写，所以需要将指令中那些需要修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变，而数据部分可以在每一个进程中拥有一个副本。</p>
-<p>   3.2 全局偏移表（Global Offset Table）<br>    当链接过程发生在运行期时，外部的符号调用只有在运行时装载模块后才能确定模块被装载的地址，以及模块内符号的确切地址。所以ELF提供了一个全局偏移表（GOT）来记录这些外部模块的符号引用。当模块被装载时，会更新此表的内容。</p>
-<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p>1.<a href="https://people.cs.pitt.edu/~xianeizhang/notes/Linking.html#symbol">Linking</a><br>2.<a href="https://stac47.github.io/c/relocation/elf/tutorial/2018/03/01/understanding-relocation-elf.html">understanding-relocation-elf</a><br>3.<a href="http://stffrdhrn.github.io/hardware/embedded/openrisc/2019/11/29/relocs.html">ELF Binaries and Relocation Entries</a><br>4.<a href="http://chuquan.me/2018/06/03/linking-static-linking-dynamic-linking/">static-linking-dynamic-linking</a><br>5.<a href="https://blog.csdn.net/ayu_ag/article/details/78655300">ELF函数重定位问题</a></p>
+    <title>开发者七条</title>
+    <url>/ep-good-developer-manifesto.html</url>
+    <content><![CDATA[<p>软件开发不只是API调用和基础语法，以下是应用开发的全貌：</p>
+<h4 id="一、相信数据"><a href="#一、相信数据" class="headerlink" title="一、相信数据"></a>一、相信数据</h4><p>如果你觉得系统正常运转，你应该拿出数据支撑你的想法。更重要的是，当研究证明你是错的时，你应该欣然接受实事。<br>这就需要做测试来验证你的代码，也需要一些流程来生成对应的数据。<br>你做的任何事都需要数据来辅助你下一步的决策。否则你将不知道自己做的事是对还是错。</p>
+<h4 id="二、软件开发不只是编码"><a href="#二、软件开发不只是编码" class="headerlink" title="二、软件开发不只是编码"></a>二、软件开发不只是编码</h4><p>除了编码，开发人员还需要协调、沟通、分析、设计、测试、项目管理等</p>
+<h4 id="三、代码就是和人沟通"><a href="#三、代码就是和人沟通" class="headerlink" title="三、代码就是和人沟通"></a>三、代码就是和人沟通</h4><p>如果我们真的只是“为计算机编程”，那么我们都将编写字节码。计算机最能理解它。但我们用的是一种“折衷”语言，这种语言其他人可以理解，也可以翻译成计算机可以理解的东西。</p>
+<p>好的软件开发是一个交流的过程。这是为了确保人们理解你在做什么。你的工作是与下一个阅读它的人交流。找到最好的表达方式可能需要同理心。</p>
+<h4 id="四、好的流程很重要"><a href="#四、好的流程很重要" class="headerlink" title="四、好的流程很重要"></a>四、好的流程很重要</h4><p>康威定律预言，你的软件注定要反映你的团队及其沟通结构。流程是沟通的结构。</p>
+<p>想象一下一架起飞的飞机:飞行员、副驾驶、机组人员和空中交通管制人员之间有一段非常有条理的对话。这确保了每个人都关注关键问题，每个人都有发言权。“机翼还在飞机上吗?””“检查。“没有别的飞机挡住我们的去路吗?”“可以起飞了。”</p>
+<h4 id="五、用结果证明自己，而不是身份低位"><a href="#五、用结果证明自己，而不是身份低位" class="headerlink" title="五、用结果证明自己，而不是身份低位"></a>五、用结果证明自己，而不是身份低位</h4><p>最糟糕的开发组织要么等级森严，要么每个开发人员有太多老板。这通常反映了管理者对地位的渴望。</p>
+<p>考虑“角色”，而不是“地位”。我工作过的最好的组织都首先认可那些推动事情的人，而不管他们在组织中扮演什么角色。</p>
+<h4 id="六、每个人都能从别人那学到"><a href="#六、每个人都能从别人那学到" class="headerlink" title="六、每个人都能从别人那学到"></a>六、每个人都能从别人那学到</h4><p>如果您认为人们的种族、性别或其他因素是判断他们的技能或他们必须教给您的东西的好方法，那么您就限制了自己作为软件开发人员的发展。</p>
+<h4 id="七、测试你所有的猜想，并随时准备改变这些猜想"><a href="#七、测试你所有的猜想，并随时准备改变这些猜想" class="headerlink" title="七、测试你所有的猜想，并随时准备改变这些猜想"></a>七、测试你所有的猜想，并随时准备改变这些猜想</h4><p>当指导年轻的开发者时，我总是强调你不应该证明自己是对的，而应该证明自己是错的。我还鼓励他们用证明自己正确的热情去做这件事。</p>
+<p>逻辑理论往往有一种方法可以证明你是错的。如果没有，这可能不是一个很好的理论。如果你不能证明它是错的，那么，只有那时，也许你可以试着证明它是对的。这与“相信数据”类似，但这不仅仅是关于数据，还有你使用数据的方式。</p>
+<p><a href="https://www.infoworld.com/article/3214481/the-good-software-development-manifesto.html">参考来源</a></p>
 ]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
       <tags>
-        <tag>C/C++</tag>
+        <tag>软件哲学</tag>
       </tags>
   </entry>
   <entry>
@@ -1264,6 +1230,40 @@
       <tags>
         <tag>Java</tag>
         <tag>File</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>重定位</title>
+    <url>/file-format-elf-relocation.html</url>
+    <content><![CDATA[<h4 id="一、可重定位文件"><a href="#一、可重定位文件" class="headerlink" title="一、可重定位文件"></a>一、可重定位文件</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//main.c                    //x.c</span><br><span class="line"></span><br><span class="line">extern void foo(void);      |   #include &lt;stdio.h&gt;</span><br><span class="line">                            |</span><br><span class="line">int main(void)              |   void foo()</span><br><span class="line">&#123;                           |   &#123;</span><br><span class="line">    foo();                  |       printf(&quot;foo\n&quot;);</span><br><span class="line">    return 0;               |   &#125;</span><br><span class="line">&#125;                           |</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt; objdump -d main.o</span><br><span class="line">00000000 &lt;main&gt;:</span><br><span class="line">   0:	55                   	push   %ebp</span><br><span class="line">   1:	89 e5                	mov    %esp,%ebp</span><br><span class="line">   3:	83 e4 f0             	and    $0xfffffff0,%esp</span><br><span class="line">   6:	e8 fc ff ff ff       	call   7 &lt;main+0x7&gt;</span><br><span class="line">   b:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  10:	c9                   	leave</span><br><span class="line">  11:	c3                   	ret</span><br></pre></td></tr></table></figure>
+
+<p>在编译和汇编阶段，[main.c -&gt; main.o] 汇编器无法确定外部定义的函数和全局变量的地址，所以它只能使用一个假地址占位，并产生一条额外的记录，让后面的链接器使用这条记录帮它完成地址修正。这条记录对于代码段来说放在[.rel.text] ，对于数据段来说放在[.rel.data],它们都是重定位文件的一个section。</p>
+<p>对于每一条记录都对应于如下的一个数据结构：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr r_offset;</span><br><span class="line">        uint32_t   r_info;</span><br><span class="line">        int32_t    r_addend;</span><br><span class="line">&#125; Elf32_Rela;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="二、静态链接"><a href="#二、静态链接" class="headerlink" title="二、静态链接"></a>二、静态链接</h4><p>1、多个目标文件的合并:</p>
+<center>
+    <img src="../images/elf_obj_file_merge.png" width="500"/>
+</center>
+
+<p>2、对代码段，数据段以及各符号进行地址分配<br>3、根据 [relocation entries] 重新计算代码和数据段中的假地址。</p>
+<h4 id="三、动态链接"><a href="#三、动态链接" class="headerlink" title="三、动态链接"></a>三、动态链接</h4><h5 id="1、静态链接的缺点"><a href="#1、静态链接的缺点" class="headerlink" title="1、静态链接的缺点"></a>1、静态链接的缺点</h5><ul>
+<li>静态链接将使一些公用代码如libc库产生冗余，浪费内存和磁盘空间</li>
+<li>如果模块化开发，一个模块更新就得重新链接</li>
+</ul>
+<h5 id="2、动态链接的概念"><a href="#2、动态链接的概念" class="headerlink" title="2、动态链接的概念"></a>2、动态链接的概念</h5><p>相较于静态链接在编译期进行链接操作，将链接过程推迟到运行时进行的过程叫动态链接。</p>
+<h5 id="3、动态链接的实现"><a href="#3、动态链接的实现" class="headerlink" title="3、动态链接的实现"></a>3、动态链接的实现</h5><p>   3.1 地址无关代码<br>    由于在运行时，代码段是共享的，只能读不能写，所以需要将指令中那些需要修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变，而数据部分可以在每一个进程中拥有一个副本。</p>
+<p>   3.2 全局偏移表（Global Offset Table）<br>    当链接过程发生在运行期时，外部的符号调用只有在运行时装载模块后才能确定模块被装载的地址，以及模块内符号的确切地址。所以ELF提供了一个全局偏移表（GOT）来记录这些外部模块的符号引用。当模块被装载时，会更新此表的内容。</p>
+<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p>1.<a href="https://people.cs.pitt.edu/~xianeizhang/notes/Linking.html#symbol">Linking</a><br>2.<a href="https://stac47.github.io/c/relocation/elf/tutorial/2018/03/01/understanding-relocation-elf.html">understanding-relocation-elf</a><br>3.<a href="http://stffrdhrn.github.io/hardware/embedded/openrisc/2019/11/29/relocs.html">ELF Binaries and Relocation Entries</a><br>4.<a href="http://chuquan.me/2018/06/03/linking-static-linking-dynamic-linking/">static-linking-dynamic-linking</a><br>5.<a href="https://blog.csdn.net/ayu_ag/article/details/78655300">ELF函数重定位问题</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>C/C++</tag>
       </tags>
   </entry>
   <entry>
@@ -1786,6 +1786,121 @@
       </tags>
   </entry>
   <entry>
+    <title>Kotlin中的JVM注解</title>
+    <url>/kotlin-lang-jvm-annotation.html</url>
+    <content><![CDATA[<p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
+<h4 id="1、-JvmName"><a href="#1、-JvmName" class="headerlink" title="1、@JvmName"></a>1、@JvmName</h4><p>用于文件、函数、属性、getter和setter。</p>
+<h5 id="1-1-给文件添加-JvmName注解"><a href="#1-1-给文件添加-JvmName注解" class="headerlink" title="1.1 给文件添加@JvmName注解"></a>1.1 给文件添加@JvmName注解</h5><p>默认情况下，一个Kotlin文件中的<strong>function</strong>和<strong>properties</strong>会被编译成<em>filenameKt.class</em>，其中的<strong>class</strong>会被编译成classname.class:</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmname-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmname-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h5 id="1-2-给函数名添加-JvmName注解"><a href="#1-2-给函数名添加-JvmName注解" class="headerlink" title="1.2 给函数名添加@JvmName注解"></a>1.2 给函数名添加@JvmName注解</h5><center>
+    <img src="../images/kotlin-annotation-jvmname-3.jpeg" width="500"/>
+</center>
+
+<h5 id="1-3-给getter和setting添加-JvmName"><a href="#1-3-给getter和setting添加-JvmName" class="headerlink" title="1.3 给getter和setting添加@JvmName"></a>1.3 给getter和setting添加@JvmName</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@get:JvmName</span>(<span class="string">&quot;getContent&quot;</span>)</span><br><span class="line"><span class="meta">@set:JvmName</span>(<span class="string">&quot;setContent&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="2、-JvmDefault"><a href="#2、-JvmDefault" class="headerlink" title="2、@JvmDefault"></a>2、@JvmDefault</h4><p>和Java8一样，Kotlin的接口也支持默认方法实现。即使针对Java7及以下版本，他也能正常编译，因为Kotlin使用静态内部类实现默认方法。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmdefault-1.jpeg" width="500"/>
+</center>
+
+<p>当在Java中实现此接口时，需要复写对应的方法，否则将报错。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmdefault-2.jpeg" width="100%"/>
+</center>
+
+<p>如果我们希望它在Java8中不报错，可以使用@JvmDefault注解标识方法：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Document</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JvmDefault</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getType</span><span class="params">()</span></span> = <span class="string">&quot;document&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3、-JvmStatic"><a href="#3、-JvmStatic" class="headerlink" title="3、@JvmStatic"></a>3、@JvmStatic</h4><p>针对<code>object class</code> 或<code>companion object</code>使用此注解,可以避免Java访问时的INSTANCE调用</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h4 id="4、-JvmOverloads"><a href="#4、-JvmOverloads" class="headerlink" title="4、@JvmOverloads"></a>4、@JvmOverloads</h4><p>Kotlin的默认参数可以帮助我们减少函数重载，简化方法调用参数。在Java中调用含默认参数的Kotlin函数时，需要提供全部参数。</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmoverloads-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmoverloads-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h4 id="5、-Throws"><a href="#5、-Throws" class="headerlink" title="5、@Throws"></a>5、@Throws</h4><p>Kotlin没有受检测异常，try-catch是非必须的。如果希望在Java调用中检测到异常，可以使用@Throws注解</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmthrows.jpeg" width="100%"/>
+</center>
+
+<h4 id="6、-JvmWildcard-amp-JvmSuppressWildcard"><a href="#6、-JvmWildcard-amp-JvmSuppressWildcard" class="headerlink" title="6、@JvmWildcard &amp; @JvmSuppressWildcard"></a>6、@JvmWildcard &amp; @JvmSuppressWildcard</h4><p>略</p>
+<h4 id="7、-JvmMultifileClass"><a href="#7、-JvmMultifileClass" class="headerlink" title="7、@JvmMultifileClass"></a>7、@JvmMultifileClass</h4><p>当在多个文件中定义的顶层函数或属性想要合并到一个编译的class中时，可以使用此注解。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmmultifileclass.jpeg" width="500"/>
+</center>
+
+
+<h4 id="8、-JvmPackageName"><a href="#8、-JvmPackageName" class="headerlink" title="8、@JvmPackageName"></a>8、@JvmPackageName</h4><p>和@JvmName一样，此注解可以修改包名，但是他被标记为internal，只能在kotlin库内部使用，这里不做过多介绍。</p>
+<h4 id="9、注解一览"><a href="#9、注解一览" class="headerlink" title="9、注解一览"></a>9、注解一览</h4><center>
+    <img src="../images/kotlin-annotation-overview.png" width="100%"/>
+</center>
+
+<h4 id="参考"><a href="#参考" class="headerlink" title="[参考]"></a>[参考]</h4><p><a href="https://www.baeldung.com/kotlin/jvm-annotations">1.Guide to JVM Platform Annotations in Kotlin</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kotlin之JvmStatic和override冲突问题</title>
+    <url>/kotlin-lang-jvmstatic-with-interface.html</url>
+    <content><![CDATA[<h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
+</center>
+
+
+<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
+</code></pre>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
+<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
+</blockquote>
+<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Effective Kotlin-48：为参数包含函数的方法内联</title>
     <url>/kotlin-lang-inline-func-param.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>你可能注意到了几乎所有的Kotlin标准库里面的高阶函数都是inline类型的。</p>
@@ -1928,121 +2043,6 @@
       </categories>
       <tags>
         <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Kotlin中的JVM注解</title>
-    <url>/kotlin-lang-jvm-annotation.html</url>
-    <content><![CDATA[<p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
-<h4 id="1、-JvmName"><a href="#1、-JvmName" class="headerlink" title="1、@JvmName"></a>1、@JvmName</h4><p>用于文件、函数、属性、getter和setter。</p>
-<h5 id="1-1-给文件添加-JvmName注解"><a href="#1-1-给文件添加-JvmName注解" class="headerlink" title="1.1 给文件添加@JvmName注解"></a>1.1 给文件添加@JvmName注解</h5><p>默认情况下，一个Kotlin文件中的<strong>function</strong>和<strong>properties</strong>会被编译成<em>filenameKt.class</em>，其中的<strong>class</strong>会被编译成classname.class:</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmname-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmname-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h5 id="1-2-给函数名添加-JvmName注解"><a href="#1-2-给函数名添加-JvmName注解" class="headerlink" title="1.2 给函数名添加@JvmName注解"></a>1.2 给函数名添加@JvmName注解</h5><center>
-    <img src="../images/kotlin-annotation-jvmname-3.jpeg" width="500"/>
-</center>
-
-<h5 id="1-3-给getter和setting添加-JvmName"><a href="#1-3-给getter和setting添加-JvmName" class="headerlink" title="1.3 给getter和setting添加@JvmName"></a>1.3 给getter和setting添加@JvmName</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@get:JvmName</span>(<span class="string">&quot;getContent&quot;</span>)</span><br><span class="line"><span class="meta">@set:JvmName</span>(<span class="string">&quot;setContent&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="2、-JvmDefault"><a href="#2、-JvmDefault" class="headerlink" title="2、@JvmDefault"></a>2、@JvmDefault</h4><p>和Java8一样，Kotlin的接口也支持默认方法实现。即使针对Java7及以下版本，他也能正常编译，因为Kotlin使用静态内部类实现默认方法。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmdefault-1.jpeg" width="500"/>
-</center>
-
-<p>当在Java中实现此接口时，需要复写对应的方法，否则将报错。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmdefault-2.jpeg" width="100%"/>
-</center>
-
-<p>如果我们希望它在Java8中不报错，可以使用@JvmDefault注解标识方法：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Document</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JvmDefault</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getType</span><span class="params">()</span></span> = <span class="string">&quot;document&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="3、-JvmStatic"><a href="#3、-JvmStatic" class="headerlink" title="3、@JvmStatic"></a>3、@JvmStatic</h4><p>针对<code>object class</code> 或<code>companion object</code>使用此注解,可以避免Java访问时的INSTANCE调用</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h4 id="4、-JvmOverloads"><a href="#4、-JvmOverloads" class="headerlink" title="4、@JvmOverloads"></a>4、@JvmOverloads</h4><p>Kotlin的默认参数可以帮助我们减少函数重载，简化方法调用参数。在Java中调用含默认参数的Kotlin函数时，需要提供全部参数。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmoverloads-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmoverloads-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h4 id="5、-Throws"><a href="#5、-Throws" class="headerlink" title="5、@Throws"></a>5、@Throws</h4><p>Kotlin没有受检测异常，try-catch是非必须的。如果希望在Java调用中检测到异常，可以使用@Throws注解</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmthrows.jpeg" width="100%"/>
-</center>
-
-<h4 id="6、-JvmWildcard-amp-JvmSuppressWildcard"><a href="#6、-JvmWildcard-amp-JvmSuppressWildcard" class="headerlink" title="6、@JvmWildcard &amp; @JvmSuppressWildcard"></a>6、@JvmWildcard &amp; @JvmSuppressWildcard</h4><p>略</p>
-<h4 id="7、-JvmMultifileClass"><a href="#7、-JvmMultifileClass" class="headerlink" title="7、@JvmMultifileClass"></a>7、@JvmMultifileClass</h4><p>当在多个文件中定义的顶层函数或属性想要合并到一个编译的class中时，可以使用此注解。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmmultifileclass.jpeg" width="500"/>
-</center>
-
-
-<h4 id="8、-JvmPackageName"><a href="#8、-JvmPackageName" class="headerlink" title="8、@JvmPackageName"></a>8、@JvmPackageName</h4><p>和@JvmName一样，此注解可以修改包名，但是他被标记为internal，只能在kotlin库内部使用，这里不做过多介绍。</p>
-<h4 id="9、注解一览"><a href="#9、注解一览" class="headerlink" title="9、注解一览"></a>9、注解一览</h4><center>
-    <img src="../images/kotlin-annotation-overview.png" width="100%"/>
-</center>
-
-<h4 id="参考"><a href="#参考" class="headerlink" title="[参考]"></a>[参考]</h4><p><a href="https://www.baeldung.com/kotlin/jvm-annotations">1.Guide to JVM Platform Annotations in Kotlin</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Kotlin之JvmStatic和override冲突问题</title>
-    <url>/kotlin-lang-jvmstatic-with-interface.html</url>
-    <content><![CDATA[<h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
-</center>
-
-
-<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
-</code></pre>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
-<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
-</blockquote>
-<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
-<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Kotlin</tag>
-        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -2322,28 +2322,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Effective Kotlin-56：考虑使用可变集合</title>
-    <url>/kotlin-lang-use-mutable-collection.html</url>
-    <content><![CDATA[<p>与不可变集合相比，使用可变集合最大的优点是性能更快。向不可变集合添加元素需要新建集合再拷贝所有元素，下面是kotlin标准库现在的实现：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">plus</span><span class="params">(element: <span class="type">T</span>)</span></span>: List&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span> <span class="keyword">is</span> Collection) <span class="keyword">return</span> <span class="keyword">this</span>.plus(element)</span><br><span class="line">    <span class="keyword">val</span> result = ArrayList&lt;T&gt;()</span><br><span class="line">    result.addAll(<span class="keyword">this</span>)</span><br><span class="line">    result.add(element)</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当集合很大时，拷贝操作就比较耗性能了。所以对于需要添加元素的集合使用可变集合性能更好。我们知道，不可变集合是线程安全的。但是对于不需要同步的局部变量来说则不适用。这也是为什么对于局部处理，使用可变集合通常更有意义。这个事实可以在标准库中反映出来，在标准库中，所有的集合处理函数都是使用可变集合内部实现的:</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">map</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    transform: (<span class="type">T</span>) -&gt; <span class="type">R</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;R&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> size =</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span> <span class="keyword">is</span> Collection&lt;*&gt;) <span class="keyword">this</span>.size <span class="keyword">else</span> <span class="number">10</span></span><br><span class="line">    <span class="keyword">val</span> destination = ArrayList&lt;R&gt;(size)</span><br><span class="line">    <span class="keyword">for</span> (item <span class="keyword">in</span> <span class="keyword">this</span>)</span><br><span class="line">        destination.add(transform(item))</span><br><span class="line">    <span class="keyword">return</span> destination</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而不是不可变集合：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// This is not how map is implemented</span></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">map</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    transform: (<span class="type">T</span>) -&gt; <span class="type">R</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;R&gt; &#123;</span><br><span class="line">    <span class="keyword">var</span> destination = listOf&lt;R&gt;()</span><br><span class="line">    <span class="keyword">for</span> (item <span class="keyword">in</span> <span class="keyword">this</span>)</span><br><span class="line">        destination += transform(item)</span><br><span class="line">    <span class="keyword">return</span> destination</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<p>总结：<br>如果是增加元素，可变集合是很快的，而不可变集合则给我们给多的控制，知道集合是如何变化的。但对于本地作用域来讲，我们不需要这种控制，所以使用可变集合更好。尤其在一些工具类，插入操作可能很频繁。</p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>LeetCode 两数相加</title>
     <url>/leetcode-list-add.html</url>
     <content><![CDATA[<h3 id="Leetode-2-两数相加"><a href="#Leetode-2-两数相加" class="headerlink" title="Leetode-2 两数相加"></a>Leetode-2 两数相加</h3><blockquote>
@@ -2381,6 +2359,28 @@
         <tag>LeetCode</tag>
         <tag>算法</tag>
         <tag>链表</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Effective Kotlin-56：考虑使用可变集合</title>
+    <url>/kotlin-lang-use-mutable-collection.html</url>
+    <content><![CDATA[<p>与不可变集合相比，使用可变集合最大的优点是性能更快。向不可变集合添加元素需要新建集合再拷贝所有元素，下面是kotlin标准库现在的实现：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">plus</span><span class="params">(element: <span class="type">T</span>)</span></span>: List&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span> <span class="keyword">is</span> Collection) <span class="keyword">return</span> <span class="keyword">this</span>.plus(element)</span><br><span class="line">    <span class="keyword">val</span> result = ArrayList&lt;T&gt;()</span><br><span class="line">    result.addAll(<span class="keyword">this</span>)</span><br><span class="line">    result.add(element)</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当集合很大时，拷贝操作就比较耗性能了。所以对于需要添加元素的集合使用可变集合性能更好。我们知道，不可变集合是线程安全的。但是对于不需要同步的局部变量来说则不适用。这也是为什么对于局部处理，使用可变集合通常更有意义。这个事实可以在标准库中反映出来，在标准库中，所有的集合处理函数都是使用可变集合内部实现的:</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">map</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    transform: (<span class="type">T</span>) -&gt; <span class="type">R</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;R&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> size =</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span> <span class="keyword">is</span> Collection&lt;*&gt;) <span class="keyword">this</span>.size <span class="keyword">else</span> <span class="number">10</span></span><br><span class="line">    <span class="keyword">val</span> destination = ArrayList&lt;R&gt;(size)</span><br><span class="line">    <span class="keyword">for</span> (item <span class="keyword">in</span> <span class="keyword">this</span>)</span><br><span class="line">        destination.add(transform(item))</span><br><span class="line">    <span class="keyword">return</span> destination</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而不是不可变集合：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// This is not how map is implemented</span></span><br><span class="line"><span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> Iterable<span class="type">&lt;T&gt;</span>.<span class="title">map</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    transform: (<span class="type">T</span>) -&gt; <span class="type">R</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>: List&lt;R&gt; &#123;</span><br><span class="line">    <span class="keyword">var</span> destination = listOf&lt;R&gt;()</span><br><span class="line">    <span class="keyword">for</span> (item <span class="keyword">in</span> <span class="keyword">this</span>)</span><br><span class="line">        destination += transform(item)</span><br><span class="line">    <span class="keyword">return</span> destination</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>总结：<br>如果是增加元素，可变集合是很快的，而不可变集合则给我们给多的控制，知道集合是如何变化的。但对于本地作用域来讲，我们不需要这种控制，所以使用可变集合更好。尤其在一些工具类，插入操作可能很频繁。</p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Kotlin</tag>
       </tags>
   </entry>
   <entry>
@@ -2500,8 +2500,8 @@
         <category>计算机</category>
       </categories>
       <tags>
-        <tag>Kotlin</tag>
         <tag>Concurrency</tag>
+        <tag>Kotlin</tag>
       </tags>
   </entry>
   <entry>
@@ -2539,5 +2539,39 @@
       <tags>
         <tag>经济学</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>《思考，快与慢》 第7章 字母B与数字13</title>
+    <url>/%E3%80%8A%E6%80%9D%E8%80%83%EF%BC%8C%E5%BF%AB%E4%B8%8E%E6%85%A2%E3%80%8B-%E7%AC%AC7%E7%AB%A0-%E5%AD%97%E6%AF%8DB%E4%B8%8E%E6%95%B0%E5%AD%9713.html</url>
+    <content><![CDATA[<p>本章包含三节：</p>
+<ul>
+<li>是什么让你相信了那些荒谬之辞</li>
+<li>光环效应与群体智慧</li>
+<li>眼见为实的想法往往让我们仓促作出决定</li>
+</ul>
+<h4 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h4><center>
+    <img src="../images/b_and_13.jpg" width="50%"/>
+</center>
+
+<blockquote>
+<p>“同样的形状在字母的环境下就容易被看做是字母，在数字的环境下就容易被看做是数字”</p>
+</blockquote>
+<blockquote>
+<p>“你过早地对它的“身份”下了结论，并且根本意识不到你已经赋予了某种歧义以解释。”</p>
+</blockquote>
+<blockquote>
+<p>“你作了一个确切的选择，但自己却没有意识到自己这样做了”</p>
+</blockquote>
+<h4 id="是什么让你相信了那些荒谬之辞"><a href="#是什么让你相信了那些荒谬之辞" class="headerlink" title="是什么让你相信了那些荒谬之辞"></a>是什么让你相信了那些荒谬之辞</h4><blockquote>
+<p>联想记忆的运作是导致“确认偏误”的原因之一</p>
+</blockquote>
+<p>“你试试他给出的例子：“白鱼吃糖果。”<br>你有可能意识到一个关于鱼和糖果的模糊印象，这个印象的产生过程，就是联想记忆自动搜索“鱼”和“糖果”这两个概念之间各种联系的过程，这一过程会使这种很荒唐的说法看起来竟有些道理了。</p>
+<h4 id="光环效应与群体智慧"><a href="#光环效应与群体智慧" class="headerlink" title="光环效应与群体智慧"></a>光环效应与群体智慧</h4><p>“如果你赞同一个总统的政见，你可能也会喜爱他的声音及着装。喜爱（或讨厌）某个人就会喜爱（或讨厌）这个人的全部—包括你还没有观察到的方面—这种倾向就叫做光环效应”</p>
+<p>Alan：聪明—勤奋—冲动—爱挑剔—固执—忌妒心强<br>Ben：忌妒心强—固执—爱挑剔—冲动—勤奋—聪明</p>
+<p>“光环效应注重第一印象，而后续信息在很大程度上都被消解掉了”</p>
+<h4 id="眼见为实的想法往往让我们仓促作出决定"><a href="#眼见为实的想法往往让我们仓促作出决定" class="headerlink" title="眼见为实的想法往往让我们仓促作出决定"></a>眼见为实的想法往往让我们仓促作出决定</h4><p>“所有受试者都充分了解了整个过程，那些只听到其中一方辩词的受试者能够很轻松地为另一方写出辩词。然而，片面的证据陈述对判断有着重大影响。<br>另外，只掌握一方证据的受试者比掌握了双方证据的受试者更有自信。”</p>
+<p>“这正说明人们根据已有信息“勾勒出的故事的连贯性增强了他们的自信心。一个好故事最重要的是信息的前后一致性，而不是其完整性。<br>的确，你常会发现：知道得很少反而可以把已知的所有事物都囊括进连贯的思维模式中。</p>
+<p>“眼见即为事实的理念有助于达成连贯性和认知放松的状态，从而使我们相信某个陈述是真实的。这一理念解释了我们能够快速思考的原因，解释了我们是如何弄清楚一个复杂领域中那些信息片段的含义的。很多时候，我们拼凑出的连贯情节与事实是无限接近的，完全可以用来支持理性活动”</p>
+]]></content>
   </entry>
 </search>
