@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2022-06-06T05:56:35.654Z</updated>
+  <updated>2022-10-09T09:28:42.713Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -17,11 +17,87 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>开发者七条</title>
+    <link href="https://wangduwei.top/ep-good-developer-manifesto.html"/>
+    <id>https://wangduwei.top/ep-good-developer-manifesto.html</id>
+    <published>2022-10-09T09:20:32.000Z</published>
+    <updated>2022-10-09T09:28:42.713Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;软件开发不只是API调用和基础语法，以下是应用开发的全貌：&lt;/p&gt;
+&lt;h4 id=&quot;一、相信数据&quot;&gt;&lt;a href=&quot;#一、相信数据&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="软件哲学" scheme="https://wangduwei.top/tags/%E8%BD%AF%E4%BB%B6%E5%93%B2%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Android消息机制</title>
+    <link href="https://wangduwei.top/android-aosp-event-loop.html"/>
+    <id>https://wangduwei.top/android-aosp-event-loop.html</id>
+    <published>2022-06-20T07:34:15.000Z</published>
+    <updated>2022-07-04T06:39:06.053Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;h4 id=&quot;一、相关类和结构&quot;&gt;&lt;a href=&quot;#一、相关类和结构&quot; class=&quot;headerlink&quot; title=&quot;一、相关类和结构&quot;&gt;&lt;/a&gt;一、相关类和结构&lt;/h4&gt;&lt;center&gt;
+    &lt;img</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>投资回报率</title>
+    <link href="https://wangduwei.top/econonmics-roa-roe-roic-roce.html"/>
+    <id>https://wangduwei.top/econonmics-roa-roe-roic-roce.html</id>
+    <published>2022-06-13T09:04:39.000Z</published>
+    <updated>2022-07-04T06:55:08.482Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="经济学" scheme="https://wangduwei.top/categories/%E7%BB%8F%E6%B5%8E%E5%AD%A6/"/>
+    
+    
+    <category term="经济学" scheme="https://wangduwei.top/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Kotlin Flow的工作原理</title>
     <link href="https://wangduwei.top/kotlin-lang-flow-under-the-hood.html"/>
     <id>https://wangduwei.top/kotlin-lang-flow-under-the-hood.html</id>
     <published>2022-05-25T03:08:23.000Z</published>
-    <updated>2022-06-06T05:56:35.654Z</updated>
+    <updated>2022-06-06T05:59:22.950Z</updated>
     
     
       
@@ -48,7 +124,7 @@
     <link href="https://wangduwei.top/android-jetpack-compose-state-management.html"/>
     <id>https://wangduwei.top/android-jetpack-compose-state-management.html</id>
     <published>2022-05-18T06:34:49.000Z</published>
-    <updated>2022-06-06T05:56:35.608Z</updated>
+    <updated>2022-06-06T05:59:22.946Z</updated>
     
     
       
@@ -78,7 +154,7 @@
     <link href="https://wangduwei.top/android-jetpack-compose-sideeffect.html"/>
     <id>https://wangduwei.top/android-jetpack-compose-sideeffect.html</id>
     <published>2022-05-17T08:11:13.000Z</published>
-    <updated>2022-06-06T05:56:35.601Z</updated>
+    <updated>2022-06-06T05:59:22.945Z</updated>
     
     
       
@@ -105,7 +181,7 @@
     <link href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html"/>
     <id>https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html</id>
     <published>2022-05-09T08:35:18.000Z</published>
-    <updated>2022-06-06T05:56:35.490Z</updated>
+    <updated>2022-06-06T05:59:22.951Z</updated>
     
     
       
@@ -132,7 +208,7 @@
     <link href="https://wangduwei.top/kotlin-lang-jvm-annotation.html"/>
     <id>https://wangduwei.top/kotlin-lang-jvm-annotation.html</id>
     <published>2022-05-01T07:29:44.000Z</published>
-    <updated>2022-06-06T05:56:35.496Z</updated>
+    <updated>2022-06-06T05:59:22.951Z</updated>
     
     
       
@@ -158,7 +234,7 @@
     <link href="https://wangduwei.top/android-github-source-workmanager.html"/>
     <id>https://wangduwei.top/android-github-source-workmanager.html</id>
     <published>2022-04-17T05:51:57.000Z</published>
-    <updated>2022-06-06T05:56:35.638Z</updated>
+    <updated>2022-06-06T05:59:22.945Z</updated>
     
     
       
@@ -183,7 +259,7 @@
     <link href="https://wangduwei.top/android-library-room-7-tips.html"/>
     <id>https://wangduwei.top/android-library-room-7-tips.html</id>
     <published>2022-01-30T14:01:39.000Z</published>
-    <updated>2022-06-06T05:56:35.643Z</updated>
+    <updated>2022-06-13T06:11:42.740Z</updated>
     
     
       
@@ -201,6 +277,8 @@
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
+    <category term="数据库" scheme="https://wangduwei.top/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
   </entry>
   
   <entry>
@@ -208,7 +286,7 @@
     <link href="https://wangduwei.top/android-github-source-retrofit.html"/>
     <id>https://wangduwei.top/android-github-source-retrofit.html</id>
     <published>2021-12-30T13:37:29.000Z</published>
-    <updated>2022-06-06T05:56:35.474Z</updated>
+    <updated>2022-06-13T06:11:42.753Z</updated>
     
     
       
@@ -226,6 +304,8 @@
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
+    <category term="安卓框架" scheme="https://wangduwei.top/tags/%E5%AE%89%E5%8D%93%E6%A1%86%E6%9E%B6/"/>
+    
   </entry>
   
   <entry>
@@ -233,7 +313,7 @@
     <link href="https://wangduwei.top/android-github-source-spacex.html"/>
     <id>https://wangduwei.top/android-github-source-spacex.html</id>
     <published>2021-12-26T04:10:14.000Z</published>
-    <updated>2022-06-06T05:56:35.561Z</updated>
+    <updated>2022-06-13T06:11:42.724Z</updated>
     
     
       
@@ -251,7 +331,7 @@
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
-    <category term="Arch" scheme="https://wangduwei.top/tags/Arch/"/>
+    <category term="架构" scheme="https://wangduwei.top/tags/%E6%9E%B6%E6%9E%84/"/>
     
   </entry>
   
@@ -260,7 +340,7 @@
     <link href="https://wangduwei.top/model-csp-deadlocks.html"/>
     <id>https://wangduwei.top/model-csp-deadlocks.html</id>
     <published>2021-12-04T03:54:49.000Z</published>
-    <updated>2022-06-06T05:56:35.631Z</updated>
+    <updated>2022-06-06T05:59:22.954Z</updated>
     
     
       
@@ -287,7 +367,7 @@
     <link href="https://wangduwei.top/kotlin-lang-use-dsl.html"/>
     <id>https://wangduwei.top/kotlin-lang-use-dsl.html</id>
     <published>2021-11-23T12:19:39.000Z</published>
-    <updated>2022-06-06T05:56:35.502Z</updated>
+    <updated>2022-06-06T05:59:22.952Z</updated>
     
     
       
@@ -312,7 +392,7 @@
     <link href="https://wangduwei.top/kotlin-lang-use-mutable-collection.html"/>
     <id>https://wangduwei.top/kotlin-lang-use-mutable-collection.html</id>
     <published>2021-11-20T00:47:24.000Z</published>
-    <updated>2022-06-06T05:56:35.695Z</updated>
+    <updated>2022-06-06T05:59:22.953Z</updated>
     
     
       
@@ -338,7 +418,7 @@
     <link href="https://wangduwei.top/kotlin-lang-inline-func-param.html"/>
     <id>https://wangduwei.top/kotlin-lang-inline-func-param.html</id>
     <published>2021-11-09T13:57:29.000Z</published>
-    <updated>2022-06-06T05:56:35.684Z</updated>
+    <updated>2022-06-06T05:59:22.951Z</updated>
     
     
       
@@ -364,7 +444,7 @@
     <link href="https://wangduwei.top/kotlin-lang-sequence.html"/>
     <id>https://wangduwei.top/kotlin-lang-sequence.html</id>
     <published>2021-11-06T13:37:43.000Z</published>
-    <updated>2022-06-06T05:56:35.730Z</updated>
+    <updated>2022-06-06T05:59:22.952Z</updated>
     
     
       
@@ -389,7 +469,7 @@
     <link href="https://wangduwei.top/kotlin-coroutine-deep-recursion.html"/>
     <id>https://wangduwei.top/kotlin-coroutine-deep-recursion.html</id>
     <published>2021-10-30T02:38:30.000Z</published>
-    <updated>2022-06-06T05:56:35.521Z</updated>
+    <updated>2022-06-06T05:59:22.950Z</updated>
     
     
       
@@ -415,7 +495,7 @@
     <link href="https://wangduwei.top/android-basic-constraintlayout.html"/>
     <id>https://wangduwei.top/android-basic-constraintlayout.html</id>
     <published>2021-10-23T07:03:23.000Z</published>
-    <updated>2022-06-06T05:56:35.510Z</updated>
+    <updated>2022-06-13T06:11:42.746Z</updated>
     
     
       
@@ -433,6 +513,8 @@
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
+    <category term="View" scheme="https://wangduwei.top/tags/View/"/>
+    
   </entry>
   
   <entry>
@@ -440,7 +522,7 @@
     <link href="https://wangduwei.top/cpu-cache-overview.html"/>
     <id>https://wangduwei.top/cpu-cache-overview.html</id>
     <published>2021-10-13T07:28:59.000Z</published>
-    <updated>2022-06-06T05:56:35.482Z</updated>
+    <updated>2022-06-06T05:59:22.948Z</updated>
     
     
       
@@ -457,86 +539,6 @@
     
     
     <category term="计算机基础" scheme="https://wangduwei.top/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>对象的内存布局</title>
-    <link href="https://wangduwei.top/java-object-layout.html"/>
-    <id>https://wangduwei.top/java-object-layout.html</id>
-    <published>2021-10-03T07:59:09.000Z</published>
-    <updated>2022-06-06T05:56:35.575Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot; title=&quot;一、概述&quot;&gt;&lt;/a&gt;一、概述&lt;/h4&gt;&lt;p&gt;很多时候我们都有一个疑问：一个对象在内存中占用多大的空间呢？&lt;/p&gt;
-&lt;figure class=&quot;highlight</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
-    
-    <category term="JVM" scheme="https://wangduwei.top/tags/JVM/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Java synchronized</title>
-    <link href="https://wangduwei.top/java-multithreading-synchronized.html"/>
-    <id>https://wangduwei.top/java-multithreading-synchronized.html</id>
-    <published>2021-09-26T14:29:34.000Z</published>
-    <updated>2022-06-06T05:56:35.625Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
-    
-    <category term="Concurrency" scheme="https://wangduwei.top/tags/Concurrency/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Kotlin Flow 基础</title>
-    <link href="https://wangduwei.top/kotlin-lang-flow.html"/>
-    <id>https://wangduwei.top/kotlin-lang-flow.html</id>
-    <published>2021-09-25T07:27:31.000Z</published>
-    <updated>2022-06-06T05:56:35.723Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、什么是Flow&quot;&gt;&lt;a href=&quot;#一、什么是Flow&quot; class=&quot;headerlink&quot; title=&quot;一、什么是Flow&quot;&gt;&lt;/a&gt;一、什么是Flow&lt;/h4&gt;&lt;h5 id=&quot;1、如何通过同步和异步方式返回多个值？&quot;&gt;&lt;a</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
     
   </entry>
   
