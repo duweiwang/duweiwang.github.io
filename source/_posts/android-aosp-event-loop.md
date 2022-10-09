@@ -8,13 +8,13 @@ categories:
 description:
 ------
 
-#### 相关类和结构
+#### 一、相关类和结构
 <center>
     <img src="../images/android-basic-eventloop.png" width="100%"/>
 </center>
 
-#### 基本使用
-##### 主线程的事件循环
+#### 二、基本使用
+##### 2.1 主线程的事件循环
 ```java
 package android.app;
 
@@ -31,7 +31,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
 ```
 
-##### 构建自己的事件循环
+##### 2.2 构建自己的事件循环
 ```java
 class LooperThread extends Thread {
       public Handler mHandler;
@@ -50,29 +50,29 @@ class LooperThread extends Thread {
 }
 ```
 
-#### 原理剖析
+#### 三、原理剖析
 
-##### 构建事件循环
+##### 3.1 构建事件循环
 
 <center>
     <img src="../images/android-basic-eventloop-start.png" width="70%"/>
 </center>
 
 
-##### 发送消息
+##### 3.2 发送消息
 
 <center>
     <img src="../images/android-basic-eventloop-send.png" width="70%"/>
 </center>
 
 
-##### 消息执行
+##### 3.3 消息执行
 
 <center>
     <img src="../images/android-basic-eventloop-callback.png" width="50%"/>
 </center>
 
-##### 同步屏障
+##### 3.4 同步屏障
 
 ###### 3.4.1 消息的分类
 + 同步消息
@@ -160,10 +160,8 @@ void scheduleTraversals() {
 ```
 
 
-#### 常见问题
+#### 四、其他
 
-Epoll 实现原理
-https://www.jxhs.me/2021/04/08/linux%E5%86%85%E6%A0%B8Epoll-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/
+[Epoll 实现原理](https://www.jxhs.me/2021/04/08/linux%E5%86%85%E6%A0%B8Epoll-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/)
 
-【原创】Linux select/poll机制原理分析
-https://www.cnblogs.com/LoyenWang/p/12622904.html
+[Linux select/poll机制原理分析](https://www.cnblogs.com/LoyenWang/p/12622904.html)
