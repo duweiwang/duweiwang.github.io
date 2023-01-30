@@ -1,9 +1,8 @@
 ---
-title: Android的小部件
+title: Android之桌面小部件
 tags:
 - Android
 ---------
-
 
 ####  一、概览：
 1.1 小部件的分类

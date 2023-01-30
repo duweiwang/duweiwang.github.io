@@ -1,17 +1,25 @@
 ---
-title: Java线程池
+title: Java多线程之线程池
 tags: Java
 ----------
 
-
-一、线程池的目的
-
+#### 一、线程池的目的
 大量短生命周期的任务的执行，创建和销毁线程的成本高于任务的执行成本。通过缓存一定数量的线程，避免创建线程带来的开销。
 
+#### 二、线程池的Java实现
 
-二、线程池的Java实现
+##### 2.0 一些配置参数
 
-2.1 一些基础
++ corePoolSize：核心线程数：即使空闲了也不会销毁
++ maximumPoolSize：最大线程数：
++ keepAliveTime：存活时长：超过核心线程数的线程空闲后多久被销毁
++ unit：时长单位：
++ workQueue：缓存任务的队列：
++ threadFactory：创建线程的工程：
++ handler：队列或线程容量超标时的拒绝策略：
+
+##### 2.1 一些基础
+
 通过Int类型的不同位保存任务的状态和数量
 ```java
     private final AtomicInteger ctl = new AtomicInteger(ctlOf(RUNNING, 0));
@@ -31,7 +39,7 @@ tags: Java
     private static int ctlOf(int rs, int wc) { return rs | wc; }
 ```
 
-2.2 提交任务流程
+##### 2.2 提交任务流程
 
 > ExecutorService#submit -> Executor#execute -> ThreadPoolExecutor#execute
 
@@ -78,7 +86,7 @@ tags: Java
 
 ```
 
-2.3 执行任务流程
+##### 2.3 执行任务流程
 
 ```java
     private final BlockingQueue<Runnable> workQueue;
@@ -124,12 +132,14 @@ tags: Java
 
 ```
 
-
-二、思考
+#### 二、思考
 + 如何缓存线程
 
+```java
+private final HashSet<Worker> workers = new HashSet<>();
+```
 
-
+线程被包装进`Worker`对象当中，缓存在Set集合中
 
 
 + 

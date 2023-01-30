@@ -1,5 +1,5 @@
 ---
-title: 并发编程设计模式
+title: Java之并发编程设计模式
 tags: Java
 ----------
 

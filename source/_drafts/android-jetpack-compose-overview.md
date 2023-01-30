@@ -70,3 +70,32 @@ tags: Android
 #####  九、语义
 
 
+
+参考资料
+
+Jetpack-Compose资料
+
+1、[展示jetpack compose中使用mvvm mvi redux等框架](https://github.com/feiyin0719/compose_architecture)
+
+2、[jetpack compose 开发架构选择探讨（一）](https://juejin.cn/post/6994398933334097934)
+[jetpack compose 开发架构选择探讨（二）]()
+[jetpack compose 开发架构选择探讨（三）]()
+
+3、[Under the hood of Jetpack Compose — part 2 of 2](https://medium.com/androiddevelopers/under-the-hood-of-jetpack-compose-part-2-of-2-37b2c20c6cdd)
+
+Inside Jetpack Compose：
+https://medium.com/@takahirom/inside-jetpack-compose-2e971675e55e
+Jetpack Compose · snapshot system：
+https://programmer.ink/think/jetpack-compose-snapshot-system.html
+
+https://jorgecastillo.dev/book/
+
+一文看懂 Jetpack Compose 快照系统
+https://juejin.cn/post/7095544677515919367#heading-17
+
+
+flutter：
+https://book.flutterchina.club/chapter4/layoutbuilder.html#_4-8-3-flutter-%E7%9A%84-build-%E5%92%8C-layout
+
+
+

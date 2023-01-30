@@ -69,8 +69,18 @@ tags: Android
 
 [源码链接](https://cs.android.com/search?q=ANRHelper&sq=&ss=android%2Fplatform%2Fsuperproject)
 
+
+#### 捕获ANR
+
++ Play Console Android vitals
++ Firebase and AppExitInfo
++ ANR-WatchDog
++ block-canary
++ 
+
 #### ANR的分析方法
 
 
 
 [1.ANR官方文档](https://developer.android.com/topic/performance/vitals/anr)
+[](https://medium.com/okcredit/how-we-reduced-our-anr-by-three-times-d9ae0b41ad94)

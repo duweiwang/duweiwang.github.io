@@ -1,5 +1,5 @@
 ---
-title: java-collection-hashmap
+title: Java集合之HashMap
 tags:
 - Java
 ---
