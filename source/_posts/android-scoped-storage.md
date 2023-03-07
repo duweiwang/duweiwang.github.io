@@ -105,7 +105,7 @@ private suspend fun performDeleteImage(image: MediaStoreModel) {
 
 
 2.2 对文档的增删改查：
-对外部文档的读写操作需要使用Storage Access FrameWork，通过各种Intent交由系统处理。更多实例见[参考资料2]
+对外部文档的读写操作需要使用Storage Access FrameWork，通过各种Intent交由系统处理。更多实例见[参考资料2](https://ppting.me/2020/04/19/2020_04_19_about_Storage_Access_Framework/)
 
 SAF存储的限制：
 + Intent.ACTION_OPEN_DOCUMENT_TREE访问限制
@@ -147,7 +147,7 @@ val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
 
 ```kotlin
 
-val uriList = /* A collection of content URIs to modify. */
+val uriList = [] //A collection of content URIs to modify. 
 val pendingIntent = MediaStore.createWriteRequest(contentResolver,urisToModify)
 
 // Launch a system prompt requesting user permission for the operation.
