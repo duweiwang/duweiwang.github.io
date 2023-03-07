@@ -1,0 +1,74 @@
+@startjson
+{
+   "widget":{
+      "c_time":"2022-01-01",
+      "m_time":"2022-02-02",
+      "author":"apple-id-001",
+      "info":"ios16_1.0_v1",
+
+      "view":{
+         "size":"4*4",
+         "child":[
+            {
+               "id":"middle-weather-01",
+               "size":"2*4",
+               "position":"0,0",
+               "attr":[
+                  {
+                     "name":"bg",
+                     "type":"1",
+                     "value":"color or res"
+                  },
+                  {
+                     "name":"border",
+                     "type":"1",
+                     "value":"color or image"
+                  },
+                  {
+                     "name":"temp_unit",
+                     "value":"F"
+                  },
+                  {
+                     "name":"location",
+                     "value":"120,112"
+                  },
+                  {
+                     "name":"font",
+                     "value":"font-1"
+                  }
+               ]
+            },
+            {
+               "id":"middle-clock-01",
+               "size":"2*4",
+               "position":"2,0",
+               "attr":[
+                  {
+                     "name":"bg",
+                     "type":"1",
+                     "value":"color or res"
+                  },
+                  {
+                     "name":"border",
+                     "type":"1",
+                     "value":"color or image"
+                  }
+               ]
+            }
+         ],
+         "attr":[
+            {
+               "name":"bg",
+               "type":"1 = color, 2 = res",
+               "value":"color or res"
+            },
+            {
+               "name":"border",
+               "type":"1 = color, 2 = image",
+               "value":"color or image"
+            }
+         ]
+      }
+   }
+}
+@endjson

@@ -1,0 +1,79 @@
+@startjson
+{
+    "widget":{
+
+        "c_time":"2022-01-01",
+        "m_time":"2022-02-02",
+        "author":"apple-id-001",
+
+        "view":{
+            "size":"4*4",
+            "child":[
+                {
+                    "id":"middle-weather-01",
+                    "position":"0,0"
+                },{
+                    "id":"middle-clock-01",
+                    "position":"2,0",
+                     "attr":"attr-id-02"
+                }
+            ],
+            "attr":"attr-id-00",
+            "data":"data-all-01"
+        },
+                
+        "child":[
+            {
+                "id":"middle-weather-01",
+                "size":"2*4",
+                "data":"data-middle-weather-01",
+                "attr":"attr-id-01"
+            
+            },{
+                "id":"middle-clock-01",
+                "size":"2*4",
+                "data":"data-middle-clock-01"
+            }
+        ],
+
+        "data":[
+            {
+                "id":"data-all-01",
+                "bg":"http://www.baidu.com/1.jpeg",
+                "border":{
+
+                }
+            },
+            {
+                "id":"data-middle-weather-01"
+                
+            },{
+                "id":"data-middle-clock-01"
+            }
+
+        ],
+        "attrs":[
+            {
+                "id":"attr-id-00",
+                "widget":[
+                    "bg",
+                    "border"
+                ]
+            },
+            {
+              "id":"attr-id-01",
+              "weather":[
+                "unit",
+                "value"
+              ]
+            },{
+              "id":"attr-id-02",
+               "clock":[
+
+
+               ]
+            }
+        ]
+    }
+}
+@endjson

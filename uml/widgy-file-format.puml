@@ -1,0 +1,82 @@
+@startjson
+{
+  "id": 123,
+  "version": 1,
+  "app_version": 1,
+  "widget": [
+    {
+      "size": "2*2",
+      "child": {
+        "id（小-1）": {
+          "position": "0-0",
+          "attributes": "0x111"
+        }
+      }
+    },
+    {
+      "size": "4*4",
+      "child": [
+        {
+          "id（小-1）": {
+            "position": "0-0"
+          },
+          "id（小-2）": {
+            "position": "0-1"
+          },
+          "id（小-3）": {
+            "position": "1-0"
+          },
+          "id（小-4）": {
+            "position": "1-1"
+          }
+        },
+        {
+          "id（中-1）": {},
+          "id（中-2）": {}
+        },
+        {
+          "id（小-1）": {
+            "position": "0-0"
+          },
+          "id（小-2）": {
+            "position": "0-1"
+          },
+          "id（中-1）": {}
+        }
+      ]
+    },
+    {
+      "size": "2*4",
+      "child": [
+        {
+          "id（小-a）": {
+            "position": "0-0"
+          },
+          "id（小-b）": {
+            "position": "0-1"
+          }
+        },
+        {
+          "id（中-1）": {}
+        }
+      ]
+    }
+  ],
+  "data": {
+    "id（小-1）": {},
+    "id（小-2）": {},
+    "id（小-3）": {},
+    "id（小-4）": {}
+  },
+  "attributes": {
+    "0x111": {
+      "bg": {
+        "type": "",
+        "value": ""
+      },
+      "border": {
+      }
+    }
+  }
+}
+@endjson

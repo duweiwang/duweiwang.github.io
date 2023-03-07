@@ -1,0 +1,132 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+package component{
+    abstract class AbsComponent{
+        - frame: Frame
+        - color: Color
+        - background: Background
+        - effects: Effects
+        - data: Data
+    }
+
+    class Text{
+        -text: AbsTextDecor
+    }
+    class CurvedText{
+        -text: AbsTextDecor
+    }
+    class Symbol{
+        -symbol: SymbolDecor
+    }
+}
+
+
+package decor{
+
+    class FrameDecor{
+        Angle
+        Position
+        Size
+    }
+
+
+    class ColorDecor{
+        Alpha
+        Color
+    }
+
+    class BackgroundDecor{
+        Alpha
+        Color
+    }
+
+    class EffectsDecor{
+        Object Alpha：对象透明度
+        Edges Rounding：边缘圆角
+        Blend Mode：混合模式
+        Mirror Mode：镜像模式
+        Blink：闪烁
+        Stretching：
+        Clip To Frame
+        Outline：外框
+        Shadow：阴影
+        Blur：模糊
+        Width inset
+        Height Inset
+
+    }
+
+    class DataDecor{
+
+    }
+
+    class AbsTextDecor{
+        Font：字体样式
+        unicode remapping
+        Text Case：大小写样式
+        Horizontal Alignment
+        Show Unit
+        Group Separator
+        Decimals
+    }
+
+    class TextDecor{
+        Line Mode
+        Vertical Alignment：垂直对齐
+        Kerning：字距
+        Strikethrough：删除线
+        Underline：下划线
+    }
+
+    class CurvedTextDecor{
+        font scale：字体缩放
+        font spacing：字间距
+        Flip Text：文字翻转
+        Shape：形状
+        Shape Phase：
+        Start Angle：起始角度
+        Angle Range：角度范围
+        Clockwise：顺时针
+    }
+
+    class SymbolDecor{
+        Apple SF Symbols
+        Smart Symbols
+        Unicode Symbols
+        Material Icons Regular
+        Font Awesome Regular
+        Font Awesome Solid
+        Captain Icon
+        Ionicons
+        Typicons
+    }
+
+}
+
+
+AbsComponent *-- FrameDecor
+AbsComponent *-- ColorDecor
+AbsComponent *-- BackgroundDecor:包含
+AbsComponent *-- EffectsDecor
+
+
+
+AbsComponent <|-- Text
+AbsComponent <|-- CurvedText
+AbsComponent <|-- Symbol
+
+Text *-- AbsTextDecor
+CurvedText *-- AbsTextDecor
+Text *-- DataDecor
+CurvedText *-- DataDecor
+
+Symbol *-- SymbolDecor
+
+
+AbsTextDecor <|-- TextDecor
+AbsTextDecor <|-- CurvedTextDecor
+
+
+@enduml

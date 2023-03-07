@@ -1,0 +1,17 @@
+@startuml
+
+class Widget{
+    -attrs : List<Attr>
+
+    -child : List<Widget>?
+
+}
+
+class Attr
+
+Widget "1"*--"many" Attr
+
+Widget "1"*--"many" Widget
+
+
+@enduml

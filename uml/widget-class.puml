@@ -1,0 +1,48 @@
+@startuml
+
+class Attr{
+    - bg:Background
+    - border:Border
+}
+
+class WeatherAttr
+class ClockAttr
+class PhotoAttr
+
+Attr <|-- WeatherAttr
+Attr <|-- ClockAttr
+Attr <|-- PhotoAttr
+
+class Root{
+    -child : List<Widget>
+}
+
+class Widget{
+    -size : Size
+    -position : Position
+}
+
+class Size{
+    width : Int
+    height : Int
+}
+
+class Position{
+    x : Int
+    y : Int
+}
+
+class WeatherWidget
+
+class ClockWidget
+class PhotoWidget
+
+Widget <|-- WeatherWidget
+Widget <|-- ClockWidget
+Widget <|-- PhotoWidget
+
+Root "1" *-- "many" Widget :contains
+
+Widget *-- Attr
+
+@enduml

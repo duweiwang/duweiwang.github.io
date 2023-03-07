@@ -1,0 +1,112 @@
+@startjson
+{
+   "widget":{
+      "c_time":"2022-01-01",
+      "m_time":"2022-02-02",
+      "author":"apple-id-001",
+      "info":"ios16_1.0_v1",
+
+      "attr":{
+            "widget-44":[
+               {
+                "name":"bg",
+                "id":"bg-1"
+               },
+               {
+                "name":"border",
+                "id":"border-1"
+               }
+            ],
+            "middle-weather-01":[
+               {
+                  "name":"bg",
+                  "id":"bg-2"
+               },
+               {
+                  "name":"border",
+                   "id":"border-2"
+               },
+               {
+                  "name":"temp_unit",
+                   "id":"t_u-2"
+               },
+               {
+                  "name":"location",
+                  "id":"l-1"
+               },
+               {
+                  "name":"font",
+                  "id":"f-1"
+               }
+            ],
+            "middle-clock-01":[
+               {
+                  "name":"bg",
+                  "type":"1",
+                  "value":"color or res"
+               },
+               {
+                  "name":"border",
+                  "type":"1",
+                  "value":"color or image"
+               }
+            ]
+
+      },
+      "view":{
+         "size":"4*4",
+         "id":"widget-44",
+         "child":[
+            {
+               "id":"middle-weather-01",
+               "size":"2*4",
+               "position":"0,0"
+            },
+            {
+               "id":"middle-clock-01",
+               "size":"2*4",
+               "position":"2,0"
+            }
+         ]
+      },
+      "data":{
+            "widget-44":[
+                {
+                     "id":"bg-1",
+                     "type":"1 = color, 2 = res",
+                     "value":"color or res"
+                },{
+                    "id":"border-1",
+                    "type":"1 = color, 2 = image",
+                    "value":"color or image"
+                }
+            ],
+            "middle-weather-01":[
+                {
+                 "id":"bg-2",
+                 "type":"1",
+                  "value":"color or res"
+                },{
+                  "id":"border-2",
+                  "type":"1",
+                  "value":"color or image"
+                },{
+                 "id":"t_u-2",
+                 "value":"F"
+                },{
+                  "id":"l-1",
+                  "value":"100,102"
+                },{
+                  "id":"f-1",
+                  "value":"font-1"
+                }
+            ],
+           "middle-clock-01":[
+
+
+
+           ]
+      }
+   }
+}
+@endjson

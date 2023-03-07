@@ -12,6 +12,8 @@ abstract class AbstractOwnableSynchronizer{}
 abstract class AbstractQueuedSynchronizer{}
 class Worker{}
 
+class Thread{}
+
 
 Runnable <|.. Worker
 AbstractQueuedSynchronizer <|-- Worker
@@ -19,9 +21,10 @@ AbstractOwnableSynchronizer <|-- AbstractQueuedSynchronizer
 ThreadPoolExecutor *-- Worker
 
 
-
 Executor <|-- ExecutorService
 ExecutorService <|.. AbstractExecutorService
 AbstractExecutorService <|-- ThreadPoolExecutor
 
+
+Worker *--Thread
 @enduml
