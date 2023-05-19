@@ -3,8 +3,11 @@
 
 interface Executor{}
 interface ExecutorService{}
+interface ScheduledExecutorService{}
 abstract class AbstractExecutorService{}
 class ThreadPoolExecutor{}
+class ScheduledThreadPoolExecutor{}
+class ForkJoinPool{}
 
 
 interface Runnable{}
@@ -19,11 +22,15 @@ Runnable <|.. Worker
 AbstractQueuedSynchronizer <|-- Worker
 AbstractOwnableSynchronizer <|-- AbstractQueuedSynchronizer
 ThreadPoolExecutor *-- Worker
+ThreadPoolExecutor <|-- ScheduledThreadPoolExecutor
+ScheduledExecutorService <|.. ScheduledThreadPoolExecutor
+ExecutorService <|-- ScheduledExecutorService
 
 
 Executor <|-- ExecutorService
 ExecutorService <|.. AbstractExecutorService
 AbstractExecutorService <|-- ThreadPoolExecutor
+AbstractExecutorService <|-- ForkJoinPool
 
 
 Worker *--Thread

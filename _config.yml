@@ -103,7 +103,7 @@ theme: next
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repo: git@github.com:duweiwang/duweiwang.github.io.git
+  repo: https://github.com/duweiwang/duweiwang.github.io.git
   branch: main
 #  repo: git@gitee.com:wangduwei/wangduwei.git
 #  branch: master

@@ -1,4 +1,4 @@
 ---
-title: cs-algorithms-selection-sort
+title: 排序算法之选择排序
 tags:
 ---

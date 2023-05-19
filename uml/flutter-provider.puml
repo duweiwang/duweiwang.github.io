@@ -1,0 +1,34 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class SingleChildStatelessWidget
+
+SingleChildStatelessWidget <|-- InheritedProvider
+SingleChildStatelessWidget <|-- Consumer_2_3_4_5_6
+
+InheritedProvider <|-- ListenableProvider
+InheritedProvider <|-- DeferredInheritedProvider
+InheritedProvider <|-- ListenableProxyProvider0
+InheritedProvider <|-- ProxyProvider0
+
+DeferredInheritedProvider <|-- FutureProvider
+
+DeferredInheritedProvider <|-- StreamProvider
+
+ListenableProvider <|-- ChangeNotifierProvider
+
+ListenableProxyProvider0 <|-- ListenableProxyProvider_2_3_4_5_6
+
+ProxyProvider0 <|-- ProxyProvider_2_3_4_5_6
+
+
+class SingleChildStatefulWidget
+
+SingleChildStatefulWidget <|-- Selector0
+
+Selector0 <|-- Selector
+Selector0 <|-- Selector2
+
+
+
+@enduml

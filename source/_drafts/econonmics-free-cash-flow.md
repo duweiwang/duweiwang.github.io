@@ -1,5 +1,5 @@
 ---
-title: econonmics-free-cash-flow
+title: 自由现金流
 athjax: true
 tags:
 ---

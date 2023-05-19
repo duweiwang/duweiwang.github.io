@@ -55,7 +55,7 @@ tags: Android
 + Used for message passing, synchronization, shared memory, and remote procedure calls (RPC)
 + Enables information sharing, computational speedup, modularity, convenience, privilege separation, data isolation, stability
  - Each process has its own (sandboxed) address space, typically running under a unique system ID
-+ Many IPC options
++ 进程间通讯的方案
  - Files (including memory mapped)
  - Signals
  - Sockets (UNIX domain, TCP/IP)
