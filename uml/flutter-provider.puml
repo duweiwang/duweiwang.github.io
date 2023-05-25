@@ -2,6 +2,7 @@
 'https://plantuml.com/class-diagram
 
 class SingleChildStatelessWidget
+InheritedWidget <|-- _InheritedProviderScope
 
 SingleChildStatelessWidget <|-- InheritedProvider
 SingleChildStatelessWidget <|-- Consumer_2_3_4_5_6
@@ -10,6 +11,8 @@ InheritedProvider <|-- ListenableProvider
 InheritedProvider <|-- DeferredInheritedProvider
 InheritedProvider <|-- ListenableProxyProvider0
 InheritedProvider <|-- ProxyProvider0
+InheritedProvider *-- _Delegate
+InheritedProvider --* _InheritedProviderScope
 
 DeferredInheritedProvider <|-- FutureProvider
 
@@ -29,6 +32,8 @@ SingleChildStatefulWidget <|-- Selector0
 Selector0 <|-- Selector
 Selector0 <|-- Selector2
 
+_Delegate <|-- _CreateInheritedProvider
+_Delegate <|-- _ValueInheritedProvider
 
 
 @enduml

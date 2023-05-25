@@ -1,0 +1,31 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+class SingleChildStatefulWidget
+class SingleChildStatelessWidget
+
+SingleChildStatefulWidget <|-- BlocListenerBase
+
+BlocListenerBase <|-- BlocListener
+
+BlocBase <|-- Bloc
+StateStreamableSource <|.. BlocBase
+Emittable <|.. BlocBase
+ErrorSink <|.. BlocBase
+Closable <|.. ErrorSink
+
+StateStreamable <.. StateStreamableSource
+Streamable <.. StateStreamable
+
+SingleChildStatelessWidget <|-- BlocProvider
+
+BlocProvider *-- StateStreamableSource
+
+BlocObserver <|-- _DefaultBlocObserver
+BlocObserver <|-- _TestBlocObserver
+
+Bloc *-- BlocObserverBlocListenerBase
+
+
+@enduml
