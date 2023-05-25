@@ -30,9 +30,10 @@ BlocObserver <|-- _DefaultBlocObserver
 package flutter_bloc {
 
     abstract class BlocBuilderBase
-    class BlocListenerBase
+    abstract class BlocListenerBase
     class BlocListener
     class BlocProvider
+    class BlocBuilder
 }
 
 package flutter {
@@ -46,11 +47,18 @@ SingleChildStatelessWidget <|-- BlocProvider
 StatefulWidget <|-- BlocBuilderBase
 
 BlocListenerBase <|-- BlocListener
-
+BlocBuilderBase <|-- BlocBuilder
 
 BlocProvider *-- StateStreamableSource
-
+BlocBuilderBase *-- StateStreamable
 
 Bloc *-- BlocObserver
 
+package demo{
+
+    class Page{}
+}
+
+Page *-- BlocListener
+Page *-- BlocBuilder
 @enduml
