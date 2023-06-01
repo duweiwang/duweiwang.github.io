@@ -24,25 +24,23 @@
 
 <script data-ad-client="ca-pub-8087648226243491" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
-  <meta name="description" content="一、问题   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加@JvmStatic注解。                                然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。          二、解决要想解决上述问题，只需要将object类的实现做一些转换：  1234567891011121">
+  <meta name="description" content="一、简介官方提供的一个简单的状态管理库。 关键点：  提取状态:状态变量和UI分离 访问状态:将UI和状态建立联系 使用状态:读取状态变量           二、Provider的基本使用12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152&#x2F;&#x2F;&#x2F;这是状态cl">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Kotlin之JvmStatic和override冲突问题">
-<meta property="og:url" content="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html">
+<meta property="og:title" content="Flutter状态管理之Provider">
+<meta property="og:url" content="https://wangduwei.top/flutter-state-provider.html">
 <meta property="og:site_name" content="蓝色的笔记本">
-<meta property="og:description" content="一、问题   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加@JvmStatic注解。                                然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。          二、解决要想解决上述问题，只需要将object类的实现做一些转换：  1234567891011121">
+<meta property="og:description" content="一、简介官方提供的一个简单的状态管理库。 关键点：  提取状态:状态变量和UI分离 访问状态:将UI和状态建立联系 使用状态:读取状态变量           二、Provider的基本使用12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152&#x2F;&#x2F;&#x2F;这是状态cl">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmstatic-1.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmstatic-2.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmstatic-error.jpg">
-<meta property="article:published_time" content="2022-05-09T08:35:18.000Z">
-<meta property="article:modified_time" content="2022-06-06T05:59:22.951Z">
+<meta property="og:image" content="https://wangduwei.top/images/ui-equals-function-of-state.png">
+<meta property="og:image" content="https://wangduwei.top/images/flutter/flutter_provider.png">
+<meta property="article:published_time" content="2023-06-01T07:30:50.000Z">
+<meta property="article:modified_time" content="2023-06-01T07:47:28.426Z">
 <meta property="article:author" content="wangduwei">
-<meta property="article:tag" content="Kotlin">
-<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Flutter">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://wangduwei.top/images/kotlin-annotation-jvmstatic-1.jpeg">
+<meta name="twitter:image" content="https://wangduwei.top/images/ui-equals-function-of-state.png">
 
-<link rel="canonical" href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html">
+<link rel="canonical" href="https://wangduwei.top/flutter-state-provider.html">
 
 
 <script id="page-configurations">
@@ -55,7 +53,7 @@
   };
 </script>
 
-  <title>Kotlin之JvmStatic和override冲突问题 | 蓝色的笔记本</title>
+  <title>Flutter状态管理之Provider | 蓝色的笔记本</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-69Z1P1CBTV"></script>
     <script>
@@ -195,7 +193,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/flutter-state-provider.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -208,7 +206,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Kotlin之JvmStatic和override冲突问题
+          Flutter状态管理之Provider
         </h1>
 
         <div class="post-meta">
@@ -217,24 +215,9 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-05-09 16:35:18" itemprop="dateCreated datePublished" datetime="2022-05-09T16:35:18+08:00">2022-05-09</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-06-06 13:59:22" itemprop="dateModified" datetime="2022-06-06T13:59:22+08:00">2022-06-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
+              <time title="创建时间：2023-06-01 15:30:50 / 修改时间：15:47:28" itemprop="dateCreated datePublished" datetime="2023-06-01T15:30:50+08:00">2023-06-01</time>
             </span>
 
           
@@ -253,8 +236,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/kotlin-lang-jvmstatic-with-interface.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/kotlin-lang-jvmstatic-with-interface.html" itemprop="commentCount"></span>
+    <a title="valine" href="/flutter-state-provider.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/flutter-state-provider.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -264,14 +247,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.2k</span>
+              <span>3.2k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>3 分钟</span>
             </span>
 
         </div>
@@ -283,35 +266,44 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
+        <hr>
+<h4 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h4><p>官方提供的一个简单的状态管理库。</p>
+<p>关键点：</p>
+<ul>
+<li>提取状态:状态变量和UI分离</li>
+<li>访问状态:将UI和状态建立联系</li>
+<li>使用状态:读取状态变量</li>
+</ul>
 <center>
-    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
+    <img src="../images/ui-equals-function-of-state.png" width="100%"/>
 </center>
 
 
-<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
-</code></pre>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="二、Provider的基本使用"><a href="#二、Provider的基本使用" class="headerlink" title="二、Provider的基本使用"></a>二、Provider的基本使用</h4><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">///<span class="markdown">这是状态</span></span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="title">with</span> <span class="title">ChangeNotifier</span> </span>&#123;</span><br><span class="line">  <span class="built_in">String</span> name = <span class="string">&quot;ChangeNotifierProvider&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">void</span> changName(&#123;<span class="keyword">required</span> <span class="built_in">String</span> newName&#125;) &#123;</span><br><span class="line">    name = newName;</span><br><span class="line">    notifyListeners();<span class="comment">//1</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainApp</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> MainApp(&#123;<span class="keyword">super</span>.key&#125;);</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> ChangeNotifierProvider&lt;Person&gt;(<span class="comment">///<span class="markdown">状态和UI之间建立联系</span></span></span><br><span class="line">      create: (ctx) =&gt; Person(),</span><br><span class="line">      child: <span class="keyword">const</span> MaterialApp(</span><br><span class="line">        home: ChangeNotifierProviderDemo(),</span><br><span class="line">      ),</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChangeNotifierProviderDemo</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> ChangeNotifierProviderDemo(&#123;Key? key&#125;) : <span class="keyword">super</span>(key: key);</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> Scaffold(</span><br><span class="line">      appBar: AppBar(title: <span class="keyword">const</span> Text(<span class="string">&quot;ChangeNotifierProvider&quot;</span>)),</span><br><span class="line">      body: Center(</span><br><span class="line">        child: Column(</span><br><span class="line">          mainAxisAlignment: MainAxisAlignment.spaceEvenly,</span><br><span class="line">          children: [</span><br><span class="line">            Consumer&lt;Person&gt;(<span class="comment">///<span class="markdown">使用状态</span></span></span><br><span class="line">              builder: (ctx, person, child) =&gt; Text(person.name),</span><br><span class="line">            ),</span><br><span class="line">            Consumer&lt;Person&gt;(</span><br><span class="line">              builder: (ctx, person, child) &#123;</span><br><span class="line">                <span class="keyword">return</span> ElevatedButton(</span><br><span class="line">                  onPressed: () =&gt; person.changName(newName: <span class="string">&quot;ChangeNotifierProvider更新了&quot;</span>),</span><br><span class="line">                  child: <span class="keyword">const</span> Text(<span class="string">&quot;点击更新&quot;</span>),</span><br><span class="line">                );</span><br><span class="line">              &#125;,</span><br><span class="line">            ),</span><br><span class="line">          ],</span><br><span class="line">        ),</span><br><span class="line">      ),</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
-<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
-</blockquote>
-<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="三、Provider的类结构"><a href="#三、Provider的类结构" class="headerlink" title="三、Provider的类结构"></a>三、Provider的类结构</h4><center>
+    <img src="../images/flutter/flutter_provider.png" width="100%"/>
+</center>
 
-<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
-<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a target="_blank" rel="noopener" href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
+
+<p>3.1 InheritedProvider的子类只是具体功能的实现，基础逻辑封装在InheritedProvider中<br>3.2 InheritedProvider将职责转嫁给_InheritedProviderScope而_InheritedProviderScope是一个InheritedWidget</p>
+<h4 id="四、如何实现监听"><a href="#四、如何实现监听" class="headerlink" title="四、如何实现监听"></a>四、如何实现监听</h4><p>1、数据实现了ChangeNotifier，变更后调用notifyListeners(),触发回调。</p>
+<p>2、ChangeNotifierProvider继承自ListenableProvider，ListenableProvider构建时开启监听：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> VoidCallback _startListening(</span><br><span class="line">  InheritedContext e,</span><br><span class="line">  Listenable? value,</span><br><span class="line">) &#123;</span><br><span class="line">  value?.addListener(e.markNeedsNotifyDependents);</span><br><span class="line">  <span class="keyword">return</span> () =&gt; value?.removeListener(e.markNeedsNotifyDependents);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>class InheritedContext extends BuildContext{<br>    void markNeedsNotifyDependents();<br>}</p>
+<p>3、markNeedsNotifyDependents是<code>InheritedContext</code>中的方法，其实现类是<code>_InheritedProviderScopeElement</code></p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@override</span></span><br><span class="line">  <span class="keyword">void</span> markNeedsNotifyDependents() &#123;</span><br><span class="line">    <span class="keyword">if</span> (!_isNotifyDependentsEnabled) &#123;</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    markNeedsBuild();</span><br><span class="line">    _shouldNotifyDependents = <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>4、markNeedsBuild是Element的方法：标记需要重新构建</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> markNeedsBuild() &#123;</span><br><span class="line">    ...  </span><br><span class="line">    <span class="keyword">if</span> (dirty) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    _dirty = <span class="keyword">true</span>;</span><br><span class="line">    owner!.scheduleBuildFor(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="五、局部更新"><a href="#五、局部更新" class="headerlink" title="五、局部更新"></a>五、局部更新</h4><p>Provider的<code>Selector</code>提供了缓存Widget的功能，当Widget没有变化时，将直接返回缓存，否则重新build。</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_Selector0State</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">SingleChildState</span>&lt;<span class="title">Selector0</span>&lt;<span class="title">T</span>&gt;&gt; </span>&#123;</span><br><span class="line">  T? value;</span><br><span class="line">  Widget? cache;<span class="comment">//这是缓存</span></span><br><span class="line">  Widget? oldWidget;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget buildWithChild(BuildContext context, Widget? child) &#123;</span><br><span class="line">    <span class="keyword">final</span> selected = widget.selector(context);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> shouldInvalidateCache = oldWidget != widget ||</span><br><span class="line">        (widget._shouldRebuild != <span class="keyword">null</span> &amp;&amp;</span><br><span class="line">            widget._shouldRebuild!(value <span class="keyword">as</span> T, selected)) ||</span><br><span class="line">        (widget._shouldRebuild == <span class="keyword">null</span> &amp;&amp;</span><br><span class="line">            !<span class="keyword">const</span> DeepCollectionEquality().equals(value, selected));</span><br><span class="line">    <span class="keyword">if</span> (shouldInvalidateCache) &#123;<span class="comment">//需要重新构建</span></span><br><span class="line">      value = selected;</span><br><span class="line">      oldWidget = widget;</span><br><span class="line">      cache = widget.builder(</span><br><span class="line">        context,</span><br><span class="line">        selected,</span><br><span class="line">        child,</span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> cache!;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  <span class="keyword">void</span> debugFillProperties(DiagnosticPropertiesBuilder properties) &#123;</span><br><span class="line">    <span class="keyword">super</span>.debugFillProperties(properties);</span><br><span class="line">    properties.add(DiagnosticsProperty&lt;T&gt;(<span class="string">&#x27;value&#x27;</span>, value));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="六、参考"><a href="#六、参考" class="headerlink" title="六、参考"></a>六、参考</h4><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7067356022272163847#heading-16">https://juejin.cn/post/7067356022272163847#heading-16</a></p>
 
     </div>
 
@@ -347,7 +339,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html" title="Kotlin之JvmStatic和override冲突问题">https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html</a>
+    <a href="https://wangduwei.top/flutter-state-provider.html" title="Flutter状态管理之Provider">https://wangduwei.top/flutter-state-provider.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -358,8 +350,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Kotlin/" rel="tag"># Kotlin</a>
-              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/Flutter/" rel="tag"># Flutter</a>
           </div>
 
         
@@ -373,13 +364,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/kotlin-lang-jvm-annotation.html" rel="prev" title="Kotlin中的JVM注解">
-      <i class="fa fa-chevron-left"></i> Kotlin中的JVM注解
+    <a href="/flutter-widget-row.html" rel="prev" title="Flutter Widget之Row、Column">
+      <i class="fa fa-chevron-left"></i> Flutter Widget之Row、Column
     </a></div>
-      <div class="post-nav-item">
-    <a href="/android-jetpack-compose-sideeffect.html" rel="next" title="Jetpack Compose Side Effects">
-      Jetpack Compose Side Effects <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -452,7 +440,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E9%97%AE%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">一、问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%A7%A3%E5%86%B3"><span class="nav-number">2.</span> <span class="nav-text">二、解决</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%80%9D%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">三、思考</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">一、简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Provider%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">二、Provider的基本使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E3%80%81Provider%E7%9A%84%E7%B1%BB%E7%BB%93%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">三、Provider的类结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%9B%91%E5%90%AC"><span class="nav-number">4.</span> <span class="nav-text">四、如何实现监听</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%B1%80%E9%83%A8%E6%9B%B4%E6%96%B0"><span class="nav-number">5.</span> <span class="nav-text">五、局部更新</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%8F%82%E8%80%83"><span class="nav-number">6.</span> <span class="nav-text">六、参考</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -660,7 +648,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'duweiwang.github.io',
       owner       : 'duweiwang',
       admin       : ['duweiwang'],
-      id          : '6be61753041d5d21cf9e1ddf4914d176',
+      id          : '05b74338b5574a0fc72a940cadec8e8f',
         language: '',
       distractionFreeMode: true
     });

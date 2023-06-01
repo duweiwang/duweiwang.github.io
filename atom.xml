@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2023-03-07T10:01:05.574Z</updated>
+  <updated>2023-06-01T07:47:28.426Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Flutter状态管理之Provider</title>
+    <link href="https://wangduwei.top/flutter-state-provider.html"/>
+    <id>https://wangduwei.top/flutter-state-provider.html</id>
+    <published>2023-06-01T07:30:50.000Z</published>
+    <updated>2023-06-01T07:47:28.426Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;h4 id=&quot;一、简介&quot;&gt;&lt;a href=&quot;#一、简介&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Flutter" scheme="https://wangduwei.top/tags/Flutter/"/>
+    
+  </entry>
   
   <entry>
     <title>Flutter Widget之Row、Column</title>
@@ -504,32 +528,6 @@
         
         
     <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot; title=&quot;一、概述&quot;&gt;&lt;/a&gt;一、概述&lt;/h4&gt;&lt;p&gt;你可能对 &lt;code&gt;Iterable&lt;/code&gt; 和 &lt;code&gt;Sequence&lt;/code&gt;</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>用Kotlin协程解决深度递归问题</title>
-    <link href="https://wangduwei.top/kotlin-coroutine-deep-recursion.html"/>
-    <id>https://wangduwei.top/kotlin-coroutine-deep-recursion.html</id>
-    <published>2021-10-30T02:38:30.000Z</published>
-    <updated>2022-06-06T05:59:22.950Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;p&gt;&amp;ensp;&amp;ensp;&amp;ensp;&amp;ensp;协程一般用于异步编程。在解决异步编程问题方面，Kotlin编译器在对协程的设计和实现是通用的。我们可以借助协程优雅的解决深度递归问题。&lt;/p&gt;
-&lt;h4 id=&quot;一、问题描述&quot;&gt;&lt;a href=&quot;#一、问题描述&quot;</summary>
         
       
     

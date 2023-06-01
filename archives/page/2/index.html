@@ -186,6 +186,170 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-lang-jvm-annotation.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpeg">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/kotlin-lang-jvm-annotation.html" class="post-title-link" itemprop="url">Kotlin中的JVM注解</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-01 15:29:44" itemprop="dateCreated datePublished" datetime="2022-05-01T15:29:44+08:00">2022-05-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-06-06 13:59:22" itemprop="dateModified" datetime="2022-06-06T13:59:22+08:00">2022-06-06</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/kotlin-lang-jvm-annotation.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/kotlin-lang-jvm-annotation.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
+<h4 id="1、-JvmName"><a href="#1、-JvmName" class="headerlink" title="1、@JvmName"></a>1、@JvmName</h4><p>用于文件、函数、属性、getter和setter。</p>
+<h5 id="1-1-给文件添加-JvmName注解"><a href="#1-1-给文件添加-JvmName注解" class="headerlink" title="1.1 给文件添加@JvmName注解"></a>1.1 给文件添加@JvmName注解</h5><p>默认情况下，一个Kotlin文件中的<strong>function</strong>和<strong>properties</strong>会被编译成<em>filenameKt.class</em>，其中的<strong>class</strong>会被编译成classname.class:</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmname-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmname-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h5 id="1-2-给函数名添加-JvmName注解"><a href="#1-2-给函数名添加-JvmName注解" class="headerlink" title="1.2 给函数名添加@JvmName注解"></a>1.2 给函数名添加@JvmName注解</h5><center>
+    <img src="../images/kotlin-annotation-jvmname-3.jpeg" width="500"/>
+</center>
+
+<h5 id="1-3-给getter和setting添加-JvmName"><a href="#1-3-给getter和setting添加-JvmName" class="headerlink" title="1.3 给getter和setting添加@JvmName"></a>1.3 给getter和setting添加@JvmName</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@get:JvmName</span>(<span class="string">&quot;getContent&quot;</span>)</span><br><span class="line"><span class="meta">@set:JvmName</span>(<span class="string">&quot;setContent&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="2、-JvmDefault"><a href="#2、-JvmDefault" class="headerlink" title="2、@JvmDefault"></a>2、@JvmDefault</h4><p>和Java8一样，Kotlin的接口也支持默认方法实现。即使针对Java7及以下版本，他也能正常编译，因为Kotlin使用静态内部类实现默认方法。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmdefault-1.jpeg" width="500"/>
+</center>
+
+<p>当在Java中实现此接口时，需要复写对应的方法，否则将报错。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmdefault-2.jpeg" width="100%"/>
+</center>
+
+<p>如果我们希望它在Java8中不报错，可以使用@JvmDefault注解标识方法：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Document</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JvmDefault</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getType</span><span class="params">()</span></span> = <span class="string">&quot;document&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3、-JvmStatic"><a href="#3、-JvmStatic" class="headerlink" title="3、@JvmStatic"></a>3、@JvmStatic</h4><p>针对<code>object class</code> 或<code>companion object</code>使用此注解,可以避免Java访问时的INSTANCE调用</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h4 id="4、-JvmOverloads"><a href="#4、-JvmOverloads" class="headerlink" title="4、@JvmOverloads"></a>4、@JvmOverloads</h4><p>Kotlin的默认参数可以帮助我们减少函数重载，简化方法调用参数。在Java中调用含默认参数的Kotlin函数时，需要提供全部参数。</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmoverloads-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmoverloads-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h4 id="5、-Throws"><a href="#5、-Throws" class="headerlink" title="5、@Throws"></a>5、@Throws</h4><p>Kotlin没有受检测异常，try-catch是非必须的。如果希望在Java调用中检测到异常，可以使用@Throws注解</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmthrows.jpeg" width="100%"/>
+</center>
+
+<h4 id="6、-JvmWildcard-amp-JvmSuppressWildcard"><a href="#6、-JvmWildcard-amp-JvmSuppressWildcard" class="headerlink" title="6、@JvmWildcard &amp; @JvmSuppressWildcard"></a>6、@JvmWildcard &amp; @JvmSuppressWildcard</h4><p>略</p>
+<h4 id="7、-JvmMultifileClass"><a href="#7、-JvmMultifileClass" class="headerlink" title="7、@JvmMultifileClass"></a>7、@JvmMultifileClass</h4><p>当在多个文件中定义的顶层函数或属性想要合并到一个编译的class中时，可以使用此注解。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmmultifileclass.jpeg" width="500"/>
+</center>
+
+
+<h4 id="8、-JvmPackageName"><a href="#8、-JvmPackageName" class="headerlink" title="8、@JvmPackageName"></a>8、@JvmPackageName</h4><p>和@JvmName一样，此注解可以修改包名，但是他被标记为internal，只能在kotlin库内部使用，这里不做过多介绍。</p>
+<h4 id="9、注解一览"><a href="#9、注解一览" class="headerlink" title="9、注解一览"></a>9、注解一览</h4><center>
+    <img src="../images/kotlin-annotation-overview.png" width="100%"/>
+</center>
+
+<h4 id="参考"><a href="#参考" class="headerlink" title="[参考]"></a>[参考]</h4><p><a target="_blank" rel="noopener" href="https://www.baeldung.com/kotlin/jvm-annotations">1.Guide to JVM Platform Annotations in Kotlin</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-github-source-workmanager.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1683,143 +1847,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-coroutine-deep-recursion.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpeg">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/kotlin-coroutine-deep-recursion.html" class="post-title-link" itemprop="url">用Kotlin协程解决深度递归问题</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-10-30 10:38:30" itemprop="dateCreated datePublished" datetime="2021-10-30T10:38:30+08:00">2021-10-30</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-06-06 13:59:22" itemprop="dateModified" datetime="2022-06-06T13:59:22+08:00">2022-06-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/kotlin-coroutine-deep-recursion.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/kotlin-coroutine-deep-recursion.html" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>&ensp;&ensp;&ensp;&ensp;协程一般用于异步编程。在解决异步编程问题方面，Kotlin编译器在对协程的设计和实现是通用的。我们可以借助协程优雅的解决深度递归问题。</p>
-<h4 id="一、问题描述"><a href="#一、问题描述" class="headerlink" title="一、问题描述"></a>一、问题描述</h4><p>定义以下二叉树的结点，并构造一棵只含十万个左结点的树，进行深度遍历，求树的深度：  </p>
-<center>
-    <img src="../images/tree_only_left.png" width="500"/>
-</center>
-
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//结点定义</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Tree</span></span>(<span class="keyword">val</span> left: Tree?, <span class="keyword">val</span> right: Tree?)</span><br><span class="line"></span><br><span class="line"><span class="comment">//构造二叉树：以叶子结点开始，重复构造父结点，并把当前结点作为父结点的左子树</span></span><br><span class="line"><span class="keyword">val</span> n = <span class="number">100_000</span></span><br><span class="line"><span class="keyword">val</span> deepTree = generateSequence(Tree(<span class="literal">null</span>, <span class="literal">null</span>)) &#123; prev -&gt;</span><br><span class="line">    Tree(prev, <span class="literal">null</span>) </span><br><span class="line">&#125;.take(n).last()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="二、解决方案"><a href="#二、解决方案" class="headerlink" title="二、解决方案"></a>二、解决方案</h4><h5 id="2-1-解决方案一："><a href="#2-1-解决方案一：" class="headerlink" title="2.1 解决方案一："></a>2.1 解决方案一：</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">depth</span><span class="params">(t: <span class="type">Tree</span>?)</span></span>: <span class="built_in">Int</span> =</span><br><span class="line">    <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="number">0</span> <span class="keyword">else</span> maxOf(</span><br><span class="line">        depth(t.left), <span class="comment">// recursive call one</span></span><br><span class="line">        depth(t.right) <span class="comment">// recursive call two</span></span><br><span class="line">    ) + <span class="number">1</span></span><br></pre></td></tr></table></figure>
-
-<p>分析：<br>对树进行递归是最简洁直接的解决方案。而递归将保存函数的调用栈用于后续状态恢复，线程的调用栈是有大小限制的，此处将抛出<code>Exception in thread &quot;main&quot; java.lang.StackOverflowError</code>错误。</p>
-<h5 id="2-2-解决方案二："><a href="#2-2-解决方案二：" class="headerlink" title="2.2 解决方案二："></a>2.2 解决方案二：</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">depth</span><span class="params">(t: <span class="type">Tree</span>?)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">      <span class="class"><span class="keyword">class</span> <span class="title">Frame</span></span>(<span class="keyword">val</span> node: Tree, <span class="keyword">var</span> state: <span class="built_in">Int</span> = <span class="number">0</span>, <span class="keyword">var</span> depth: <span class="built_in">Int</span> = <span class="number">1</span>)</span><br><span class="line">      <span class="keyword">val</span> stack = ArrayList&lt;Frame&gt;()</span><br><span class="line">      <span class="keyword">val</span> root = Frame(t)</span><br><span class="line">      stack.add(root)</span><br><span class="line">      <span class="keyword">while</span> (stack.isNotEmpty()) &#123;</span><br><span class="line">          <span class="keyword">val</span> frame = stack.last()</span><br><span class="line">          <span class="keyword">when</span> (frame.state++) &#123;</span><br><span class="line">              <span class="number">0</span> -&gt; frame.node.left?.let &#123; l -&gt; stack.add(Frame(l)) &#125;</span><br><span class="line">              <span class="number">1</span> -&gt; frame.node.right?.let &#123; r -&gt; stack.add(Frame(r)) &#125;</span><br><span class="line">              <span class="number">2</span> -&gt; &#123;</span><br><span class="line">                  stack.removeLast()</span><br><span class="line">                  stack.lastOrNull()?.let &#123; p -&gt; </span><br><span class="line">                      p.depth = maxOf(p.depth, frame.depth + <span class="number">1</span>) </span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> root.depth</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-<p>分析：<br>基于解决方案一，我们考虑将调用栈状态的保存转移到内存空间更大的堆区，并加入了状态机和<code>while</code>循环。在此例中，程序开始时将全部走状态0，将所有的左节点加入stack。然后全部走状态2(因为没有右结点)，由下到上计算每一个结点的深度。最后返回根节点的深度。</p>
-<h5 id="2-3-解决方案三："><a href="#2-3-解决方案三：" class="headerlink" title="2.3 解决方案三："></a>2.3 解决方案三：</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> depth = DeepRecursiveFunction&lt;Tree?, <span class="built_in">Int</span>&gt; &#123; t -&gt;</span><br><span class="line">        <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="number">0</span> <span class="keyword">else</span> maxOf(</span><br><span class="line">            callRecursive(t.left),</span><br><span class="line">            callRecursive(t.right)</span><br><span class="line">        ) + <span class="number">1</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>分析：<br>方案二中的状态机就是Kotlin挂起函数的实现原理。所以我们也可以利用Kotlin的挂起函数实现深度遍历。那么方案三是如何实现的呢？我们分析三个方面：  </p>
-<ul>
-<li>如何调用</li>
-<li>如何进入循环</li>
-<li>如何保存状态</li>
-</ul>
-<p>2.3.1 调用<br><code>DeepRecursiveFunction</code>类声明了<code>invoke</code>操作符，调用<code>depth</code>函数就是调用下面👇🏻的操作符。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SinceKotlin(<span class="meta-string">&quot;1.4&quot;</span>)</span></span><br><span class="line"><span class="meta">@ExperimentalStdlibApi</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> DeepRecursiveFunction<span class="type">&lt;T, R&gt;</span>.<span class="title">invoke</span><span class="params">(value: <span class="type">T</span>)</span></span>: R =</span><br><span class="line">    DeepRecursiveScopeImpl&lt;T, R&gt;(block, value).runCallLoop()</span><br></pre></td></tr></table></figure>
-
-<p>2.3.2 循环<br>调用<code>DeepRecursiveFunction</code>后直接进入<code>runCallLoop()</code>循环，result的默认值为UNDEFINED_RESULT，所以会启动我们的递归业务逻辑</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Suppress(<span class="meta-string">&quot;UNCHECKED_CAST&quot;</span>)</span></span><br><span class="line">   <span class="function"><span class="keyword">fun</span> <span class="title">runCallLoop</span><span class="params">()</span></span>: R &#123;</span><br><span class="line">       <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">           <span class="comment">// Note: cont is set to null in DeepRecursiveScopeImpl.resumeWith when the whole computation completes</span></span><br><span class="line">           <span class="keyword">val</span> result = <span class="keyword">this</span>.result</span><br><span class="line">           <span class="keyword">val</span> cont = <span class="keyword">this</span>.cont</span><br><span class="line">               ?: <span class="keyword">return</span> (result <span class="keyword">as</span> Result&lt;R&gt;).getOrThrow() <span class="comment">// done -- final result</span></span><br><span class="line">           <span class="comment">// The order of comparison is important here for that case of rogue class with broken equals</span></span><br><span class="line">           <span class="keyword">if</span> (UNDEFINED_RESULT == result) &#123;</span><br><span class="line">               <span class="comment">// call &quot;function&quot; with &quot;value&quot; using &quot;cont&quot; as completion</span></span><br><span class="line">               <span class="keyword">val</span> r = <span class="keyword">try</span> &#123;</span><br><span class="line">                   <span class="comment">// This is block.startCoroutine(this, value, cont)</span></span><br><span class="line">                   function.startCoroutineUninterceptedOrReturn(<span class="keyword">this</span>, value, cont)</span><br><span class="line">               &#125; <span class="keyword">catch</span> (e: Throwable) &#123;</span><br><span class="line">                   cont.resumeWithException(e)</span><br><span class="line">                   <span class="keyword">continue</span></span><br><span class="line">               &#125;</span><br><span class="line">               <span class="comment">// If the function returns without suspension -- calls its continuation immediately</span></span><br><span class="line">               <span class="keyword">if</span> (r !== COROUTINE_SUSPENDED)</span><br><span class="line">                   cont.resume(r <span class="keyword">as</span> R)</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="comment">// we returned from a crossFunctionCompletion trampoline -- call resume here</span></span><br><span class="line">               <span class="keyword">this</span>.result = UNDEFINED_RESULT <span class="comment">// reset result back</span></span><br><span class="line">               cont.resumeWith(result)</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-
-<p>2.3.3 状态保存<br>每次调用<code>callRecursive</code>时将保存当前的值和cont（continuation），注意这里cont对象每次都不是同一个对象。当进行挂起恢复时，拿到旧的continuation进行回调。</p>
-<center>
-    <img src="../images/kotlin_coroutine_resume.jpeg" width="500"/>
-</center>
-
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">callRecursive</span><span class="params">(value: <span class="type">T</span>)</span></span>: R = </span><br><span class="line">    suspendCoroutineUninterceptedOrReturn &#123; cont -&gt;</span><br><span class="line">        <span class="keyword">this</span>.cont = cont</span><br><span class="line">        <span class="keyword">this</span>.value = value</span><br><span class="line">        COROUTINE_SUSPENDED</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h4><p><a target="_blank" rel="noopener" href="https://elizarov.medium.com/deep-recursion-with-coroutines-7c53e15993e3">Deep recursion with coroutines</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1942,13 +1969,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">97k</span>
+    <span title="站点总字数">100k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">1:28</span>
+    <span title="站点阅读时长">1:31</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
   </div>
