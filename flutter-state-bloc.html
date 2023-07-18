@@ -24,28 +24,24 @@
 
 <script data-ad-client="ca-pub-8087648226243491" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
-  <meta name="description" content="给你单链表的头结点 head，请你反转链表，并返回反转后的链表。">
+  <meta name="description" content="一、概述Bloc &#x3D; Business Logic Component          二、结构BloC本身是一个独立的package、flutter-bloc基于BloC和Provider实现，其结构如下图所示：         三、 实现3.1 BloC是基于dart的Stream API实现的发布订阅模式。 通过on方法订阅事件并提供处理函数，收到Event再将Event转换成State">
 <meta property="og:type" content="article">
-<meta property="og:title" content="LeetCode 反转单链表">
-<meta property="og:url" content="https://wangduwei.top/leetcode-reverse-list.html">
+<meta property="og:title" content="flutter状态管理之BloC">
+<meta property="og:url" content="https://wangduwei.top/flutter-state-bloc.html">
 <meta property="og:site_name" content="蓝色的笔记本">
-<meta property="og:description" content="给你单链表的头结点 head，请你反转链表，并返回反转后的链表。">
+<meta property="og:description" content="一、概述Bloc &#x3D; Business Logic Component          二、结构BloC本身是一个独立的package、flutter-bloc基于BloC和Provider实现，其结构如下图所示：         三、 实现3.1 BloC是基于dart的Stream API实现的发布订阅模式。 通过on方法订阅事件并提供处理函数，收到Event再将Event转换成State">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://wangduwei.top/images/revert_list_0.png">
-<meta property="og:image" content="https://wangduwei.top/images/revert_list_7.png">
-<meta property="og:image" content="https://wangduwei.top/images/revert_list_4.png">
-<meta property="og:image" content="https://wangduwei.top/images/revert_list_5.png">
-<meta property="og:image" content="https://wangduwei.top/images/revert_list_6.png">
-<meta property="article:published_time" content="2021-08-23T13:23:30.000Z">
-<meta property="article:modified_time" content="2022-06-06T05:59:22.954Z">
+<meta property="og:image" content="https://wangduwei.top/images/flutter/bloc_architecture.png">
+<meta property="og:image" content="https://wangduwei.top/images/flutter/flutter_bloc.png">
+<meta property="og:image" content="https://wangduwei.top/images/flutter/flutter-bloc-inner.png">
+<meta property="article:published_time" content="2023-07-18T13:27:20.000Z">
+<meta property="article:modified_time" content="2023-07-18T13:32:49.003Z">
 <meta property="article:author" content="wangduwei">
-<meta property="article:tag" content="LeetCode">
-<meta property="article:tag" content="算法">
-<meta property="article:tag" content="List">
+<meta property="article:tag" content="Flutter">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://wangduwei.top/images/revert_list_0.png">
+<meta name="twitter:image" content="https://wangduwei.top/images/flutter/bloc_architecture.png">
 
-<link rel="canonical" href="https://wangduwei.top/leetcode-reverse-list.html">
+<link rel="canonical" href="https://wangduwei.top/flutter-state-bloc.html">
 
 
 <script id="page-configurations">
@@ -58,7 +54,7 @@
   };
 </script>
 
-  <title>LeetCode 反转单链表 | 蓝色的笔记本</title>
+  <title>flutter状态管理之BloC | 蓝色的笔记本</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-69Z1P1CBTV"></script>
     <script>
@@ -198,7 +194,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/leetcode-reverse-list.html">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/flutter-state-bloc.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -211,7 +207,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          LeetCode 反转单链表
+          flutter状态管理之BloC
         </h1>
 
         <div class="post-meta">
@@ -220,24 +216,9 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2021-08-23 21:23:30" itemprop="dateCreated datePublished" datetime="2021-08-23T21:23:30+08:00">2021-08-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-06-06 13:59:22" itemprop="dateModified" datetime="2022-06-06T13:59:22+08:00">2022-06-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
+              <time title="创建时间：2023-07-18 21:27:20 / 修改时间：21:32:49" itemprop="dateCreated datePublished" datetime="2023-07-18T21:27:20+08:00">2023-07-18</time>
             </span>
 
           
@@ -256,8 +237,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/leetcode-reverse-list.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/leetcode-reverse-list.html" itemprop="commentCount"></span>
+    <a title="valine" href="/flutter-state-bloc.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/flutter-state-bloc.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -267,16 +248,15 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>575</span>
+              <span>1.8k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>2 分钟</span>
             </span>
-            <div class="post-description">给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</div>
 
         </div>
       </header>
@@ -287,47 +267,37 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="LeetCode-206-反转单链表"><a href="#LeetCode-206-反转单链表" class="headerlink" title="LeetCode-206 反转单链表"></a>LeetCode-206 反转单链表</h3><blockquote>
-<p>给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</p>
-</blockquote>
-<p>问题分析：</p>
-<p>这是初始状态的链表</p>
+        <hr>
+<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>Bloc = Business Logic Component</p>
 <center>
-    <img src="../images/revert_list_0.png" width="400"/>
-</center>
-由于反转链表后 **head** 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  
-
-<p>尝试一次反转后，我们发现，后续结点信息丢失了！我们不得不声明一个新的变量保存原链表的信息。</p>
-<center>
-    <img src="../images/revert_list_7.png" width="400"/>
+    <img src="../images/flutter/bloc_architecture.png" width="60%"/>
 </center>
 
-<p>所以，我们一共需要三个指针来记录转换过程  </p>
-<ul>
-<li>prev、 head 用于交换</li>
-<li>next 用于记录  </li>
+
+<h4 id="二、结构"><a href="#二、结构" class="headerlink" title="二、结构"></a>二、结构</h4><p>BloC本身是一个独立的package、flutter-bloc基于BloC和Provider实现，其结构如下图所示：</p>
+<center>
+    <img src="../images/flutter/flutter_bloc.png" width="100%"/>
+</center>
+
+<h4 id="三、-实现"><a href="#三、-实现" class="headerlink" title="三、 实现"></a>三、 实现</h4><h5 id="3-1-BloC是基于dart的Stream-API实现的发布订阅模式。"><a href="#3-1-BloC是基于dart的Stream-API实现的发布订阅模式。" class="headerlink" title="3.1 BloC是基于dart的Stream API实现的发布订阅模式。"></a>3.1 BloC是基于dart的Stream API实现的发布订阅模式。</h5><ul>
+<li>通过on方法订阅事件并提供处理函数，收到Event再将Event转换成State返回给Bloc</li>
+<li>通过add方法发布事件</li>
 </ul>
-<p>分析到这里，我们再回到初始状态  ：</p>
-<center>
-    <img src="../images/revert_list_4.png" width="400"/>
-</center>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Bloc</span>&lt;<span class="title">Event</span>, <span class="title">State</span>&gt; <span class="keyword">extends</span> <span class="title">BlocBase</span>&lt;<span class="title">State</span>&gt;</span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">BlocEventSink</span>&lt;<span class="title">Event</span>&gt; </span>&#123;</span><br><span class="line">     <span class="comment">//所有的订阅者</span></span><br><span class="line">     <span class="keyword">final</span> _subscriptions = &lt;StreamSubscription&lt;<span class="built_in">dynamic</span>&gt;&gt;[];</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">final</span> _eventController = StreamController&lt;Event&gt;.broadcast();</span><br><span class="line">     </span><br><span class="line">     <span class="comment">//添加订阅者</span></span><br><span class="line">     <span class="keyword">void</span> <span class="keyword">on</span>&lt;E <span class="keyword">extends</span> Event&gt;(</span><br><span class="line">       EventHandler&lt;E, State&gt; handler, &#123;</span><br><span class="line">       EventTransformer&lt;E&gt;? transformer,</span><br><span class="line">     &#125;) &#123;</span><br><span class="line">        <span class="comment">//这里开始了listen</span></span><br><span class="line">        <span class="keyword">final</span> subscription = xxx.listen(<span class="keyword">null</span>);</span><br><span class="line">        _subscriptions.add(subscription);</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">     <span class="meta">@override</span></span><br><span class="line">     <span class="keyword">void</span> add(Event event) &#123;</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">         onEvent(event);</span><br><span class="line">         _eventController.add(event);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">         onError(error, stackTrace);</span><br><span class="line">         <span class="keyword">rethrow</span>;</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>接下来我们进行第一次反转，<strong>head.next</strong> 指向虚拟的空结点，且后续链表信息没有丢失。</p>
 <center>
-    <img src="../images/revert_list_5.png" width="400"/>
-</center>
-
-<p>三个指针一起往后移动一个单位。我们发现此时链表又回到了最初的状态。</p>
-<center>
-    <img src="../images/revert_list_6.png" width="400"/>
+    <img src="../images/flutter/flutter-bloc-inner.png" width="50%"/>
 </center>
 
 
-<p>至此，我们可以尝试写出如下代码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">reverseIteratively</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">    ListNode pre = <span class="keyword">null</span>;</span><br><span class="line">    ListNode next = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = head.next;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//改变指针方向，对第一个节点来说，他的前一个节点是null</span></span><br><span class="line">        head.next = pre;</span><br><span class="line">        <span class="comment">//向前移动两个指针</span></span><br><span class="line">        pre = head;</span><br><span class="line">        head = next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="3-1-事件和状态之间的转换"><a href="#3-1-事件和状态之间的转换" class="headerlink" title="3.1 事件和状态之间的转换"></a>3.1 事件和状态之间的转换</h5><ul>
+<li>转换逻辑有业务层通过on()注入</li>
+<li>内部的核心是_Emitter以及 <em>_eventController</em> 和 <em>_stateController</em></li>
+</ul>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">(<span class="built_in">dynamic</span> event) &#123;</span><br><span class="line">       <span class="keyword">void</span> onEmit(State state) &#123;</span><br><span class="line">         <span class="keyword">if</span> (isClosed) <span class="keyword">return</span>;</span><br><span class="line">         <span class="keyword">if</span> (<span class="keyword">this</span>.state == state &amp;&amp; _emitted) <span class="keyword">return</span>;</span><br><span class="line">         onTransition(Transition(</span><br><span class="line">           currentState: <span class="keyword">this</span>.state,</span><br><span class="line">           event: event <span class="keyword">as</span> E,</span><br><span class="line">           nextState: state,</span><br><span class="line">         ));</span><br><span class="line">         emit(state);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">final</span> emitter = _Emitter(onEmit);</span><br><span class="line">       <span class="keyword">final</span> controller = StreamController&lt;E&gt;.broadcast(</span><br><span class="line">         <span class="keyword">sync</span>: <span class="keyword">true</span>,</span><br><span class="line">         onCancel: emitter.cancel,</span><br><span class="line">       );</span><br><span class="line"></span><br><span class="line">       <span class="keyword">void</span> handleEvent() <span class="keyword">async</span> &#123;</span><br><span class="line">         <span class="keyword">void</span> onDone() &#123;</span><br><span class="line">           emitter.complete();</span><br><span class="line">           _emitters.remove(emitter);</span><br><span class="line">           <span class="keyword">if</span> (!controller.isClosed) controller.close();</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">try</span> &#123;</span><br><span class="line">           _emitters.add(emitter);</span><br><span class="line">           <span class="comment">//交给外部实现转换事件和状态</span></span><br><span class="line">           <span class="keyword">await</span> handler(event <span class="keyword">as</span> E, emitter);</span><br><span class="line">         &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">           onError(error, stackTrace);</span><br><span class="line">           <span class="keyword">rethrow</span>;</span><br><span class="line">         &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">           onDone();</span><br><span class="line">         &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       handleEvent();</span><br><span class="line">       <span class="keyword">return</span> controller.stream;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
 
 
-<p>思考：<br>你能使用递归的方式改写上述代码逻辑吗？</p>
+<h4 id="四、参考"><a href="#四、参考" class="headerlink" title="四、参考"></a>四、参考</h4><p>主要参考和debug了bloc仓库里面examples中login的例子：<br><a target="_blank" rel="noopener" href="https://github.com/felangel/bloc/tree/master/examples/flutter_login">这里</a></p>
 
     </div>
 
@@ -363,7 +333,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://wangduwei.top/leetcode-reverse-list.html" title="LeetCode 反转单链表">https://wangduwei.top/leetcode-reverse-list.html</a>
+    <a href="https://wangduwei.top/flutter-state-bloc.html" title="flutter状态管理之BloC">https://wangduwei.top/flutter-state-bloc.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -374,9 +344,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/LeetCode/" rel="tag"># LeetCode</a>
-              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
-              <a href="/tags/List/" rel="tag"># List</a>
+              <a href="/tags/Flutter/" rel="tag"># Flutter</a>
           </div>
 
         
@@ -389,11 +357,11 @@
 
         
     <div class="post-nav">
-      <div class="post-nav-item"></div>
       <div class="post-nav-item">
-    <a href="/leetcode-list-add.html" rel="next" title="LeetCode 两数相加">
-      LeetCode 两数相加 <i class="fa fa-chevron-right"></i>
+    <a href="/flutter-state-provider.html" rel="prev" title="Flutter状态管理之Provider">
+      <i class="fa fa-chevron-left"></i> Flutter状态管理之Provider
     </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -466,7 +434,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#LeetCode-206-%E5%8F%8D%E8%BD%AC%E5%8D%95%E9%93%BE%E8%A1%A8"><span class="nav-number">1.</span> <span class="nav-text">LeetCode-206 反转单链表</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">二、结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E3%80%81-%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">三、 实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-BloC%E6%98%AF%E5%9F%BA%E4%BA%8Edart%E7%9A%84Stream-API%E5%AE%9E%E7%8E%B0%E7%9A%84%E5%8F%91%E5%B8%83%E8%AE%A2%E9%98%85%E6%A8%A1%E5%BC%8F%E3%80%82"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 BloC是基于dart的Stream API实现的发布订阅模式。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-%E4%BA%8B%E4%BB%B6%E5%92%8C%E7%8A%B6%E6%80%81%E4%B9%8B%E9%97%B4%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="nav-number">3.2.</span> <span class="nav-text">3.1 事件和状态之间的转换</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">四、参考</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -674,7 +642,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'duweiwang.github.io',
       owner       : 'duweiwang',
       admin       : ['duweiwang'],
-      id          : 'eb5152ef01d1a31647ca7fb5da3cfb00',
+      id          : 'f0ab9d7412915c9b983ea973bd0eb155',
         language: '',
       distractionFreeMode: true
     });

@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2023-06-01T07:47:28.426Z</updated>
+  <updated>2023-07-18T13:32:49.003Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>flutter状态管理之BloC</title>
+    <link href="https://wangduwei.top/flutter-state-bloc.html"/>
+    <id>https://wangduwei.top/flutter-state-bloc.html</id>
+    <published>2023-07-18T13:27:20.000Z</published>
+    <updated>2023-07-18T13:32:49.003Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot; title=&quot;一、概述&quot;&gt;&lt;/a&gt;一、概述&lt;/h4&gt;&lt;p&gt;Bloc = Business Logic Component&lt;/p&gt;
+&lt;center&gt;
+    &lt;img</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Flutter" scheme="https://wangduwei.top/tags/Flutter/"/>
+    
+  </entry>
   
   <entry>
     <title>Flutter状态管理之Provider</title>
@@ -503,31 +529,6 @@
         
     <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot; title=&quot;一、概述&quot;&gt;&lt;/a&gt;一、概述&lt;/h4&gt;&lt;p&gt;你可能注意到了几乎所有的Kotlin标准库里面的高阶函数都是inline类型的。&lt;/p&gt;
 &lt;figure</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Effective Kotlin-51：使用Sequence优化集合操作</title>
-    <link href="https://wangduwei.top/kotlin-lang-sequence.html"/>
-    <id>https://wangduwei.top/kotlin-lang-sequence.html</id>
-    <published>2021-11-06T13:37:43.000Z</published>
-    <updated>2022-06-06T05:59:22.952Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot; title=&quot;一、概述&quot;&gt;&lt;/a&gt;一、概述&lt;/h4&gt;&lt;p&gt;你可能对 &lt;code&gt;Iterable&lt;/code&gt; 和 &lt;code&gt;Sequence&lt;/code&gt;</summary>
         
       
     

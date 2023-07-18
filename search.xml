@@ -842,9 +842,43 @@
       </tags>
   </entry>
   <entry>
-    <title>市盈率和市净率</title>
+    <title>估值指标</title>
     <url>/base-economic-concept.html</url>
-    <content><![CDATA[<h4 id="一、市盈率"><a href="#一、市盈率" class="headerlink" title="一、市盈率"></a>一、市盈率</h4><p>1.1 PE - 静态市盈率</p>
+    <content><![CDATA[<table>
+<thead>
+<tr>
+<th>英文名称</th>
+<th>中文名称</th>
+<th>计算方式</th>
+<th>理解</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PE = Price-to-Earning Ratio</td>
+<td>市盈率</td>
+<td>每股股价/每股盈余 = 市值/净利润</td>
+<td>创造财富的能力、回收成本的时间</td>
+</tr>
+<tr>
+<td>PS = Price-to-Sales Ratio</td>
+<td>市销率</td>
+<td>每股股价/每股营收 = 市值/营收</td>
+<td>获得公司1元的销售收入需要投入多少钱</td>
+</tr>
+<tr>
+<td>PCF =Price-to-Cash-Flow Ratio</td>
+<td>市现率</td>
+<td>每股股价/每股现金流 = 市值/12月现金流</td>
+<td></td>
+</tr>
+<tr>
+<td>PB = Price-to-Book Ratio</td>
+<td>市净率</td>
+<td>每股股价/每股净资产 = 市值/净资产</td>
+<td>净资产的溢价程度</td>
+</tr>
+</tbody></table>
+<h4 id="一、市盈率"><a href="#一、市盈率" class="headerlink" title="一、市盈率"></a>一、市盈率</h4><p>1.1 PE - 静态市盈率</p>
 <blockquote>
 <p>① 市盈率 = 当日收盘价 / 上一年度每股税后利润  </p>
 </blockquote>
@@ -887,7 +921,7 @@
 
 <h4 id="三、市净率"><a href="#三、市净率" class="headerlink" title="三、市净率"></a>三、市净率</h4><p>3.1 PB-市净率</p>
 <blockquote>
-<p>市净率 = 每股市价 / 每股净值产</p>
+<p>市净率 = 每股市价 / 每股净值产<br>每股净资产 = 股东权益 / 总股本</p>
 </blockquote>
 <p>市净率越低那么它的投资价值就越高，这也就意味着它的风险越低。</p>
 ]]></content>
@@ -896,54 +930,6 @@
       </categories>
       <tags>
         <tag>Economics</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>对称/非对称加密和数字签名</title>
-    <url>/basic-encryption-algorithm.html</url>
-    <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
-<p>一般加密和解密的算法是公开的，需要保持隐秘的是密钥k<br>流行的对称加密算法有：DES，Triple-DES，RC2和RC4，AES</p>
-<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
-<li>发送方和接收方首先需要共享相同的密钥，即存在密钥k的分发问题，如何安全的把共享密钥在双方进行分享，这本身也是一个如何安全通信的问题，一种方法是提前双方约定好，不通过具体的通信进行协商，避免被监听和截获。另外一种方式，将是下面我们介绍的通过非对称加密信道进行对称密码的分发和共享，即混合加密系统。</li>
-<li>密钥管理的复杂度问题。由于对称加密的密钥是一对一的使用方式，若一方要跟n方通信，则需要维护n对密钥。</li>
-</ul>
-<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
-<li>加密和解密的速度要比非对称加密快很多，因此常用非对称加密建立的安全信道进行共享密钥的分享，完成后，具体的加解密则使用对称加密。即混合加密系统。</li>
-</ul>
-<p>另外一个点需要重点说明的是，密钥k的长度对解密破解的难度有很重大的影响，k的长度越长，对应的密码空间就越大，遭到暴力破解或者词典破解的难度就更大，就更加安全。</p>
-<center>
-    <img src="../images/dcjm.png" width="400"/>
-</center>
-
-<h4 id="2-数字签名的过程："><a href="#2-数字签名的过程：" class="headerlink" title="2.数字签名的过程："></a>2.数字签名的过程：</h4><ul>
-<li>发送方A首先对变长的报文提取成一个定长的摘要，一般是md5等</li>
-<li>A对摘要应用了一个签名函数，并且用A自己的私钥作为参数，因为只有A才知道私钥，所以正确的签名会说明签名者就是其所有者。</li>
-<li>一旦计算出签名，节点A就将其附加到报文的末尾，并将报文和签名一起都发送给B</li>
-<li>在接收端B，首先会按照同样的算法计算出报文的摘要，然后对签名用A的公钥进行解码，得出解码后的摘要，两个摘要进行比较，则可以判断是否是A发送的且内容没被篡改过。</li>
-</ul>
-<center>
-    <img src="../images/szqm.png" width="400"/>
-</center>
-
-
-<h4 id="3-非对称加解密的过程："><a href="#3-非对称加解密的过程：" class="headerlink" title="3.非对称加解密的过程："></a>3.非对称加解密的过程：</h4><p>加密一方找到接收方的公钥e (如何找到呢？大部分的公钥查找工作实际上都是通过数字证书来实现的)，然后用公钥e对明文p进行加密后得到密文c，并将得到的密文发送给接收方，接收方收到密文后，用自己保留的私钥d进行解密，得到明文p，需要注意的是：用公钥加密的密文，只有拥有私钥的一方才能解密，这样就可以解决加密的各方可以统一使用一个公钥即可。</p>
-<p>常用的非对称加密算法有：RSA</p>
-<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
-<li>不存在密钥分发的问题，解码方可以自己生成密钥对，一个做私钥存起来，另外一个作为公钥进行发布。</li>
-<li>解决了密钥管理的复杂度问题，多个加密方都可以使用一个已知的公钥进行加密，但只有拥有私钥的一方才能解密。</li>
-</ul>
-<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
-<li>非对称加密不足的地方是加解密的速度没有对称加密快。</li>
-</ul>
-<p>综上，分析了对称加密和非对称加密各自的优缺点后，有没有一种办法是可以利用两者的优点但避开对应的缺点呢？答应是有的，实际上用得最多的是混合加密系统，比如在两个节点间通过便捷的公开密码加密技术建立起安全通信，然后再用安全的通信产生并发送临时的随机对称密钥，通过更快的对称加密技术对剩余的数据进行加密。</p>
-<center>
-    <img src="../images/fdcjm.png" width="400"/>
-</center>]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>cryptography</tag>
       </tags>
   </entry>
   <entry>
@@ -1008,6 +994,54 @@
       </categories>
       <tags>
         <tag>计算机基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>对称/非对称加密和数字签名</title>
+    <url>/basic-encryption-algorithm.html</url>
+    <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
+<p>一般加密和解密的算法是公开的，需要保持隐秘的是密钥k<br>流行的对称加密算法有：DES，Triple-DES，RC2和RC4，AES</p>
+<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>发送方和接收方首先需要共享相同的密钥，即存在密钥k的分发问题，如何安全的把共享密钥在双方进行分享，这本身也是一个如何安全通信的问题，一种方法是提前双方约定好，不通过具体的通信进行协商，避免被监听和截获。另外一种方式，将是下面我们介绍的通过非对称加密信道进行对称密码的分发和共享，即混合加密系统。</li>
+<li>密钥管理的复杂度问题。由于对称加密的密钥是一对一的使用方式，若一方要跟n方通信，则需要维护n对密钥。</li>
+</ul>
+<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>加密和解密的速度要比非对称加密快很多，因此常用非对称加密建立的安全信道进行共享密钥的分享，完成后，具体的加解密则使用对称加密。即混合加密系统。</li>
+</ul>
+<p>另外一个点需要重点说明的是，密钥k的长度对解密破解的难度有很重大的影响，k的长度越长，对应的密码空间就越大，遭到暴力破解或者词典破解的难度就更大，就更加安全。</p>
+<center>
+    <img src="../images/dcjm.png" width="400"/>
+</center>
+
+<h4 id="2-数字签名的过程："><a href="#2-数字签名的过程：" class="headerlink" title="2.数字签名的过程："></a>2.数字签名的过程：</h4><ul>
+<li>发送方A首先对变长的报文提取成一个定长的摘要，一般是md5等</li>
+<li>A对摘要应用了一个签名函数，并且用A自己的私钥作为参数，因为只有A才知道私钥，所以正确的签名会说明签名者就是其所有者。</li>
+<li>一旦计算出签名，节点A就将其附加到报文的末尾，并将报文和签名一起都发送给B</li>
+<li>在接收端B，首先会按照同样的算法计算出报文的摘要，然后对签名用A的公钥进行解码，得出解码后的摘要，两个摘要进行比较，则可以判断是否是A发送的且内容没被篡改过。</li>
+</ul>
+<center>
+    <img src="../images/szqm.png" width="400"/>
+</center>
+
+
+<h4 id="3-非对称加解密的过程："><a href="#3-非对称加解密的过程：" class="headerlink" title="3.非对称加解密的过程："></a>3.非对称加解密的过程：</h4><p>加密一方找到接收方的公钥e (如何找到呢？大部分的公钥查找工作实际上都是通过数字证书来实现的)，然后用公钥e对明文p进行加密后得到密文c，并将得到的密文发送给接收方，接收方收到密文后，用自己保留的私钥d进行解密，得到明文p，需要注意的是：用公钥加密的密文，只有拥有私钥的一方才能解密，这样就可以解决加密的各方可以统一使用一个公钥即可。</p>
+<p>常用的非对称加密算法有：RSA</p>
+<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>不存在密钥分发的问题，解码方可以自己生成密钥对，一个做私钥存起来，另外一个作为公钥进行发布。</li>
+<li>解决了密钥管理的复杂度问题，多个加密方都可以使用一个已知的公钥进行加密，但只有拥有私钥的一方才能解密。</li>
+</ul>
+<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>非对称加密不足的地方是加解密的速度没有对称加密快。</li>
+</ul>
+<p>综上，分析了对称加密和非对称加密各自的优缺点后，有没有一种办法是可以利用两者的优点但避开对应的缺点呢？答应是有的，实际上用得最多的是混合加密系统，比如在两个节点间通过便捷的公开密码加密技术建立起安全通信，然后再用安全的通信产生并发送临时的随机对称密钥，通过更快的对称加密技术对剩余的数据进行加密。</p>
+<center>
+    <img src="../images/fdcjm.png" width="400"/>
+</center>]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>cryptography</tag>
       </tags>
   </entry>
   <entry>
@@ -1233,6 +1267,40 @@
       </tags>
   </entry>
   <entry>
+    <title>重定位</title>
+    <url>/file-format-elf-relocation.html</url>
+    <content><![CDATA[<h4 id="一、可重定位文件"><a href="#一、可重定位文件" class="headerlink" title="一、可重定位文件"></a>一、可重定位文件</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//main.c                    //x.c</span><br><span class="line"></span><br><span class="line">extern void foo(void);      |   #include &lt;stdio.h&gt;</span><br><span class="line">                            |</span><br><span class="line">int main(void)              |   void foo()</span><br><span class="line">&#123;                           |   &#123;</span><br><span class="line">    foo();                  |       printf(&quot;foo\n&quot;);</span><br><span class="line">    return 0;               |   &#125;</span><br><span class="line">&#125;                           |</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt; objdump -d main.o</span><br><span class="line">00000000 &lt;main&gt;:</span><br><span class="line">   0:	55                   	push   %ebp</span><br><span class="line">   1:	89 e5                	mov    %esp,%ebp</span><br><span class="line">   3:	83 e4 f0             	and    $0xfffffff0,%esp</span><br><span class="line">   6:	e8 fc ff ff ff       	call   7 &lt;main+0x7&gt;</span><br><span class="line">   b:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  10:	c9                   	leave</span><br><span class="line">  11:	c3                   	ret</span><br></pre></td></tr></table></figure>
+
+<p>在编译和汇编阶段，[main.c -&gt; main.o] 汇编器无法确定外部定义的函数和全局变量的地址，所以它只能使用一个假地址占位，并产生一条额外的记录，让后面的链接器使用这条记录帮它完成地址修正。这条记录对于代码段来说放在[.rel.text] ，对于数据段来说放在[.rel.data],它们都是重定位文件的一个section。</p>
+<p>对于每一条记录都对应于如下的一个数据结构：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr r_offset;</span><br><span class="line">        uint32_t   r_info;</span><br><span class="line">        int32_t    r_addend;</span><br><span class="line">&#125; Elf32_Rela;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="二、静态链接"><a href="#二、静态链接" class="headerlink" title="二、静态链接"></a>二、静态链接</h4><p>1、多个目标文件的合并:</p>
+<center>
+    <img src="../images/elf_obj_file_merge.png" width="500"/>
+</center>
+
+<p>2、对代码段，数据段以及各符号进行地址分配<br>3、根据 [relocation entries] 重新计算代码和数据段中的假地址。</p>
+<h4 id="三、动态链接"><a href="#三、动态链接" class="headerlink" title="三、动态链接"></a>三、动态链接</h4><h5 id="1、静态链接的缺点"><a href="#1、静态链接的缺点" class="headerlink" title="1、静态链接的缺点"></a>1、静态链接的缺点</h5><ul>
+<li>静态链接将使一些公用代码如libc库产生冗余，浪费内存和磁盘空间</li>
+<li>如果模块化开发，一个模块更新就得重新链接</li>
+</ul>
+<h5 id="2、动态链接的概念"><a href="#2、动态链接的概念" class="headerlink" title="2、动态链接的概念"></a>2、动态链接的概念</h5><p>相较于静态链接在编译期进行链接操作，将链接过程推迟到运行时进行的过程叫动态链接。</p>
+<h5 id="3、动态链接的实现"><a href="#3、动态链接的实现" class="headerlink" title="3、动态链接的实现"></a>3、动态链接的实现</h5><p>   3.1 地址无关代码<br>    由于在运行时，代码段是共享的，只能读不能写，所以需要将指令中那些需要修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变，而数据部分可以在每一个进程中拥有一个副本。</p>
+<p>   3.2 全局偏移表（Global Offset Table）<br>    当链接过程发生在运行期时，外部的符号调用只有在运行时装载模块后才能确定模块被装载的地址，以及模块内符号的确切地址。所以ELF提供了一个全局偏移表（GOT）来记录这些外部模块的符号引用。当模块被装载时，会更新此表的内容。</p>
+<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p>1.<a href="https://people.cs.pitt.edu/~xianeizhang/notes/Linking.html#symbol">Linking</a><br>2.<a href="https://stac47.github.io/c/relocation/elf/tutorial/2018/03/01/understanding-relocation-elf.html">understanding-relocation-elf</a><br>3.<a href="http://stffrdhrn.github.io/hardware/embedded/openrisc/2019/11/29/relocs.html">ELF Binaries and Relocation Entries</a><br>4.<a href="http://chuquan.me/2018/06/03/linking-static-linking-dynamic-linking/">static-linking-dynamic-linking</a><br>5.<a href="https://blog.csdn.net/ayu_ag/article/details/78655300">ELF函数重定位问题</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>C/C++</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>ELF文件的结构</title>
     <url>/file-format-elf.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>代码是解决问题的工具。当通过编码方式解决一个问题时，通常有如下步骤：</p>
@@ -1434,37 +1502,88 @@
       </tags>
   </entry>
   <entry>
-    <title>重定位</title>
-    <url>/file-format-elf-relocation.html</url>
-    <content><![CDATA[<h4 id="一、可重定位文件"><a href="#一、可重定位文件" class="headerlink" title="一、可重定位文件"></a>一、可重定位文件</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//main.c                    //x.c</span><br><span class="line"></span><br><span class="line">extern void foo(void);      |   #include &lt;stdio.h&gt;</span><br><span class="line">                            |</span><br><span class="line">int main(void)              |   void foo()</span><br><span class="line">&#123;                           |   &#123;</span><br><span class="line">    foo();                  |       printf(&quot;foo\n&quot;);</span><br><span class="line">    return 0;               |   &#125;</span><br><span class="line">&#125;                           |</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt; objdump -d main.o</span><br><span class="line">00000000 &lt;main&gt;:</span><br><span class="line">   0:	55                   	push   %ebp</span><br><span class="line">   1:	89 e5                	mov    %esp,%ebp</span><br><span class="line">   3:	83 e4 f0             	and    $0xfffffff0,%esp</span><br><span class="line">   6:	e8 fc ff ff ff       	call   7 &lt;main+0x7&gt;</span><br><span class="line">   b:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  10:	c9                   	leave</span><br><span class="line">  11:	c3                   	ret</span><br></pre></td></tr></table></figure>
-
-<p>在编译和汇编阶段，[main.c -&gt; main.o] 汇编器无法确定外部定义的函数和全局变量的地址，所以它只能使用一个假地址占位，并产生一条额外的记录，让后面的链接器使用这条记录帮它完成地址修正。这条记录对于代码段来说放在[.rel.text] ，对于数据段来说放在[.rel.data],它们都是重定位文件的一个section。</p>
-<p>对于每一条记录都对应于如下的一个数据结构：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr r_offset;</span><br><span class="line">        uint32_t   r_info;</span><br><span class="line">        int32_t    r_addend;</span><br><span class="line">&#125; Elf32_Rela;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="二、静态链接"><a href="#二、静态链接" class="headerlink" title="二、静态链接"></a>二、静态链接</h4><p>1、多个目标文件的合并:</p>
+    <title>Flutter状态管理之Provider</title>
+    <url>/flutter-state-provider.html</url>
+    <content><![CDATA[<hr>
+<h4 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h4><p>官方提供的一个简单的状态管理库。</p>
+<p>关键点：</p>
+<ul>
+<li>提取状态:状态变量和UI分离</li>
+<li>访问状态:将UI和状态建立联系</li>
+<li>使用状态:读取状态变量</li>
+</ul>
 <center>
-    <img src="../images/elf_obj_file_merge.png" width="500"/>
+    <img src="../images/ui-equals-function-of-state.png" width="100%"/>
 </center>
 
-<p>2、对代码段，数据段以及各符号进行地址分配<br>3、根据 [relocation entries] 重新计算代码和数据段中的假地址。</p>
-<h4 id="三、动态链接"><a href="#三、动态链接" class="headerlink" title="三、动态链接"></a>三、动态链接</h4><h5 id="1、静态链接的缺点"><a href="#1、静态链接的缺点" class="headerlink" title="1、静态链接的缺点"></a>1、静态链接的缺点</h5><ul>
-<li>静态链接将使一些公用代码如libc库产生冗余，浪费内存和磁盘空间</li>
-<li>如果模块化开发，一个模块更新就得重新链接</li>
-</ul>
-<h5 id="2、动态链接的概念"><a href="#2、动态链接的概念" class="headerlink" title="2、动态链接的概念"></a>2、动态链接的概念</h5><p>相较于静态链接在编译期进行链接操作，将链接过程推迟到运行时进行的过程叫动态链接。</p>
-<h5 id="3、动态链接的实现"><a href="#3、动态链接的实现" class="headerlink" title="3、动态链接的实现"></a>3、动态链接的实现</h5><p>   3.1 地址无关代码<br>    由于在运行时，代码段是共享的，只能读不能写，所以需要将指令中那些需要修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变，而数据部分可以在每一个进程中拥有一个副本。</p>
-<p>   3.2 全局偏移表（Global Offset Table）<br>    当链接过程发生在运行期时，外部的符号调用只有在运行时装载模块后才能确定模块被装载的地址，以及模块内符号的确切地址。所以ELF提供了一个全局偏移表（GOT）来记录这些外部模块的符号引用。当模块被装载时，会更新此表的内容。</p>
-<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p>1.<a href="https://people.cs.pitt.edu/~xianeizhang/notes/Linking.html#symbol">Linking</a><br>2.<a href="https://stac47.github.io/c/relocation/elf/tutorial/2018/03/01/understanding-relocation-elf.html">understanding-relocation-elf</a><br>3.<a href="http://stffrdhrn.github.io/hardware/embedded/openrisc/2019/11/29/relocs.html">ELF Binaries and Relocation Entries</a><br>4.<a href="http://chuquan.me/2018/06/03/linking-static-linking-dynamic-linking/">static-linking-dynamic-linking</a><br>5.<a href="https://blog.csdn.net/ayu_ag/article/details/78655300">ELF函数重定位问题</a></p>
+
+<h4 id="二、Provider的基本使用"><a href="#二、Provider的基本使用" class="headerlink" title="二、Provider的基本使用"></a>二、Provider的基本使用</h4><figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="comment">///<span class="markdown">这是状态</span></span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="title">with</span> <span class="title">ChangeNotifier</span> </span>&#123;</span><br><span class="line">  <span class="built_in">String</span> name = <span class="string">&quot;ChangeNotifierProvider&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">void</span> changName(&#123;<span class="keyword">required</span> <span class="built_in">String</span> newName&#125;) &#123;</span><br><span class="line">    name = newName;</span><br><span class="line">    notifyListeners();<span class="comment">//1</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainApp</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> MainApp(&#123;<span class="keyword">super</span>.key&#125;);</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> ChangeNotifierProvider&lt;Person&gt;(<span class="comment">///<span class="markdown">状态和UI之间建立联系</span></span></span><br><span class="line">      create: (ctx) =&gt; Person(),</span><br><span class="line">      child: <span class="keyword">const</span> MaterialApp(</span><br><span class="line">        home: ChangeNotifierProviderDemo(),</span><br><span class="line">      ),</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChangeNotifierProviderDemo</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> ChangeNotifierProviderDemo(&#123;Key? key&#125;) : <span class="keyword">super</span>(key: key);</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> Scaffold(</span><br><span class="line">      appBar: AppBar(title: <span class="keyword">const</span> Text(<span class="string">&quot;ChangeNotifierProvider&quot;</span>)),</span><br><span class="line">      body: Center(</span><br><span class="line">        child: Column(</span><br><span class="line">          mainAxisAlignment: MainAxisAlignment.spaceEvenly,</span><br><span class="line">          children: [</span><br><span class="line">            Consumer&lt;Person&gt;(<span class="comment">///<span class="markdown">使用状态</span></span></span><br><span class="line">              builder: (ctx, person, child) =&gt; Text(person.name),</span><br><span class="line">            ),</span><br><span class="line">            Consumer&lt;Person&gt;(</span><br><span class="line">              builder: (ctx, person, child) &#123;</span><br><span class="line">                <span class="keyword">return</span> ElevatedButton(</span><br><span class="line">                  onPressed: () =&gt; person.changName(newName: <span class="string">&quot;ChangeNotifierProvider更新了&quot;</span>),</span><br><span class="line">                  child: <span class="keyword">const</span> Text(<span class="string">&quot;点击更新&quot;</span>),</span><br><span class="line">                );</span><br><span class="line">              &#125;,</span><br><span class="line">            ),</span><br><span class="line">          ],</span><br><span class="line">        ),</span><br><span class="line">      ),</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="三、Provider的类结构"><a href="#三、Provider的类结构" class="headerlink" title="三、Provider的类结构"></a>三、Provider的类结构</h4><center>
+    <img src="../images/flutter/flutter_provider.png" width="100%"/>
+</center>
+
+
+<p>3.1 InheritedProvider的子类只是具体功能的实现，基础逻辑封装在InheritedProvider中<br>3.2 InheritedProvider将职责转嫁给_InheritedProviderScope而_InheritedProviderScope是一个InheritedWidget</p>
+<h4 id="四、如何实现监听"><a href="#四、如何实现监听" class="headerlink" title="四、如何实现监听"></a>四、如何实现监听</h4><p>1、数据实现了ChangeNotifier，变更后调用notifyListeners(),触发回调。</p>
+<p>2、ChangeNotifierProvider继承自ListenableProvider，ListenableProvider构建时开启监听：</p>
+<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> VoidCallback _startListening(</span><br><span class="line">  InheritedContext e,</span><br><span class="line">  Listenable? value,</span><br><span class="line">) &#123;</span><br><span class="line">  value?.addListener(e.markNeedsNotifyDependents);</span><br><span class="line">  <span class="keyword">return</span> () =&gt; value?.removeListener(e.markNeedsNotifyDependents);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>class InheritedContext extends BuildContext{<br>    void markNeedsNotifyDependents();<br>}</p>
+<p>3、markNeedsNotifyDependents是<code>InheritedContext</code>中的方法，其实现类是<code>_InheritedProviderScopeElement</code></p>
+<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="meta">@override</span></span><br><span class="line">  <span class="keyword">void</span> markNeedsNotifyDependents() &#123;</span><br><span class="line">    <span class="keyword">if</span> (!_isNotifyDependentsEnabled) &#123;</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    markNeedsBuild();</span><br><span class="line">    _shouldNotifyDependents = <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>4、markNeedsBuild是Element的方法：标记需要重新构建</p>
+<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="keyword">void</span> markNeedsBuild() &#123;</span><br><span class="line">    ...  </span><br><span class="line">    <span class="keyword">if</span> (dirty) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    _dirty = <span class="keyword">true</span>;</span><br><span class="line">    owner!.scheduleBuildFor(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="五、局部更新"><a href="#五、局部更新" class="headerlink" title="五、局部更新"></a>五、局部更新</h4><p>Provider的<code>Selector</code>提供了缓存Widget的功能，当Widget没有变化时，将直接返回缓存，否则重新build。</p>
+<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_Selector0State</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">SingleChildState</span>&lt;<span class="title">Selector0</span>&lt;<span class="title">T</span>&gt;&gt; </span>&#123;</span><br><span class="line">  T? value;</span><br><span class="line">  Widget? cache;<span class="comment">//这是缓存</span></span><br><span class="line">  Widget? oldWidget;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget buildWithChild(BuildContext context, Widget? child) &#123;</span><br><span class="line">    <span class="keyword">final</span> selected = widget.selector(context);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> shouldInvalidateCache = oldWidget != widget ||</span><br><span class="line">        (widget._shouldRebuild != <span class="keyword">null</span> &amp;&amp;</span><br><span class="line">            widget._shouldRebuild!(value <span class="keyword">as</span> T, selected)) ||</span><br><span class="line">        (widget._shouldRebuild == <span class="keyword">null</span> &amp;&amp;</span><br><span class="line">            !<span class="keyword">const</span> DeepCollectionEquality().equals(value, selected));</span><br><span class="line">    <span class="keyword">if</span> (shouldInvalidateCache) &#123;<span class="comment">//需要重新构建</span></span><br><span class="line">      value = selected;</span><br><span class="line">      oldWidget = widget;</span><br><span class="line">      cache = widget.builder(</span><br><span class="line">        context,</span><br><span class="line">        selected,</span><br><span class="line">        child,</span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> cache!;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  <span class="keyword">void</span> debugFillProperties(DiagnosticPropertiesBuilder properties) &#123;</span><br><span class="line">    <span class="keyword">super</span>.debugFillProperties(properties);</span><br><span class="line">    properties.add(DiagnosticsProperty&lt;T&gt;(<span class="string">&#x27;value&#x27;</span>, value));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="六、参考"><a href="#六、参考" class="headerlink" title="六、参考"></a>六、参考</h4><p><a href="https://juejin.cn/post/7067356022272163847#heading-16">https://juejin.cn/post/7067356022272163847#heading-16</a></p>
 ]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
       <tags>
-        <tag>C/C++</tag>
+        <tag>Flutter</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>flutter状态管理之BloC</title>
+    <url>/flutter-state-bloc.html</url>
+    <content><![CDATA[<hr>
+<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>Bloc = Business Logic Component</p>
+<center>
+    <img src="../images/flutter/bloc_architecture.png" width="60%"/>
+</center>
+
+
+<h4 id="二、结构"><a href="#二、结构" class="headerlink" title="二、结构"></a>二、结构</h4><p>BloC本身是一个独立的package、flutter-bloc基于BloC和Provider实现，其结构如下图所示：</p>
+<center>
+    <img src="../images/flutter/flutter_bloc.png" width="100%"/>
+</center>
+
+<h4 id="三、-实现"><a href="#三、-实现" class="headerlink" title="三、 实现"></a>三、 实现</h4><h5 id="3-1-BloC是基于dart的Stream-API实现的发布订阅模式。"><a href="#3-1-BloC是基于dart的Stream-API实现的发布订阅模式。" class="headerlink" title="3.1 BloC是基于dart的Stream API实现的发布订阅模式。"></a>3.1 BloC是基于dart的Stream API实现的发布订阅模式。</h5><ul>
+<li>通过on方法订阅事件并提供处理函数，收到Event再将Event转换成State返回给Bloc</li>
+<li>通过add方法发布事件</li>
+</ul>
+<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Bloc</span>&lt;<span class="title">Event</span>, <span class="title">State</span>&gt; <span class="keyword">extends</span> <span class="title">BlocBase</span>&lt;<span class="title">State</span>&gt;</span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">BlocEventSink</span>&lt;<span class="title">Event</span>&gt; </span>&#123;</span><br><span class="line">     <span class="comment">//所有的订阅者</span></span><br><span class="line">     <span class="keyword">final</span> _subscriptions = &lt;StreamSubscription&lt;<span class="built_in">dynamic</span>&gt;&gt;[];</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">final</span> _eventController = StreamController&lt;Event&gt;.broadcast();</span><br><span class="line">     </span><br><span class="line">     <span class="comment">//添加订阅者</span></span><br><span class="line">     <span class="keyword">void</span> <span class="keyword">on</span>&lt;E <span class="keyword">extends</span> Event&gt;(</span><br><span class="line">       EventHandler&lt;E, State&gt; handler, &#123;</span><br><span class="line">       EventTransformer&lt;E&gt;? transformer,</span><br><span class="line">     &#125;) &#123;</span><br><span class="line">        <span class="comment">//这里开始了listen</span></span><br><span class="line">        <span class="keyword">final</span> subscription = xxx.listen(<span class="keyword">null</span>);</span><br><span class="line">        _subscriptions.add(subscription);</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">     <span class="meta">@override</span></span><br><span class="line">     <span class="keyword">void</span> add(Event event) &#123;</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">         onEvent(event);</span><br><span class="line">         _eventController.add(event);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">         onError(error, stackTrace);</span><br><span class="line">         <span class="keyword">rethrow</span>;</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<center>
+    <img src="../images/flutter/flutter-bloc-inner.png" width="50%"/>
+</center>
+
+
+<h5 id="3-1-事件和状态之间的转换"><a href="#3-1-事件和状态之间的转换" class="headerlink" title="3.1 事件和状态之间的转换"></a>3.1 事件和状态之间的转换</h5><ul>
+<li>转换逻辑有业务层通过on()注入</li>
+<li>内部的核心是_Emitter以及 <em>_eventController</em> 和 <em>_stateController</em></li>
+</ul>
+<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line">(<span class="built_in">dynamic</span> event) &#123;</span><br><span class="line">       <span class="keyword">void</span> onEmit(State state) &#123;</span><br><span class="line">         <span class="keyword">if</span> (isClosed) <span class="keyword">return</span>;</span><br><span class="line">         <span class="keyword">if</span> (<span class="keyword">this</span>.state == state &amp;&amp; _emitted) <span class="keyword">return</span>;</span><br><span class="line">         onTransition(Transition(</span><br><span class="line">           currentState: <span class="keyword">this</span>.state,</span><br><span class="line">           event: event <span class="keyword">as</span> E,</span><br><span class="line">           nextState: state,</span><br><span class="line">         ));</span><br><span class="line">         emit(state);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">final</span> emitter = _Emitter(onEmit);</span><br><span class="line">       <span class="keyword">final</span> controller = StreamController&lt;E&gt;.broadcast(</span><br><span class="line">         <span class="keyword">sync</span>: <span class="keyword">true</span>,</span><br><span class="line">         onCancel: emitter.cancel,</span><br><span class="line">       );</span><br><span class="line"></span><br><span class="line">       <span class="keyword">void</span> handleEvent() <span class="keyword">async</span> &#123;</span><br><span class="line">         <span class="keyword">void</span> onDone() &#123;</span><br><span class="line">           emitter.complete();</span><br><span class="line">           _emitters.remove(emitter);</span><br><span class="line">           <span class="keyword">if</span> (!controller.isClosed) controller.close();</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">try</span> &#123;</span><br><span class="line">           _emitters.add(emitter);</span><br><span class="line">           <span class="comment">//交给外部实现转换事件和状态</span></span><br><span class="line">           <span class="keyword">await</span> handler(event <span class="keyword">as</span> E, emitter);</span><br><span class="line">         &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">           onError(error, stackTrace);</span><br><span class="line">           <span class="keyword">rethrow</span>;</span><br><span class="line">         &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">           onDone();</span><br><span class="line">         &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       handleEvent();</span><br><span class="line">       <span class="keyword">return</span> controller.stream;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="四、参考"><a href="#四、参考" class="headerlink" title="四、参考"></a>四、参考</h4><p>主要参考和debug了bloc仓库里面examples中login的例子：<br><a href="https://github.com/felangel/bloc/tree/master/examples/flutter_login">这里</a></p>
+]]></content>
+      <tags>
+        <tag>Flutter</tag>
       </tags>
   </entry>
   <entry>
@@ -1552,52 +1671,6 @@
       <categories>
         <category>Flutter</category>
       </categories>
-      <tags>
-        <tag>Flutter</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Flutter状态管理之Provider</title>
-    <url>/flutter-state-provider.html</url>
-    <content><![CDATA[<hr>
-<h4 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h4><p>官方提供的一个简单的状态管理库。</p>
-<p>关键点：</p>
-<ul>
-<li>提取状态:状态变量和UI分离</li>
-<li>访问状态:将UI和状态建立联系</li>
-<li>使用状态:读取状态变量</li>
-</ul>
-<center>
-    <img src="../images/ui-equals-function-of-state.png" width="100%"/>
-</center>
-
-
-<h4 id="二、Provider的基本使用"><a href="#二、Provider的基本使用" class="headerlink" title="二、Provider的基本使用"></a>二、Provider的基本使用</h4><figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="comment">///<span class="markdown">这是状态</span></span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="title">with</span> <span class="title">ChangeNotifier</span> </span>&#123;</span><br><span class="line">  <span class="built_in">String</span> name = <span class="string">&quot;ChangeNotifierProvider&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">void</span> changName(&#123;<span class="keyword">required</span> <span class="built_in">String</span> newName&#125;) &#123;</span><br><span class="line">    name = newName;</span><br><span class="line">    notifyListeners();<span class="comment">//1</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainApp</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> MainApp(&#123;<span class="keyword">super</span>.key&#125;);</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> ChangeNotifierProvider&lt;Person&gt;(<span class="comment">///<span class="markdown">状态和UI之间建立联系</span></span></span><br><span class="line">      create: (ctx) =&gt; Person(),</span><br><span class="line">      child: <span class="keyword">const</span> MaterialApp(</span><br><span class="line">        home: ChangeNotifierProviderDemo(),</span><br><span class="line">      ),</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChangeNotifierProviderDemo</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> ChangeNotifierProviderDemo(&#123;Key? key&#125;) : <span class="keyword">super</span>(key: key);</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> Scaffold(</span><br><span class="line">      appBar: AppBar(title: <span class="keyword">const</span> Text(<span class="string">&quot;ChangeNotifierProvider&quot;</span>)),</span><br><span class="line">      body: Center(</span><br><span class="line">        child: Column(</span><br><span class="line">          mainAxisAlignment: MainAxisAlignment.spaceEvenly,</span><br><span class="line">          children: [</span><br><span class="line">            Consumer&lt;Person&gt;(<span class="comment">///<span class="markdown">使用状态</span></span></span><br><span class="line">              builder: (ctx, person, child) =&gt; Text(person.name),</span><br><span class="line">            ),</span><br><span class="line">            Consumer&lt;Person&gt;(</span><br><span class="line">              builder: (ctx, person, child) &#123;</span><br><span class="line">                <span class="keyword">return</span> ElevatedButton(</span><br><span class="line">                  onPressed: () =&gt; person.changName(newName: <span class="string">&quot;ChangeNotifierProvider更新了&quot;</span>),</span><br><span class="line">                  child: <span class="keyword">const</span> Text(<span class="string">&quot;点击更新&quot;</span>),</span><br><span class="line">                );</span><br><span class="line">              &#125;,</span><br><span class="line">            ),</span><br><span class="line">          ],</span><br><span class="line">        ),</span><br><span class="line">      ),</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="三、Provider的类结构"><a href="#三、Provider的类结构" class="headerlink" title="三、Provider的类结构"></a>三、Provider的类结构</h4><center>
-    <img src="../images/flutter/flutter_provider.png" width="100%"/>
-</center>
-
-
-<p>3.1 InheritedProvider的子类只是具体功能的实现，基础逻辑封装在InheritedProvider中<br>3.2 InheritedProvider将职责转嫁给_InheritedProviderScope而_InheritedProviderScope是一个InheritedWidget</p>
-<h4 id="四、如何实现监听"><a href="#四、如何实现监听" class="headerlink" title="四、如何实现监听"></a>四、如何实现监听</h4><p>1、数据实现了ChangeNotifier，变更后调用notifyListeners(),触发回调。</p>
-<p>2、ChangeNotifierProvider继承自ListenableProvider，ListenableProvider构建时开启监听：</p>
-<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> VoidCallback _startListening(</span><br><span class="line">  InheritedContext e,</span><br><span class="line">  Listenable? value,</span><br><span class="line">) &#123;</span><br><span class="line">  value?.addListener(e.markNeedsNotifyDependents);</span><br><span class="line">  <span class="keyword">return</span> () =&gt; value?.removeListener(e.markNeedsNotifyDependents);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>class InheritedContext extends BuildContext{<br>    void markNeedsNotifyDependents();<br>}</p>
-<p>3、markNeedsNotifyDependents是<code>InheritedContext</code>中的方法，其实现类是<code>_InheritedProviderScopeElement</code></p>
-<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="meta">@override</span></span><br><span class="line">  <span class="keyword">void</span> markNeedsNotifyDependents() &#123;</span><br><span class="line">    <span class="keyword">if</span> (!_isNotifyDependentsEnabled) &#123;</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    markNeedsBuild();</span><br><span class="line">    _shouldNotifyDependents = <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-<p>4、markNeedsBuild是Element的方法：标记需要重新构建</p>
-<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="keyword">void</span> markNeedsBuild() &#123;</span><br><span class="line">    ...  </span><br><span class="line">    <span class="keyword">if</span> (dirty) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    _dirty = <span class="keyword">true</span>;</span><br><span class="line">    owner!.scheduleBuildFor(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="五、局部更新"><a href="#五、局部更新" class="headerlink" title="五、局部更新"></a>五、局部更新</h4><p>Provider的<code>Selector</code>提供了缓存Widget的功能，当Widget没有变化时，将直接返回缓存，否则重新build。</p>
-<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_Selector0State</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">SingleChildState</span>&lt;<span class="title">Selector0</span>&lt;<span class="title">T</span>&gt;&gt; </span>&#123;</span><br><span class="line">  T? value;</span><br><span class="line">  Widget? cache;<span class="comment">//这是缓存</span></span><br><span class="line">  Widget? oldWidget;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget buildWithChild(BuildContext context, Widget? child) &#123;</span><br><span class="line">    <span class="keyword">final</span> selected = widget.selector(context);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> shouldInvalidateCache = oldWidget != widget ||</span><br><span class="line">        (widget._shouldRebuild != <span class="keyword">null</span> &amp;&amp;</span><br><span class="line">            widget._shouldRebuild!(value <span class="keyword">as</span> T, selected)) ||</span><br><span class="line">        (widget._shouldRebuild == <span class="keyword">null</span> &amp;&amp;</span><br><span class="line">            !<span class="keyword">const</span> DeepCollectionEquality().equals(value, selected));</span><br><span class="line">    <span class="keyword">if</span> (shouldInvalidateCache) &#123;<span class="comment">//需要重新构建</span></span><br><span class="line">      value = selected;</span><br><span class="line">      oldWidget = widget;</span><br><span class="line">      cache = widget.builder(</span><br><span class="line">        context,</span><br><span class="line">        selected,</span><br><span class="line">        child,</span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> cache!;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  <span class="keyword">void</span> debugFillProperties(DiagnosticPropertiesBuilder properties) &#123;</span><br><span class="line">    <span class="keyword">super</span>.debugFillProperties(properties);</span><br><span class="line">    properties.add(DiagnosticsProperty&lt;T&gt;(<span class="string">&#x27;value&#x27;</span>, value));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="六、参考"><a href="#六、参考" class="headerlink" title="六、参考"></a>六、参考</h4><p><a href="https://juejin.cn/post/7067356022272163847#heading-16">https://juejin.cn/post/7067356022272163847#heading-16</a></p>
-]]></content>
       <tags>
         <tag>Flutter</tag>
       </tags>
