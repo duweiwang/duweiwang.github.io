@@ -1,9 +1,27 @@
 @startuml
 'https://plantuml.com/class-diagram
 
+
+package flutter {
+
+    abstract Widget
+    abstract class StatefulWidget
+    abstract class StatelessWidget
+
+     abstract class SingleChildStatefulWidget
+     abstract class SingleChildStatelessWidget
+
+     Widget <|-- StatefulWidget
+     Widget <|-- StatelessWidget
+
+    StatefulWidget <|-- SingleChildStatefulWidget
+    StatelessWidget <|-- SingleChildStatelessWidget
+}
+
+
 package bloc{
-    class BlocBase
-    class Bloc
+    abstract class BlocBase<State>
+    abstract class Bloc<Event, State>
 
     abstract class Emittable
     abstract class Closable
@@ -13,19 +31,34 @@ package bloc{
     abstract class Streamable
     abstract class StateStreamable
     abstract class BlocObserver
-    class _DefaultBlocObserver
+'    class _DefaultBlocObserver
+
+    abstract class Emitter<State>
+
+    class _Emitter<State>
+    class _Handler
+    class Change<State>
+    class Transition<Event,State>
+    Change <|-- Transition
+
+    BlocBase <|-- Bloc
+    StateStreamableSource <|.. BlocBase
+    Emittable <|.. BlocBase
+    ErrorSink <|.. BlocBase
+    Closable <|.. ErrorSink
+    Streamable <.. StateStreamable
+    StateStreamable <.. StateStreamableSource
+    Bloc *-- BlocObserver
+
+    Emitter <|.. _Emitter
+
+    Bloc "1"*--"n" _Emitter
+    Bloc "1"*--"n" _Handler
 }
 
-BlocBase <|-- Bloc
-StateStreamableSource <|.. BlocBase
-Emittable <|.. BlocBase
-ErrorSink <|.. BlocBase
-Closable <|.. ErrorSink
-
-Streamable <.. StateStreamable
-StateStreamable <.. StateStreamableSource
-
-BlocObserver <|-- _DefaultBlocObserver
+package provider{
+    class InheritedProvider
+}
 
 package flutter_bloc {
 
@@ -34,31 +67,34 @@ package flutter_bloc {
     class BlocListener
     class BlocProvider
     class BlocBuilder
+
+    BlocListenerBase <|-- BlocListener
+    BlocBuilderBase <|-- BlocBuilder
 }
 
-package flutter {
-    class SingleChildStatefulWidget
-    class SingleChildStatelessWidget
-    class StatefulWidget
-}
+InheritedProvider <.. BlocProvider
+
+'package demo{
+'
+'    class DemoPage
+'    class DemoBloc
+'
+'}
+'
+'DemoPage *-- BlocListener
+'DemoPage *-- BlocBuilder
+'DemoPage *-- BlocProvider
+'Bloc <|-- DemoBloc
 
 SingleChildStatefulWidget <|-- BlocListenerBase
 SingleChildStatelessWidget <|-- BlocProvider
 StatefulWidget <|-- BlocBuilderBase
 
-BlocListenerBase <|-- BlocListener
-BlocBuilderBase <|-- BlocBuilder
+
 
 BlocProvider *-- StateStreamableSource
 BlocBuilderBase *-- StateStreamable
+BlocListenerBase *-- StateStreamable
 
-Bloc *-- BlocObserver
-
-package demo{
-
-    class Page{}
-}
-
-Page *-- BlocListener
-Page *-- BlocBuilder
+SingleChildStatelessWidget <|-- InheritedProvider
 @enduml
