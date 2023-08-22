@@ -1,54 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Android消息机制</title>
-    <url>/android-aosp-event-loop.html</url>
-    <content><![CDATA[<hr>
-<h4 id="一、相关类和结构"><a href="#一、相关类和结构" class="headerlink" title="一、相关类和结构"></a>一、相关类和结构</h4><center>
-    <img src="../images/android-basic-eventloop.png" width="100%"/>
-</center>
-
-<h4 id="二、基本使用"><a href="#二、基本使用" class="headerlink" title="二、基本使用"></a>二、基本使用</h4><h5 id="2-1-主线程的事件循环"><a href="#2-1-主线程的事件循环" class="headerlink" title="2.1 主线程的事件循环"></a>2.1 主线程的事件循环</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> android.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ActivityThread</span> <span class="keyword">extends</span> <span class="title">ClientTransactionHandler</span></span></span><br><span class="line"><span class="class">        <span class="keyword">implements</span> <span class="title">ActivityThreadInternal</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">         <span class="comment">//...</span></span><br><span class="line">         Looper.prepareMainLooper();</span><br><span class="line">         </span><br><span class="line">         Looper.loop();</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h5 id="2-2-构建自己的事件循环"><a href="#2-2-构建自己的事件循环" class="headerlink" title="2.2 构建自己的事件循环"></a>2.2 构建自己的事件循环</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LooperThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">      <span class="keyword">public</span> Handler mHandler;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">          Looper.prepare();</span><br><span class="line"></span><br><span class="line">          mHandler = <span class="keyword">new</span> Handler() &#123;</span><br><span class="line">              <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(Message msg)</span> </span>&#123;</span><br><span class="line">                  <span class="comment">// process incoming messages here</span></span><br><span class="line">              &#125;</span><br><span class="line">          &#125;;</span><br><span class="line"></span><br><span class="line">          Looper.loop();</span><br><span class="line">      &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="三、原理剖析"><a href="#三、原理剖析" class="headerlink" title="三、原理剖析"></a>三、原理剖析</h4><h5 id="3-1-构建事件循环"><a href="#3-1-构建事件循环" class="headerlink" title="3.1 构建事件循环"></a>3.1 构建事件循环</h5><center>
-    <img src="../images/android-basic-eventloop-start.png" width="70%"/>
-</center>
-
-
-<h5 id="3-2-发送消息"><a href="#3-2-发送消息" class="headerlink" title="3.2 发送消息"></a>3.2 发送消息</h5><center>
-    <img src="../images/android-basic-eventloop-send.png" width="70%"/>
-</center>
-
-
-<h5 id="3-3-消息执行"><a href="#3-3-消息执行" class="headerlink" title="3.3 消息执行"></a>3.3 消息执行</h5><center>
-    <img src="../images/android-basic-eventloop-callback.png" width="50%"/>
-</center>
-
-<h5 id="3-4-同步屏障"><a href="#3-4-同步屏障" class="headerlink" title="3.4 同步屏障"></a>3.4 同步屏障</h5><h6 id="3-4-1-消息的分类"><a href="#3-4-1-消息的分类" class="headerlink" title="3.4.1 消息的分类"></a>3.4.1 消息的分类</h6><ul>
-<li>同步消息</li>
-<li>异步消息</li>
-<li>屏障消息</li>
-</ul>
-<h6 id="3-4-2-同步屏障是什么"><a href="#3-4-2-同步屏障是什么" class="headerlink" title="3.4.2 同步屏障是什么"></a>3.4.2 同步屏障是什么</h6><p>一种特殊的Message，其target=null</p>
-<h6 id="3-4-3-同步屏障工作原理"><a href="#3-4-3-同步屏障工作原理" class="headerlink" title="3.4.3 同步屏障工作原理"></a>3.4.3 同步屏障工作原理</h6><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function">Message <span class="title">next</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> pendingIdleHandlerCount = -<span class="number">1</span>; <span class="comment">// -1 only during first iteration</span></span><br><span class="line">    <span class="keyword">int</span> nextPollTimeoutMillis = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="comment">// Try to retrieve the next message.  Return if found.</span></span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">long</span> now = SystemClock.uptimeMillis();</span><br><span class="line">            Message prevMsg = <span class="keyword">null</span>;</span><br><span class="line">            Message msg = mMessages;</span><br><span class="line">            <span class="keyword">if</span> (msg != <span class="keyword">null</span> &amp;&amp; msg.target == <span class="keyword">null</span>) &#123;<span class="comment">//碰到同步屏障</span></span><br><span class="line">                <span class="comment">// Stalled by a barrier.  Find the next asynchronous message in the queue.</span></span><br><span class="line">                <span class="comment">// do while循环遍历消息链表</span></span><br><span class="line">                <span class="comment">// 跳出循环时，msg指向离表头最近的一个异步消息</span></span><br><span class="line">                <span class="keyword">do</span> &#123;</span><br><span class="line">                    prevMsg = msg;</span><br><span class="line">                    msg = msg.next;</span><br><span class="line">                &#125; <span class="keyword">while</span> (msg != <span class="keyword">null</span> &amp;&amp; !msg.isAsynchronous());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (msg != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (now &lt; msg.when) &#123;</span><br><span class="line">                    <span class="comment">//...</span></span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// Got a message.</span></span><br><span class="line">                    mBlocked = <span class="keyword">false</span>;</span><br><span class="line">                    <span class="keyword">if</span> (prevMsg != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        <span class="comment">//将msg从消息链表中移除</span></span><br><span class="line">                        prevMsg.next = msg.next;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        mMessages = msg.next;</span><br><span class="line">                    &#125;</span><br><span class="line">                    msg.next = <span class="keyword">null</span>;</span><br><span class="line">                    <span class="keyword">if</span> (DEBUG) Log.v(TAG, <span class="string">&quot;Returning message: &quot;</span> + msg);</span><br><span class="line">                    msg.markInUse();</span><br><span class="line">                    <span class="comment">//返回异步消息</span></span><br><span class="line">                    <span class="keyword">return</span> msg;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// No more messages.</span></span><br><span class="line">                nextPollTimeoutMillis = -<span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>当设置了同步屏障之后，next函数将会忽略所有的同步消息，返回异步消息。换句话说就是，设置了同步屏障之后，Handler只会处理异步消息。再换句话说，同步屏障为Handler消息机制增加了一种简单的优先级机制，异步消息的优先级要高于同步消息。</p>
-<h6 id="3-4-4-实际应用"><a href="#3-4-4-实际应用" class="headerlink" title="3.4.4 实际应用"></a>3.4.4 实际应用</h6><p>Android应用框架中为了更快的响应UI刷新事件在ViewRootImpl.scheduleTraversals中使用了同步屏障</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">scheduleTraversals</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!mTraversalScheduled) &#123;</span><br><span class="line">        mTraversalScheduled = <span class="keyword">true</span>;</span><br><span class="line">        <span class="comment">//设置同步障碍，确保mTraversalRunnable优先被执行</span></span><br><span class="line">        mTraversalBarrier = mHandler.getLooper().getQueue().postSyncBarrier();</span><br><span class="line">        <span class="comment">//内部通过Handler发送了一个异步消息</span></span><br><span class="line">        mChoreographer.postCallback(</span><br><span class="line">                Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, <span class="keyword">null</span>);</span><br><span class="line">        <span class="keyword">if</span> (!mUnbufferedInputDispatch) &#123;</span><br><span class="line">            scheduleConsumeBatchedInput();</span><br><span class="line">        &#125;</span><br><span class="line">        notifyRendererOfFramePending();</span><br><span class="line">        pokeDrawLockIfNeeded();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="四、其他"><a href="#四、其他" class="headerlink" title="四、其他"></a>四、其他</h4><p><a href="https://www.jxhs.me/2021/04/08/linux%E5%86%85%E6%A0%B8Epoll-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">Epoll 实现原理</a></p>
-<p><a href="https://www.cnblogs.com/LoyenWang/p/12622904.html">Linux select/poll机制原理分析</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Android中的约束布局</title>
     <url>/android-basic-constraintlayout.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>&ensp;&ensp;&ensp;&ensp;Android中的视图是以树的形式组织起来的，它是一种层次结构。在代码中体现为组合模式，一个ViewGroup可以包含一个或多个View，同时ViewGroup又是一个View。在布局文件中体现为xml的结点和缩进。<br>&ensp;&ensp;&ensp;&ensp;同时视图的渲染少不了对其进行遍历，这就涉及数据结构中树的深度优先遍历和广度优先遍历。有时候一些复杂的布局一次遍历还无法完全确定View的信息。如何通过算法方式降低树的层次呢？也许这就是约束布局存在的意义吧。<br>&ensp;&ensp;&ensp;&ensp;在Android中，灵活运用ConstraintLayout包括以下几个点：</p>
@@ -361,6 +313,54 @@
       </tags>
   </entry>
   <entry>
+    <title>Android消息机制</title>
+    <url>/android-aosp-event-loop.html</url>
+    <content><![CDATA[<hr>
+<h4 id="一、相关类和结构"><a href="#一、相关类和结构" class="headerlink" title="一、相关类和结构"></a>一、相关类和结构</h4><center>
+    <img src="../images/android-basic-eventloop.png" width="100%"/>
+</center>
+
+<h4 id="二、基本使用"><a href="#二、基本使用" class="headerlink" title="二、基本使用"></a>二、基本使用</h4><h5 id="2-1-主线程的事件循环"><a href="#2-1-主线程的事件循环" class="headerlink" title="2.1 主线程的事件循环"></a>2.1 主线程的事件循环</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> android.app;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ActivityThread</span> <span class="keyword">extends</span> <span class="title">ClientTransactionHandler</span></span></span><br><span class="line"><span class="class">        <span class="keyword">implements</span> <span class="title">ActivityThreadInternal</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">         <span class="comment">//...</span></span><br><span class="line">         Looper.prepareMainLooper();</span><br><span class="line">         </span><br><span class="line">         Looper.loop();</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h5 id="2-2-构建自己的事件循环"><a href="#2-2-构建自己的事件循环" class="headerlink" title="2.2 构建自己的事件循环"></a>2.2 构建自己的事件循环</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LooperThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">      <span class="keyword">public</span> Handler mHandler;</span><br><span class="line"></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">          Looper.prepare();</span><br><span class="line"></span><br><span class="line">          mHandler = <span class="keyword">new</span> Handler() &#123;</span><br><span class="line">              <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(Message msg)</span> </span>&#123;</span><br><span class="line">                  <span class="comment">// process incoming messages here</span></span><br><span class="line">              &#125;</span><br><span class="line">          &#125;;</span><br><span class="line"></span><br><span class="line">          Looper.loop();</span><br><span class="line">      &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="三、原理剖析"><a href="#三、原理剖析" class="headerlink" title="三、原理剖析"></a>三、原理剖析</h4><h5 id="3-1-构建事件循环"><a href="#3-1-构建事件循环" class="headerlink" title="3.1 构建事件循环"></a>3.1 构建事件循环</h5><center>
+    <img src="../images/android-basic-eventloop-start.png" width="70%"/>
+</center>
+
+
+<h5 id="3-2-发送消息"><a href="#3-2-发送消息" class="headerlink" title="3.2 发送消息"></a>3.2 发送消息</h5><center>
+    <img src="../images/android-basic-eventloop-send.png" width="70%"/>
+</center>
+
+
+<h5 id="3-3-消息执行"><a href="#3-3-消息执行" class="headerlink" title="3.3 消息执行"></a>3.3 消息执行</h5><center>
+    <img src="../images/android-basic-eventloop-callback.png" width="50%"/>
+</center>
+
+<h5 id="3-4-同步屏障"><a href="#3-4-同步屏障" class="headerlink" title="3.4 同步屏障"></a>3.4 同步屏障</h5><h6 id="3-4-1-消息的分类"><a href="#3-4-1-消息的分类" class="headerlink" title="3.4.1 消息的分类"></a>3.4.1 消息的分类</h6><ul>
+<li>同步消息</li>
+<li>异步消息</li>
+<li>屏障消息</li>
+</ul>
+<h6 id="3-4-2-同步屏障是什么"><a href="#3-4-2-同步屏障是什么" class="headerlink" title="3.4.2 同步屏障是什么"></a>3.4.2 同步屏障是什么</h6><p>一种特殊的Message，其target=null</p>
+<h6 id="3-4-3-同步屏障工作原理"><a href="#3-4-3-同步屏障工作原理" class="headerlink" title="3.4.3 同步屏障工作原理"></a>3.4.3 同步屏障工作原理</h6><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function">Message <span class="title">next</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> pendingIdleHandlerCount = -<span class="number">1</span>; <span class="comment">// -1 only during first iteration</span></span><br><span class="line">    <span class="keyword">int</span> nextPollTimeoutMillis = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="comment">// Try to retrieve the next message.  Return if found.</span></span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">long</span> now = SystemClock.uptimeMillis();</span><br><span class="line">            Message prevMsg = <span class="keyword">null</span>;</span><br><span class="line">            Message msg = mMessages;</span><br><span class="line">            <span class="keyword">if</span> (msg != <span class="keyword">null</span> &amp;&amp; msg.target == <span class="keyword">null</span>) &#123;<span class="comment">//碰到同步屏障</span></span><br><span class="line">                <span class="comment">// Stalled by a barrier.  Find the next asynchronous message in the queue.</span></span><br><span class="line">                <span class="comment">// do while循环遍历消息链表</span></span><br><span class="line">                <span class="comment">// 跳出循环时，msg指向离表头最近的一个异步消息</span></span><br><span class="line">                <span class="keyword">do</span> &#123;</span><br><span class="line">                    prevMsg = msg;</span><br><span class="line">                    msg = msg.next;</span><br><span class="line">                &#125; <span class="keyword">while</span> (msg != <span class="keyword">null</span> &amp;&amp; !msg.isAsynchronous());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (msg != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (now &lt; msg.when) &#123;</span><br><span class="line">                    <span class="comment">//...</span></span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// Got a message.</span></span><br><span class="line">                    mBlocked = <span class="keyword">false</span>;</span><br><span class="line">                    <span class="keyword">if</span> (prevMsg != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        <span class="comment">//将msg从消息链表中移除</span></span><br><span class="line">                        prevMsg.next = msg.next;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        mMessages = msg.next;</span><br><span class="line">                    &#125;</span><br><span class="line">                    msg.next = <span class="keyword">null</span>;</span><br><span class="line">                    <span class="keyword">if</span> (DEBUG) Log.v(TAG, <span class="string">&quot;Returning message: &quot;</span> + msg);</span><br><span class="line">                    msg.markInUse();</span><br><span class="line">                    <span class="comment">//返回异步消息</span></span><br><span class="line">                    <span class="keyword">return</span> msg;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// No more messages.</span></span><br><span class="line">                nextPollTimeoutMillis = -<span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//...</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当设置了同步屏障之后，next函数将会忽略所有的同步消息，返回异步消息。换句话说就是，设置了同步屏障之后，Handler只会处理异步消息。再换句话说，同步屏障为Handler消息机制增加了一种简单的优先级机制，异步消息的优先级要高于同步消息。</p>
+<h6 id="3-4-4-实际应用"><a href="#3-4-4-实际应用" class="headerlink" title="3.4.4 实际应用"></a>3.4.4 实际应用</h6><p>Android应用框架中为了更快的响应UI刷新事件在ViewRootImpl.scheduleTraversals中使用了同步屏障</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">scheduleTraversals</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!mTraversalScheduled) &#123;</span><br><span class="line">        mTraversalScheduled = <span class="keyword">true</span>;</span><br><span class="line">        <span class="comment">//设置同步障碍，确保mTraversalRunnable优先被执行</span></span><br><span class="line">        mTraversalBarrier = mHandler.getLooper().getQueue().postSyncBarrier();</span><br><span class="line">        <span class="comment">//内部通过Handler发送了一个异步消息</span></span><br><span class="line">        mChoreographer.postCallback(</span><br><span class="line">                Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, <span class="keyword">null</span>);</span><br><span class="line">        <span class="keyword">if</span> (!mUnbufferedInputDispatch) &#123;</span><br><span class="line">            scheduleConsumeBatchedInput();</span><br><span class="line">        &#125;</span><br><span class="line">        notifyRendererOfFramePending();</span><br><span class="line">        pokeDrawLockIfNeeded();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="四、其他"><a href="#四、其他" class="headerlink" title="四、其他"></a>四、其他</h4><p><a href="https://www.jxhs.me/2021/04/08/linux%E5%86%85%E6%A0%B8Epoll-%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">Epoll 实现原理</a></p>
+<p><a href="https://www.cnblogs.com/LoyenWang/p/12622904.html">Linux select/poll机制原理分析</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>源码分析-网络框架之Retrofit</title>
     <url>/android-github-source-retrofit.html</url>
     <content><![CDATA[<h4 id="一、使用"><a href="#一、使用" class="headerlink" title="一、使用"></a>一、使用</h4><h5 id="1-1-定义API方法"><a href="#1-1-定义API方法" class="headerlink" title="1.1 定义API方法"></a>1.1 定义API方法</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">RemoteApi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(<span class="meta-string">&quot;timeline&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">timeline</span><span class="params">()</span></span>: RemoteLaunchesResponse </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -424,52 +424,6 @@
       </tags>
   </entry>
   <entry>
-    <title>源码分析-WorkManager</title>
-    <url>/android-github-source-workmanager.html</url>
-    <content><![CDATA[<h4 id="一、初始化流程"><a href="#一、初始化流程" class="headerlink" title="一、初始化流程"></a>一、初始化流程</h4><p>1、WorkManager集成了<code>androidx.startup</code> 库，通过<code>startup</code>库的<code>ContentProvider</code>在应用启动时进行初始化。<br>见<code>work-runtime</code>的Manifest文件：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">provider</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;androidx.startup.InitializationProvider&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:authorities</span>=<span class="string">&quot;$&#123;applicationId&#125;.androidx-startup&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:exported</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:node</span>=<span class="string">&quot;merge&quot;</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;androidx.work.WorkManagerInitializer&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:value</span>=<span class="string">&quot;androidx.startup&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>其初始化类为<code>WorkManagerInitializer</code>，其中调用了<code>WorkManager#initialize</code>，然后调用<code>WorkManager</code>的构造函数。<br>整个流程初始化了如下一些对象：</p>
-<center>
-    <img src="../images/android-workmanager_init.jpg" width="100%"/>
-</center>
-
-
-<h4 id="二、任务"><a href="#二、任务" class="headerlink" title="二、任务"></a>二、任务</h4><h5 id="2-1-定义任务"><a href="#2-1-定义任务" class="headerlink" title="2.1 定义任务"></a>2.1 定义任务</h5><p>当我们自定义任务时，需要继承<code>Work</code>类，WorkManager内部对<code>Work</code>的结构定义如下：</p>
-<center>
-    <img src="../images/android-workmanager-work.jpg" width="40%"/>
-</center>
-
-<p>其中<code>DiagnosticsWorker</code>和<code>CombineContinueationsWorker</code>是内部使用的两个任务。</p>
-<h5 id="2-2-提交任务"><a href="#2-2-提交任务" class="headerlink" title="2.2 提交任务"></a>2.2 提交任务</h5><p>我们将任务以请求（WorkRequest）的形式提交（enqueue）给WorkManager。WorkManager会将请求装换成内部的WorkContinuation对象。</p>
-<center>
-    <img src="../images/android-workmanager-request.jpg" width="70%"/>
-</center>
-
-<p>WorkContinuation可以将多个<code>OneTimeWorkrequest</code>构建成任意依赖关系的无环图。而WorkContinuation的<code>enqueue</code>方法则是任务被执行调度的入口。</p>
-<h5 id="2-3-执行任务"><a href="#2-3-执行任务" class="headerlink" title="2.3 执行任务"></a>2.3 执行任务</h5><p>对任务进行不同的操作，如：取消、结束、开始等。WorkManager内部会将这些行为转换成对应的Runnable交给调度系统进行执行。</p>
-<center>
-    <img src="../images/android-workmanager-action.jpg" width="70%"/>
-</center>
-
-
-<h4 id="三、任务的调度"><a href="#三、任务的调度" class="headerlink" title="三、任务的调度"></a>三、任务的调度</h4><p>提交给WorkManager的任务，会封装成<code>EnqueueRunnable</code>交给默认的<code>SerialExecutor</code>去执行。<br><code>EnqueueRunnable</code>的run方法会先将任务加入数据库中保存。然后进行任务调度。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (mWorkContinuation.hasCycles()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">                    String.format(<span class="string">&quot;WorkContinuation has cycles (%s)&quot;</span>, mWorkContinuation));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//加入数据库</span></span><br><span class="line">        <span class="keyword">boolean</span> needsScheduling = addToDatabase();</span><br><span class="line">        <span class="keyword">if</span> (needsScheduling) &#123;</span><br><span class="line">            <span class="comment">// Enable RescheduleReceiver, only when there are Worker&#x27;s that need scheduling.</span></span><br><span class="line">            <span class="keyword">final</span> Context context =</span><br><span class="line">                    mWorkContinuation.getWorkManagerImpl().getApplicationContext();</span><br><span class="line">            PackageManagerHelper.setComponentEnabled(context, RescheduleReceiver.class, <span class="keyword">true</span>);</span><br><span class="line">            <span class="comment">//进行任务调度</span></span><br><span class="line">            scheduleWorkInBackground();</span><br><span class="line">        &#125;</span><br><span class="line">        mOperation.setState(Operation.SUCCESS);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable exception) &#123;</span><br><span class="line">        mOperation.setState(<span class="keyword">new</span> Operation.State.FAILURE(exception));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="四、其他"><a href="#四、其他" class="headerlink" title="四、其他"></a>四、其他</h4><h5 id="4-1-任务的约束"><a href="#4-1-任务的约束" class="headerlink" title="4.1 任务的约束"></a>4.1 任务的约束</h5><h4 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h4><p>WorkManager库并不算复杂。这种对任务的管理和调度框架的源码，我们可以多看，学习一下里面的设计思路。有个大概的印象，后续写相关逻辑时可以借鉴。</p>
-<ul>
-<li>借助<code>startup</code>初始化你的框架</li>
-<li>构建有依赖关系的任务</li>
-<li>通过Runnable解耦任务的请求和执行。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Jetpack Compose Side Effects</title>
     <url>/android-jetpack-compose-sideeffect.html</url>
     <content><![CDATA[<h4 id="一、什么是Side-Effect"><a href="#一、什么是Side-Effect" class="headerlink" title="一、什么是Side-Effect"></a>一、什么是Side-Effect</h4><blockquote>
@@ -522,6 +476,52 @@
       <tags>
         <tag>Android</tag>
         <tag>Compose</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>源码分析-WorkManager</title>
+    <url>/android-github-source-workmanager.html</url>
+    <content><![CDATA[<h4 id="一、初始化流程"><a href="#一、初始化流程" class="headerlink" title="一、初始化流程"></a>一、初始化流程</h4><p>1、WorkManager集成了<code>androidx.startup</code> 库，通过<code>startup</code>库的<code>ContentProvider</code>在应用启动时进行初始化。<br>见<code>work-runtime</code>的Manifest文件：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">provider</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;androidx.startup.InitializationProvider&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:authorities</span>=<span class="string">&quot;$&#123;applicationId&#125;.androidx-startup&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:exported</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:node</span>=<span class="string">&quot;merge&quot;</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;androidx.work.WorkManagerInitializer&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:value</span>=<span class="string">&quot;androidx.startup&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>其初始化类为<code>WorkManagerInitializer</code>，其中调用了<code>WorkManager#initialize</code>，然后调用<code>WorkManager</code>的构造函数。<br>整个流程初始化了如下一些对象：</p>
+<center>
+    <img src="../images/android-workmanager_init.jpg" width="100%"/>
+</center>
+
+
+<h4 id="二、任务"><a href="#二、任务" class="headerlink" title="二、任务"></a>二、任务</h4><h5 id="2-1-定义任务"><a href="#2-1-定义任务" class="headerlink" title="2.1 定义任务"></a>2.1 定义任务</h5><p>当我们自定义任务时，需要继承<code>Work</code>类，WorkManager内部对<code>Work</code>的结构定义如下：</p>
+<center>
+    <img src="../images/android-workmanager-work.jpg" width="40%"/>
+</center>
+
+<p>其中<code>DiagnosticsWorker</code>和<code>CombineContinueationsWorker</code>是内部使用的两个任务。</p>
+<h5 id="2-2-提交任务"><a href="#2-2-提交任务" class="headerlink" title="2.2 提交任务"></a>2.2 提交任务</h5><p>我们将任务以请求（WorkRequest）的形式提交（enqueue）给WorkManager。WorkManager会将请求装换成内部的WorkContinuation对象。</p>
+<center>
+    <img src="../images/android-workmanager-request.jpg" width="70%"/>
+</center>
+
+<p>WorkContinuation可以将多个<code>OneTimeWorkrequest</code>构建成任意依赖关系的无环图。而WorkContinuation的<code>enqueue</code>方法则是任务被执行调度的入口。</p>
+<h5 id="2-3-执行任务"><a href="#2-3-执行任务" class="headerlink" title="2.3 执行任务"></a>2.3 执行任务</h5><p>对任务进行不同的操作，如：取消、结束、开始等。WorkManager内部会将这些行为转换成对应的Runnable交给调度系统进行执行。</p>
+<center>
+    <img src="../images/android-workmanager-action.jpg" width="70%"/>
+</center>
+
+
+<h4 id="三、任务的调度"><a href="#三、任务的调度" class="headerlink" title="三、任务的调度"></a>三、任务的调度</h4><p>提交给WorkManager的任务，会封装成<code>EnqueueRunnable</code>交给默认的<code>SerialExecutor</code>去执行。<br><code>EnqueueRunnable</code>的run方法会先将任务加入数据库中保存。然后进行任务调度。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (mWorkContinuation.hasCycles()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">                    String.format(<span class="string">&quot;WorkContinuation has cycles (%s)&quot;</span>, mWorkContinuation));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//加入数据库</span></span><br><span class="line">        <span class="keyword">boolean</span> needsScheduling = addToDatabase();</span><br><span class="line">        <span class="keyword">if</span> (needsScheduling) &#123;</span><br><span class="line">            <span class="comment">// Enable RescheduleReceiver, only when there are Worker&#x27;s that need scheduling.</span></span><br><span class="line">            <span class="keyword">final</span> Context context =</span><br><span class="line">                    mWorkContinuation.getWorkManagerImpl().getApplicationContext();</span><br><span class="line">            PackageManagerHelper.setComponentEnabled(context, RescheduleReceiver.class, <span class="keyword">true</span>);</span><br><span class="line">            <span class="comment">//进行任务调度</span></span><br><span class="line">            scheduleWorkInBackground();</span><br><span class="line">        &#125;</span><br><span class="line">        mOperation.setState(Operation.SUCCESS);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable exception) &#123;</span><br><span class="line">        mOperation.setState(<span class="keyword">new</span> Operation.State.FAILURE(exception));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="四、其他"><a href="#四、其他" class="headerlink" title="四、其他"></a>四、其他</h4><h5 id="4-1-任务的约束"><a href="#4-1-任务的约束" class="headerlink" title="4.1 任务的约束"></a>4.1 任务的约束</h5><h4 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h4><p>WorkManager库并不算复杂。这种对任务的管理和调度框架的源码，我们可以多看，学习一下里面的设计思路。有个大概的印象，后续写相关逻辑时可以借鉴。</p>
+<ul>
+<li>借助<code>startup</code>初始化你的框架</li>
+<li>构建有依赖关系的任务</li>
+<li>通过Runnable解耦任务的请求和执行。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
       </tags>
   </entry>
   <entry>
@@ -933,6 +933,54 @@
       </tags>
   </entry>
   <entry>
+    <title>对称/非对称加密和数字签名</title>
+    <url>/basic-encryption-algorithm.html</url>
+    <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
+<p>一般加密和解密的算法是公开的，需要保持隐秘的是密钥k<br>流行的对称加密算法有：DES，Triple-DES，RC2和RC4，AES</p>
+<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>发送方和接收方首先需要共享相同的密钥，即存在密钥k的分发问题，如何安全的把共享密钥在双方进行分享，这本身也是一个如何安全通信的问题，一种方法是提前双方约定好，不通过具体的通信进行协商，避免被监听和截获。另外一种方式，将是下面我们介绍的通过非对称加密信道进行对称密码的分发和共享，即混合加密系统。</li>
+<li>密钥管理的复杂度问题。由于对称加密的密钥是一对一的使用方式，若一方要跟n方通信，则需要维护n对密钥。</li>
+</ul>
+<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>加密和解密的速度要比非对称加密快很多，因此常用非对称加密建立的安全信道进行共享密钥的分享，完成后，具体的加解密则使用对称加密。即混合加密系统。</li>
+</ul>
+<p>另外一个点需要重点说明的是，密钥k的长度对解密破解的难度有很重大的影响，k的长度越长，对应的密码空间就越大，遭到暴力破解或者词典破解的难度就更大，就更加安全。</p>
+<center>
+    <img src="../images/dcjm.png" width="400"/>
+</center>
+
+<h4 id="2-数字签名的过程："><a href="#2-数字签名的过程：" class="headerlink" title="2.数字签名的过程："></a>2.数字签名的过程：</h4><ul>
+<li>发送方A首先对变长的报文提取成一个定长的摘要，一般是md5等</li>
+<li>A对摘要应用了一个签名函数，并且用A自己的私钥作为参数，因为只有A才知道私钥，所以正确的签名会说明签名者就是其所有者。</li>
+<li>一旦计算出签名，节点A就将其附加到报文的末尾，并将报文和签名一起都发送给B</li>
+<li>在接收端B，首先会按照同样的算法计算出报文的摘要，然后对签名用A的公钥进行解码，得出解码后的摘要，两个摘要进行比较，则可以判断是否是A发送的且内容没被篡改过。</li>
+</ul>
+<center>
+    <img src="../images/szqm.png" width="400"/>
+</center>
+
+
+<h4 id="3-非对称加解密的过程："><a href="#3-非对称加解密的过程：" class="headerlink" title="3.非对称加解密的过程："></a>3.非对称加解密的过程：</h4><p>加密一方找到接收方的公钥e (如何找到呢？大部分的公钥查找工作实际上都是通过数字证书来实现的)，然后用公钥e对明文p进行加密后得到密文c，并将得到的密文发送给接收方，接收方收到密文后，用自己保留的私钥d进行解密，得到明文p，需要注意的是：用公钥加密的密文，只有拥有私钥的一方才能解密，这样就可以解决加密的各方可以统一使用一个公钥即可。</p>
+<p>常用的非对称加密算法有：RSA</p>
+<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>不存在密钥分发的问题，解码方可以自己生成密钥对，一个做私钥存起来，另外一个作为公钥进行发布。</li>
+<li>解决了密钥管理的复杂度问题，多个加密方都可以使用一个已知的公钥进行加密，但只有拥有私钥的一方才能解密。</li>
+</ul>
+<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>非对称加密不足的地方是加解密的速度没有对称加密快。</li>
+</ul>
+<p>综上，分析了对称加密和非对称加密各自的优缺点后，有没有一种办法是可以利用两者的优点但避开对应的缺点呢？答应是有的，实际上用得最多的是混合加密系统，比如在两个节点间通过便捷的公开密码加密技术建立起安全通信，然后再用安全的通信产生并发送临时的随机对称密钥，通过更快的对称加密技术对剩余的数据进行加密。</p>
+<center>
+    <img src="../images/fdcjm.png" width="400"/>
+</center>]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>cryptography</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>CPU的缓存</title>
     <url>/cpu-cache-overview.html</url>
     <content><![CDATA[<h4 id="一、性能"><a href="#一、性能" class="headerlink" title="一、性能"></a>一、性能</h4><p>1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。<a href="https://gist.github.com/jboner/2841832">参考</a></p>
@@ -997,51 +1045,66 @@
       </tags>
   </entry>
   <entry>
-    <title>对称/非对称加密和数字签名</title>
-    <url>/basic-encryption-algorithm.html</url>
-    <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
-<p>一般加密和解密的算法是公开的，需要保持隐秘的是密钥k<br>流行的对称加密算法有：DES，Triple-DES，RC2和RC4，AES</p>
-<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
-<li>发送方和接收方首先需要共享相同的密钥，即存在密钥k的分发问题，如何安全的把共享密钥在双方进行分享，这本身也是一个如何安全通信的问题，一种方法是提前双方约定好，不通过具体的通信进行协商，避免被监听和截获。另外一种方式，将是下面我们介绍的通过非对称加密信道进行对称密码的分发和共享，即混合加密系统。</li>
-<li>密钥管理的复杂度问题。由于对称加密的密钥是一对一的使用方式，若一方要跟n方通信，则需要维护n对密钥。</li>
-</ul>
-<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
-<li>加密和解密的速度要比非对称加密快很多，因此常用非对称加密建立的安全信道进行共享密钥的分享，完成后，具体的加解密则使用对称加密。即混合加密系统。</li>
-</ul>
-<p>另外一个点需要重点说明的是，密钥k的长度对解密破解的难度有很重大的影响，k的长度越长，对应的密码空间就越大，遭到暴力破解或者词典破解的难度就更大，就更加安全。</p>
+    <title>CPU流水线工作原理</title>
+    <url>/cpu-pipline-overview.html</url>
+    <content><![CDATA[<h5 id="说明："><a href="#说明：" class="headerlink" title="说明："></a>说明：</h5><p>在<a href="https://www.zhaixue.cc/weixin/weixin-cpu-pipeline.html">宅学部落</a>这个网站看到一篇讲CPU流水线的文章，写的非常好，为了便于翻阅回顾，转载之。</p>
+<h5 id="正文："><a href="#正文：" class="headerlink" title="正文："></a>正文：</h5><p>现在的CPU处理器一般都是超流水线工作，动不动就是10级以上流水线，超高主频，这两者之间有什么关系呢？今天就跟大家科普下CPU流水线的工作原理，以及他们之间的关系。</p>
+<p>说到流水线，很多人会想到富士康；说到富士康，很多人会想到张全蛋。作为富士康 3 号流水线资深质检员，下面就请张全蛋给大家科普下什么是流水线，大家鼓掌欢迎。</p>
+<h5 id="Micheal-Jack-眼中的流水线"><a href="#Micheal-Jack-眼中的流水线" class="headerlink" title="Micheal Jack 眼中的流水线"></a>Micheal Jack 眼中的流水线</h5><blockquote>
+<p>大家好，我是张全蛋，英文名叫Micheal Jack，法文名叫霍雷呆-杰Q赖，大家也可以叫我查理。作为iPhone 手机 3 号流水线的资深质检员，我很忙的，每分钟都是几百万的生意。像我们富士康这样的transnational enterprise，经常会和不同国家的客户说一些技术上的meeting啊、下班陪他们message啊，都需要英文的。像我们厂里不会说英语的啊，都会被经理 fire 掉的。在我们厂里，流水线叫法太 low了，我们都叫 pipeline，一条pipeline，每个人分工不同，从手机原材料到成品iPhone ，只需要短短几分钟。—- 《嵌入式C语言自我修养》</p>
+</blockquote>
 <center>
-    <img src="../images/dcjm.png" width="400"/>
+    <img src="../images/cpu-pipeline-phone.jpeg" width="90%"/>
 </center>
 
-<h4 id="2-数字签名的过程："><a href="#2-数字签名的过程：" class="headerlink" title="2.数字签名的过程："></a>2.数字签名的过程：</h4><ul>
-<li>发送方A首先对变长的报文提取成一个定长的摘要，一般是md5等</li>
-<li>A对摘要应用了一个签名函数，并且用A自己的私钥作为参数，因为只有A才知道私钥，所以正确的签名会说明签名者就是其所有者。</li>
-<li>一旦计算出签名，节点A就将其附加到报文的末尾，并将报文和签名一起都发送给B</li>
-<li>在接收端B，首先会按照同样的算法计算出报文的摘要，然后对签名用A的公钥进行解码，得出解码后的摘要，两个摘要进行比较，则可以判断是否是A发送的且内容没被篡改过。</li>
-</ul>
+<p>查理很忙，介绍到这里就走了，接下来我们继续了解下什么叫流水线。</p>
+<p>流水线是工业大生产下的产物。在农业社会做一部手机，需要的是工匠、手艺人，就像故宫里制作钟表的那些匠人一样，是需要拜师学艺、慢慢学习的：从手机组装、质检、贴膜、包装都是一个人，什么都要学。手艺人慢工出细活，但成本很高，到了工业化社会就不一样了：大家分工合作，将做手机这个复杂过程拆分为多个简单步骤，每个人负责一个步骤，经过刻意（机械）练习和培训，就可以很快上手。每个人都做自己最擅长的，可以大大提高工作效率。</p>
+<p>如果每个人都单独做一部手机，焊接电路、组装成品这一步骤一般人需要8分钟，测试检验一般需要4分钟，贴膜包装成盒一般需要4分钟，总共需要16分钟。每16分钟，如果有3个工人的话，一共可以生产3部手机。一个新员工从进厂开始，要培训学习三个月才能掌握所有的技能，才能上岗。如果引入生产流水线就不一样了，每个人只负责一个工序，比如赵铁柱只负责焊接电路、组装手机，李小花只负责贴膜，进厂培训3天就可以快速上手了，对工人的技能要求大大降低！而且随着时间积累，每个人对自己所负责的工序越来越熟练，每道工序需要的时间大大减少：赵铁柱焊接电路越来越顺手，花费时间从原来的8分钟缩减为4分钟；张全蛋的质量检验练得如火纯情，整个流程做完只需要2分钟；李小花的贴膜技术也越来越溜了，从贴膜到包装2分钟搞定。每16分钟，赵铁柱可以焊接4块电路板 ，整个流水线可以生产出4部手机，产能整整提升了33.33%！老板高兴，赵铁柱高兴，张全蛋和李小花更高兴，因为每做2分钟，他们还可以休息2分钟，刷刷微博滑个抖音，岂不乐哉！</p>
+<p>看到这里可能有人抬杠了：你这么算是不对的，每道工序所用的时间都变为原来的一半，怎么可能做得到？其实要做到不难的，只要工序拆解得合理，容易上手，再加上足够时间的机械重复，很多人都可以做得到。只要奖金发到位，蛋糕店里的小姐姐夹蛋糕的速度比你眨眼的速度都快，银行柜台的小李数钞票的速度比点钞机都快，买单时饭店前台的小妹摁计算器的速度比你掏钱的速度都快。</p>
+<h5 id="流水线工作原理"><a href="#流水线工作原理" class="headerlink" title="流水线工作原理"></a>流水线工作原理</h5><p>一条指令的执行一般要经过：取指令、翻译指令、执行指令三个基本流程。CPU内部的电路分为不同的单元：取指单元、译码单元、执行单元等，指令的执行也是按照流水线工序一步一步执行的。我们假设每一个步骤执行时间都是一个时钟周期，那么一条指令执行需要3个时钟周期。</p>
 <center>
-    <img src="../images/szqm.png" width="400"/>
+    <img src="../images/cpu-arm-pipeline.png" width="50%"/>
 </center>
 
 
-<h4 id="3-非对称加解密的过程："><a href="#3-非对称加解密的过程：" class="headerlink" title="3.非对称加解密的过程："></a>3.非对称加解密的过程：</h4><p>加密一方找到接收方的公钥e (如何找到呢？大部分的公钥查找工作实际上都是通过数字证书来实现的)，然后用公钥e对明文p进行加密后得到密文c，并将得到的密文发送给接收方，接收方收到密文后，用自己保留的私钥d进行解密，得到明文p，需要注意的是：用公钥加密的密文，只有拥有私钥的一方才能解密，这样就可以解决加密的各方可以统一使用一个公钥即可。</p>
-<p>常用的非对称加密算法有：RSA</p>
-<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
-<li>不存在密钥分发的问题，解码方可以自己生成密钥对，一个做私钥存起来，另外一个作为公钥进行发布。</li>
-<li>解决了密钥管理的复杂度问题，多个加密方都可以使用一个已知的公钥进行加密，但只有拥有私钥的一方才能解密。</li>
-</ul>
-<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
-<li>非对称加密不足的地方是加解密的速度没有对称加密快。</li>
-</ul>
-<p>综上，分析了对称加密和非对称加密各自的优缺点后，有没有一种办法是可以利用两者的优点但避开对应的缺点呢？答应是有的，实际上用得最多的是混合加密系统，比如在两个节点间通过便捷的公开密码加密技术建立起安全通信，然后再用安全的通信产生并发送临时的随机对称密钥，通过更快的对称加密技术对剩余的数据进行加密。</p>
+<p>CPU 执行指令的3个时钟周期里，取指单元只在第一个时钟周期里工作，其余两个时钟周期都处于空闲状态，其它两个执行单元也是如此，效率太低了，消费者无法接受，老板也不能接受。解决方法就是引入流水线，让流水线每一颗螺丝钉都马不停蹄地运转起来，最好一刻也不要停。</p>
 <center>
-    <img src="../images/fdcjm.png" width="400"/>
-</center>]]></content>
+    <img src="../images/cpu-pipeline-multi.png" width="50%"/>
+</center>
+
+
+<p>引入流水线工作模式后可以看到，除了刚开始第一个时钟周期大家还可以偷懒外，其余的时间都不能闲着：从第二个时钟周期开始，当译码单元在翻译指令1时，取指单元也不能闲着，要接着去取指令2。同样如此，从第三个时钟周期开始，当执行单元执行指令1时，译码单元也不能闲着，要接着去翻译指令2，而取指单元要去取指令3。从第四个时钟周期开始，每个电路单元都会进入满荷负载工作状态，像富士康工厂里的流水线一样，源源不断地执行一条条指令。</p>
+<p>引入流水线后，虽然每一条指令执行流程不变，还是需要3个时钟周期，但是从整条流水线的输出看来，差不多平均每个时钟周期就能执行一条指令。原来执行一条指令需要3个时钟周期，现在平均只需要1个时钟周期，CPU 性能提升了不少。</p>
+<p>流水线的本质其实就是拿空间资源换时间。将每条指令分解为多步，指令的每一步都有独立的电路来执行，并让不同指令的各步操作重叠，从而实现几条指令并行处理，从而加快程序的运行。</p>
+<p>CPU内部的流水线如此，富士康工厂里的iPhone流水线也是如此，通过不断往流水线增加人手来提高流水线的生产效率，也就是吞吐率。</p>
+<h5 id="超流水线技术"><a href="#超流水线技术" class="headerlink" title="超流水线技术"></a>超流水线技术</h5><p>想知道什么是超流水线，让我们再回到富士康。</p>
+<p>在富士康 3 号 iPhone 流水生产线上，因为赵铁柱工作效率不高，焊接组装一步手机需要 4 分钟，导致生产一部iPhone手机也得需要 4 分钟，从而拖累了整条生产线的生产效率。老板很生气，后果很严重，赵铁柱没干到一个月就被 fire 掉了。后面几个月，陆陆续续来了不少人：小黑、皮裤哥、红姐，都想试试这份工作，可惜干得还不如赵铁柱，挑战电子厂失败，早已提桶跑路。</p>
+<p>老板招不到人，感觉又错怪了赵铁柱，于是决定升级生产线，并承诺加薪重新召回了赵铁柱。</p>
+<center>
+    <img src="../images/cpu-pipeline-phone2.png" width="50%"/>
+</center>
+
+<p>老板找出了生产线的瓶颈：每道工序都是需要2分钟，只有赵铁柱这道工序耗时4分钟，老板错怪了这铁柱，这不是赵铁柱的原因，是因为这道工序太复杂。于是把这道工序进行了拆解为2道工序：焊接电路板和组装手机。焊接电路仍由赵铁柱负责，把电路板、显示屏、手机外壳组装成手机这道工序则由新招员工王建国负责。生产流水线优化后，赵铁柱焊接电路只需要2分钟，王建国组装也只需要 2 分钟，生产每部 iPhone 的时间由原来的 4 分钟缩减为 2 分钟，生产流水线的瓶颈解决了！</p>
+<p>跟富士康流水线类似，优化CPU流水线也是提升CPU性能的有效手段。流水生产线存在木桶短板效应，我们只需要找出CPU流水线中的性能瓶颈，即耗时最长的那道工序，然后再进行细分、优化为更多的工序就可以了。每一道工序我们称为流水线的一级，流水线越深，每一道流水电路单元的执行时间就会变得越小，我们处理器的时钟周期就可以更短，从而可以通过提升CPU主频来提升CPU性能、提高工作效率。</p>
+<p>在富士康流水生产线中，每道工序的最长耗时时间决定了整条生产线的吞吐率。在CPU内部也是如此，每个流水单元的执行时间（即时间延迟）决定了CPU流水线的性能。CPU流水线中的每一道电路单元由组合逻辑电路和寄存器组成，逻辑单路用来执行本道工序的逻辑运算，寄存器用来保存结果，并作为下一道工序的输入。</p>
+<center>
+    <img src="../images/cpu-pipeline-line.png" width="50%"/>
+</center>
+
+<p>流水生产线是通过减少每一道工序的耗费时间来提升整条流水线效率的。在CPU内部也是如此，CPU内部的数字电路是靠时钟驱动来工作的，既然每条指令的执行时钟周期数不变，即执行每条指令需要3个时钟周期，但是我们可以通过缩短时钟周期的方法来提升效率，即减少每条指令所耗费的时间。减少时钟周期，也就是提升CPU主频，一个关键的制约因素就是CPU内部每一个执行单元的耗费时间。虽然说电信号在电路中的传播时间很快，可以接近光速，但是经过成千上万的晶体管，不停地信号翻转，还是会带来一定的时间延迟，这个时间延迟我们可以看做这道工作的执行时间。以上图为例，如果每个执行单元的延迟是 1.5 纳秒，那么你的时钟周期至少也得2纳秒以上，否则电路就会工作异常。如果驱动CPU工作的时钟周期是 2 纳秒，CPU的主频就是 500 MHz。现在的CPU流水线深度可以做到10级以上，流水线的每一级时间延迟可以做到皮秒级别，驱动CPU工作的时钟周期可以做到更短，因此可以把CPU的主频飙到 5 GHz 以上。</p>
+<p>我们把5级以上的流水线称为超流水线结构。高性能的处理器，为了提升CPU主频，一般都会采用这种超流水线结构。Intel的 i7 处理器有16级流水线，AMD的速龙64系列CPU流水线为20级。史上具有最长流水线的是Intel的第三代奔腾四处理器，有31级的流水线。</p>
+<p>想要提升CPU的主频，根本在于减少流水线中每一级流水的执行时间，消除木桶的短板效应，才能提升流水线的整体性能。解决方法有三个：一是优化流水线中各级流水线的性能，受限于当前集成电路的设计水平，这一步最难；二是依靠集成电路的制造工艺，更先进的纳米工艺，芯片面积越小，发热越小，更容易提升主频；三是不断地增加流水线，流水线越深，流水线的各级延迟就可以做得越小，更容易提高主频。</p>
+<p>流水线是否越深越好呢？非也。流水线的本质是拿空间换时间，流水线越深，电路就会越复杂，需要更多的组合逻辑电路和寄存器，芯片面积也就越大，功耗也就随之上升了。拿功耗增长换来性能提升，在PC机和服务器上还行，但对于很多靠电池供电的移动设备的处理器来说就无法接受了，CPU设计人员需要在性能和功耗之间做一个很好的平衡。</p>
+<p>流水线越深，就越能提升性能吗？也不一定。流水线是靠指令的并行来提升性能的，第一条指令还没有执行完，下面的第二条指令就开始取指、译码了。执行的程序指令如果是顺序结构，没有中断或跳转，流水线确实可以提高执行效率。但是当程序指令中存在跳转、分支结构时，下面预取的指令可能就要全部丢掉了，需要到要跳转的地方重新取指令执行。如下面的分支，如果BEQ条件不满足，处理器可能就会将预期的ADD指令全部丢弃，重新到here标签处取SUB指令执行。</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">BEQ R1, R2, here</span><br><span class="line">ADD R2, R1, R0</span><br><span class="line">ADD R5, R4, R3</span><br><span class="line">...</span><br><span class="line">here:</span><br><span class="line">SUB R2, R1, R0</span><br><span class="line">SUB R5, R4, R3</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>流水线越深，一旦预取指令失败，浪费和损失就会越严重，因为流水线中预取的几十条指令可能都要丢弃掉，流水线发生了停顿，无法按照预期继续执行，这种情况我们一般称之为流水线冒险（hazard）。在现在很多超流水线处理器中，为了避免这种情况出现，会采取各种各样的方法去避免这种情况，以免影响处理器的性能。</p>
+<p>流水线越深，一旦预取指令失败，浪费和损失就会越严重，因为流水线中预取的几十条指令可能都要丢弃掉，流水线发生了停顿，无法按照预期继续执行，这种情况我们一般称之为流水线冒险（hazard）。在现在很多超流水线处理器中，为了避免这种情况出现，会采取各种各样的方法去避免这种情况发生，以免影响处理器的性能。</p>
+]]></content>
       <categories>
         <category>计算机</category>
       </categories>
       <tags>
-        <tag>cryptography</tag>
+        <tag>计算机基础</tag>
       </tags>
   </entry>
   <entry>
@@ -1502,6 +1565,45 @@
       </tags>
   </entry>
   <entry>
+    <title>flutter状态管理之BloC</title>
+    <url>/flutter-state-bloc.html</url>
+    <content><![CDATA[<hr>
+<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>Bloc = Business Logic Component</p>
+<center>
+    <img src="../images/flutter/bloc_architecture.png" width="60%"/>
+</center>
+
+
+<h4 id="二、结构"><a href="#二、结构" class="headerlink" title="二、结构"></a>二、结构</h4><p>BloC本身是一个独立的package、flutter-bloc基于BloC和Provider实现，其结构如下图所示：</p>
+<center>
+    <img src="../images/flutter/flutter_bloc.png" width="100%"/>
+</center>
+
+<h4 id="三、-实现"><a href="#三、-实现" class="headerlink" title="三、 实现"></a>三、 实现</h4><h5 id="3-1-BloC是基于dart的Stream-API实现的发布订阅模式。"><a href="#3-1-BloC是基于dart的Stream-API实现的发布订阅模式。" class="headerlink" title="3.1 BloC是基于dart的Stream API实现的发布订阅模式。"></a>3.1 BloC是基于dart的Stream API实现的发布订阅模式。</h5><ul>
+<li>通过on方法订阅事件并提供处理函数，收到Event再将Event转换成State返回给Bloc</li>
+<li>通过add方法发布事件</li>
+</ul>
+<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Bloc</span>&lt;<span class="title">Event</span>, <span class="title">State</span>&gt; <span class="keyword">extends</span> <span class="title">BlocBase</span>&lt;<span class="title">State</span>&gt;</span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">BlocEventSink</span>&lt;<span class="title">Event</span>&gt; </span>&#123;</span><br><span class="line">     <span class="comment">//所有的订阅者</span></span><br><span class="line">     <span class="keyword">final</span> _subscriptions = &lt;StreamSubscription&lt;<span class="built_in">dynamic</span>&gt;&gt;[];</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">final</span> _eventController = StreamController&lt;Event&gt;.broadcast();</span><br><span class="line">     </span><br><span class="line">     <span class="comment">//添加订阅者</span></span><br><span class="line">     <span class="keyword">void</span> <span class="keyword">on</span>&lt;E <span class="keyword">extends</span> Event&gt;(</span><br><span class="line">       EventHandler&lt;E, State&gt; handler, &#123;</span><br><span class="line">       EventTransformer&lt;E&gt;? transformer,</span><br><span class="line">     &#125;) &#123;</span><br><span class="line">        <span class="comment">//这里开始了listen</span></span><br><span class="line">        <span class="keyword">final</span> subscription = xxx.listen(<span class="keyword">null</span>);</span><br><span class="line">        _subscriptions.add(subscription);</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">     <span class="meta">@override</span></span><br><span class="line">     <span class="keyword">void</span> add(Event event) &#123;</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">         onEvent(event);</span><br><span class="line">         _eventController.add(event);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">         onError(error, stackTrace);</span><br><span class="line">         <span class="keyword">rethrow</span>;</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<center>
+    <img src="../images/flutter/flutter-bloc-inner.png" width="50%"/>
+</center>
+
+
+<h5 id="3-1-事件和状态之间的转换"><a href="#3-1-事件和状态之间的转换" class="headerlink" title="3.1 事件和状态之间的转换"></a>3.1 事件和状态之间的转换</h5><ul>
+<li>转换逻辑有业务层通过on()注入</li>
+<li>内部的核心是_Emitter以及 <em>_eventController</em> 和 <em>_stateController</em></li>
+</ul>
+<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line">(<span class="built_in">dynamic</span> event) &#123;</span><br><span class="line">       <span class="keyword">void</span> onEmit(State state) &#123;</span><br><span class="line">         <span class="keyword">if</span> (isClosed) <span class="keyword">return</span>;</span><br><span class="line">         <span class="keyword">if</span> (<span class="keyword">this</span>.state == state &amp;&amp; _emitted) <span class="keyword">return</span>;</span><br><span class="line">         onTransition(Transition(</span><br><span class="line">           currentState: <span class="keyword">this</span>.state,</span><br><span class="line">           event: event <span class="keyword">as</span> E,</span><br><span class="line">           nextState: state,</span><br><span class="line">         ));</span><br><span class="line">         emit(state);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">final</span> emitter = _Emitter(onEmit);</span><br><span class="line">       <span class="keyword">final</span> controller = StreamController&lt;E&gt;.broadcast(</span><br><span class="line">         <span class="keyword">sync</span>: <span class="keyword">true</span>,</span><br><span class="line">         onCancel: emitter.cancel,</span><br><span class="line">       );</span><br><span class="line"></span><br><span class="line">       <span class="keyword">void</span> handleEvent() <span class="keyword">async</span> &#123;</span><br><span class="line">         <span class="keyword">void</span> onDone() &#123;</span><br><span class="line">           emitter.complete();</span><br><span class="line">           _emitters.remove(emitter);</span><br><span class="line">           <span class="keyword">if</span> (!controller.isClosed) controller.close();</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">try</span> &#123;</span><br><span class="line">           _emitters.add(emitter);</span><br><span class="line">           <span class="comment">//交给外部实现转换事件和状态</span></span><br><span class="line">           <span class="keyword">await</span> handler(event <span class="keyword">as</span> E, emitter);</span><br><span class="line">         &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">           onError(error, stackTrace);</span><br><span class="line">           <span class="keyword">rethrow</span>;</span><br><span class="line">         &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">           onDone();</span><br><span class="line">         &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       handleEvent();</span><br><span class="line">       <span class="keyword">return</span> controller.stream;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="四、参考"><a href="#四、参考" class="headerlink" title="四、参考"></a>四、参考</h4><p>主要参考和debug了bloc仓库里面examples中login的例子：<br><a href="https://github.com/felangel/bloc/tree/master/examples/flutter_login">这里</a></p>
+]]></content>
+      <tags>
+        <tag>Flutter</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Flutter状态管理之Provider</title>
     <url>/flutter-state-provider.html</url>
     <content><![CDATA[<hr>
@@ -1542,45 +1644,6 @@
 
 
 <h4 id="六、参考"><a href="#六、参考" class="headerlink" title="六、参考"></a>六、参考</h4><p><a href="https://juejin.cn/post/7067356022272163847#heading-16">https://juejin.cn/post/7067356022272163847#heading-16</a></p>
-]]></content>
-      <tags>
-        <tag>Flutter</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>flutter状态管理之BloC</title>
-    <url>/flutter-state-bloc.html</url>
-    <content><![CDATA[<hr>
-<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>Bloc = Business Logic Component</p>
-<center>
-    <img src="../images/flutter/bloc_architecture.png" width="60%"/>
-</center>
-
-
-<h4 id="二、结构"><a href="#二、结构" class="headerlink" title="二、结构"></a>二、结构</h4><p>BloC本身是一个独立的package、flutter-bloc基于BloC和Provider实现，其结构如下图所示：</p>
-<center>
-    <img src="../images/flutter/flutter_bloc.png" width="100%"/>
-</center>
-
-<h4 id="三、-实现"><a href="#三、-实现" class="headerlink" title="三、 实现"></a>三、 实现</h4><h5 id="3-1-BloC是基于dart的Stream-API实现的发布订阅模式。"><a href="#3-1-BloC是基于dart的Stream-API实现的发布订阅模式。" class="headerlink" title="3.1 BloC是基于dart的Stream API实现的发布订阅模式。"></a>3.1 BloC是基于dart的Stream API实现的发布订阅模式。</h5><ul>
-<li>通过on方法订阅事件并提供处理函数，收到Event再将Event转换成State返回给Bloc</li>
-<li>通过add方法发布事件</li>
-</ul>
-<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Bloc</span>&lt;<span class="title">Event</span>, <span class="title">State</span>&gt; <span class="keyword">extends</span> <span class="title">BlocBase</span>&lt;<span class="title">State</span>&gt;</span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">BlocEventSink</span>&lt;<span class="title">Event</span>&gt; </span>&#123;</span><br><span class="line">     <span class="comment">//所有的订阅者</span></span><br><span class="line">     <span class="keyword">final</span> _subscriptions = &lt;StreamSubscription&lt;<span class="built_in">dynamic</span>&gt;&gt;[];</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">final</span> _eventController = StreamController&lt;Event&gt;.broadcast();</span><br><span class="line">     </span><br><span class="line">     <span class="comment">//添加订阅者</span></span><br><span class="line">     <span class="keyword">void</span> <span class="keyword">on</span>&lt;E <span class="keyword">extends</span> Event&gt;(</span><br><span class="line">       EventHandler&lt;E, State&gt; handler, &#123;</span><br><span class="line">       EventTransformer&lt;E&gt;? transformer,</span><br><span class="line">     &#125;) &#123;</span><br><span class="line">        <span class="comment">//这里开始了listen</span></span><br><span class="line">        <span class="keyword">final</span> subscription = xxx.listen(<span class="keyword">null</span>);</span><br><span class="line">        _subscriptions.add(subscription);</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">     <span class="meta">@override</span></span><br><span class="line">     <span class="keyword">void</span> add(Event event) &#123;</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">         onEvent(event);</span><br><span class="line">         _eventController.add(event);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">         onError(error, stackTrace);</span><br><span class="line">         <span class="keyword">rethrow</span>;</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<center>
-    <img src="../images/flutter/flutter-bloc-inner.png" width="50%"/>
-</center>
-
-
-<h5 id="3-1-事件和状态之间的转换"><a href="#3-1-事件和状态之间的转换" class="headerlink" title="3.1 事件和状态之间的转换"></a>3.1 事件和状态之间的转换</h5><ul>
-<li>转换逻辑有业务层通过on()注入</li>
-<li>内部的核心是_Emitter以及 <em>_eventController</em> 和 <em>_stateController</em></li>
-</ul>
-<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line">(<span class="built_in">dynamic</span> event) &#123;</span><br><span class="line">       <span class="keyword">void</span> onEmit(State state) &#123;</span><br><span class="line">         <span class="keyword">if</span> (isClosed) <span class="keyword">return</span>;</span><br><span class="line">         <span class="keyword">if</span> (<span class="keyword">this</span>.state == state &amp;&amp; _emitted) <span class="keyword">return</span>;</span><br><span class="line">         onTransition(Transition(</span><br><span class="line">           currentState: <span class="keyword">this</span>.state,</span><br><span class="line">           event: event <span class="keyword">as</span> E,</span><br><span class="line">           nextState: state,</span><br><span class="line">         ));</span><br><span class="line">         emit(state);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">final</span> emitter = _Emitter(onEmit);</span><br><span class="line">       <span class="keyword">final</span> controller = StreamController&lt;E&gt;.broadcast(</span><br><span class="line">         <span class="keyword">sync</span>: <span class="keyword">true</span>,</span><br><span class="line">         onCancel: emitter.cancel,</span><br><span class="line">       );</span><br><span class="line"></span><br><span class="line">       <span class="keyword">void</span> handleEvent() <span class="keyword">async</span> &#123;</span><br><span class="line">         <span class="keyword">void</span> onDone() &#123;</span><br><span class="line">           emitter.complete();</span><br><span class="line">           _emitters.remove(emitter);</span><br><span class="line">           <span class="keyword">if</span> (!controller.isClosed) controller.close();</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">try</span> &#123;</span><br><span class="line">           _emitters.add(emitter);</span><br><span class="line">           <span class="comment">//交给外部实现转换事件和状态</span></span><br><span class="line">           <span class="keyword">await</span> handler(event <span class="keyword">as</span> E, emitter);</span><br><span class="line">         &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">           onError(error, stackTrace);</span><br><span class="line">           <span class="keyword">rethrow</span>;</span><br><span class="line">         &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">           onDone();</span><br><span class="line">         &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       handleEvent();</span><br><span class="line">       <span class="keyword">return</span> controller.stream;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="四、参考"><a href="#四、参考" class="headerlink" title="四、参考"></a>四、参考</h4><p>主要参考和debug了bloc仓库里面examples中login的例子：<br><a href="https://github.com/felangel/bloc/tree/master/examples/flutter_login">这里</a></p>
 ]]></content>
       <tags>
         <tag>Flutter</tag>
@@ -2249,8 +2312,8 @@
         <category>计算机</category>
       </categories>
       <tags>
-        <tag>Kotlin</tag>
         <tag>Java</tag>
+        <tag>Kotlin</tag>
       </tags>
   </entry>
   <entry>
@@ -2708,8 +2771,8 @@
         <category>计算机</category>
       </categories>
       <tags>
-        <tag>Kotlin</tag>
         <tag>Concurrency</tag>
+        <tag>Kotlin</tag>
       </tags>
   </entry>
   <entry>

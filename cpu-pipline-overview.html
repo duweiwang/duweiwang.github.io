@@ -24,33 +24,26 @@
 
 <script data-ad-client="ca-pub-8087648226243491" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 
-  <meta name="description" content="Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。 1、@JvmName用于文件、函数、属性、getter和setter。 1.1 给文件添加@JvmName注解默认情况下，一个Kotlin文件中的function和properties会被编译成filenameKt.class，其中的cla">
+  <meta name="description" content="说明：在宅学部落这个网站看到一篇讲CPU流水线的文章，写的非常好，为了便于翻阅回顾，转载之。 正文：现在的CPU处理器一般都是超流水线工作，动不动就是10级以上流水线，超高主频，这两者之间有什么关系呢？今天就跟大家科普下CPU流水线的工作原理，以及他们之间的关系。 说到流水线，很多人会想到富士康；说到富士康，很多人会想到张全蛋。作为富士康 3 号流水线资深质检员，下面就请张全蛋给大家科普下什么是流">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Kotlin中的JVM注解">
-<meta property="og:url" content="https://wangduwei.top/kotlin-lang-jvm-annotation.html">
+<meta property="og:title" content="CPU流水线工作原理">
+<meta property="og:url" content="https://wangduwei.top/cpu-pipline-overview.html">
 <meta property="og:site_name" content="蓝色的笔记本">
-<meta property="og:description" content="Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。 1、@JvmName用于文件、函数、属性、getter和setter。 1.1 给文件添加@JvmName注解默认情况下，一个Kotlin文件中的function和properties会被编译成filenameKt.class，其中的cla">
+<meta property="og:description" content="说明：在宅学部落这个网站看到一篇讲CPU流水线的文章，写的非常好，为了便于翻阅回顾，转载之。 正文：现在的CPU处理器一般都是超流水线工作，动不动就是10级以上流水线，超高主频，这两者之间有什么关系呢？今天就跟大家科普下CPU流水线的工作原理，以及他们之间的关系。 说到流水线，很多人会想到富士康；说到富士康，很多人会想到张全蛋。作为富士康 3 号流水线资深质检员，下面就请张全蛋给大家科普下什么是流">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmname-1.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmname-2.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmname-3.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmdefault-1.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmdefault-2.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmstatic-1.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmstatic-2.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmoverloads-1.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmoverloads-2.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmthrows.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-jvmmultifileclass.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/kotlin-annotation-overview.png">
-<meta property="article:published_time" content="2022-05-01T07:29:44.000Z">
-<meta property="article:modified_time" content="2022-06-06T05:59:22.951Z">
+<meta property="og:image" content="https://wangduwei.top/images/cpu-pipeline-phone.jpeg">
+<meta property="og:image" content="https://wangduwei.top/images/cpu-arm-pipeline.png">
+<meta property="og:image" content="https://wangduwei.top/images/cpu-pipeline-multi.png">
+<meta property="og:image" content="https://wangduwei.top/images/cpu-pipeline-phone2.png">
+<meta property="og:image" content="https://wangduwei.top/images/cpu-pipeline-line.png">
+<meta property="article:published_time" content="2023-08-22T13:56:21.000Z">
+<meta property="article:modified_time" content="2023-08-22T14:03:28.040Z">
 <meta property="article:author" content="wangduwei">
-<meta property="article:tag" content="Kotlin">
+<meta property="article:tag" content="计算机基础">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://wangduwei.top/images/kotlin-annotation-jvmname-1.jpeg">
+<meta name="twitter:image" content="https://wangduwei.top/images/cpu-pipeline-phone.jpeg">
 
-<link rel="canonical" href="https://wangduwei.top/kotlin-lang-jvm-annotation.html">
+<link rel="canonical" href="https://wangduwei.top/cpu-pipline-overview.html">
 
 
 <script id="page-configurations">
@@ -63,7 +56,7 @@
   };
 </script>
 
-  <title>Kotlin中的JVM注解 | 蓝色的笔记本</title>
+  <title>CPU流水线工作原理 | 蓝色的笔记本</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-69Z1P1CBTV"></script>
     <script>
@@ -203,7 +196,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-lang-jvm-annotation.html">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/cpu-pipline-overview.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpeg">
@@ -216,7 +209,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Kotlin中的JVM注解
+          CPU流水线工作原理
         </h1>
 
         <div class="post-meta">
@@ -225,16 +218,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-05-01 15:29:44" itemprop="dateCreated datePublished" datetime="2022-05-01T15:29:44+08:00">2022-05-01</time>
+              <time title="创建时间：2023-08-22 21:56:21 / 修改时间：22:03:28" itemprop="dateCreated datePublished" datetime="2023-08-22T21:56:21+08:00">2023-08-22</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-06-06 13:59:22" itemprop="dateModified" datetime="2022-06-06T13:59:22+08:00">2022-06-06</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -261,8 +248,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/kotlin-lang-jvm-annotation.html#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/kotlin-lang-jvm-annotation.html" itemprop="commentCount"></span>
+    <a title="valine" href="/cpu-pipline-overview.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/cpu-pipline-overview.html" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -272,14 +259,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1k</span>
+              <span>4.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>4 分钟</span>
             </span>
 
         </div>
@@ -291,69 +278,58 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
-<h4 id="1、-JvmName"><a href="#1、-JvmName" class="headerlink" title="1、@JvmName"></a>1、@JvmName</h4><p>用于文件、函数、属性、getter和setter。</p>
-<h5 id="1-1-给文件添加-JvmName注解"><a href="#1-1-给文件添加-JvmName注解" class="headerlink" title="1.1 给文件添加@JvmName注解"></a>1.1 给文件添加@JvmName注解</h5><p>默认情况下，一个Kotlin文件中的<strong>function</strong>和<strong>properties</strong>会被编译成<em>filenameKt.class</em>，其中的<strong>class</strong>会被编译成classname.class:</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmname-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmname-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h5 id="1-2-给函数名添加-JvmName注解"><a href="#1-2-给函数名添加-JvmName注解" class="headerlink" title="1.2 给函数名添加@JvmName注解"></a>1.2 给函数名添加@JvmName注解</h5><center>
-    <img src="../images/kotlin-annotation-jvmname-3.jpeg" width="500"/>
-</center>
-
-<h5 id="1-3-给getter和setting添加-JvmName"><a href="#1-3-给getter和setting添加-JvmName" class="headerlink" title="1.3 给getter和setting添加@JvmName"></a>1.3 给getter和setting添加@JvmName</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@get:JvmName</span>(<span class="string">&quot;getContent&quot;</span>)</span><br><span class="line"><span class="meta">@set:JvmName</span>(<span class="string">&quot;setContent&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="2、-JvmDefault"><a href="#2、-JvmDefault" class="headerlink" title="2、@JvmDefault"></a>2、@JvmDefault</h4><p>和Java8一样，Kotlin的接口也支持默认方法实现。即使针对Java7及以下版本，他也能正常编译，因为Kotlin使用静态内部类实现默认方法。</p>
+        <h5 id="说明："><a href="#说明：" class="headerlink" title="说明："></a>说明：</h5><p>在<a target="_blank" rel="noopener" href="https://www.zhaixue.cc/weixin/weixin-cpu-pipeline.html">宅学部落</a>这个网站看到一篇讲CPU流水线的文章，写的非常好，为了便于翻阅回顾，转载之。</p>
+<h5 id="正文："><a href="#正文：" class="headerlink" title="正文："></a>正文：</h5><p>现在的CPU处理器一般都是超流水线工作，动不动就是10级以上流水线，超高主频，这两者之间有什么关系呢？今天就跟大家科普下CPU流水线的工作原理，以及他们之间的关系。</p>
+<p>说到流水线，很多人会想到富士康；说到富士康，很多人会想到张全蛋。作为富士康 3 号流水线资深质检员，下面就请张全蛋给大家科普下什么是流水线，大家鼓掌欢迎。</p>
+<h5 id="Micheal-Jack-眼中的流水线"><a href="#Micheal-Jack-眼中的流水线" class="headerlink" title="Micheal Jack 眼中的流水线"></a>Micheal Jack 眼中的流水线</h5><blockquote>
+<p>大家好，我是张全蛋，英文名叫Micheal Jack，法文名叫霍雷呆-杰Q赖，大家也可以叫我查理。作为iPhone 手机 3 号流水线的资深质检员，我很忙的，每分钟都是几百万的生意。像我们富士康这样的transnational enterprise，经常会和不同国家的客户说一些技术上的meeting啊、下班陪他们message啊，都需要英文的。像我们厂里不会说英语的啊，都会被经理 fire 掉的。在我们厂里，流水线叫法太 low了，我们都叫 pipeline，一条pipeline，每个人分工不同，从手机原材料到成品iPhone ，只需要短短几分钟。—- 《嵌入式C语言自我修养》</p>
+</blockquote>
 <center>
-    <img src="../images/kotlin-annotation-jvmdefault-1.jpeg" width="500"/>
+    <img src="../images/cpu-pipeline-phone.jpeg" width="90%"/>
 </center>
 
-<p>当在Java中实现此接口时，需要复写对应的方法，否则将报错。</p>
+<p>查理很忙，介绍到这里就走了，接下来我们继续了解下什么叫流水线。</p>
+<p>流水线是工业大生产下的产物。在农业社会做一部手机，需要的是工匠、手艺人，就像故宫里制作钟表的那些匠人一样，是需要拜师学艺、慢慢学习的：从手机组装、质检、贴膜、包装都是一个人，什么都要学。手艺人慢工出细活，但成本很高，到了工业化社会就不一样了：大家分工合作，将做手机这个复杂过程拆分为多个简单步骤，每个人负责一个步骤，经过刻意（机械）练习和培训，就可以很快上手。每个人都做自己最擅长的，可以大大提高工作效率。</p>
+<p>如果每个人都单独做一部手机，焊接电路、组装成品这一步骤一般人需要8分钟，测试检验一般需要4分钟，贴膜包装成盒一般需要4分钟，总共需要16分钟。每16分钟，如果有3个工人的话，一共可以生产3部手机。一个新员工从进厂开始，要培训学习三个月才能掌握所有的技能，才能上岗。如果引入生产流水线就不一样了，每个人只负责一个工序，比如赵铁柱只负责焊接电路、组装手机，李小花只负责贴膜，进厂培训3天就可以快速上手了，对工人的技能要求大大降低！而且随着时间积累，每个人对自己所负责的工序越来越熟练，每道工序需要的时间大大减少：赵铁柱焊接电路越来越顺手，花费时间从原来的8分钟缩减为4分钟；张全蛋的质量检验练得如火纯情，整个流程做完只需要2分钟；李小花的贴膜技术也越来越溜了，从贴膜到包装2分钟搞定。每16分钟，赵铁柱可以焊接4块电路板 ，整个流水线可以生产出4部手机，产能整整提升了33.33%！老板高兴，赵铁柱高兴，张全蛋和李小花更高兴，因为每做2分钟，他们还可以休息2分钟，刷刷微博滑个抖音，岂不乐哉！</p>
+<p>看到这里可能有人抬杠了：你这么算是不对的，每道工序所用的时间都变为原来的一半，怎么可能做得到？其实要做到不难的，只要工序拆解得合理，容易上手，再加上足够时间的机械重复，很多人都可以做得到。只要奖金发到位，蛋糕店里的小姐姐夹蛋糕的速度比你眨眼的速度都快，银行柜台的小李数钞票的速度比点钞机都快，买单时饭店前台的小妹摁计算器的速度比你掏钱的速度都快。</p>
+<h5 id="流水线工作原理"><a href="#流水线工作原理" class="headerlink" title="流水线工作原理"></a>流水线工作原理</h5><p>一条指令的执行一般要经过：取指令、翻译指令、执行指令三个基本流程。CPU内部的电路分为不同的单元：取指单元、译码单元、执行单元等，指令的执行也是按照流水线工序一步一步执行的。我们假设每一个步骤执行时间都是一个时钟周期，那么一条指令执行需要3个时钟周期。</p>
 <center>
-    <img src="../images/kotlin-annotation-jvmdefault-2.jpeg" width="100%"/>
+    <img src="../images/cpu-arm-pipeline.png" width="50%"/>
 </center>
 
-<p>如果我们希望它在Java8中不报错，可以使用@JvmDefault注解标识方法：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Document</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JvmDefault</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getType</span><span class="params">()</span></span> = <span class="string">&quot;document&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h4 id="3、-JvmStatic"><a href="#3、-JvmStatic" class="headerlink" title="3、@JvmStatic"></a>3、@JvmStatic</h4><p>针对<code>object class</code> 或<code>companion object</code>使用此注解,可以避免Java访问时的INSTANCE调用</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h4 id="4、-JvmOverloads"><a href="#4、-JvmOverloads" class="headerlink" title="4、@JvmOverloads"></a>4、@JvmOverloads</h4><p>Kotlin的默认参数可以帮助我们减少函数重载，简化方法调用参数。在Java中调用含默认参数的Kotlin函数时，需要提供全部参数。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmoverloads-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmoverloads-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h4 id="5、-Throws"><a href="#5、-Throws" class="headerlink" title="5、@Throws"></a>5、@Throws</h4><p>Kotlin没有受检测异常，try-catch是非必须的。如果希望在Java调用中检测到异常，可以使用@Throws注解</p>
+<p>CPU 执行指令的3个时钟周期里，取指单元只在第一个时钟周期里工作，其余两个时钟周期都处于空闲状态，其它两个执行单元也是如此，效率太低了，消费者无法接受，老板也不能接受。解决方法就是引入流水线，让流水线每一颗螺丝钉都马不停蹄地运转起来，最好一刻也不要停。</p>
 <center>
-    <img src="../images/kotlin-annotation-jvmthrows.jpeg" width="100%"/>
+    <img src="../images/cpu-pipeline-multi.png" width="50%"/>
 </center>
 
-<h4 id="6、-JvmWildcard-amp-JvmSuppressWildcard"><a href="#6、-JvmWildcard-amp-JvmSuppressWildcard" class="headerlink" title="6、@JvmWildcard &amp; @JvmSuppressWildcard"></a>6、@JvmWildcard &amp; @JvmSuppressWildcard</h4><p>略</p>
-<h4 id="7、-JvmMultifileClass"><a href="#7、-JvmMultifileClass" class="headerlink" title="7、@JvmMultifileClass"></a>7、@JvmMultifileClass</h4><p>当在多个文件中定义的顶层函数或属性想要合并到一个编译的class中时，可以使用此注解。</p>
+
+<p>引入流水线工作模式后可以看到，除了刚开始第一个时钟周期大家还可以偷懒外，其余的时间都不能闲着：从第二个时钟周期开始，当译码单元在翻译指令1时，取指单元也不能闲着，要接着去取指令2。同样如此，从第三个时钟周期开始，当执行单元执行指令1时，译码单元也不能闲着，要接着去翻译指令2，而取指单元要去取指令3。从第四个时钟周期开始，每个电路单元都会进入满荷负载工作状态，像富士康工厂里的流水线一样，源源不断地执行一条条指令。</p>
+<p>引入流水线后，虽然每一条指令执行流程不变，还是需要3个时钟周期，但是从整条流水线的输出看来，差不多平均每个时钟周期就能执行一条指令。原来执行一条指令需要3个时钟周期，现在平均只需要1个时钟周期，CPU 性能提升了不少。</p>
+<p>流水线的本质其实就是拿空间资源换时间。将每条指令分解为多步，指令的每一步都有独立的电路来执行，并让不同指令的各步操作重叠，从而实现几条指令并行处理，从而加快程序的运行。</p>
+<p>CPU内部的流水线如此，富士康工厂里的iPhone流水线也是如此，通过不断往流水线增加人手来提高流水线的生产效率，也就是吞吐率。</p>
+<h5 id="超流水线技术"><a href="#超流水线技术" class="headerlink" title="超流水线技术"></a>超流水线技术</h5><p>想知道什么是超流水线，让我们再回到富士康。</p>
+<p>在富士康 3 号 iPhone 流水生产线上，因为赵铁柱工作效率不高，焊接组装一步手机需要 4 分钟，导致生产一部iPhone手机也得需要 4 分钟，从而拖累了整条生产线的生产效率。老板很生气，后果很严重，赵铁柱没干到一个月就被 fire 掉了。后面几个月，陆陆续续来了不少人：小黑、皮裤哥、红姐，都想试试这份工作，可惜干得还不如赵铁柱，挑战电子厂失败，早已提桶跑路。</p>
+<p>老板招不到人，感觉又错怪了赵铁柱，于是决定升级生产线，并承诺加薪重新召回了赵铁柱。</p>
 <center>
-    <img src="../images/kotlin-annotation-jvmmultifileclass.jpeg" width="500"/>
+    <img src="../images/cpu-pipeline-phone2.png" width="50%"/>
 </center>
 
-
-<h4 id="8、-JvmPackageName"><a href="#8、-JvmPackageName" class="headerlink" title="8、@JvmPackageName"></a>8、@JvmPackageName</h4><p>和@JvmName一样，此注解可以修改包名，但是他被标记为internal，只能在kotlin库内部使用，这里不做过多介绍。</p>
-<h4 id="9、注解一览"><a href="#9、注解一览" class="headerlink" title="9、注解一览"></a>9、注解一览</h4><center>
-    <img src="../images/kotlin-annotation-overview.png" width="100%"/>
+<p>老板找出了生产线的瓶颈：每道工序都是需要2分钟，只有赵铁柱这道工序耗时4分钟，老板错怪了这铁柱，这不是赵铁柱的原因，是因为这道工序太复杂。于是把这道工序进行了拆解为2道工序：焊接电路板和组装手机。焊接电路仍由赵铁柱负责，把电路板、显示屏、手机外壳组装成手机这道工序则由新招员工王建国负责。生产流水线优化后，赵铁柱焊接电路只需要2分钟，王建国组装也只需要 2 分钟，生产每部 iPhone 的时间由原来的 4 分钟缩减为 2 分钟，生产流水线的瓶颈解决了！</p>
+<p>跟富士康流水线类似，优化CPU流水线也是提升CPU性能的有效手段。流水生产线存在木桶短板效应，我们只需要找出CPU流水线中的性能瓶颈，即耗时最长的那道工序，然后再进行细分、优化为更多的工序就可以了。每一道工序我们称为流水线的一级，流水线越深，每一道流水电路单元的执行时间就会变得越小，我们处理器的时钟周期就可以更短，从而可以通过提升CPU主频来提升CPU性能、提高工作效率。</p>
+<p>在富士康流水生产线中，每道工序的最长耗时时间决定了整条生产线的吞吐率。在CPU内部也是如此，每个流水单元的执行时间（即时间延迟）决定了CPU流水线的性能。CPU流水线中的每一道电路单元由组合逻辑电路和寄存器组成，逻辑单路用来执行本道工序的逻辑运算，寄存器用来保存结果，并作为下一道工序的输入。</p>
+<center>
+    <img src="../images/cpu-pipeline-line.png" width="50%"/>
 </center>
 
-<h4 id="参考"><a href="#参考" class="headerlink" title="[参考]"></a>[参考]</h4><p><a target="_blank" rel="noopener" href="https://www.baeldung.com/kotlin/jvm-annotations">1.Guide to JVM Platform Annotations in Kotlin</a></p>
+<p>流水生产线是通过减少每一道工序的耗费时间来提升整条流水线效率的。在CPU内部也是如此，CPU内部的数字电路是靠时钟驱动来工作的，既然每条指令的执行时钟周期数不变，即执行每条指令需要3个时钟周期，但是我们可以通过缩短时钟周期的方法来提升效率，即减少每条指令所耗费的时间。减少时钟周期，也就是提升CPU主频，一个关键的制约因素就是CPU内部每一个执行单元的耗费时间。虽然说电信号在电路中的传播时间很快，可以接近光速，但是经过成千上万的晶体管，不停地信号翻转，还是会带来一定的时间延迟，这个时间延迟我们可以看做这道工作的执行时间。以上图为例，如果每个执行单元的延迟是 1.5 纳秒，那么你的时钟周期至少也得2纳秒以上，否则电路就会工作异常。如果驱动CPU工作的时钟周期是 2 纳秒，CPU的主频就是 500 MHz。现在的CPU流水线深度可以做到10级以上，流水线的每一级时间延迟可以做到皮秒级别，驱动CPU工作的时钟周期可以做到更短，因此可以把CPU的主频飙到 5 GHz 以上。</p>
+<p>我们把5级以上的流水线称为超流水线结构。高性能的处理器，为了提升CPU主频，一般都会采用这种超流水线结构。Intel的 i7 处理器有16级流水线，AMD的速龙64系列CPU流水线为20级。史上具有最长流水线的是Intel的第三代奔腾四处理器，有31级的流水线。</p>
+<p>想要提升CPU的主频，根本在于减少流水线中每一级流水的执行时间，消除木桶的短板效应，才能提升流水线的整体性能。解决方法有三个：一是优化流水线中各级流水线的性能，受限于当前集成电路的设计水平，这一步最难；二是依靠集成电路的制造工艺，更先进的纳米工艺，芯片面积越小，发热越小，更容易提升主频；三是不断地增加流水线，流水线越深，流水线的各级延迟就可以做得越小，更容易提高主频。</p>
+<p>流水线是否越深越好呢？非也。流水线的本质是拿空间换时间，流水线越深，电路就会越复杂，需要更多的组合逻辑电路和寄存器，芯片面积也就越大，功耗也就随之上升了。拿功耗增长换来性能提升，在PC机和服务器上还行，但对于很多靠电池供电的移动设备的处理器来说就无法接受了，CPU设计人员需要在性能和功耗之间做一个很好的平衡。</p>
+<p>流水线越深，就越能提升性能吗？也不一定。流水线是靠指令的并行来提升性能的，第一条指令还没有执行完，下面的第二条指令就开始取指、译码了。执行的程序指令如果是顺序结构，没有中断或跳转，流水线确实可以提高执行效率。但是当程序指令中存在跳转、分支结构时，下面预取的指令可能就要全部丢掉了，需要到要跳转的地方重新取指令执行。如下面的分支，如果BEQ条件不满足，处理器可能就会将预期的ADD指令全部丢弃，重新到here标签处取SUB指令执行。</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">BEQ R1, R2, here</span><br><span class="line">ADD R2, R1, R0</span><br><span class="line">ADD R5, R4, R3</span><br><span class="line">...</span><br><span class="line">here:</span><br><span class="line">SUB R2, R1, R0</span><br><span class="line">SUB R5, R4, R3</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>流水线越深，一旦预取指令失败，浪费和损失就会越严重，因为流水线中预取的几十条指令可能都要丢弃掉，流水线发生了停顿，无法按照预期继续执行，这种情况我们一般称之为流水线冒险（hazard）。在现在很多超流水线处理器中，为了避免这种情况出现，会采取各种各样的方法去避免这种情况，以免影响处理器的性能。</p>
+<p>流水线越深，一旦预取指令失败，浪费和损失就会越严重，因为流水线中预取的几十条指令可能都要丢弃掉，流水线发生了停顿，无法按照预期继续执行，这种情况我们一般称之为流水线冒险（hazard）。在现在很多超流水线处理器中，为了避免这种情况出现，会采取各种各样的方法去避免这种情况发生，以免影响处理器的性能。</p>
 
     </div>
 
@@ -389,7 +365,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://wangduwei.top/kotlin-lang-jvm-annotation.html" title="Kotlin中的JVM注解">https://wangduwei.top/kotlin-lang-jvm-annotation.html</a>
+    <a href="https://wangduwei.top/cpu-pipline-overview.html" title="CPU流水线工作原理">https://wangduwei.top/cpu-pipline-overview.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -400,7 +376,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/Kotlin/" rel="tag"># Kotlin</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/" rel="tag"># 计算机基础</a>
           </div>
 
         
@@ -414,13 +390,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/android-github-source-workmanager.html" rel="prev" title="源码分析-WorkManager">
-      <i class="fa fa-chevron-left"></i> 源码分析-WorkManager
+    <a href="/flutter-state-bloc.html" rel="prev" title="flutter状态管理之BloC">
+      <i class="fa fa-chevron-left"></i> flutter状态管理之BloC
     </a></div>
-      <div class="post-nav-item">
-    <a href="/kotlin-lang-jvmstatic-with-interface.html" rel="next" title="Kotlin之JvmStatic和override冲突问题">
-      Kotlin之JvmStatic和override冲突问题 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -493,7 +466,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1%E3%80%81-JvmName"><span class="nav-number">1.</span> <span class="nav-text">1、@JvmName</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-1-%E7%BB%99%E6%96%87%E4%BB%B6%E6%B7%BB%E5%8A%A0-JvmName%E6%B3%A8%E8%A7%A3"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 给文件添加@JvmName注解</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-2-%E7%BB%99%E5%87%BD%E6%95%B0%E5%90%8D%E6%B7%BB%E5%8A%A0-JvmName%E6%B3%A8%E8%A7%A3"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 给函数名添加@JvmName注解</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-3-%E7%BB%99getter%E5%92%8Csetting%E6%B7%BB%E5%8A%A0-JvmName"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 给getter和setting添加@JvmName</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2%E3%80%81-JvmDefault"><span class="nav-number">2.</span> <span class="nav-text">2、@JvmDefault</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3%E3%80%81-JvmStatic"><span class="nav-number">3.</span> <span class="nav-text">3、@JvmStatic</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4%E3%80%81-JvmOverloads"><span class="nav-number">4.</span> <span class="nav-text">4、@JvmOverloads</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5%E3%80%81-Throws"><span class="nav-number">5.</span> <span class="nav-text">5、@Throws</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6%E3%80%81-JvmWildcard-amp-JvmSuppressWildcard"><span class="nav-number">6.</span> <span class="nav-text">6、@JvmWildcard &amp; @JvmSuppressWildcard</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7%E3%80%81-JvmMultifileClass"><span class="nav-number">7.</span> <span class="nav-text">7、@JvmMultifileClass</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8%E3%80%81-JvmPackageName"><span class="nav-number">8.</span> <span class="nav-text">8、@JvmPackageName</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9%E3%80%81%E6%B3%A8%E8%A7%A3%E4%B8%80%E8%A7%88"><span class="nav-number">9.</span> <span class="nav-text">9、注解一览</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">10.</span> <span class="nav-text">[参考]</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AF%B4%E6%98%8E%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">说明：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A3%E6%96%87%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">正文：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Micheal-Jack-%E7%9C%BC%E4%B8%AD%E7%9A%84%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-number">3.</span> <span class="nav-text">Micheal Jack 眼中的流水线</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">流水线工作原理</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B6%85%E6%B5%81%E6%B0%B4%E7%BA%BF%E6%8A%80%E6%9C%AF"><span class="nav-number">5.</span> <span class="nav-text">超流水线技术</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -701,7 +674,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'duweiwang.github.io',
       owner       : 'duweiwang',
       admin       : ['duweiwang'],
-      id          : '77f13978848eea7618d21cc0b21c6cd5',
+      id          : '56f00347e3d799b8a8e0fb4a53007e01',
         language: '',
       distractionFreeMode: true
     });
