@@ -3,6 +3,13 @@ title: Android之ANR
 tags: Android
 -------------
 
+
+<center>
+    <img src="../images/android/android-anr-source-code.webp" width="50%"/>
+</center>
+
+
+
 分类
 
 + 1.Service ANR：前台20s，后台200s；startForeground超时10s

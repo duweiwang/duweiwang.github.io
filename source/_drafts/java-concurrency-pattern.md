@@ -81,7 +81,7 @@ tags: Java
 ![alt text](./etc/async-method-invocation.png "Async Method Invocation")
 
 ##### 应用
-一下情况考虑使用异步方法调用：
+以下情况考虑使用异步方法调用：
 
 * 有多个不相关的子任务可以并行执行
 * 想提升一组sequential tasks的性能
