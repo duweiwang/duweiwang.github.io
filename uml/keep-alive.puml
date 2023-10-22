@@ -1,0 +1,21 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+    abstract class JobIntentService
+
+    JobIntentService <|-- JobHeartService
+
+
+    JobService <|-- DazzleLiveService
+    JobService <|-- JobHandlerService
+
+
+    package account_sync {
+        JobService <|-- AccountCoreJobService
+        JobService <|-- AccountJobService
+    }
+
+
+
+@enduml

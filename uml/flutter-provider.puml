@@ -2,30 +2,78 @@
 'https://plantuml.com/class-diagram
 
 class SingleChildStatelessWidget
-InheritedWidget <|-- _InheritedProviderScope
+class SingleChildStatefulWidget
+
+package provider{
+
+    class InheritedProvider
+
+    class DeferredInheritedProvider
+    class StreamProvider
+    class FutureProvider
+
+    class ListenableProvider
+    class ListenableProxyProvider0
+    class ChangeNotifierProvider
+
+    class ListenableProxyProvider_2_3_4_5_6
+
+    class ProxyProvider0
+    class Consumer_2_3_4_5_6
+    class ProxyProvider_2_3_4_5_6
+
+    class _Delegate
+    class _CreateInheritedProvider
+    class _ValueInheritedProvider
+
+    class _InheritedProviderScope
+
+    class InheritedContext
+    class _InheritedProviderScopeElement
+
+'    二级继承
+    InheritedProvider <|-- ListenableProvider
+    InheritedProvider <|-- DeferredInheritedProvider
+    InheritedProvider <|-- ListenableProxyProvider0
+    InheritedProvider <|-- ProxyProvider0
+
+'    这里是实际使用的具体实现
+    DeferredInheritedProvider <|-- FutureProvider
+    DeferredInheritedProvider <|-- StreamProvider
+    ListenableProvider <|-- ChangeNotifierProvider
+    ListenableProxyProvider0 <|-- ListenableProxyProvider_2_3_4_5_6
+    ProxyProvider0 <|-- ProxyProvider_2_3_4_5_6
+}
+
+package flutter {
+ class InheritedWidget
+ class ChangeNotifier
+ class Listenable
+ class BuildContext
+ abstract class ProxyWidget
+ abstract class Widget
+ class InheritedElement {
+    void notifyClients()
+ }
+
+ Widget <|-- ProxyWidget
+ ProxyWidget <|-- InheritedWidget
+
+ InheritedWidget "createElement"*-- InheritedElement
+
+}
+
+Listenable <|-- ChangeNotifier
+
+InheritedWidget <|-[thickness=4]- _InheritedProviderScope
 
 SingleChildStatelessWidget <|-- InheritedProvider
 SingleChildStatelessWidget <|-- Consumer_2_3_4_5_6
 
-InheritedProvider <|-- ListenableProvider
-InheritedProvider <|-- DeferredInheritedProvider
-InheritedProvider <|-- ListenableProxyProvider0
-InheritedProvider <|-- ProxyProvider0
+
 InheritedProvider *-- _Delegate
-InheritedProvider --* _InheritedProviderScope
+InheritedProvider "return"-[thickness=4]->"委托" _InheritedProviderScope
 
-DeferredInheritedProvider <|-- FutureProvider
-
-DeferredInheritedProvider <|-- StreamProvider
-
-ListenableProvider <|-- ChangeNotifierProvider
-
-ListenableProxyProvider0 <|-- ListenableProxyProvider_2_3_4_5_6
-
-ProxyProvider0 <|-- ProxyProvider_2_3_4_5_6
-
-
-class SingleChildStatefulWidget
 
 SingleChildStatefulWidget <|-- Selector0
 
@@ -35,5 +83,12 @@ Selector0 <|-- Selector2
 _Delegate <|-- _CreateInheritedProvider
 _Delegate <|-- _ValueInheritedProvider
 
+_ValueInheritedProvider *-- Listenable
+
+BuildContext <|-- InheritedContext
+
+InheritedElement <|-- _InheritedProviderScopeElement
+
+_InheritedProviderScope "createElement"*-- _InheritedProviderScopeElement
 
 @enduml

@@ -1,7 +1,9 @@
 ---
 title: CPU流水线工作原理
 date: 2023-08-22 21:56:21
-tags: 计算机基础
+tags:
+- 计算机基础
+- CPU
 categories: 计算机
 description:
 ---

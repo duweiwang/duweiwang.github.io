@@ -1,0 +1,32 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+abstract class Route<T>
+abstract class OverlayRoute<T>
+abstract class TransitionRoute<T>
+abstract class ModalRoute<T>
+abstract class PopupRoute<T>
+
+class Navigator
+class RouteSettings
+class NavigatorObserver
+class WillPopScope
+abstract class Page<T>
+
+StatefulWidget <|-- Navigator
+StatefulWidget <|-- WillPopScope
+WillPopScope --> _WillPopScopeState
+_WillPopScopeState "ModalRoute.of(context)"*-- ModalRoute
+
+Route <|-- OverlayRoute
+OverlayRoute <|-- TransitionRoute
+
+TransitionRoute <|-- ModalRoute
+ModalRoute <|-- PopupRoute
+
+Navigator "1"*--"n" Page
+Navigator "1"*--"n" NavigatorObserver
+
+Navigator "RouteFactory"--> Route
+
+@enduml

@@ -1,0 +1,104 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+'package ad_mediator{
+
+    interface IAdObject
+
+    interface IAdInterstitial
+    IAdInterstitial --|> IAdObject
+
+    interface IBannerAd
+    IBannerAd --|> IAdObject
+
+    interface INativeAd
+    INativeAd --|> IAdObject
+
+    interface IOpenAd
+    IOpenAd --|> IAdObject
+
+    interface IRewardAd
+    IRewardAd --|> IAdObject
+
+      interface IAdAdapter {
+            void loadAd()
+            boolean hasAd()
+            void setListener()
+        }
+        interface IAdAdapterFactory
+
+        IAdAdapterFactory "create"..> IAdAdapter
+
+
+  interface IAdLoader
+
+    class AdLoader
+    class AdLoaderParallel
+
+    IAdLoader <|.. AdLoader
+    IAdLoader <|.. AdLoaderParallel
+
+    interface ISPAdManager {
+        void initAd()
+        IAdLoader createAdLoader()
+    }
+    class AdManagerImp
+
+    ISPAdManager <|.. AdManagerImp
+    AdManagerImp *-- AdConfig
+
+    interface IAdLoadedListener
+    interface IAdImpressListener
+
+
+    class AdConfig
+    class AdConfig.Builder {}
+
+    AdConfig.Builder --> AdConfig
+
+'}
+
+
+'package muslim_ad {
+
+    class AdLoaderController
+
+
+    IAdLoadedListener <|.. AdLoaderController
+    IAdImpressListener <|.. AdLoaderController
+
+
+    class AdLoadManager {
+        instance:AdLoadManager
+    }
+
+    AdLoadManager "1"*--"n" AdLoaderController
+    AdLoadManager "1"*--"1" ISPAdManager
+    AdLoadManager "1"*--"1" AndroidAdAdapterFactory
+
+
+    AdLoaderController "1"*--"1" IAdLoader
+
+    AndroidAdAdapterFactory ..|> IAdAdapterFactory
+'}
+
+
+'package fb_mediation {
+
+    IAdAdapter <|.. FacebookBannerAdapter
+    IAdAdapter <|.. FacebookNativeAdAdapter
+    IAdAdapter <|.. FacebookInterstitialAdapter
+    IAdAdapter <|.. FacebookRewardAdapter
+
+'}
+
+'package admob_mediation {
+'
+'    AdMobBannerAdapter ..|> IAdAdapter
+'    AdMobNativeAdAdapter ..|> IAdAdapter
+'    AdMobInterstitialAdapter ..|> IAdAdapter
+'    AdmobRewardAdAdapter ..|> IAdAdapter
+'
+'}
+
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class ShowRewardAdMixin{
+    void tryShowRewardAd()
+    void preloadAd()
+}
+
+class ShowRewardAdHelper {
+    void tryShowRewardAd()
+    void preloadAd()
+}
+
+ShowRewardAdMixin *-- ShowRewardAdHelper
+
+ShowRewardAdMixin --|> BaseBloc
+
+ShowRewardAdHelper *-- AdManager
+
+
+ShowRewardAdMixin <|-- QuizWrongBloc
+ShowRewardAdMixin <|-- RewardAdBloc
+ShowRewardAdMixin <|-- RewardAdOrSubscribeBloc
+'ShowRewardAdMixin <|-- SendQuranExitBloc
+ShowRewardAdMixin <|-- TaskListBloc
+
+JsWatchAdWithCallBack *-- ShowRewardAdHelper
+JsWatchAd *-- ShowRewardAdHelper
+AdManager "1"*--"..." AdController
+
+
+@enduml
