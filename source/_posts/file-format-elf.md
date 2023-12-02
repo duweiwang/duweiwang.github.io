@@ -93,6 +93,9 @@ typedef struct {
 | ET_DYN | 共享目标文件。ELF 类型为 dynamic，意味着该文件被标记 为了一个动态的可链接的目标文件，也称为共享库。这类共享库会在 程序运行时被装载并链接到程序的进程镜像中。 |
 | ET_CORE | 核心文件。在程序崩溃或者进程传递了一个 SIGSEGV 信 号（分段违规）时，会在核心文件中记录整个进程的镜像信息。可以 使用 GDB 读取这类文件来辅助调试并查找程序崩溃的原因。 | 
 
+> file /bin/bash     //executable
+> file /xxx/xx.so   //shared object
+
 ##### Program Header Table
 程序装载时，根据此结构的信息对文件进行分段（segment）。描述了磁盘上可执行文件的内存布局以及如何映射到内存中。
 
@@ -105,14 +108,14 @@ typedef struct {
    uint32_t   p_filesz; /* 文件的字节数  */
    uint32_t   p_memsz;  /* 加载到内存中的字节数  */
    uint32_t   p_flags;  /* segment类型标志位  */
-   uint32_t   p_align;  /* 内存对其  */
+   uint32_t   p_align;  /* 内存对齐  */
 } Elf32_Phdr;
 ```
 
 | p_flags | 描述 |
 | ----| ---- |
 | PF_X | An executable segment. |
-| PF_W | An executable segment. |
+| PF_W | A writable segment. |
 | PF_R | A readable segment. |
 
 ##### Section Header Table
@@ -196,6 +199,20 @@ r_info：
 
 r_addend：
 用于计算重定位字段的值。
+
+##### Dynamic tags（Dyn）
+`.dynamic`这个section存储一些包含动态链接信息的结构
+```
+typedef struct {
+        Elf32_Sword    d_tag;
+        union {
+            Elf32_Word d_val;
+            Elf32_Addr d_ptr;
+        } d_un;
+ } Elf32_Dyn;
+           
+extern Elf64_Dyn _DYNAMIC[];
+```
 
 #### 三、参考链接
 
