@@ -26,6 +26,7 @@ tags: Flutter
 #### 六、状态的类型
 
 #### 七、Flutter状态管理的方案、技术
++ flutter_riverpod
 
 
 [](https://medium.com/dhiwise/7-things-you-need-to-know-about-flutter-state-management-42f840ef022e)
