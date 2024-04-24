@@ -40,3 +40,7 @@ tags:
     文件监控：监控APP私有文件大小/变化，避免私有文件过大导致的卡顿、存储空间占用等问题
     卡顿分析：监控并发现卡顿原因，代码堆栈精准定位问题，解决明显的卡顿体验
     ANR分析：捕获ANR异常，解决APP的“未响应”问题
+
+
+https://github.com/zhengmin1989/TheSevenWeapons?tab=readme-ov-file
+https://www.linuxjournal.com/article/6100
