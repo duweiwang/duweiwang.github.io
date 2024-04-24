@@ -34,7 +34,7 @@ tags: Android
     <img src="../images/android-binder-what.svg" width="50%"/>
 </center>
 
-+ 开发面向对象的系统级服务时使用的一种进程通讯手段
++ 开发面向对象的系统级服务时使用的一种进程通讯手段（为了开发面向对象的操作系统服务而设计的进程通讯组件）
  - Not yet another object-oriented kernel
  - Instead an object-oriented operating system environment that works on traditional kernels, like Linux!
 + 对于安卓至关重要
@@ -103,6 +103,7 @@ tags: Android
  - Simplified transaction invocation model via auto-generated proxies and stubs (Java-only)
  - Recursion across processes - i.e. behaves the same as recursion semantics when calling methods on local objects
  - Local execution mode (no IPC/data marshalling) if the client and the service happen to be in the same process
+
 + But:
  - No support for RPC (local-only)
  - Client-service message-based communication - not well-suited for streaming
@@ -113,7 +114,7 @@ tags: Android
  - Unix domain sockets used in some cases (e.g. RILD)
 
 
-四、IPC with Intents and ContentProviders?
+四、使用Intents 和 ContentProviders进程间通讯
 
 <center>
     <img src="../images/android-binder-intent-contentprovider.svg" width="50%"/>
