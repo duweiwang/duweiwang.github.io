@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"wangduwei.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、概述 资产回报率（ROA） 净资产回报率（ROE） 投入资本回报率（ROIC） 使用资本回报率（ROCE）  不同的回报率，实际上是衡量公司的不同视角。 二、资产回报率（ROA）2.1 基本概念运用全部资金获取利润能力的集中体现         $$    ROA&#x3D;\frac{净利润}{总资产}$$ 2.2 概念拆分$$    ROA &#x3D; 净利润率NPM * 资产利用率AU &#x3D; \frac{净">
+<meta property="og:type" content="article">
+<meta property="og:title" content="投资回报率">
+<meta property="og:url" content="https://wangduwei.top/econonmics-roa-roe-roic-roce.html">
+<meta property="og:site_name" content="蓝色的笔记本">
+<meta property="og:description" content="一、概述 资产回报率（ROA） 净资产回报率（ROE） 投入资本回报率（ROIC） 使用资本回报率（ROCE）  不同的回报率，实际上是衡量公司的不同视角。 二、资产回报率（ROA）2.1 基本概念运用全部资金获取利润能力的集中体现         $$    ROA&#x3D;\frac{净利润}{总资产}$$ 2.2 概念拆分$$    ROA &#x3D; 净利润率NPM * 资产利用率AU &#x3D; \frac{净">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wangduwei.top/images/ec-roa.png">
+<meta property="og:image" content="https://wangduwei.top/images/ec-roe.png">
+<meta property="og:image" content="https://wangduwei.top/images/ec-roic-1.png">
+<meta property="og:image" content="https://wangduwei.top/images/ec-roic-2.png">
+<meta property="og:image" content="https://wangduwei.top/images/ec-roce.png">
+<meta property="article:published_time" content="2022-06-13T09:04:39.000Z">
+<meta property="article:modified_time" content="2024-04-29T11:50:54.577Z">
+<meta property="article:author" content="wangduwei">
+<meta property="article:tag" content="经济学">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wangduwei.top/images/ec-roa.png">
+
+<link rel="canonical" href="https://wangduwei.top/econonmics-roa-roe-roic-roce.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>投资回报率 | 蓝色的笔记本</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?9f3c7bb2232e1e3fda4c019e4a4406c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="蓝色的笔记本" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">蓝色的笔记本</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录学习内容</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/econonmics-roa-roe-roic-roce.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          投资回报率
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-06-13 17:04:39" itemprop="dateCreated datePublished" datetime="2022-06-13T17:04:39+08:00">2022-06-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BB%8F%E6%B5%8E%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">经济学</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><ul>
+<li>资产回报率（ROA）</li>
+<li>净资产回报率（ROE）</li>
+<li>投入资本回报率（ROIC）</li>
+<li>使用资本回报率（ROCE）</li>
+</ul>
+<p>不同的回报率，实际上是衡量公司的不同视角。</p>
+<h4 id="二、资产回报率（ROA）"><a href="#二、资产回报率（ROA）" class="headerlink" title="二、资产回报率（ROA）"></a>二、资产回报率（ROA）</h4><h5 id="2-1-基本概念"><a href="#2-1-基本概念" class="headerlink" title="2.1 基本概念"></a>2.1 基本概念</h5><p><strong>运用全部资金获取利润能力的集中体现</strong></p>
+<center>
+    <img src="../images/ec-roa.png" width="50%"/>
+</center>
+
+<p>$$<br>    ROA=\frac{净利润}{总资产}<br>$$</p>
+<h5 id="2-2-概念拆分"><a href="#2-2-概念拆分" class="headerlink" title="2.2 概念拆分"></a>2.2 概念拆分</h5><p>$$<br>    ROA = 净利润率NPM * 资产利用率AU = \frac{净利润}{营业总收入} * \frac{营业总收入}{总资产} = \frac{（主营业务收入+非主营业务收入）}{总资产}<br>$$</p>
+<h5 id="2-3-概念理解"><a href="#2-3-概念理解" class="headerlink" title="2.3 概念理解"></a>2.3 概念理解</h5><p>ROA这个回报率衡量的是资产的回报率。<br>但是一个公司资产负债表上的资产价值更多的是反映了历史而不是当前，<br>而且不同的行业的ROA具有不可比性。<br>最简单的例子，很多类金融企业有无息流动负债，增加了总资产，降低了ROA，<br>但是无偿使用上下游资金实际上是公司有竞争力的体现。</p>
+<h4 id="三、净资产回报率（ROE）"><a href="#三、净资产回报率（ROE）" class="headerlink" title="三、净资产回报率（ROE）"></a>三、净资产回报率（ROE）</h4><h5 id="2-1-基本概念-1"><a href="#2-1-基本概念-1" class="headerlink" title="2.1 基本概念"></a>2.1 基本概念</h5><p>ROE的视角是从股东的角度看问题，单纯从股权的角度衡量回报，而不考虑公司的资本结构及负债情况。衡量公司赚钱的效率。</p>
+<center>
+    <img src="../images/ec-roe.png" width="50%"/>
+</center>
+
+<p>$$<br>    净资产收益率 = \frac{净利润}{净资产}<br>$$</p>
+<blockquote>
+<p>A公司：10亿净资产赚2亿。ROE = 20%<br>B公司：50亿净资产赚5亿。ROE = 10%</p>
+</blockquote>
+<h5 id="2-2-概念拆分-1"><a href="#2-2-概念拆分-1" class="headerlink" title="2.2 概念拆分"></a>2.2 概念拆分</h5><p>$$<br>    净资产收益率 = \frac{净利润}{净资产} = \frac{净利润}{营业收入} * \frac{营业收入}{总资产} * \frac{总资产}{净资产}<br>$$</p>
+<p>$$<br>    净资产收益率 = 净利润 * 资产周转率 * 权益乘数<br>$$</p>
+<p>$$<br>    权益乘数 = \frac{总资产}{净资产}<br>$$</p>
+<p>$$<br>    资产周转率 = \frac{营业收入}{总资产}<br>$$</p>
+<p>影响因素：</p>
+<ul>
+<li>净利润：反应盈利能力</li>
+<li>资产周转率：反应资产使用效率</li>
+<li>权益乘数：反应负债程度</li>
+</ul>
+<p>提升ROE的办法：</p>
+<ul>
+<li>提高周转率</li>
+<li>廉价的债务杠杆</li>
+<li>更高的债务杠杆</li>
+<li>更低的所得税</li>
+<li>更高的运营利润率</li>
+</ul>
+<h5 id="2-3-概念理解-1"><a href="#2-3-概念理解-1" class="headerlink" title="2.3 概念理解"></a>2.3 概念理解</h5><p>ROE对股东来说意义最大，是股票复利增长的源泉。<br>ROE可以在不同行业与不同企业之间横向比较。<br>相当于股票这种“股权债券”的收益率。<br>对投资人来说无论是投资铁路还是互联网，都相当于是买了“股权债券”。<br>在同等风险情况下，当然是收益率越高越好。<br>而且，ROE还可以与政府债券、企业债券的收益率跨资产类别横向比较。</p>
+<h5 id="不足"><a href="#不足" class="headerlink" title="不足"></a>不足</h5><p>ROE的问题在于无法反映债务杠杆对净利润的影响。<br>如果一个企业借更多的债，一般就能产生更多净利润，ROE也会提高。<br>但是这样的提高是以牺牲企业经营稳健程度为代价的。<br>因此，分析ROE一定要结合杜邦公式，并与同行业进行比较。</p>
+<hr>
+<h4 id="四、投入资本回报率（ROIC）"><a href="#四、投入资本回报率（ROIC）" class="headerlink" title="四、投入资本回报率（ROIC）"></a>四、投入资本回报率（ROIC）</h4><center>
+    <img src="../images/ec-roic-1.png" width="50%"/>
+</center>
+
+
+<p>ROIC是从资本的角度看问题，综合考虑股权与债权，衡量投资的效率。与ROIC对应的是平均资金成本（WACC）。如果ROIC小于WACC，就说明投入资本的回报小于平均资本成本，公司是在浪费资本。</p>
+<p>ROIC=息税前收益（EBIT）*（1-税率）/投入资本</p>
+<p>$$<br>    ROIC = \frac{息税前收益（EBIT）*（1-税率）}{投入资本}<br>$$</p>
+<p>$$<br>    投入资本 = 股东权益 + 有息负债<br>$$</p>
+<p>$$<br>    ROIC = \frac{EBIT（1-税率）}{有息负债+权益）}<br>$$</p>
+<p>公式中分子是指一家公司如果完全以权益筹资所应报告的净利润，分母是指公司所有要求回报的现金来源的总和，也就是说，尽管应付账款也是公司的一种现金来源，但因其未附带明确的成本而被排除在外。实质上，ROIC是生产经营活动中所有投入资本赚取的收益率，而不论这些投入资本是被称为债务还是权益。</p>
+<center>
+    <img src="../images/ec-roic-2.png" width="50%"/>
+</center>
+
+
+<p>投入资本回报率是EBIT（税及利息前盈利）经过税率调整比上投入的资本，也就是股东权益加负债减去非运营现金和投资。之所以用EBIT就是因为利息是由债务产生的，是对债权的回报，当计算债权加股权的总的投入资本的回报率时应该把利息加回来。</p>
+<p>投入资本也可以表示为净运营资金（流动运营资产减去无息流动负债）加固定资产，加无形资产及商誉，加其他运营资产。</p>
+<p>ROIC的问题在于没有考虑无息流动负债的影响。ROIC实际上是衡量投入的总资本的使用效率，与平均资金成本WACC相结合可以揭示一个企业的真正效率。ROIC &lt; WACC 是卖空大师Jim Chanos经常用来寻找卖空对象的一个重要指标。</p>
+<p>但是，ROIC对于类金融企业的分析不太容易。一些类金融企业如国美、苏宁、联想、格力等，占用了大量上下游资金作为无息流动负债，因此提高了EBIT。但是，和有息负债一样，无息负债也存在风险。虽然不用付利息，但是一旦经营形式改变，这些资金很有可能像“热钱”一样撤走。国美在黄光裕被捕后就陷入了这样的危险境地，只要供应商撤资，国美就会破产。这些企业虽然ROIC很高，但是静态不稳定，动态稳定。</p>
+<h4 id="五、使用资本回报率-ROCE-Return-on-Capital-Employed"><a href="#五、使用资本回报率-ROCE-Return-on-Capital-Employed" class="headerlink" title="五、使用资本回报率(ROCE = Return on Capital Employed)"></a>五、使用资本回报率(ROCE = Return on Capital Employed)</h4><center>
+    <img src="../images/ec-roce.png" width="50%"/>
+</center>
+
+<p>$$<br>    ROCE資本運用報酬率 = \frac{息税前收益（EBIT）}{已動用資本(Capital Employed)}<br>$$</p>
+<p>$$<br>    已動用資本 = 總資產 -流動負債<br>$$</p>
+<p>ROCE实质上是从企业价值（EnterpriseValue，EV）的角度，从并购的角度看资本的回报率。ROCE中的使用资本是股东权益加有息负债再减现金。这实质上相当于1倍PB并购企业时的企业价值。因为如果你以1倍PB并购一个企业，你要付的价格就是股东权益，并且承担所有负债，但也获得所有现金。</p>
+<p>ROCE实际上是从一个并购者的角度看问题，如果并购一个企业，付出企业价值EV后的回报率有多少？这与ROIC最大的不同是：ROIC从企业的拥有者的角度看问题，衡量投入资本的使用效率与回报率。而ROCE是从潜在并购者的角度看问题，衡量如果1倍PB并购付出EV后的回报率，也就是并购到底值不值的问题。这接近价值投资买股票就是买公司的原则。</p>
+<p>ROCE：使用资本回报率是EBIT（税及利息前盈利）比上使用的资本，也就是所有有息负债加上股东权益。这个指标与ROIC相近，但是使用的是EBIT而没有经过税率调整，因此可以用来比较不同税率的企业。ROCE也容易忽视公司无息负债的融资效应。</p>
+<p>总之，本质上是从四个不同的视角看问题，衡量不同的指标。只有全面综合考虑，才能更全面的看问题</p>
+<h4 id="六、参考来源"><a href="#六、参考来源" class="headerlink" title="六、参考来源"></a>六、参考来源</h4><p><a target="_blank" rel="noopener" href="https://xueqiu.com/1484348349/107966592">雪球-老韩7</a><br><a target="_blank" rel="noopener" href="https://rich01.com/what-is-roce/">ROCE資本運用報酬率</a></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>赏你一杯咖啡</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="wangduwei 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpeg" alt="wangduwei 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>wangduwei
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://wangduwei.top/econonmics-roa-roe-roic-roce.html" title="投资回报率">https://wangduwei.top/econonmics-roa-roe-roic-roce.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/" rel="tag"># 经济学</a>
+          </div>
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/kotlin-lang-flow-under-the-hood.html" rel="prev" title="Kotlin Flow的工作原理">
+      <i class="fa fa-chevron-left"></i> Kotlin Flow的工作原理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/android-aosp-event-loop.html" rel="next" title="Android消息机制">
+      Android消息机制 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%B5%84%E4%BA%A7%E5%9B%9E%E6%8A%A5%E7%8E%87%EF%BC%88ROA%EF%BC%89"><span class="nav-number">2.</span> <span class="nav-text">二、资产回报率（ROA）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 基本概念</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-%E6%A6%82%E5%BF%B5%E6%8B%86%E5%88%86"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 概念拆分</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-%E6%A6%82%E5%BF%B5%E7%90%86%E8%A7%A3"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 概念理解</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%87%80%E8%B5%84%E4%BA%A7%E5%9B%9E%E6%8A%A5%E7%8E%87%EF%BC%88ROE%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">三、净资产回报率（ROE）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-1"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 基本概念</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-%E6%A6%82%E5%BF%B5%E6%8B%86%E5%88%86-1"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 概念拆分</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-%E6%A6%82%E5%BF%B5%E7%90%86%E8%A7%A3-1"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 概念理解</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8D%E8%B6%B3"><span class="nav-number">3.4.</span> <span class="nav-text">不足</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%8A%95%E5%85%A5%E8%B5%84%E6%9C%AC%E5%9B%9E%E6%8A%A5%E7%8E%87%EF%BC%88ROIC%EF%BC%89"><span class="nav-number">4.</span> <span class="nav-text">四、投入资本回报率（ROIC）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E4%BD%BF%E7%94%A8%E8%B5%84%E6%9C%AC%E5%9B%9E%E6%8A%A5%E7%8E%87-ROCE-Return-on-Capital-Employed"><span class="nav-number">5.</span> <span class="nav-text">五、使用资本回报率(ROCE &#x3D; Return on Capital Employed)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E5%8F%82%E8%80%83%E6%9D%A5%E6%BA%90"><span class="nav-number">6.</span> <span class="nav-text">六、参考来源</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">wangduwei</p>
+  <div class="site-description" itemprop="description">耐心和坚持</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wangduwei</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">114k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">1:43</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+  <!-- 页面点击小红心 -->
+  
+        <script type="text/javascript" src="/js/love.js"></script>
+  
+</body>
+</html>

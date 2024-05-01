@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"wangduwei.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Android-11,target-sdk 30 变更及适配指南">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-11适配">
+<meta property="og:url" content="https://wangduwei.top/android-target-30.html">
+<meta property="og:site_name" content="蓝色的笔记本">
+<meta property="og:description" content="Android-11,target-sdk 30 变更及适配指南">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-08-26T12:27:25.000Z">
+<meta property="article:modified_time" content="2024-04-29T11:50:54.573Z">
+<meta property="article:author" content="wangduwei">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://wangduwei.top/android-target-30.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android-11适配 | 蓝色的笔记本</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?9f3c7bb2232e1e3fda4c019e4a4406c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="蓝色的笔记本" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">蓝色的笔记本</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录学习内容</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-target-30.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android-11适配
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-26 20:27:25" itemprop="dateCreated datePublished" datetime="2021-08-26T20:27:25+08:00">2021-08-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+            <div class="post-description">Android-11,target-sdk 30 变更及适配指南</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h4 id="一、变更概览"><a href="#一、变更概览" class="headerlink" title="一、变更概览"></a>一、变更概览</h4><h5 id="1、隐私"><a href="#1、隐私" class="headerlink" title="1、隐私"></a>1、隐私</h5><ul>
+<li>分区存储</li>
+<li>自动释放权限</li>
+<li>后台定位</li>
+<li>包可见性</li>
+</ul>
+<h5 id="2、安全"><a href="#2、安全" class="headerlink" title="2、安全"></a>2、安全</h5><ul>
+<li><a target="_blank" rel="noopener" href="https://source.android.com/devices/tech/debug/tagged-pointers">堆指针添加标记</a></li>
+<li>Toast<ul>
+<li>🚫禁止后台弹出含自定义View的Toast</li>
+<li>Toast支持显示/隐藏回调</li>
+<li>部分View相关API调整</li>
+</ul>
+</li>
+</ul>
+<h5 id="3、连接"><a href="#3、连接" class="headerlink" title="3、连接"></a>3、连接</h5><ul>
+<li>限制对APN数据库（Access Point Names）的读写</li>
+</ul>
+<h5 id="4、Accessibility"><a href="#4、Accessibility" class="headerlink" title="4、Accessibility"></a>4、Accessibility</h5><ul>
+<li>文本转语音（TTS）和语音识别 需要声明<queries></li>
+<li>在res/raw下声明对accessibility的使用</li>
+</ul>
+<h5 id="5、相机"><a href="#5、相机" class="headerlink" title="5、相机"></a>5、相机</h5><ul>
+<li>以下Action默认只能调起系统相机，除非指定包名<ul>
+<li>android.media.action.VIDEO_CAPTURE</li>
+<li>android.media.action.IMAGE_CAPTURE</li>
+<li>android.media.action.IMAGE_CAPTURE_SECURE</li>
+</ul>
+</li>
+</ul>
+<h5 id="6、应用打包和安装"><a href="#6、应用打包和安装" class="headerlink" title="6、应用打包和安装"></a>6、应用打包和安装</h5><ul>
+<li>🚫禁止压缩resources.arsc</li>
+<li>必须使用V2及以上版本进行apk签名<h5 id="7、Firebase"><a href="#7、Firebase" class="headerlink" title="7、Firebase"></a>7、Firebase</h5></li>
+<li>target-30的apk在6.0及以上设备，不能使用Firebase JobDispatcher 和 GCMNetworkManager</li>
+</ul>
+<h5 id="8、allowBackup属性调整"><a href="#8、allowBackup属性调整" class="headerlink" title="8、allowBackup属性调整"></a>8、allowBackup属性调整</h5><h5 id="9、修改SP的OnSharedPreferenceChangeListener回调"><a href="#9、修改SP的OnSharedPreferenceChangeListener回调" class="headerlink" title="9、修改SP的OnSharedPreferenceChangeListener回调"></a>9、修改SP的OnSharedPreferenceChangeListener回调</h5><h5 id="10、非SDK接口调用黑名单"><a href="#10、非SDK接口调用黑名单" class="headerlink" title="10、非SDK接口调用黑名单"></a>10、非SDK接口调用黑名单</h5><h4 id="二、变更详情"><a href="#二、变更详情" class="headerlink" title="二、变更详情"></a>二、变更详情</h4><h5 id="1、分区存储"><a href="#1、分区存储" class="headerlink" title="1、分区存储"></a>1、分区存储</h5><ul>
+<li><p>针对特殊类型应用(文件管理器、文件备份、文件加密)<br><br>这种类型的应用需要大规模的进行文件操作，迁移成本较高，推荐使用新的存储管理权限 MANAGE_EXTERNAL_STORAGE （参考1:此权限的授权范围）</p>
+<ul>
+<li>优点：<br><br>  1、开启后直接拥有所有读写权限（包括拔插的SD卡，USB等）<br><br>  2、清缓存不会丢失授权<br><br>  3、处理成本较低，只需兼容旧的动态权限申请部分的逻辑。<br></li>
+<li>缺点：<br><br>  1、需要跳转设置页面开启权限，有损产品数据（轮询权限，强制拉回）<br><br>  2、需要提交GP申请表单，审核通过才能上架<br></li>
+<li>实践：<br><br>  1、判断权限 Environment.isExternalStorageManager() <br><br>  2、跳转设置页面引导用户开启权限的方式：注意下面两个<strong>Action</strong>的区别<br><pre><code>  Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION&lt;br&gt;
+  Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>针对普通应用<br>无法申请新的存储管理权限 MANAGE_EXTERNAL_STORAGE 。只能对旧的API进行改造兼容，将其迁移到存储访问框架SAF（Storage Access Framework）包括Document-API 或 MediaStore-API。<ul>
+<li>优点： <br><br>  1、交互逻辑，和代码逻辑结构比较统一 <br><br>  2、提高隐私与安全性，避免杂乱无章的文件系统 <br></li>
+<li>缺点： <br><br>  1、迁移成本较高，需要做大量的API兼容，可能影响产品逻辑 <br></li>
+<li>实践： <br><br>  1、分区存储文档 <br></li>
+<li>注意事项： <br><br>  1、做好数据迁移，避免升级后，原来的数据在不可访问区域 <br><br>  2、保留 [requestLegacyExternalStorage=true] 属性 <br></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>我的应用1.0版本之前数据库存储在外部，为了适配target-30，我在1.1版本，写了数据迁移代码。1.2版本，我做了target-30升级。某用户直接跳过1.1版本升级到了1.2版本。无法运行迁移代码。怎么办！</p>
+</blockquote>
+<p>preserveLegacyExternalStorage 属性：针对升级用户，暂时维持兼容属性，卸载后失效。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">  	<span class="attr">android:preserveLegacyExternalStorage</span>=<span class="string">&quot;true&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<h5 id="2、电话号码"><a href="#2、电话号码" class="headerlink" title="2、电话号码 "></a>2、电话号码 <br></h5><p>以下两个方法的调用需要申请新的权限： READ_PHONE_NUMBERS <br><br>getLine1Number()<br>getMsisdn()</p>
+<h5 id="3、定位"><a href="#3、定位" class="headerlink" title="3、定位 "></a>3、定位 <br></h5><ul>
+<li>增加Only this time 选项</li>
+<li>不能一次性申请前后台定位权限，要分两次单独申请</li>
+<li>后台位置访问需要跳转设置页面</li>
+</ul>
+<h5 id="4、包可见性"><a href="#4、包可见性" class="headerlink" title="4、包可见性 "></a>4、包可见性 <br></h5><p>概念： <br><br>在Android-10及以前的版本通过 queryIntentActivities、getPackageInfo、getInstalledApplications可以获取所有安装的App。但是在Android-11之后只能获取到一部分已安装应用列表。<br>解决方案： <br></p>
+<ul>
+<li>通过 <queries> 标签指定需要交互的应用</li>
+<li>申请查看所有安装列表<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">package</span>=<span class="string">&quot;com.example.game&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">queries</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 需要和你做交互的app --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.store&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">android:name</span>=<span class="string">&quot;com.example.service&quot;</span> /&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 你需要查询的Intent --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.SEND&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">data</span> <span class="attr">android:mimeType</span>=<span class="string">&quot;image/jpeg&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">queries</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.QUERY_ALL_PACKAGES&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="三、参考文献"><a href="#三、参考文献" class="headerlink" title="三、参考文献"></a>三、参考文献</h4><p>1、<a target="_blank" rel="noopener" href="https://developer.android.com/about/versions/11/behavior-changes-11#change-details">官方文档-behavior-changes-11</a> <br><br>2、<a target="_blank" rel="noopener" href="https://support.google.com/googleplay/android-developer/answer/10467955">GP政策-MANAGE_EXTERNAL_STORAGE</a> <br><br>3、<a target="_blank" rel="noopener" href="https://developer.android.com/training/data-storage/manage-all-files">存储权限-管理所有文件</a> <br><br>4、<a target="_blank" rel="noopener" href="https://support.google.com/googleplay/android-developer/answer/10158779?hl=en#zippy=%2Cpermitted-uses-of-the-query-all-packages-permission">GP政策-all-packages-permission</a> <br> </p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>赏你一杯咖啡</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="wangduwei 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpeg" alt="wangduwei 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>wangduwei
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://wangduwei.top/android-target-30.html" title="Android-11适配">https://wangduwei.top/android-target-30.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android/" rel="tag"># Android</a>
+          </div>
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/android-scoped-storage.html" rel="prev" title="Android分区存储">
+      <i class="fa fa-chevron-left"></i> Android分区存储
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/file-format-class.html" rel="next" title="Class文件的存储格式">
+      Class文件的存储格式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%8F%98%E6%9B%B4%E6%A6%82%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">一、变更概览</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1%E3%80%81%E9%9A%90%E7%A7%81"><span class="nav-number">1.1.</span> <span class="nav-text">1、隐私</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2%E3%80%81%E5%AE%89%E5%85%A8"><span class="nav-number">1.2.</span> <span class="nav-text">2、安全</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3%E3%80%81%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.3.</span> <span class="nav-text">3、连接</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4%E3%80%81Accessibility"><span class="nav-number">1.4.</span> <span class="nav-text">4、Accessibility</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5%E3%80%81%E7%9B%B8%E6%9C%BA"><span class="nav-number">1.5.</span> <span class="nav-text">5、相机</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6%E3%80%81%E5%BA%94%E7%94%A8%E6%89%93%E5%8C%85%E5%92%8C%E5%AE%89%E8%A3%85"><span class="nav-number">1.6.</span> <span class="nav-text">6、应用打包和安装</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7%E3%80%81Firebase"><span class="nav-number">1.7.</span> <span class="nav-text">7、Firebase</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#8%E3%80%81allowBackup%E5%B1%9E%E6%80%A7%E8%B0%83%E6%95%B4"><span class="nav-number">1.8.</span> <span class="nav-text">8、allowBackup属性调整</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#9%E3%80%81%E4%BF%AE%E6%94%B9SP%E7%9A%84OnSharedPreferenceChangeListener%E5%9B%9E%E8%B0%83"><span class="nav-number">1.9.</span> <span class="nav-text">9、修改SP的OnSharedPreferenceChangeListener回调</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#10%E3%80%81%E9%9D%9ESDK%E6%8E%A5%E5%8F%A3%E8%B0%83%E7%94%A8%E9%BB%91%E5%90%8D%E5%8D%95"><span class="nav-number">1.10.</span> <span class="nav-text">10、非SDK接口调用黑名单</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8F%98%E6%9B%B4%E8%AF%A6%E6%83%85"><span class="nav-number">2.</span> <span class="nav-text">二、变更详情</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1%E3%80%81%E5%88%86%E5%8C%BA%E5%AD%98%E5%82%A8"><span class="nav-number">2.1.</span> <span class="nav-text">1、分区存储</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2%E3%80%81%E7%94%B5%E8%AF%9D%E5%8F%B7%E7%A0%81"><span class="nav-number">2.2.</span> <span class="nav-text">2、电话号码 
+</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3%E3%80%81%E5%AE%9A%E4%BD%8D"><span class="nav-number">2.3.</span> <span class="nav-text">3、定位 
+</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4%E3%80%81%E5%8C%85%E5%8F%AF%E8%A7%81%E6%80%A7"><span class="nav-number">2.4.</span> <span class="nav-text">4、包可见性 
+</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">3.</span> <span class="nav-text">三、参考文献</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">wangduwei</p>
+  <div class="site-description" itemprop="description">耐心和坚持</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wangduwei</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">114k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">1:43</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+  <!-- 页面点击小红心 -->
+  
+        <script type="text/javascript" src="/js/love.js"></script>
+  
+</body>
+</html>

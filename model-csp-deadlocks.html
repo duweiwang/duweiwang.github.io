@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"wangduwei.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="简介：本文是 Roman Elizarov 关于CSP中产生死锁问题的讨论，解释了其中的原因，并逐步给出了一种解决方案。部分翻译不恰当的可参考原文 原文：众所周知，使用锁保护共享可变状态可能会导致死锁，但很少有人知道，使用无共享可变状态的CSP或actor模型也会导致死锁，尽管它们并不使用锁。它的死锁以另一种方式表现：通信死锁。 要知道，死锁的正式定义并没有直接与锁联系在一起。当每个进程都在循环等">
+<meta property="og:type" content="article">
+<meta property="og:title" content="无等级CSP中的死锁">
+<meta property="og:url" content="https://wangduwei.top/model-csp-deadlocks.html">
+<meta property="og:site_name" content="蓝色的笔记本">
+<meta property="og:description" content="简介：本文是 Roman Elizarov 关于CSP中产生死锁问题的讨论，解释了其中的原因，并逐步给出了一种解决方案。部分翻译不恰当的可参考原文 原文：众所周知，使用锁保护共享可变状态可能会导致死锁，但很少有人知道，使用无共享可变状态的CSP或actor模型也会导致死锁，尽管它们并不使用锁。它的死锁以另一种方式表现：通信死锁。 要知道，死锁的正式定义并没有直接与锁联系在一起。当每个进程都在循环等">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wangduwei.top/images/deadlock-dga.png">
+<meta property="og:image" content="https://wangduwei.top/images/deadlock-csp-downloader.png">
+<meta property="og:image" content="https://wangduwei.top/images/deadlock-csp-cfsm.png">
+<meta property="og:image" content="https://wangduwei.top/images/deadlock-csp-why.png">
+<meta property="article:published_time" content="2021-12-04T03:54:49.000Z">
+<meta property="article:modified_time" content="2024-04-29T11:50:54.588Z">
+<meta property="article:author" content="wangduwei">
+<meta property="article:tag" content="Kotlin">
+<meta property="article:tag" content="Concurrency">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wangduwei.top/images/deadlock-dga.png">
+
+<link rel="canonical" href="https://wangduwei.top/model-csp-deadlocks.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>无等级CSP中的死锁 | 蓝色的笔记本</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?9f3c7bb2232e1e3fda4c019e4a4406c0";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="蓝色的笔记本" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">蓝色的笔记本</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">记录学习内容</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/model-csp-deadlocks.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          无等级CSP中的死锁
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-12-04 11:54:49" itemprop="dateCreated datePublished" datetime="2021-12-04T11:54:49+08:00">2021-12-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h4 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h4><p>本文是 Roman Elizarov 关于CSP中产生死锁问题的讨论，解释了其中的原因，并逐步给出了一种解决方案。部分翻译不恰当的可参考<a target="_blank" rel="noopener" href="https://elizarov.medium.com/deadlocks-in-non-hierarchical-csp-e5910d137cc">原文</a></p>
+<h4 id="原文："><a href="#原文：" class="headerlink" title="原文："></a>原文：</h4><p>众所周知，使用锁保护共享可变状态可能会导致死锁，但很少有人知道，使用无共享可变状态的CSP或actor模型也会导致死锁，尽管它们并不使用锁。它的死锁以另一种方式表现：通信死锁。</p>
+<p>要知道，死锁的正式定义并没有直接与锁联系在一起。当每个进程都在循环等待下一个进程时，这组进程(线程/协程/参与者)就处于死锁状态。后面我们会看个例子，这里先道个歉，之前没强调这个问题。</p>
+<h4 id="The-stage"><a href="#The-stage" class="headerlink" title="The stage"></a>The stage</h4><p>在2018年的KotlinConf我发表了题为”Kotlin协程实践”的演讲，其中讲到了对于构建可信赖软件来说结构性并发是重要的，且介绍了CSP的一些高级概念。其中一个部分有点问题。如果你按照演讲中一字不差的写完代码会导致一个死锁。不知何故，我掉进了这个陷阱，以为它对我来说是安全的，但不是。让我们来分析一下</p>
+<p>首先来讲，如果应用被组织成数据处理管道，消息进入系统，被不同的协程顺序处理，最后被送出系统，那么这种CSP风格的架构，包括actor模式，都是安全的。更广泛地说，只要代码具有协程的层次结构(或有向无环图)，上游协程只向下游发送消息，且每个协程在同一个地方接收传过来的消息并向下游传递响应消息，代码就不会出现死锁。</p>
+<center>
+    <img src="../images/deadlock-dga.png" width="500"/>
+</center>
+
+
+<p>然而在我的演讲中，我草拟了一个数据处理循环的架构，下载器协程向任务池发送<code>locations</code>，并从任务池获取结果：</p>
+<center>
+    <img src="../images/deadlock-csp-downloader.png" width="500"/>
+</center>
+
+<p>我演讲中的例子的架构基于3个channel：<code>references</code>、<code>locations</code>、<code>contents</code>。下载协程包含以下逻辑：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    select&lt;<span class="built_in">Unit</span>&gt; &#123;                                   </span><br><span class="line">        references.onReceive &#123; ref -&gt;                <span class="comment">// (1)</span></span><br><span class="line">            <span class="keyword">val</span> loc = ref.resolveLocation()</span><br><span class="line">            ... </span><br><span class="line">            locations.send(loc)                      <span class="comment">// (2)</span></span><br><span class="line">        &#125;</span><br><span class="line">        contents.onReceive &#123; (loc, content) -&gt; ... &#125; <span class="comment">// (3)</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Downloader从<code>references</code>通道(1)接收，解析对位置的引用并将它们发送到<code>locations</code>通道(2)。它还通过从<code>contents</code>通道(3)接收来自workers的结果来更新其状态。另外，works有以下代码:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (loc <span class="keyword">in</span> locations) &#123;                             <span class="comment">// (4)</span></span><br><span class="line">    <span class="keyword">val</span> content = downloadContent(loc)         </span><br><span class="line">    contents.send(LocContent(loc, content))          <span class="comment">// (5)</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从<code>locations</code>通道接收消息（4），并发送下载后的内容去<code>contents</code>通道（5）</p>
+<p>即使在两段通信的代码中也很难遵循逻辑，但在CSP中有一种方便的方法来可视化它。我们可以用通信有限状态机(CFSM)表示我们的系统。这些状态相当于挂起点和向通信的转变过程:</p>
+<center>
+    <img src="../images/deadlock-csp-cfsm.png" width="500"/>
+</center>
+
+<p>为了简洁起见，上图中通道名简写。receive -&gt; rcv、send -&gt; snd 。下载器主循环中的<code>select</code>语句相当于D0状态，它能接收来自<code>references</code>通道的消息(1)或者来自<code>contents</code>通道的消息(3)，当接收到来自<code>references</code>消息，切换到状态D1，等待发送消息去<code>locations</code>通道，如图中：(2)l.snd</p>
+<h4 id="Deadlock-Demo"><a href="#Deadlock-Demo" class="headerlink" title="Deadlock Demo"></a>Deadlock <a target="_blank" rel="noopener" href="https://github.com/elizarov/DeadlocksInCSP">Demo</a></h4><p>我用模拟数据类的方式完善了演讲中的代码，加入了<code>delay(10)</code>的<code>downloadContent</code>方法。main函数则持续发送请求给下载器的<code>references</code>通道，它有4个workers且带3秒超时限制。此项目可以完整的运行,正常情况下3s应该处理1000次请求。</p>
+<p>当你运行该项目时，你会发现只处理了4次请求（和我们定义的worker数量一样）就挂起了，直到3s超时。此外，它没有任何随机性，因为它是在单线程的runBlocking上下文中运行的。</p>
+<p>为了说服你（还有我自己），这是CSP内在的行为而不是Kotlin实现的bug，我用Go语言实现了一遍。Go语言内建的死锁检测器立即给出了提示：<em>all goroutines are asleep — deadlock</em> ，到底发生了什么呢？</p>
+<p>开始时所有的worker完成初始化处于W1状态，然后尝试发送回复下载器的消息去<code>contents</code>通道(5)，但它是一个对接通道，下载器不能立马收到。下载器处于D1正尝试发送消息去<code>locations</code>通道(2)，但由于worker都在尝试发送所以无法接收。死锁发生了，所有的协程都在等待。</p>
+<center>
+    <img src="../images/deadlock-csp-why.png" width="500"/>
+</center>
+
+<h4 id="Solutions-that-do-not-work"><a href="#Solutions-that-do-not-work" class="headerlink" title="Solutions that do not work"></a>Solutions that do not work</h4><p>问题好像出在<code>select</code>表达式。修复它很简单。相对于由下载器通过select处理来自<code>references</code>和<code>contents</code>的消息，我们可以使用actor模型作为协程重写下载器，它有独立的mailbox通道来处理发送过来的消息。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (msg <span class="keyword">in</span> mailbox) &#123;</span><br><span class="line">    <span class="keyword">when</span> (msg) &#123;</span><br><span class="line">        <span class="keyword">is</span> Reference -&gt; ...</span><br><span class="line">        <span class="keyword">is</span> LocContent -&gt; ...</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然而，actor模型也不能避免死锁，这种方式和原来一样代码很快被挂起。他们的通讯状态机是相同的。</p>
+<p>另一个可能被指责的是集合信道——没有缓冲区的信道，因为它们在另一端没有接收器的情况下会暂停发送。即使我们给<code>contents</code>和<code>locations</code>添加buffer也不能解决此问题，只是减少了问题出现的概率或延迟出现。buffer越大出现的概率越低，但无法完全避免死锁的发生，一旦buffer满了发送器还是会挂起并发生死锁。</p>
+<h4 id="Unlimited-capacity-channels"><a href="#Unlimited-capacity-channels" class="headerlink" title="Unlimited-capacity channels"></a>Unlimited-capacity channels</h4><p>一种明确的避免死锁的解决方案是对被通讯死锁影响的channel中的至少一个使用不限大小的buffer，<a target="_blank" rel="noopener" href="https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderWithUnlimitedBuffer.kt#L49">这里</a> 的代码对<code>contents</code>通道使用了无限制buffer，似乎能正常工作。</p>
+<p>然而，通过取消通道缓冲区的限制，我们丧失了CPS编程风格的利润丰厚的属性-自动背压传播.如果来自通道的消息的接收方比发送方慢，则发送方将挂起在全缓冲区上以自动减慢速度。有了无限容量的通道，就不会发生这种情况，管理背压的任务完全由应用程序开发人员承担。如果不能管理背压，系统最终可能会耗尽内存，在其缓冲区中收集越来越多的消息。</p>
+<p>在我们的例子中，把<code>locations</code>通道设置成无限buffer会完全移除对传入引用的背压管理，因为即使所有的worker都处于忙碌状态，下载器也将发送所有的消息去<code>locations</code>通道。<br>把contents通道设置成无限buffer会更安全，因为它只影响下载内容的最终处理。然而，在无限容量的情况下，我们面临的风险是，下载器会被传入的<code>references</code>淹没，永远无法处理下载的内容。这使我们离最终解决方案更近一步。</p>
+<h4 id="Solutions-that-do-work"><a href="#Solutions-that-do-work" class="headerlink" title="Solutions that do work"></a>Solutions that do work</h4><p>我们调整一下下载器协程中<code>select</code>表达式的顺序，以便先检查<code>contents</code>通道，也就是说<code>contents</code>通道的消息优先级高于<code>references</code>通道：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">select&lt;<span class="built_in">Unit</span>&gt; &#123;</span><br><span class="line">    contents.onReceive &#123; ... &#125;</span><br><span class="line">    references.onReceive &#123; </span><br><span class="line">        ... </span><br><span class="line">        locations.send(loc)                      <span class="comment">// (2)</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>它本身并没有解决这个问题(你可以在这里验证代码),但它给了一个有用的属性——<br>下载器只有在没有worker被挂起且worker准备发送消息去<code>contents</code>通道时，才发送消息去<code>locations</code>通道(2)。现在，提供至少一个buffer给<code>contents</code>通道就足够了，以确保至少有一个worker可以在(5)发送其内容，并在(4)再次开始从<code>locations</code>接收，从而允许下载程序继续进行:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> contents = Channel&lt;LocContent&gt;(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderFixedPriority.kt">这里</a> 是能运行的代码。</p>
+<p>注意，它是如何在3秒内处理比之前的无限渠道“解决方案”更多的下载的。此外，由于<code>contents</code>通道处理具有最高优先级，现在可以安全地拥有无限容量的<code>contents</code>通道。它在缓冲区中保存的消息永远不会超过工作人员的数量加1(为什么是加1 ?这是留给读者的练习)。</p>
+<p>还有一种替代解决方案，它完全不使用缓冲通道，可以完美地与任何容量的通道一起工作。它加倍<code>select</code>，以避免在<code>locations.send(loc)</code>上挂起下载程序，将这个发送操作折叠为一个<code>select</code>。它实际上是CFSM模型中表示和分析的最简单的一个，但是我现在不会详细介绍它，把它留给将来的故事。你可以看一下<a target="_blank" rel="noopener" href="https://github.com/elizarov/DeadlocksInCSP/blob/master/src/DownloaderFixedSelect.kt#L16">这里</a> 对应的代码并在playground中运行它。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>通信循环(非DAG模式)可能并将导致通道容量有限的通信死锁，除非使用一些死锁预防策略。如果在应用程序中遇到死锁，在了解发生了什么之前，不要尝试使用缓冲通道解决它，否则可能会把问题掩盖起来。</p>
+<p>请在本文的评论中分享更多解决这种特殊通信循环死锁的有效解决方案。Kotlin和其他CSP/actor运行时中的代码都是受欢迎的(请提供链接，不要将代码粘贴到评论中)。</p>
+<h4 id="Credits"><a href="#Credits" class="headerlink" title="Credits"></a>Credits</h4><p>我要感谢Alexey Semin，他通过<a target="_blank" rel="noopener" href="https://github.com/Kotlin/kotlinx.coroutines/issues/797">这个</a> github-issue报告了这个问题，并感谢Alexander Gorynin在Kotlin Slack里联系了我。还要感谢Simon Wirtz和Sean McQuillan对本文草稿的有用评论。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>赏你一杯咖啡</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="wangduwei 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpeg" alt="wangduwei 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>wangduwei
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://wangduwei.top/model-csp-deadlocks.html" title="无等级CSP中的死锁">https://wangduwei.top/model-csp-deadlocks.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Kotlin/" rel="tag"># Kotlin</a>
+              <a href="/tags/Concurrency/" rel="tag"># Concurrency</a>
+          </div>
+
+        
+  <div class="post-widgets">
+    <div class="wp_rating">
+      <div id="wpac-rating"></div>
+    </div>
+  </div>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/my-work-of-this-week-01.html" rel="prev" title="一周工作总结">
+      <i class="fa fa-chevron-left"></i> 一周工作总结
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/android-github-source-spacex.html" rel="next" title="源码分析-项目架构之SpaceX">
+      源码分析-项目架构之SpaceX <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">简介：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8E%9F%E6%96%87%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">原文：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#The-stage"><span class="nav-number">3.</span> <span class="nav-text">The stage</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Deadlock-Demo"><span class="nav-number">4.</span> <span class="nav-text">Deadlock Demo</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Solutions-that-do-not-work"><span class="nav-number">5.</span> <span class="nav-text">Solutions that do not work</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Unlimited-capacity-channels"><span class="nav-number">6.</span> <span class="nav-text">Unlimited-capacity channels</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Solutions-that-do-work"><span class="nav-number">7.</span> <span class="nav-text">Solutions that do work</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Credits"><span class="nav-number">9.</span> <span class="nav-text">Credits</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">wangduwei</p>
+  <div class="site-description" itemprop="description">耐心和坚持</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">wangduwei</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">114k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">1:43</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+  <script>
+  if (CONFIG.page.isPost) {
+    wpac_init = window.wpac_init || [];
+    wpac_init.push({
+      widget: 'Rating',
+      id    : ,
+      el    : 'wpac-rating',
+      color : 'fc6423'
+    });
+    (function() {
+      if ('WIDGETPACK_LOADED' in window) return;
+      WIDGETPACK_LOADED = true;
+      var mc = document.createElement('script');
+      mc.type = 'text/javascript';
+      mc.async = true;
+      mc.src = '//embed.widgetpack.com/widget.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
+    })();
+  }
+  </script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+  <!-- 页面点击小红心 -->
+  
+        <script type="text/javascript" src="/js/love.js"></script>
+  
+</body>
+</html>

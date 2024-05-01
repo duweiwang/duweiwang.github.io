@@ -1,0 +1,12 @@
+User-Agent: *
+Allow: /
+Allow: /archives/
+
+Disallow: /js/
+Disallow: /css/
+Disallow: /fonts/
+Disallow: /vendors/
+Disallow: /fancybox/
+
+Sitemap: https://wangduwei.top/sitemap.xml
+Sitemap: https://wangduwei.top/baidusitemap.xml

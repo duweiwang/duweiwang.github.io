@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>蓝色的笔记本</title>
+  <icon>https://wangduwei.top/icon.png</icon>
+  <subtitle>记录学习内容</subtitle>
+  <link href="https://wangduwei.top/atom.xml" rel="self"/>
+  
+  <link href="https://wangduwei.top/"/>
+  <updated>2024-05-01T13:58:50.190Z</updated>
+  <id>https://wangduwei.top/</id>
+  
+  <author>
+    <name>wangduwei</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Android的maven插件和maven-publish插件</title>
+    <link href="https://wangduwei.top/Android%E7%9A%84maven%E6%8F%92%E4%BB%B6%E5%92%8Cmaven-publish%E6%8F%92%E4%BB%B6.html"/>
+    <id>https://wangduwei.top/Android%E7%9A%84maven%E6%8F%92%E4%BB%B6%E5%92%8Cmaven-publish%E6%8F%92%E4%BB%B6.html</id>
+    <published>2024-05-01T13:58:50.000Z</published>
+    <updated>2024-05-01T13:58:50.190Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>《慢思考》</title>
+    <link href="https://wangduwei.top/%E3%80%8A%E6%85%A2%E6%80%9D%E8%80%83%E3%80%8B.html"/>
+    <id>https://wangduwei.top/%E3%80%8A%E6%85%A2%E6%80%9D%E8%80%83%E3%80%8B.html</id>
+    <published>2024-04-20T09:54:33.000Z</published>
+    <updated>2024-04-29T11:50:54.590Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h4&gt;&lt;h6 id=&quot;书籍简介&quot;&gt;&lt;a href=&quot;#书籍简介&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Reading" scheme="https://wangduwei.top/categories/Reading/"/>
+    
+    
+    <category term="Reading" scheme="https://wangduwei.top/tags/Reading/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>操作系统之文件系统</title>
+    <link href="https://wangduwei.top/cs-operating-systems-file-system.html"/>
+    <id>https://wangduwei.top/cs-operating-systems-file-system.html</id>
+    <published>2023-11-09T15:01:43.000Z</published>
+    <updated>2024-04-29T11:50:54.576Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;h5 id=&quot;一、磁盘的结构&quot;&gt;&lt;a href=&quot;#一、磁盘的结构&quot; class=&quot;headerlink&quot; title=&quot;一、磁盘的结构&quot;&gt;&lt;/a&gt;一、磁盘的结构&lt;/h5&gt;&lt;p&gt;磁盘按照物理结构和逻辑结构区分比较好。&lt;/p&gt;
+&lt;p&gt;1.1 HDD物理结构(Hard</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Linux" scheme="https://wangduwei.top/tags/Linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>《麻省理工深度思考法》</title>
+    <link href="https://wangduwei.top/%E3%80%8A%E9%BA%BB%E7%9C%81%E7%90%86%E5%B7%A5%E6%B7%B1%E5%BA%A6%E6%80%9D%E8%80%83%E6%B3%95%E3%80%8B.html"/>
+    <id>https://wangduwei.top/%E3%80%8A%E9%BA%BB%E7%9C%81%E7%90%86%E5%B7%A5%E6%B7%B1%E5%BA%A6%E6%80%9D%E8%80%83%E6%B3%95%E3%80%8B.html</id>
+    <published>2023-10-22T07:15:42.000Z</published>
+    <updated>2024-04-29T11:50:54.590Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;h4 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h4&gt;&lt;h6 id=&quot;书籍简介&quot;&gt;&lt;a href=&quot;#书籍简介&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Reading" scheme="https://wangduwei.top/categories/Reading/"/>
+    
+    
+    <category term="Reading" scheme="https://wangduwei.top/tags/Reading/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>CPU流水线工作原理</title>
+    <link href="https://wangduwei.top/cpu-pipline-overview.html"/>
+    <id>https://wangduwei.top/cpu-pipline-overview.html</id>
+    <published>2023-08-22T13:56:21.000Z</published>
+    <updated>2024-04-29T11:50:54.576Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h5 id=&quot;说明：&quot;&gt;&lt;a href=&quot;#说明：&quot; class=&quot;headerlink&quot; title=&quot;说明：&quot;&gt;&lt;/a&gt;说明：&lt;/h5&gt;&lt;p&gt;在&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="计算机基础" scheme="https://wangduwei.top/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/"/>
+    
+    <category term="CPU" scheme="https://wangduwei.top/tags/CPU/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>flutter状态管理之BloC</title>
+    <link href="https://wangduwei.top/flutter-state-bloc.html"/>
+    <id>https://wangduwei.top/flutter-state-bloc.html</id>
+    <published>2023-07-18T13:27:20.000Z</published>
+    <updated>2024-04-29T11:50:54.579Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot; title=&quot;一、概述&quot;&gt;&lt;/a&gt;一、概述&lt;/h4&gt;&lt;p&gt;Bloc = Business Logic Component&lt;/p&gt;
+&lt;center&gt;
+    &lt;img</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Flutter" scheme="https://wangduwei.top/tags/Flutter/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Flutter状态管理之Provider</title>
+    <link href="https://wangduwei.top/flutter-state-provider.html"/>
+    <id>https://wangduwei.top/flutter-state-provider.html</id>
+    <published>2023-06-01T07:30:50.000Z</published>
+    <updated>2024-04-29T11:50:54.579Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;h4 id=&quot;一、简介&quot;&gt;&lt;a href=&quot;#一、简介&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Flutter" scheme="https://wangduwei.top/tags/Flutter/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Flutter Widget之Row、Column</title>
+    <link href="https://wangduwei.top/flutter-widget-row.html"/>
+    <id>https://wangduwei.top/flutter-widget-row.html</id>
+    <published>2023-03-07T08:54:08.000Z</published>
+    <updated>2024-04-29T11:50:54.580Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;Row和Column分别在横向和纵向对子Widget进行布局。&quot;&gt;&lt;a href=&quot;#Row和Column分别在横向和纵向对子Widget进行布局。&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Flutter" scheme="https://wangduwei.top/tags/Flutter/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>《思考，快与慢》 第7章 字母B与数字13</title>
+    <link href="https://wangduwei.top/%E3%80%8A%E6%80%9D%E8%80%83%EF%BC%8C%E5%BF%AB%E4%B8%8E%E6%85%A2%E3%80%8B-%E7%AC%AC7%E7%AB%A0-%E5%AD%97%E6%AF%8DB%E4%B8%8E%E6%95%B0%E5%AD%9713.html"/>
+    <id>https://wangduwei.top/%E3%80%8A%E6%80%9D%E8%80%83%EF%BC%8C%E5%BF%AB%E4%B8%8E%E6%85%A2%E3%80%8B-%E7%AC%AC7%E7%AB%A0-%E5%AD%97%E6%AF%8DB%E4%B8%8E%E6%95%B0%E5%AD%9713.html</id>
+    <published>2022-10-09T12:52:58.000Z</published>
+    <updated>2024-04-29T11:50:54.589Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;本章包含三节：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;是什么让你相信了那些荒谬之辞&lt;/li&gt;
+&lt;li&gt;光环效应与群体智慧&lt;/li&gt;
+&lt;li&gt;眼见为实的想法往往让我们仓促作出决定&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&quot;开篇&quot;&gt;&lt;a href=&quot;#开篇&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="Reading" scheme="https://wangduwei.top/categories/Reading/"/>
+    
+    
+    <category term="Reading" scheme="https://wangduwei.top/tags/Reading/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>开发者七条</title>
+    <link href="https://wangduwei.top/ep-good-developer-manifesto.html"/>
+    <id>https://wangduwei.top/ep-good-developer-manifesto.html</id>
+    <published>2022-10-09T09:20:32.000Z</published>
+    <updated>2024-04-29T11:50:54.577Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;软件开发不只是API调用和基础语法，以下是应用开发的全貌：&lt;/p&gt;
+&lt;h4 id=&quot;一、相信数据&quot;&gt;&lt;a href=&quot;#一、相信数据&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="软件哲学" scheme="https://wangduwei.top/tags/%E8%BD%AF%E4%BB%B6%E5%93%B2%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Android消息机制</title>
+    <link href="https://wangduwei.top/android-aosp-event-loop.html"/>
+    <id>https://wangduwei.top/android-aosp-event-loop.html</id>
+    <published>2022-06-20T07:34:15.000Z</published>
+    <updated>2024-04-29T11:50:54.567Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;h4 id=&quot;一、相关类和结构&quot;&gt;&lt;a href=&quot;#一、相关类和结构&quot; class=&quot;headerlink&quot; title=&quot;一、相关类和结构&quot;&gt;&lt;/a&gt;一、相关类和结构&lt;/h4&gt;&lt;center&gt;
+    &lt;img</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>投资回报率</title>
+    <link href="https://wangduwei.top/econonmics-roa-roe-roic-roce.html"/>
+    <id>https://wangduwei.top/econonmics-roa-roe-roic-roce.html</id>
+    <published>2022-06-13T09:04:39.000Z</published>
+    <updated>2024-04-29T11:50:54.577Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="经济学" scheme="https://wangduwei.top/categories/%E7%BB%8F%E6%B5%8E%E5%AD%A6/"/>
+    
+    
+    <category term="经济学" scheme="https://wangduwei.top/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Kotlin Flow的工作原理</title>
+    <link href="https://wangduwei.top/kotlin-lang-flow-under-the-hood.html"/>
+    <id>https://wangduwei.top/kotlin-lang-flow-under-the-hood.html</id>
+    <published>2022-05-25T03:08:23.000Z</published>
+    <updated>2024-04-29T11:50:54.582Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;hr&gt;
+&lt;p&gt;我们有一个会被重复调用的lambda表达式：&lt;/p&gt;
+&lt;figure class=&quot;highlight kotlin&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Jetpack Compose State Management</title>
+    <link href="https://wangduwei.top/android-jetpack-compose-state-management.html"/>
+    <id>https://wangduwei.top/android-jetpack-compose-state-management.html</id>
+    <published>2022-05-18T06:34:49.000Z</published>
+    <updated>2024-04-29T11:50:54.568Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;–&lt;/p&gt;
+&lt;center&gt;
+    &lt;img src=&quot;../images/ui-equals-function-of-state.png&quot; width=&quot;100%&quot;/&gt;
+&lt;/center&gt;
+
+&lt;h4 id=&quot;一、什么是状态&quot;&gt;&lt;a href=&quot;#一、什么是状态&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Jetpack Compose Side Effects</title>
+    <link href="https://wangduwei.top/android-jetpack-compose-sideeffect.html"/>
+    <id>https://wangduwei.top/android-jetpack-compose-sideeffect.html</id>
+    <published>2022-05-17T08:11:13.000Z</published>
+    <updated>2024-04-29T11:50:54.568Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、什么是Side-Effect&quot;&gt;&lt;a href=&quot;#一、什么是Side-Effect&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
+    
+    <category term="Compose" scheme="https://wangduwei.top/tags/Compose/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Kotlin之JvmStatic和override冲突问题</title>
+    <link href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html"/>
+    <id>https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html</id>
+    <published>2022-05-09T08:35:18.000Z</published>
+    <updated>2024-04-29T11:50:54.584Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、问题&quot;&gt;&lt;a href=&quot;#一、问题&quot; class=&quot;headerlink&quot; title=&quot;一、问题&quot;&gt;&lt;/a&gt;一、问题&lt;/h4&gt;&lt;p&gt;  </summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Kotlin中的JVM注解</title>
+    <link href="https://wangduwei.top/kotlin-lang-jvm-annotation.html"/>
+    <id>https://wangduwei.top/kotlin-lang-jvm-annotation.html</id>
+    <published>2022-05-01T07:29:44.000Z</published>
+    <updated>2024-04-29T11:50:54.584Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。&lt;/p&gt;
+&lt;h4 id=&quot;1、-JvmName&quot;&gt;&lt;a href=&quot;#1、-JvmName&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>源码分析-WorkManager</title>
+    <link href="https://wangduwei.top/android-github-source-workmanager.html"/>
+    <id>https://wangduwei.top/android-github-source-workmanager.html</id>
+    <published>2022-04-17T05:51:57.000Z</published>
+    <updated>2024-04-29T11:50:54.567Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、初始化流程&quot;&gt;&lt;a href=&quot;#一、初始化流程&quot; class=&quot;headerlink&quot; title=&quot;一、初始化流程&quot;&gt;&lt;/a&gt;一、初始化流程&lt;/h4&gt;&lt;p&gt;1、WorkManager集成了&lt;code&gt;androidx.startup&lt;/code&gt;</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Room数据库酷七条</title>
+    <link href="https://wangduwei.top/android-library-room-7-tips.html"/>
+    <id>https://wangduwei.top/android-library-room-7-tips.html</id>
+    <published>2022-01-30T14:01:39.000Z</published>
+    <updated>2024-04-29T11:50:54.568Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、通过RoomDatabase-Callback预填充数据&quot;&gt;&lt;a href=&quot;#一、通过RoomDatabase-Callback预填充数据&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
+    
+    <category term="数据库" scheme="https://wangduwei.top/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>源码分析-网络框架之Retrofit</title>
+    <link href="https://wangduwei.top/android-github-source-retrofit.html"/>
+    <id>https://wangduwei.top/android-github-source-retrofit.html</id>
+    <published>2021-12-30T13:37:29.000Z</published>
+    <updated>2024-04-29T11:50:54.567Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、使用&quot;&gt;&lt;a href=&quot;#一、使用&quot; class=&quot;headerlink&quot; title=&quot;一、使用&quot;&gt;&lt;/a&gt;一、使用&lt;/h4&gt;&lt;h5 id=&quot;1-1-定义API方法&quot;&gt;&lt;a href=&quot;#1-1-定义API方法&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
+    
+    <category term="安卓框架" scheme="https://wangduwei.top/tags/%E5%AE%89%E5%8D%93%E6%A1%86%E6%9E%B6/"/>
+    
+  </entry>
+  
+</feed>
