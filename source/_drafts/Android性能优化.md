@@ -42,5 +42,10 @@ tags:
     ANR分析：捕获ANR异常，解决APP的“未响应”问题
 
 
++ 启动优化
+  + [alibaba / alpha](https://github.com/alibaba/alpha)
+  + [idisfkj / android-startup](https://github.com/idisfkj/android-startup)
+
+
 https://github.com/zhengmin1989/TheSevenWeapons?tab=readme-ov-file
 https://www.linuxjournal.com/article/6100
