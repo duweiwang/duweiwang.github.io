@@ -1,0 +1,57 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+package flutter {
+    class StatefulWidget
+    class State<T>
+}
+
+package flutter-riverpod {
+    abstract class WidgetRef {
+        T read()
+        State refresh()
+        void listen()
+        T watch()
+    }
+
+
+    abstract class ConsumerStatefulWidget
+    abstract class ConsumerWidget
+    class Consumer
+
+    StatefulWidget <|- ConsumerStatefulWidget
+    ConsumerStatefulWidget <|- ConsumerWidget
+    ConsumerWidget <|- Consumer
+
+
+    abstract class ConsumerState<T:ConsumerStatefulWidget>
+
+    class _ConsumerState
+
+    State <|- ConsumerState
+
+    ConsumerState <|- _ConsumerState
+
+    _ConsumerState *-- WidgetRef
+}
+
+
+package riverpod {
+    abstract class Ref {
+        String refresh()
+        void onDispose()
+        T read()
+        T watch()
+        RemoveListener listen<T>()
+    }
+
+    class ProviderContainer
+
+    abstract class ProviderElementBase
+
+    Ref <|.. ProviderElementBase
+
+}
+
+
+@enduml

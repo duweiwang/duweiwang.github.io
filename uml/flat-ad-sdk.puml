@@ -52,7 +52,8 @@
 
 
     class AdConfig
-    class AdConfig.Builder {}
+
+    class AdConfig.Builder
 
     AdConfig.Builder --> AdConfig
 

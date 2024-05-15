@@ -1,13 +1,26 @@
 ---
-title: Android性能优化
+title: Android性能优化资料汇总
 tags:
 ---
 
 #### 性能介绍：
-
+在Android中，常规的性能优化包括：
++ 启动优化
++ 内存优化
++ 电量优化
++ 包体积优化
++ 网络优化
++ 线程优化
++ 卡顿优化
+  + ANR优化
+  + IO优化
+  + 绘制优化
 
 #### 性能分析：
-
+工具：
++ Android Studio Profiler
++ StrictMode
++ 
 
 #### 性能优化开源项目：
 

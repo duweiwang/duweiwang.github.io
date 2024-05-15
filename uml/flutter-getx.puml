@@ -1,6 +1,9 @@
 @startuml
 'https://plantuml.com/class-diagram
 
+class Get
+
+
 
 
 @enduml
