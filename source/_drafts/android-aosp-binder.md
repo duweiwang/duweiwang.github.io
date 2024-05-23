@@ -28,7 +28,7 @@ tags: Android
 
 
 
-一、Binder是什么
+#### 一、Binder是什么
 
 <center>
     <img src="../images/android-binder-what.svg" width="50%"/>
@@ -49,7 +49,7 @@ tags: Android
 
 + Focused on scalability, stability, flexibility, low-latency/overhead, easy programming model
 
-二、IPC-进程间通信
+#### 二、IPC-进程间通信
 
 + Inter-process communication (IPC) 是一个在多个进程间交换数据和信号📶的框架。
 + Used for message passing, synchronization, shared memory, and remote procedure calls (RPC)
@@ -67,7 +67,7 @@ tags: Android
  - Binder!
 
 
-三、为什么使用Binder
+#### 三、为什么使用Binder
 
 <center>
     <img src="../images/android-binder-why.svg" width="50%"/>
@@ -114,7 +114,7 @@ tags: Android
  - Unix domain sockets used in some cases (e.g. RILD)
 
 
-四、使用Intents 和 ContentProviders进程间通讯
+#### 四、使用Intents 和 ContentProviders进程间通讯
 
 <center>
     <img src="../images/android-binder-intent-contentprovider.svg" width="50%"/>
@@ -194,9 +194,7 @@ public class CaptureActivity extends Activity {
 
 
 
-五、Messenger IPC
-
-
+#### 五、Messenger IPC
 
 <center>
     <img src="../images/android-basic-aidl-overview.png" width="50%"/>
