@@ -29,6 +29,8 @@ tags: Flutter
 + flutter_riverpod
 + Bloc
 + GetX
++ provider
++ 
 
 
 [](https://medium.com/dhiwise/7-things-you-need-to-know-about-flutter-state-management-42f840ef022e)
