@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2024-05-01T13:58:50.190Z</updated>
+  <updated>2024-05-25T03:33:10.047Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>《异类-不一样的成功启示录》</title>
+    <link href="https://wangduwei.top/%E3%80%8A%E5%BC%82%E7%B1%BB-%E4%B8%8D%E4%B8%80%E6%A0%B7%E7%9A%84%E6%88%90%E5%8A%9F%E5%90%AF%E7%A4%BA%E5%BD%95%E3%80%8B.html"/>
+    <id>https://wangduwei.top/%E3%80%8A%E5%BC%82%E7%B1%BB-%E4%B8%8D%E4%B8%80%E6%A0%B7%E7%9A%84%E6%88%90%E5%8A%9F%E5%90%AF%E7%A4%BA%E5%BD%95%E3%80%8B.html</id>
+    <published>2024-05-25T03:33:10.000Z</published>
+    <updated>2024-05-25T03:33:10.047Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h4&gt;&lt;h6 id=&quot;书籍简介&quot;&gt;&lt;a href=&quot;#书籍简介&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>Android的maven插件和maven-publish插件</title>
@@ -92,7 +113,7 @@
     <link href="https://wangduwei.top/%E3%80%8A%E9%BA%BB%E7%9C%81%E7%90%86%E5%B7%A5%E6%B7%B1%E5%BA%A6%E6%80%9D%E8%80%83%E6%B3%95%E3%80%8B.html"/>
     <id>https://wangduwei.top/%E3%80%8A%E9%BA%BB%E7%9C%81%E7%90%86%E5%B7%A5%E6%B7%B1%E5%BA%A6%E6%80%9D%E8%80%83%E6%B3%95%E3%80%8B.html</id>
     <published>2023-10-22T07:15:42.000Z</published>
-    <updated>2024-04-29T11:50:54.590Z</updated>
+    <updated>2024-05-04T10:04:22.004Z</updated>
     
     
       
@@ -171,7 +192,7 @@
     <link href="https://wangduwei.top/flutter-state-provider.html"/>
     <id>https://wangduwei.top/flutter-state-provider.html</id>
     <published>2023-06-01T07:30:50.000Z</published>
-    <updated>2024-04-29T11:50:54.579Z</updated>
+    <updated>2024-05-23T08:45:13.597Z</updated>
     
     
       
@@ -179,7 +200,7 @@
         
         
     <summary type="html">&lt;hr&gt;
-&lt;h4 id=&quot;一、简介&quot;&gt;&lt;a href=&quot;#一、简介&quot; class=&quot;headerlink&quot;</summary>
+&lt;h4 id=&quot;简介&quot;&gt;&lt;a href=&quot;#简介&quot; class=&quot;headerlink&quot;</summary>
         
       
     
@@ -508,33 +529,6 @@
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
     <category term="数据库" scheme="https://wangduwei.top/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>源码分析-网络框架之Retrofit</title>
-    <link href="https://wangduwei.top/android-github-source-retrofit.html"/>
-    <id>https://wangduwei.top/android-github-source-retrofit.html</id>
-    <published>2021-12-30T13:37:29.000Z</published>
-    <updated>2024-04-29T11:50:54.567Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、使用&quot;&gt;&lt;a href=&quot;#一、使用&quot; class=&quot;headerlink&quot; title=&quot;一、使用&quot;&gt;&lt;/a&gt;一、使用&lt;/h4&gt;&lt;h5 id=&quot;1-1-定义API方法&quot;&gt;&lt;a href=&quot;#1-1-定义API方法&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
-    
-    <category term="安卓框架" scheme="https://wangduwei.top/tags/%E5%AE%89%E5%8D%93%E6%A1%86%E6%9E%B6/"/>
     
   </entry>
   
