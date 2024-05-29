@@ -83,11 +83,31 @@ tags: Android
 + Firebase and AppExitInfo
 + ANR-WatchDog
 + block-canary
-+ 
 
 #### ANR的分析方法
 
+1、trace文件内容
 
+| 字段        | 解释                                               |
+|-----------|--------------------------------------------------|
+| main      | main标识是主线程，如果是线程，那么命名成“Thread-X”的格式,x表示线程id,逐步递增 |
+| prio      | 线程优先级,默认是5                                       |
+| tid       | 线程唯一标识ID                                         |
+| group     | 线程组名称                                            |
+| sCount    | 该线程被挂起的次数                                        |
+| dsCount   | 该线程被调试器挂起的次数                                     |
+| obj       | 对象地址                                             |
+| self      | 该线程Native的地址                                     |
+| sysTid    | 线程号(主线程的线程号和进程号相同)                               |
+| nice      | 线程的调度优先级                                         |
+| sched     | 线程的调度策略和优先级                                      |
+| cgrp      | 调度归属组                                            |
+| handle    | 线程处理函数的地址                                        |
+| state     | 调度状态                                             |
+| schedstat | 线程在cpu上执行的时间、线程的等待时间和线程执行的时间片长度                  |
+| utm       | 线程用户态下使用的时间值(单位是jiffies）                         |
+| stm       | 内核态下的调度时间值                                       |
+| core      | 最后执行这个线程的cpu核的序号                                 |
 
 [1.ANR官方文档](https://developer.android.com/topic/performance/vitals/anr)
 [](https://medium.com/okcredit/how-we-reduced-our-anr-by-three-times-d9ae0b41ad94)
