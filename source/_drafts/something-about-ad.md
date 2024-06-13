@@ -17,16 +17,16 @@ tags:
 
 广告的计价方式：
 
-| 概念         | 定义       | 全称 |
-|:-----------|:---------|:---|
-| impression | 广告展示     |  -  |
-| CPM        | 千次展示花费   |  -  |
-| CPT        | 按时间计费    |  Cost per Time  |
-| CPC        | 按点击计费    |  Cost per Click  |
-| CPA/CPS    | 按效果计费    |  Cost per Action/Cost per Sales  |
-| eCPM       | 千次展示有效收入 |  effective Cost per Mille  |
-| CTR        | 点击率      |  Click-Through-Rate  |
-| CVR        | 转化率      |  Conversion Rate  |
+| 概念         | 定义       | 全称                             |
+|:-----------|:---------|:-------------------------------|
+| impression | 广告展示     | -                              |
+| CPM        | 千次展示花费   | -                              |
+| CPT        | 按时间计费    | Cost per Time                  |
+| CPC        | 按点击计费    | Cost per Click                 |
+| CPA/CPS    | 按效果计费    | Cost per Action/Cost per Sales |
+| eCPM       | 千次展示有效收入 | effective Cost per Mille       |
+| CTR        | 点击率      | Click-Through-Rate             |
+| CVR        | 转化率      | Conversion Rate                |
 
 > eCPM指的是千次展示有效收入，也就是媒体平台在千次广告曝光中获取的实际收益。eCPM和CPM最大的区别在于CPM是从广告主端来看的，是看广告主为千次广告曝光付多少钱；而eCPM是从媒体端来看的，是看媒体平台从千次广告曝光中实际能赚到多少钱。对媒体平台而言，eCPM越高越好，但对广告主而言，CPM过高，广告主是不会接受的。
 

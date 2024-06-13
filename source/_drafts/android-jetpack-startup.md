@@ -7,6 +7,7 @@ tags:
 一、概述
 [源码](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:startup/)
 
+startup库是一个极简启动优化库，可以解决启动中的依赖顺序问题。但是，他不支持
 
 二、基本使用
 

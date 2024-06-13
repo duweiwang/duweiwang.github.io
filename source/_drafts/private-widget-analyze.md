@@ -97,19 +97,19 @@ category:system/user/designer
 
 ##### 3.2 支持的编辑项
 
-| 编辑项名称 | 对应属性名称   |
-|:---------|:-------------|
-| 背景      | bg           |
-| 边框      | border       |
-| 边框宽度   | border-width |
-| 文字      | text         |
-| 字体      | font         |
-| 字色      | text-color   |
-| 字号      | text-size    |
-| 文字位置   | text-loc     |
-| 地区      | area         |
-| 时间格式   | time-format  |
-| 温度格式   | temp-format  |
+| 编辑项名称 | 对应属性名称       |
+|:------|:-------------|
+| 背景    | bg           |
+| 边框    | border       |
+| 边框宽度  | border-width |
+| 文字    | text         |
+| 字体    | font         |
+| 字色    | text-color   |
+| 字号    | text-size    |
+| 文字位置  | text-loc     |
+| 地区    | area         |
+| 时间格式  | time-format  |
+| 温度格式  | temp-format  |
 
 
 
