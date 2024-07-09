@@ -1,15 +1,19 @@
 ---
 title: android jetpack startup
+date: 2024-07-09 15:04:39
 tags:
+categories:
+description:
 ---
 
 
-一、概述
+
+#### 概述
 [源码](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:startup/)
 
-startup库是一个极简启动优化库，可以解决启动中的依赖顺序问题。但是，他不支持
+startup库是一个极简启动优化库，可以解决启动中的依赖顺序问题。
 
-二、基本使用
+#### 基本使用
 
 1.1 实现Initializer接口
 
@@ -42,7 +46,7 @@ class LoggerInitializer : Initializer<Logger> {
 ```
 
 
-三、源码分析
+#### 源码分析
 1、默认由ContentProvider onCreate中获取AppInitializer**单例**
 2、调用AppInitializer单例的discoverAndInitialize，**解析Manifest**里面的mate
 3、解析完后放入Set<Class<? extends Initializer<?>>>中
@@ -52,3 +56,8 @@ class LoggerInitializer : Initializer<Logger> {
     4.3 此项依赖初始化完成
 
 
+#### 缺点
++ 不支持线程控制和等待
+
+#### 其他相关库
+[android-startup](https://github.com/idisfkj/android-startup)
