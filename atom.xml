@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2024-05-25T03:33:10.047Z</updated>
+  <updated>2024-07-09T07:04:39.813Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -17,11 +17,54 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>android jetpack startup</title>
+    <link href="https://wangduwei.top/android-jetpack-startup.html"/>
+    <id>https://wangduwei.top/android-jetpack-startup.html</id>
+    <published>2024-07-09T07:04:39.000Z</published>
+    <updated>2024-07-09T07:04:39.813Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h4&gt;&lt;p&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Admob的初始化过程</title>
+    <link href="https://wangduwei.top/admob-init-performance-test.html"/>
+    <id>https://wangduwei.top/admob-init-performance-test.html</id>
+    <published>2024-07-09T07:04:20.000Z</published>
+    <updated>2024-07-09T07:04:20.119Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;在接入Google Admob时，依据官方文档 或 依据开发习惯，我们一般先对Admob SDK进行初始化，然后进行广告加载：&lt;/p&gt;
+&lt;figure class=&quot;highlight kotlin&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
     <title>《异类-不一样的成功启示录》</title>
     <link href="https://wangduwei.top/%E3%80%8A%E5%BC%82%E7%B1%BB-%E4%B8%8D%E4%B8%80%E6%A0%B7%E7%9A%84%E6%88%90%E5%8A%9F%E5%90%AF%E7%A4%BA%E5%BD%95%E3%80%8B.html"/>
     <id>https://wangduwei.top/%E3%80%8A%E5%BC%82%E7%B1%BB-%E4%B8%8D%E4%B8%80%E6%A0%B7%E7%9A%84%E6%88%90%E5%8A%9F%E5%90%AF%E7%A4%BA%E5%BD%95%E3%80%8B.html</id>
     <published>2024-05-25T03:33:10.000Z</published>
-    <updated>2024-05-25T03:33:10.047Z</updated>
+    <updated>2024-06-06T08:04:38.631Z</updated>
     
     
       
@@ -477,58 +520,6 @@
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>源码分析-WorkManager</title>
-    <link href="https://wangduwei.top/android-github-source-workmanager.html"/>
-    <id>https://wangduwei.top/android-github-source-workmanager.html</id>
-    <published>2022-04-17T05:51:57.000Z</published>
-    <updated>2024-04-29T11:50:54.567Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、初始化流程&quot;&gt;&lt;a href=&quot;#一、初始化流程&quot; class=&quot;headerlink&quot; title=&quot;一、初始化流程&quot;&gt;&lt;/a&gt;一、初始化流程&lt;/h4&gt;&lt;p&gt;1、WorkManager集成了&lt;code&gt;androidx.startup&lt;/code&gt;</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Room数据库酷七条</title>
-    <link href="https://wangduwei.top/android-library-room-7-tips.html"/>
-    <id>https://wangduwei.top/android-library-room-7-tips.html</id>
-    <published>2022-01-30T14:01:39.000Z</published>
-    <updated>2024-04-29T11:50:54.568Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、通过RoomDatabase-Callback预填充数据&quot;&gt;&lt;a href=&quot;#一、通过RoomDatabase-Callback预填充数据&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
-    
-    <category term="数据库" scheme="https://wangduwei.top/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
     
   </entry>
   

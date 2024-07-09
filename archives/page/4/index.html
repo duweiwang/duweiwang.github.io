@@ -186,6 +186,516 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-coroutine-deep-recursion.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/kotlin-coroutine-deep-recursion.html" class="post-title-link" itemprop="url">用Kotlin协程解决深度递归问题</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-30 10:38:30" itemprop="dateCreated datePublished" datetime="2021-10-30T10:38:30+08:00">2021-10-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>&ensp;&ensp;&ensp;&ensp;协程一般用于异步编程。在解决异步编程问题方面，Kotlin编译器在对协程的设计和实现是通用的。我们可以借助协程优雅的解决深度递归问题。</p>
+<h4 id="一、问题描述"><a href="#一、问题描述" class="headerlink" title="一、问题描述"></a>一、问题描述</h4><p>定义以下二叉树的结点，并构造一棵只含十万个左结点的树，进行深度遍历，求树的深度：  </p>
+<center>
+    <img src="../images/tree_only_left.png" width="500"/>
+</center>
+
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//结点定义</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Tree</span></span>(<span class="keyword">val</span> left: Tree?, <span class="keyword">val</span> right: Tree?)</span><br><span class="line"></span><br><span class="line"><span class="comment">//构造二叉树：以叶子结点开始，重复构造父结点，并把当前结点作为父结点的左子树</span></span><br><span class="line"><span class="keyword">val</span> n = <span class="number">100_000</span></span><br><span class="line"><span class="keyword">val</span> deepTree = generateSequence(Tree(<span class="literal">null</span>, <span class="literal">null</span>)) &#123; prev -&gt;</span><br><span class="line">    Tree(prev, <span class="literal">null</span>) </span><br><span class="line">&#125;.take(n).last()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h4 id="二、解决方案"><a href="#二、解决方案" class="headerlink" title="二、解决方案"></a>二、解决方案</h4><h5 id="2-1-解决方案一："><a href="#2-1-解决方案一：" class="headerlink" title="2.1 解决方案一："></a>2.1 解决方案一：</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">depth</span><span class="params">(t: <span class="type">Tree</span>?)</span></span>: <span class="built_in">Int</span> =</span><br><span class="line">    <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="number">0</span> <span class="keyword">else</span> maxOf(</span><br><span class="line">        depth(t.left), <span class="comment">// recursive call one</span></span><br><span class="line">        depth(t.right) <span class="comment">// recursive call two</span></span><br><span class="line">    ) + <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>分析：<br>对树进行递归是最简洁直接的解决方案。而递归将保存函数的调用栈用于后续状态恢复，线程的调用栈是有大小限制的，此处将抛出<code>Exception in thread &quot;main&quot; java.lang.StackOverflowError</code>错误。</p>
+<h5 id="2-2-解决方案二："><a href="#2-2-解决方案二：" class="headerlink" title="2.2 解决方案二："></a>2.2 解决方案二：</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">depth</span><span class="params">(t: <span class="type">Tree</span>?)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">      <span class="class"><span class="keyword">class</span> <span class="title">Frame</span></span>(<span class="keyword">val</span> node: Tree, <span class="keyword">var</span> state: <span class="built_in">Int</span> = <span class="number">0</span>, <span class="keyword">var</span> depth: <span class="built_in">Int</span> = <span class="number">1</span>)</span><br><span class="line">      <span class="keyword">val</span> stack = ArrayList&lt;Frame&gt;()</span><br><span class="line">      <span class="keyword">val</span> root = Frame(t)</span><br><span class="line">      stack.add(root)</span><br><span class="line">      <span class="keyword">while</span> (stack.isNotEmpty()) &#123;</span><br><span class="line">          <span class="keyword">val</span> frame = stack.last()</span><br><span class="line">          <span class="keyword">when</span> (frame.state++) &#123;</span><br><span class="line">              <span class="number">0</span> -&gt; frame.node.left?.let &#123; l -&gt; stack.add(Frame(l)) &#125;</span><br><span class="line">              <span class="number">1</span> -&gt; frame.node.right?.let &#123; r -&gt; stack.add(Frame(r)) &#125;</span><br><span class="line">              <span class="number">2</span> -&gt; &#123;</span><br><span class="line">                  stack.removeLast()</span><br><span class="line">                  stack.lastOrNull()?.let &#123; p -&gt; </span><br><span class="line">                      p.depth = maxOf(p.depth, frame.depth + <span class="number">1</span>) </span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> root.depth</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>分析：<br>基于解决方案一，我们考虑将调用栈状态的保存转移到内存空间更大的堆区，并加入了状态机和<code>while</code>循环。在此例中，程序开始时将全部走状态0，将所有的左节点加入stack。然后全部走状态2(因为没有右结点)，由下到上计算每一个结点的深度。最后返回根节点的深度。</p>
+<h5 id="2-3-解决方案三："><a href="#2-3-解决方案三：" class="headerlink" title="2.3 解决方案三："></a>2.3 解决方案三：</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> depth = DeepRecursiveFunction&lt;Tree?, <span class="built_in">Int</span>&gt; &#123; t -&gt;</span><br><span class="line">        <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="number">0</span> <span class="keyword">else</span> maxOf(</span><br><span class="line">            callRecursive(t.left),</span><br><span class="line">            callRecursive(t.right)</span><br><span class="line">        ) + <span class="number">1</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>分析：<br>方案二中的状态机就是Kotlin挂起函数的实现原理。所以我们也可以利用Kotlin的挂起函数实现深度遍历。那么方案三是如何实现的呢？我们分析三个方面：  </p>
+<ul>
+<li>如何调用</li>
+<li>如何进入循环</li>
+<li>如何保存状态</li>
+</ul>
+<p>2.3.1 调用<br><code>DeepRecursiveFunction</code>类声明了<code>invoke</code>操作符，调用<code>depth</code>函数就是调用下面👇🏻的操作符。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SinceKotlin(<span class="meta-string">&quot;1.4&quot;</span>)</span></span><br><span class="line"><span class="meta">@ExperimentalStdlibApi</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> DeepRecursiveFunction<span class="type">&lt;T, R&gt;</span>.<span class="title">invoke</span><span class="params">(value: <span class="type">T</span>)</span></span>: R =</span><br><span class="line">    DeepRecursiveScopeImpl&lt;T, R&gt;(block, value).runCallLoop()</span><br></pre></td></tr></table></figure>
+
+<p>2.3.2 循环<br>调用<code>DeepRecursiveFunction</code>后直接进入<code>runCallLoop()</code>循环，result的默认值为UNDEFINED_RESULT，所以会启动我们的递归业务逻辑</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Suppress(<span class="meta-string">&quot;UNCHECKED_CAST&quot;</span>)</span></span><br><span class="line">   <span class="function"><span class="keyword">fun</span> <span class="title">runCallLoop</span><span class="params">()</span></span>: R &#123;</span><br><span class="line">       <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">           <span class="comment">// Note: cont is set to null in DeepRecursiveScopeImpl.resumeWith when the whole computation completes</span></span><br><span class="line">           <span class="keyword">val</span> result = <span class="keyword">this</span>.result</span><br><span class="line">           <span class="keyword">val</span> cont = <span class="keyword">this</span>.cont</span><br><span class="line">               ?: <span class="keyword">return</span> (result <span class="keyword">as</span> Result&lt;R&gt;).getOrThrow() <span class="comment">// done -- final result</span></span><br><span class="line">           <span class="comment">// The order of comparison is important here for that case of rogue class with broken equals</span></span><br><span class="line">           <span class="keyword">if</span> (UNDEFINED_RESULT == result) &#123;</span><br><span class="line">               <span class="comment">// call &quot;function&quot; with &quot;value&quot; using &quot;cont&quot; as completion</span></span><br><span class="line">               <span class="keyword">val</span> r = <span class="keyword">try</span> &#123;</span><br><span class="line">                   <span class="comment">// This is block.startCoroutine(this, value, cont)</span></span><br><span class="line">                   function.startCoroutineUninterceptedOrReturn(<span class="keyword">this</span>, value, cont)</span><br><span class="line">               &#125; <span class="keyword">catch</span> (e: Throwable) &#123;</span><br><span class="line">                   cont.resumeWithException(e)</span><br><span class="line">                   <span class="keyword">continue</span></span><br><span class="line">               &#125;</span><br><span class="line">               <span class="comment">// If the function returns without suspension -- calls its continuation immediately</span></span><br><span class="line">               <span class="keyword">if</span> (r !== COROUTINE_SUSPENDED)</span><br><span class="line">                   cont.resume(r <span class="keyword">as</span> R)</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="comment">// we returned from a crossFunctionCompletion trampoline -- call resume here</span></span><br><span class="line">               <span class="keyword">this</span>.result = UNDEFINED_RESULT <span class="comment">// reset result back</span></span><br><span class="line">               cont.resumeWith(result)</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>2.3.3 状态保存<br>每次调用<code>callRecursive</code>时将保存当前的值和cont（continuation），注意这里cont对象每次都不是同一个对象。当进行挂起恢复时，拿到旧的continuation进行回调。</p>
+<center>
+    <img src="../images/kotlin_coroutine_resume.jpeg" width="500"/>
+</center>
+
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">callRecursive</span><span class="params">(value: <span class="type">T</span>)</span></span>: R = </span><br><span class="line">    suspendCoroutineUninterceptedOrReturn &#123; cont -&gt;</span><br><span class="line">        <span class="keyword">this</span>.cont = cont</span><br><span class="line">        <span class="keyword">this</span>.value = value</span><br><span class="line">        COROUTINE_SUSPENDED</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h4><p><a target="_blank" rel="noopener" href="https://elizarov.medium.com/deep-recursion-with-coroutines-7c53e15993e3">Deep recursion with coroutines</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-basic-constraintlayout.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/android-basic-constraintlayout.html" class="post-title-link" itemprop="url">Android中的约束布局</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-23 15:03:23" itemprop="dateCreated datePublished" datetime="2021-10-23T15:03:23+08:00">2021-10-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>&ensp;&ensp;&ensp;&ensp;Android中的视图是以树的形式组织起来的，它是一种层次结构。在代码中体现为组合模式，一个ViewGroup可以包含一个或多个View，同时ViewGroup又是一个View。在布局文件中体现为xml的结点和缩进。<br>&ensp;&ensp;&ensp;&ensp;同时视图的渲染少不了对其进行遍历，这就涉及数据结构中树的深度优先遍历和广度优先遍历。有时候一些复杂的布局一次遍历还无法完全确定View的信息。如何通过算法方式降低树的层次呢？也许这就是约束布局存在的意义吧。<br>&ensp;&ensp;&ensp;&ensp;在Android中，灵活运用ConstraintLayout包括以下几个点：</p>
+<ul>
+<li>主属性<ul>
+<li>通过相对位置约束View</li>
+<li>控制约束之间的距离</li>
+<li>居中和偏移百分比</li>
+<li>通过圆定位📌View</li>
+<li>通过可见性控制View</li>
+<li>通过分辨率约束View</li>
+<li>通过链⛓约束View</li>
+</ul>
+</li>
+<li>辅助工具<ul>
+<li>Barrier屏障约束</li>
+<li>Group分组约束</li>
+<li>Placeholder占位约束</li>
+<li>Guideline引导线约束</li>
+</ul>
+</li>
+</ul>
+<h4 id="二、使用"><a href="#二、使用" class="headerlink" title="二、使用"></a>二、使用</h4><h5 id="2-1-通过相对位置约束View"><a href="#2-1-通过相对位置约束View" class="headerlink" title="2.1 通过相对位置约束View"></a>2.1 通过相对位置约束View</h5><center>
+    <img src="../images/constraint/constraint_relative_position.png" width="500"/>
+</center>
+
+<table>
+<thead>
+<tr>
+<th>约束属性</th>
+<th>描述</th>
+<th>约束属性</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>layout_constraintLeft_toLeftOf</td>
+<td></td>
+<td>layout_constraintLeft_toRightOf</td>
+<td></td>
+</tr>
+<tr>
+<td>layout_constraintRight_toLeftOf</td>
+<td></td>
+<td>layout_constraintRight_toRightOf</td>
+<td></td>
+</tr>
+<tr>
+<td>layout_constraintTop_toTopOf</td>
+<td></td>
+<td>layout_constraintTop_toBottomOf</td>
+<td></td>
+</tr>
+<tr>
+<td>layout_constraintBottom_toTopOf</td>
+<td></td>
+<td>layout_constraintBottom_toBottomOf</td>
+<td></td>
+</tr>
+<tr>
+<td>layout_constraintStart_toEndOf</td>
+<td></td>
+<td>layout_constraintStart_toStartOf</td>
+<td></td>
+</tr>
+<tr>
+<td>layout_constraintEnd_toStartOf</td>
+<td></td>
+<td>layout_constraintEnd_toEndOf</td>
+<td></td>
+</tr>
+<tr>
+<td>layout_constraintBaseline_toBaselineOf</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h5 id="2-2-控制约束之间的距离"><a href="#2-2-控制约束之间的距离" class="headerlink" title="2.2 控制约束之间的距离"></a>2.2 控制约束之间的距离</h5><center>
+    <img src="../images/constraint/constraint_margin.png" width="500"/>
+</center> 
+
+<table>
+<thead>
+<tr>
+<th>约束属性</th>
+<th>描述</th>
+<th>约束属性</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>android:layout_marginStart</td>
+<td></td>
+<td>layout_goneMarginStart</td>
+<td></td>
+</tr>
+<tr>
+<td>android:layout_marginEnd</td>
+<td></td>
+<td>layout_goneMarginEnd</td>
+<td></td>
+</tr>
+<tr>
+<td>android:layout_marginLeft</td>
+<td></td>
+<td>layout_goneMarginLeft</td>
+<td></td>
+</tr>
+<tr>
+<td>android:layout_marginTop</td>
+<td></td>
+<td>layout_goneMarginTop</td>
+<td></td>
+</tr>
+<tr>
+<td>android:layout_marginRight</td>
+<td></td>
+<td>layout_goneMarginRight</td>
+<td></td>
+</tr>
+<tr>
+<td>android:layout_marginBottom</td>
+<td></td>
+<td>layout_goneMarginBottom</td>
+<td></td>
+</tr>
+<tr>
+<td>android:layout_marginBaseline</td>
+<td></td>
+<td>layout_goneMarginBaseline</td>
+<td></td>
+</tr>
+</tbody></table>
+<h5 id="2-3-居中和偏移百分比"><a href="#2-3-居中和偏移百分比" class="headerlink" title="2.3 居中和偏移百分比"></a>2.3 居中和偏移百分比</h5><table>
+    <tr>
+        <td><img src="../images/constraint/constraint_center_position.png" width="300"/></td>
+        <td><img src="../images/constraint/constraint_center_position_bias.png" width="300"/></td>
+    </tr>
+</table>
+
+<table>
+<thead>
+<tr>
+<th>约束属性</th>
+<th>描述</th>
+<th>约束属性</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>layout_constraintHorizontal_bias</td>
+<td></td>
+<td>layout_constraintVertical_bias</td>
+<td></td>
+</tr>
+</tbody></table>
+<h5 id="2-4-通过圆定位📌View"><a href="#2-4-通过圆定位📌View" class="headerlink" title="2.4 通过圆定位📌View"></a>2.4 通过圆定位📌View</h5><center>
+    <img src="../images/constraint/constraint_circular_position.jpeg" width="400"/>
+</center>
+
+<table>
+<thead>
+<tr>
+<th>约束属性</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>layout_constraintCircle</td>
+<td>另一个widget的id</td>
+</tr>
+<tr>
+<td>layout_constraintCircleRadius</td>
+<td>圆的半径</td>
+</tr>
+<tr>
+<td>layout_constraintCircleAngle</td>
+<td>角度</td>
+</tr>
+</tbody></table>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonB&quot;</span> </span></span><br><span class="line"><span class="tag">   <span class="attr">app:layout_constraintCircle</span>=<span class="string">&quot;@+id/buttonA&quot;</span></span></span><br><span class="line"><span class="tag">   <span class="attr">app:layout_constraintCircleRadius</span>=<span class="string">&quot;100dp&quot;</span></span></span><br><span class="line"><span class="tag">   <span class="attr">app:layout_constraintCircleAngle</span>=<span class="string">&quot;45&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="2-5-通过可见性控制View"><a href="#2-5-通过可见性控制View" class="headerlink" title="2.5 通过可见性控制View"></a>2.5 通过可见性控制View</h5><center>
+    <img src="../images/constraint/constraint_visibility_behavior.jpeg" width="400"/>
+</center>
+
+<h5 id="2-6-通过分辨率约束View"><a href="#2-6-通过分辨率约束View" class="headerlink" title="2.6 通过分辨率约束View"></a>2.6 通过分辨率约束View</h5><table>
+<thead>
+<tr>
+<th>约束属性</th>
+<th>描述</th>
+<th>约束属性</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>android:minWidth</td>
+<td></td>
+<td>android:minHeight</td>
+<td></td>
+</tr>
+<tr>
+<td>android:maxWidth</td>
+<td></td>
+<td>android:maxHeight</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>2.6.1 百分比</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonA&quot;</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:layout_constraintWidth_default</span>=<span class="string">&quot;percent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:layout_constraintWidth_percent</span>=<span class="string">&quot;0.5&quot;</span></span></span><br><span class="line"><span class="tag">/&gt;</span></span><br></pre></td></tr></table></figure>
+<p><code>app:layout_constraintWidth_default</code>可以取的值包括：</p>
+<ul>
+<li>spread</li>
+<li>percent</li>
+<li>wrap</li>
+</ul>
+<p>在ConstraintLayout-1.1之后，使用<code>app:layout_constrainedWidth=&quot;true&quot;</code>替代<code>app:layout_constraintWidth_default=&quot;wrap&quot;</code></p>
+<p>2.6.2 比率<br>宽高一比一：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonA&quot;</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:layout_constraintDimensionRatio</span>=<span class="string">&quot;1:1&quot;</span></span></span><br><span class="line"><span class="tag">/&gt;</span></span><br></pre></td></tr></table></figure>
+<p>指定一条边符合约束比率：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintDimensionRatio</span>=<span class="string">&quot;H,16:9&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="2-7-通过链⛓约束View"><a href="#2-7-通过链⛓约束View" class="headerlink" title="2.7 通过链⛓约束View"></a>2.7 通过链⛓约束View</h5><table>
+    <tr>
+        <td><img src="../images/constraint/constraint_chain.png" width="300"/></td>
+        <td><img src="../images/constraint/constraint_chain_head.png" width="300"/></td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <td>图示</td>
+        <td>Style</td>
+    </tr>
+    <tr>
+        <td><img src="../images/constraint/constraint_chain_spread.png" width="250"/></td>
+        <td> _chainStyle="spread" </td>
+    </tr>
+     <tr>
+      <td><img src="../images/constraint/constraint_chain_spread_inside.png" width="250"/></td>
+      <td> _chainStyle="spread_inside" </td>
+     </tr>
+     <tr>
+     <td><img src="../images/constraint/constraint_chain_weight.png" width="250"/></td>
+     <td> _chainStyle="spread" <br> _weight="1" </td>
+     </tr>
+     <tr>
+     <td><img src="../images/constraint/constraint_chain_packed.png" width="250"/></td>
+     <td> _chainStyle="packed" </td>
+     </tr>
+     <tr>
+     <td><img src="../images/constraint/constraint_chain_bias.png" width="250"/></td>
+     <td> _chainStyle="packed" <br> _bias="0.3"</td>
+     </tr>
+</table>
+
+<h5 id="2-8-Barrier"><a href="#2-8-Barrier" class="headerlink" title="2.8 Barrier"></a>2.8 Barrier</h5><p>将多个View的某一边的极端值作为约束：</p>
+<table>
+    <tr>
+        <td><img src="../images/constraint/constraint_barrier_start.png" width="300"/></td>
+        <td><img src="../images/constraint/constraint_barrier_end.png" width="300"/></td>
+    </tr>
+</table>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.Barrier</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:id</span>=<span class="string">&quot;@+id/barrier&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">app:barrierDirection</span>=<span class="string">&quot;start/end&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">app:constraint_referenced_ids</span>=<span class="string">&quot;button1,button2&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="2-9-Group分组约束"><a href="#2-9-Group分组约束" class="headerlink" title="2.9 Group分组约束"></a>2.9 Group分组约束</h5><p>将多个View作为一个组一起控制：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.Group</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:id</span>=<span class="string">&quot;@+id/group&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:visibility</span>=<span class="string">&quot;visible&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">app:constraint_referenced_ids</span>=<span class="string">&quot;button4,button9&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>无法通过group设置点击事件<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">group.referencedIds.forEach &#123; id -&gt;</span><br><span class="line">     view.findViewById(id).setOnClickListener &#123;</span><br><span class="line">        <span class="comment">//do something</span></span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h5 id="2-10-Placeholder占位约束"><a href="#2-10-Placeholder占位约束" class="headerlink" title="2.10 Placeholder占位约束"></a>2.10 Placeholder占位约束</h5><p>&ensp;&ensp;&ensp;&ensp;Placeholder是一个虚拟的占位符View，界面上其他存在的View可以通过<code>placeholder.setContentId(R.id.xxx)</code>将自己的位置设置到placeholder的位置，原位置视图将不可见。<br>&ensp;&ensp;&ensp;&ensp;我们可以使用Placeholder搭建一个布局模板，include到其他布局当中，来填充模板中的视图，这将使所有的界面有一个通用的模板。</p>
+<h5 id="2-11-Guideline引导线约束"><a href="#2-11-Guideline引导线约束" class="headerlink" title="2.11 Guideline引导线约束"></a>2.11 Guideline引导线约束</h5><p>Guideline只能在ConstraintLayout中使用，在水平或垂直方向设置辅助布局的不可见线条。</p>
+<table>
+<thead>
+<tr>
+<th>约束属性</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>layout_constraintGuide_begin</td>
+<td>距布局的左边或者上边x处设置引导线</td>
+</tr>
+<tr>
+<td>layout_constraintGuide_end</td>
+<td>距布局右边或下面x处设置引导线</td>
+</tr>
+<tr>
+<td>layout_constraintGuide_percent</td>
+<td>宽或高的百分之x处设置引导线</td>
+</tr>
+</tbody></table>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.Guideline</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">&quot;@+id/guideline&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">app:layout_constraintGuide_begin</span>=<span class="string">&quot;100dp&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:text</span>=<span class="string">&quot;Button&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">&quot;@+id/button&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;@+id/guideline&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;16dp&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="三、原理"><a href="#三、原理" class="headerlink" title="三、原理"></a>三、原理</h4><h5 id="3-1-解决约束问题"><a href="#3-1-解决约束问题" class="headerlink" title="3.1 解决约束问题"></a>3.1 解决约束问题</h5><p>3.1.1 定义变量</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x[1], x[2], ... x[n]</span><br></pre></td></tr></table></figure>
+<p>3.1.2 定义约束问题：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a[1]x[1] + ... + a[n]x[n] = b</span><br><span class="line">a[1]x[1] + ... + a[n]x[n] &lt;= b</span><br><span class="line">a[1]x[1] + ... + a[n]x[n] &gt;= b</span><br></pre></td></tr></table></figure>
+<p>3.2.3 计算约束方程<br>食火鸡算法：食火鸡是一种生活在新几内亚热带雨林中的鸟类，以水果为食。同时它也是一种解决线性方程和线性不等式的算法。1990年在华盛顿大学被证明和发现。线性方程非常适合用于表示用户界面中视图的位置、大小、与其他视图的关系。</p>
+<h5 id="3-2-个人理解："><a href="#3-2-个人理解：" class="headerlink" title="3.2 个人理解："></a>3.2 个人理解：</h5><p>定义变量 -&gt; 声明View对象<br>定义约束问题 -&gt; 建立View之间的约束关系<br>计算约束方程 -&gt; 计算视图的大小、坐标  </p>
+<h4 id="四、参考文档"><a href="#四、参考文档" class="headerlink" title="四、参考文档"></a>四、参考文档</h4><p><a target="_blank" rel="noopener" href="https://developer.android.com/reference/androidx/constraintlayout/widget/ConstraintLayout">1.官方文档</a><br><a target="_blank" rel="noopener" href="https://constraintlayout.com/layouts/">2.基本使用</a><br><a target="_blank" rel="noopener" href="https://biaomingzhong.github.io/2017/constraintlayout-basics-chains-2/">3.基本使用-译文</a><br><a target="_blank" rel="noopener" href="https://wiresareobsolete.com/2016/07/constraintlayout-part-1/">4.ConstraintLayout, Inside and Out: Part 1</a><br><a target="_blank" rel="noopener" href="https://wiresareobsolete.com/2016/07/constraintlayout-part-2/">5.ConstraintLayout, Inside and Out: Part 2</a><br><a target="_blank" rel="noopener" href="https://constraints.cs.washington.edu/cassowary/cassowary-tr.pdf">6.线性约束解决算法</a><br><a target="_blank" rel="noopener" href="https://cassowary.readthedocs.io/en/latest/topics/theory.html">7.解决约束</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/cpu-cache-overview.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1297,487 +1807,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/file-format-elf.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/file-format-elf.html" class="post-title-link" itemprop="url">ELF文件的结构</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-30 15:22:49" itemprop="dateCreated datePublished" datetime="2021-08-30T15:22:49+08:00">2021-08-30</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>6.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>6 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>代码是解决问题的工具。当通过编码方式解决一个问题时，通常有如下步骤：</p>
-<ul>
-<li>定义问题</li>
-<li>设计解决方案</li>
-<li>编码实现方案</li>
-<li>测试程序</li>
-</ul>
-<p>编码实现通常是我们利用计算机高级语言书写的，符合一定逻辑的程序代码，这种含逻辑的代码计算机是无法理解的，它能理解的只是一条条由0和1组成的指令即机器语言。所以这就涉及从高级语言到机器语言的翻译和转换过程，处理这个过程的程序叫<strong>编译器</strong>。</p>
-<p>编译器这个程序，很庞大很复杂，为了让它简洁，好控制，我们把它拆成四个部分：</p>
-<ul>
-<li>预处理器</li>
-<li>编译器</li>
-<li>汇编器</li>
-<li>链接器</li>
-</ul>
-<p>每一个阶段基本上都是在为下一个阶段做准备，它的过程如下图所示：</p>
-<center>
-    <img src="../images/GCC_CompilationProcess.png" width="500"/>
-</center>
-
-<p>预处理器（Preprocessor）处理代码的过程叫预处理阶段，它所做的工作包括：</p>
-<ul>
-<li>#define宏定义展开</li>
-<li>处理条件编译指令</li>
-<li>处理#include指令</li>
-<li>删除注释</li>
-<li>添加行号</li>
-<li>保留#pragma指令</li>
-</ul>
-<p>编译器（Compiler）处理代码的过程叫编译，它主要是将上一步的产物转换成汇编代码，它的工作内容包括：</p>
-<ul>
-<li>词法分析</li>
-<li>语法分析</li>
-<li>语义分析</li>
-<li>优化</li>
-</ul>
-<p>汇编器（Assembler）处理代码的过程叫汇编过程，它主要将汇编代码转换成二进制的机器码</p>
-<ul>
-<li>汇编码到机器码的翻译</li>
-</ul>
-<p>链接器（Linker）处理代码的过程叫链接过程，多个文件合并成一个文件</p>
-<ul>
-<li>空间与地址分配-相同部分合并</li>
-<li>符号解析和重定位-合并后位置（偏移量）调整</li>
-</ul>
-<p>综上可知，目标文件是程序未链接前的一个中间文件。目标文件内容的存储方式符合ELF文件标准，所以他是一种特殊的ELF文件。</p>
-<h4 id="二、文件结构解析"><a href="#二、文件结构解析" class="headerlink" title="二、文件结构解析"></a>二、文件结构解析</h4><p>目标文件其实是ELF文件的一种，常见的ELF文件还有.so和.oat文件等。ELF文件存在两种观察角度，分别是编译角度和运行角度。编译角度是指，在代码编译阶段的存储格式。运行角度是指，文件被加载进内存时的存储格式。<br>两个角度看到的结构略有差异。如图：</p>
-<center>
-    <img src="../images/elf_format_overview.jpeg" width="500"/>
-</center>
-
-<p>从图中可以得到这样一些信息：<br>1、Program Header Table对于编译视图是可选的，因为它只在程序被加载进内存时使用到。Section Header Table对于执行视图是可选的。<br>2、编译视图是以section为组织单位，执行视图是以segment为组织单位（多个section会被映射到同一个segment）。</p>
-<p>下面介绍一些重要的结构。</p>
-<h5 id="ELF-Header-文件的总体结构"><a href="#ELF-Header-文件的总体结构" class="headerlink" title="ELF Header-文件的总体结构"></a>ELF Header-文件的总体结构</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#define EI_NIDENT 16</span><br><span class="line">typedef struct &#123;</span><br><span class="line">    unsigned char e_ident[EI_NIDENT];</span><br><span class="line">    Elf32_Half e_type;               /* 此elf文件的类型见下表  */</span><br><span class="line">    Elf32_Half e_machine;            /* CPU平台架构  */</span><br><span class="line">    Elf32_Word e_version;            /* 此文件的版本  */</span><br><span class="line">    Elf32_Addr e_entry;              /* 加载完该程序后的执行入口  */</span><br><span class="line">    Elf32_Off e_phoff;               /* program header table在文件中的偏移量  */</span><br><span class="line">    Elf32_Off e_shoff;               /* section header table在此文件中的偏移量 */</span><br><span class="line">    Elf32_Word e_flags;              /* processor-specific flags associated with the file */</span><br><span class="line">    Elf32_Half e_ehsize;             /* the ELF header&#x27;s size in bytes. */</span><br><span class="line">    Elf32_Half e_phentsize;          /* program-header-table数组中一个元素的大小 */</span><br><span class="line">    Elf32_Half e_phnum;              /* program-header-table数组元素的个数 */</span><br><span class="line">    Elf32_Half e_shentsize;          /* section header table数组中一个元素的大小 */</span><br><span class="line">    Elf32_Half e_shnum;              /* section header table包含的元素个数 */</span><br><span class="line">    Elf32_Half e_shstrndx;           /* the section header table index of the entry associated with the section name string table. */</span><br><span class="line"> &#125; Elf32_Ehdr;</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>文件类型</th>
-<th>类型描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>ET_NONE</td>
-<td>未知类型。这个标记表明文件类型不确定，或者还未定义。</td>
-</tr>
-<tr>
-<td>ET_REL</td>
-<td>重定位文件。 ELF 类型标记为 relocatable 意味着该文件被标记为了一段可重定位的代码，有时也称为目标文件。可重定位 目标文件通常是还未被链接到可执行程序的一段位置独立的代码 （position independent code）。 在编译完代码之后通常可以看到一 个.o 格式的文件， 这种文件包含了创建可执行文件所需要的代码 和数据。</td>
-</tr>
-<tr>
-<td>ET_EXEC</td>
-<td>可执行文件。ELF 类型为 executable，表明这个文件被标 记为可执行文件。这种类型的文件也称为程序，是一个进程开始执 行的入口。</td>
-</tr>
-<tr>
-<td>ET_DYN</td>
-<td>共享目标文件。ELF 类型为 dynamic，意味着该文件被标记 为了一个动态的可链接的目标文件，也称为共享库。这类共享库会在 程序运行时被装载并链接到程序的进程镜像中。</td>
-</tr>
-<tr>
-<td>ET_CORE</td>
-<td>核心文件。在程序崩溃或者进程传递了一个 SIGSEGV 信 号（分段违规）时，会在核心文件中记录整个进程的镜像信息。可以 使用 GDB 读取这类文件来辅助调试并查找程序崩溃的原因。</td>
-</tr>
-</tbody></table>
-<blockquote>
-<p>file /bin/bash     //executable<br>file /xxx/xx.so   //shared object</p>
-</blockquote>
-<h5 id="Program-Header-Table"><a href="#Program-Header-Table" class="headerlink" title="Program Header Table"></a>Program Header Table</h5><p>程序装载时，根据此结构的信息对文件进行分段（segment）。描述了磁盘上可执行文件的内存布局以及如何映射到内存中。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">   uint32_t   p_type;   /* 此元素描述的是哪种segment，以及如何解析  */</span><br><span class="line">   Elf32_Off  p_offset; /* segment首字节在文件中的偏移值  */</span><br><span class="line">   Elf32_Addr p_vaddr;  /* 应该加载到内存中的哪个虚拟地址中  */</span><br><span class="line">   Elf32_Addr p_paddr;  /* 相关的物理地址，BSD中为0  */</span><br><span class="line">   uint32_t   p_filesz; /* 文件的字节数  */</span><br><span class="line">   uint32_t   p_memsz;  /* 加载到内存中的字节数  */</span><br><span class="line">   uint32_t   p_flags;  /* segment类型标志位  */</span><br><span class="line">   uint32_t   p_align;  /* 内存对齐  */</span><br><span class="line">&#125; Elf32_Phdr;</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>p_flags</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>PF_X</td>
-<td>An executable segment.</td>
-</tr>
-<tr>
-<td>PF_W</td>
-<td>A writable segment.</td>
-</tr>
-<tr>
-<td>PF_R</td>
-<td>A readable segment.</td>
-</tr>
-</tbody></table>
-<h5 id="Section-Header-Table"><a href="#Section-Header-Table" class="headerlink" title="Section Header Table"></a>Section Header Table</h5><p>用于定位文件中所有的section，主要用于链接和调试，没有Section Header Table程序仍然可以正常运行，因为它没有对内存布局进行描述，它是一个元素为Elf32_Shdr的数组结构。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">typedef struct</span><br><span class="line">&#123;</span><br><span class="line">	Elf32_Word sh_name;      /* Section name (string tbl index)   */</span><br><span class="line">	Elf32_Word sh_type;      /* Section type                      */</span><br><span class="line">	Elf32_Word sh_flags;     /* Section flags                     */</span><br><span class="line">	Elf32_Addr sh_addr;      /* Section virtual addr at execution */</span><br><span class="line">	Elf32_Off sh_offset;     /* Section file offset               */</span><br><span class="line">	Elf32_Word sh_size;      /* Section size in bytes             */</span><br><span class="line">	Elf32_Word sh_link;      /* Link to another section           */</span><br><span class="line">	Elf32_Word sh_info;      /* Additional section information    */</span><br><span class="line">	Elf32_Word sh_addralign; /* Section alignment                 */</span><br><span class="line">	Elf32_Word sh_entsize;   /* Entry size if section holds table */</span><br><span class="line">&#125; Elf32_Shdr;</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>Section type</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>SHT_NULL</td>
-<td>This value marks the section header as inactive. It does not have an associated section.  Other members of the section header have undefined values.</td>
-</tr>
-<tr>
-<td>SHT_PROGBITS</td>
-<td>This section holds information defined by the program, whose format and meaning are determined solely by the program.</td>
-</tr>
-<tr>
-<td>SHT_SYMTAB</td>
-<td>This section holds a symbol table.  Typically, SHT_SYMTAB provides symbols for link editing, though it may also be used for dynamic linking.  As a complete symbol table, it may contain many symbols unnecessary for dynamic linking.  An object file can also contain a SHT_DYNSYM section.</td>
-</tr>
-<tr>
-<td>SHT_STRTAB</td>
-<td>This section holds a string table.  An object file may have multiple string table sections.</td>
-</tr>
-<tr>
-<td>SHT_RELA</td>
-<td>This section holds relocation entries with explicit addends, such as type Elf32_Rela for the 32-bit class of object files.  An object may have multiple relocation sections.</td>
-</tr>
-<tr>
-<td>SHT_HASH</td>
-<td>This section holds a symbol hash table.  An object participating in dynamic linking must contain a symbol hash table.  An object file may have only one hash table.</td>
-</tr>
-<tr>
-<td>SHT_DYNAMIC</td>
-<td>This section holds information for dynamic linking. An object file may have only one dynamic section.</td>
-</tr>
-<tr>
-<td>SHT_NOTE</td>
-<td>This section holds notes (ElfN_Nhdr).</td>
-</tr>
-<tr>
-<td>SHT_NOBITS</td>
-<td>A section of this type occupies no space in the  file but otherwise resembles SHT_PROGBITS. Although this section contains no bytes, the sh_offset member contains the conceptual file offset.</td>
-</tr>
-<tr>
-<td>SHT_REL</td>
-<td>This section holds relocation offsets without explicit addends, such as type Elf32_Rel for the 32-bit class of object files.  An object file may have multiple relocation sections.</td>
-</tr>
-<tr>
-<td>SHT_SHLIB</td>
-<td>This section is reserved but has unspecified semantics.</td>
-</tr>
-<tr>
-<td>SHT_DYNSYM</td>
-<td>This section holds a minimal set of dynamic linking symbols.  An object file can also contain a SHT_SYMTAB section.</td>
-</tr>
-<tr>
-<td>SHT_LOPROC, SHT_HIPROC</td>
-<td>Values in the inclusive range [SHT_LOPROC, SHT_HIPROC] are reserved for processor-specific semantics.</td>
-</tr>
-<tr>
-<td>SHT_LOUSER</td>
-<td>This value specifies the lower bound of the range of indices reserved for application programs.</td>
-</tr>
-<tr>
-<td>SHT_HIUSER</td>
-<td>This value specifies the upper bound of the range of indices reserved for application programs. Section types between SHT_LOUSER and SHT_HIUSER may be used by the application, without conflicting with current or future system-defined section types.</td>
-</tr>
-</tbody></table>
-<h5 id="字符串表和符号表（String-and-symbol-tables）"><a href="#字符串表和符号表（String-and-symbol-tables）" class="headerlink" title="字符串表和符号表（String and symbol tables）"></a>字符串表和符号表（String and symbol tables）</h5><p>存放scetion的名字，以及符号信息。其他结构通过index访问此结构中的字符串信息。符号表保存了用于定位符号引用的信息。它是以下结构的数组：</p>
-<center>
-    <img src="../images/elf_string_table.jpeg" width="500"/>
-</center>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">       uint32_t      st_name;</span><br><span class="line">       Elf32_Addr    st_value;</span><br><span class="line">       uint32_t      st_size;</span><br><span class="line">       unsigned char st_info;</span><br><span class="line">       unsigned char st_other;</span><br><span class="line">       uint16_t      st_shndx;</span><br><span class="line">&#125; Elf32_Sym;</span><br></pre></td></tr></table></figure>
-
-
-<h5 id="Relocation-entries-Rel-amp-Rela"><a href="#Relocation-entries-Rel-amp-Rela" class="headerlink" title="Relocation entries (Rel &amp; Rela)"></a>Relocation entries (Rel &amp; Rela)</h5><p>重定位是连接符号引用（函数的名字）和符号定义（函数的定义、函数的实现）的过程。重定位文件必须包含如何修改section内容的信息，来让执行文件或共享目标文件正确的调用外部函数。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr      r_offset;</span><br><span class="line">        Elf32_Word      r_info;</span><br><span class="line">&#125; Elf32_Rel;</span><br><span class="line"> </span><br><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr      r_offset;</span><br><span class="line">        Elf32_Word      r_info;</span><br><span class="line">        Elf32_Sword     r_addend;</span><br><span class="line">&#125; Elf32_Rela;</span><br></pre></td></tr></table></figure>
-<p>r_offset：<br>对于重定位文件来说，此值表示从section的开始到被修改值在section中的偏移量。<br>对于执行文件和共享库文件来说，此值表示需要被重定位的虚拟地址。</p>
-<p>r_info：<br>符号表的index和重定位的类型。</p>
-<p>r_addend：<br>用于计算重定位字段的值。</p>
-<h5 id="Dynamic-tags（Dyn）"><a href="#Dynamic-tags（Dyn）" class="headerlink" title="Dynamic tags（Dyn）"></a>Dynamic tags（Dyn）</h5><p><code>.dynamic</code>这个section存储一些包含动态链接信息的结构</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Sword    d_tag;</span><br><span class="line">        union &#123;</span><br><span class="line">            Elf32_Word d_val;</span><br><span class="line">            Elf32_Addr d_ptr;</span><br><span class="line">        &#125; d_un;</span><br><span class="line"> &#125; Elf32_Dyn;</span><br><span class="line">           </span><br><span class="line">extern Elf64_Dyn _DYNAMIC[];</span><br></pre></td></tr></table></figure>
-
-<h4 id="一些图示"><a href="#一些图示" class="headerlink" title="一些图示"></a>一些图示</h4><center>
-    <img src="../images/file/elf_file_format-overview.jpeg" width="500"/>
-</center>
-
-<center>
-    <img src="../images/file/elf-64-bit-overview.png" width="500"/>
-</center>
-
-<h4 id="三、参考链接"><a href="#三、参考链接" class="headerlink" title="三、参考链接"></a>三、参考链接</h4><p><a target="_blank" rel="noopener" href="https://www.man7.org/linux/man-pages/man5/elf.5.html">Linux manual page</a><br><a target="_blank" rel="noopener" href="https://www.codetd.com/article/489055">The structure of an ARM ELF image</a><br><a target="_blank" rel="noopener" href="https://www3.ntu.edu.sg/home/ehchua/programming/cpp/gcc_make.html">Compiling, Linking and Building</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/file-format-class.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/file-format-class.html" class="post-title-link" itemprop="url">Class文件的存储格式</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-29 16:06:06" itemprop="dateCreated datePublished" datetime="2021-08-29T16:06:06+08:00">2021-08-29</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>5.6k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>5 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="一、Class文件结构概览"><a href="#一、Class文件结构概览" class="headerlink" title="一、Class文件结构概览"></a>一、Class文件结构概览</h4><h5 id="1-1-概述"><a href="#1-1-概述" class="headerlink" title="1.1 概述"></a>1.1 概述</h5><ul>
-<li>每一个class文件包含一个类或者接口的定义</li>
-<li>以大端方式存储</li>
-<li>u1、u2、u4分别表示1、2、4个字节  </li>
-</ul>
-<h5 id="1-2-数据结构"><a href="#1-2-数据结构" class="headerlink" title="1.2 数据结构"></a>1.2 数据结构</h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">ClassFile &#123;</span><br><span class="line">    u4             magic;</span><br><span class="line">    u2             minor_version;</span><br><span class="line">    u2             major_version;</span><br><span class="line">    u2             constant_pool_count;</span><br><span class="line">    cp_info        constant_pool[constant_pool_count<span class="number">-1</span>];</span><br><span class="line">    u2             access_flags;</span><br><span class="line">    u2             this_class;</span><br><span class="line">    u2             super_class;</span><br><span class="line">    u2             interfaces_count;</span><br><span class="line">    u2             interfaces[interfaces_count];</span><br><span class="line">    u2             fields_count;</span><br><span class="line">    field_info     fields[fields_count];</span><br><span class="line">    u2             methods_count;</span><br><span class="line">    method_info    methods[methods_count];</span><br><span class="line">    u2             attributes_count;</span><br><span class="line">    attribute_info attributes[attributes_count];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="1-3-图形化表示"><a href="#1-3-图形化表示" class="headerlink" title="1.3 图形化表示"></a>1.3 图形化表示</h5><center>
-    <img src="../images/class_file_format.jpeg" width="400"/>
-</center>
-
-<h5 id="1-4-示例"><a href="#1-4-示例" class="headerlink" title="1.4 示例"></a>1.4 示例</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BMWCar</span> <span class="keyword">implements</span> <span class="title">Car</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BMWCar</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        name = <span class="string">&quot;宝马&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;BMW car drive.&quot;</span> + name);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line">Last modified 2017-11-10; size 644 bytes</span><br><span class="line">  MD5 checksum ac6d7477d45479490e4ea3f660b1dcdd</span><br><span class="line">  Compiled from &quot;BMWCar.java&quot;</span><br><span class="line">public class BMWCar implements Car</span><br><span class="line">  minor version: 0</span><br><span class="line">  major version: 52</span><br><span class="line">  flags: ACC_PUBLIC, ACC_SUPER</span><br><span class="line">Constant pool:</span><br><span class="line">   #1 = Methodref          #12.#23        // java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #2 = String             #24            // 宝马</span><br><span class="line">   #3 = Fieldref           #11.#25        // BMWCar.name:Ljava/lang/String;</span><br><span class="line">   #4 = Fieldref           #26.#27        // java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">   #5 = Class              #28            // java/lang/StringBuilder</span><br><span class="line">   #6 = Methodref          #5.#23         // java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #7 = String             #29            // BMW car drive.</span><br><span class="line">   #8 = Methodref          #5.#30         // java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">   #9 = Methodref          #5.#31         // java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">  #10 = Methodref          #32.#33        // java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">  #11 = Class              #34            // BMWCar</span><br><span class="line">  #12 = Class              #35            // java/lang/Object</span><br><span class="line">  #13 = Class              #36            // Car</span><br><span class="line">  #14 = Utf8               name</span><br><span class="line">  #15 = Utf8               Ljava/lang/String;</span><br><span class="line">  #16 = Utf8               &lt;init&gt;</span><br><span class="line">  #17 = Utf8               ()V</span><br><span class="line">  #18 = Utf8               Code</span><br><span class="line">  #19 = Utf8               LineNumberTable</span><br><span class="line">  #20 = Utf8               drive</span><br><span class="line">  #21 = Utf8               SourceFile</span><br><span class="line">  #22 = Utf8               BMWCar.java</span><br><span class="line">  #23 = NameAndType        #16:#17        // &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">  #24 = Utf8               宝马</span><br><span class="line">  #25 = NameAndType        #14:#15        // name:Ljava/lang/String;</span><br><span class="line">  #26 = Class              #37            // java/lang/System</span><br><span class="line">  #27 = NameAndType        #38:#39        // out:Ljava/io/PrintStream;</span><br><span class="line">  #28 = Utf8               java/lang/StringBuilder</span><br><span class="line">  #29 = Utf8               BMW car drive.</span><br><span class="line">  #30 = NameAndType        #40:#41        // append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">  #31 = NameAndType        #42:#43        // toString:()Ljava/lang/String;</span><br><span class="line">  #32 = Class              #44            // java/io/PrintStream</span><br><span class="line">  #33 = NameAndType        #45:#46        // println:(Ljava/lang/String;)V</span><br><span class="line">  #34 = Utf8               BMWCar</span><br><span class="line">  #35 = Utf8               java/lang/Object</span><br><span class="line">  #36 = Utf8               Car</span><br><span class="line">  #37 = Utf8               java/lang/System</span><br><span class="line">  #38 = Utf8               out</span><br><span class="line">  #39 = Utf8               Ljava/io/PrintStream;</span><br><span class="line">  #40 = Utf8               append</span><br><span class="line">  #41 = Utf8               (Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">  #42 = Utf8               toString</span><br><span class="line">  #43 = Utf8               ()Ljava/lang/String;</span><br><span class="line">  #44 = Utf8               java/io/PrintStream</span><br><span class="line">  #45 = Utf8               println</span><br><span class="line">  #46 = Utf8               (Ljava/lang/String;)V</span><br><span class="line">&#123;</span><br><span class="line">  public BMWCar();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=1, args_size=1</span><br><span class="line">         0: aload_0</span><br><span class="line">         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         4: aload_0</span><br><span class="line">         5: ldc           #2                  // String 宝马</span><br><span class="line">         7: putfield      #3                  // Field name:Ljava/lang/String;</span><br><span class="line">        10: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 6: 0</span><br><span class="line">        line 7: 4</span><br><span class="line">        line 8: 10</span><br><span class="line"></span><br><span class="line">  public void drive();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=3, locals=1, args_size=1</span><br><span class="line">         0: getstatic     #4                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">         3: new           #5                  // class java/lang/StringBuilder</span><br><span class="line">         6: dup</span><br><span class="line">         7: invokespecial #6                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">        10: ldc           #7                  // String BMW car drive.</span><br><span class="line">        12: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">        15: aload_0</span><br><span class="line">        16: getfield      #3                  // Field name:Ljava/lang/String;</span><br><span class="line">        19: invokevirtual #8                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;</span><br><span class="line">        22: invokevirtual #9                  // Method java/lang/StringBuilder.toString:()Ljava/lang/String;</span><br><span class="line">        25: invokevirtual #10                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">        28: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 12: 0</span><br><span class="line">        line 13: 28</span><br><span class="line">&#125;</span><br><span class="line">SourceFile: &quot;BMWCar.java&quot;</span><br></pre></td></tr></table></figure>
-
-<h4 id="二、常量池的结构"><a href="#二、常量池的结构" class="headerlink" title="二、常量池的结构"></a>二、常量池的结构</h4><p>常量池是一个cp_info的数组：通过tag定位到具体的数据结构，再通过数据结构的表示，判断下面几个字节怎么解析。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cp_info &#123;</span><br><span class="line">    u1 tag; //cp-info的类型</span><br><span class="line">    u1 info[];//类型对应的数组</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>tag</th>
-<th>info</th>
-<th>数据结构</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>CONSTANT_Utf8_info</td>
-<td>CONSTANT_NameAndType_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 name_index;<br>    &nbsp;u2 descriptor_index;<br>}</td>
-<td>UTF-8编码的字符串</td>
-</tr>
-<tr>
-<td>3</td>
-<td>CONSTANT_Integer_info</td>
-<td>CONSTANT_Integer_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u4 bytes;<br>}</td>
-<td>整形字面量，boolean、byte、char、short等类型都用int存放</td>
-</tr>
-<tr>
-<td>4</td>
-<td>CONSTANT_Float_info</td>
-<td>CONSTANT_Float_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u4 bytes;<br>}</td>
-<td>浮点型字面量</td>
-</tr>
-<tr>
-<td>5</td>
-<td>CONSTANT_Long_info</td>
-<td>CONSTANT_Long_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u4 high_bytes;<br>    &nbsp;u4 low_bytes;<br>}</td>
-<td>浮点型字面量</td>
-</tr>
-<tr>
-<td>6</td>
-<td>CONSTANT_Double_info</td>
-<td>CONSTANT_Long_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u4 high_bytes;<br>    &nbsp;u4 low_bytes;<br>}</td>
-<td>双精度浮点型字面量</td>
-</tr>
-<tr>
-<td>7</td>
-<td>CONSTANT_Class_info</td>
-<td>CONSTANT_Class_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 name_index;<br>}</td>
-<td>类或接口的符号引用</td>
-</tr>
-<tr>
-<td>8</td>
-<td>CONSTANT_String_info</td>
-<td>CONSTANT_String_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 string_index;<br>}</td>
-<td>字符串类型字面量</td>
-</tr>
-<tr>
-<td>9</td>
-<td>CONSTANT_Fieldref_info</td>
-<td>CONSTANT_Fieldref_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 class_index;//索引值<br>    &nbsp;u2 name_and_type_index;<br>}</td>
-<td>字段的符号引用</td>
-</tr>
-<tr>
-<td>10</td>
-<td>CONSTANT_Methodref_info</td>
-<td>CONSTANT_Methodref_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 class_index;;//索引值<br>    &nbsp;u2 name_and_type_index;<br>}</td>
-<td>类中方法的符号引用</td>
-</tr>
-<tr>
-<td>11</td>
-<td>CONSTANT_InterfaceMethodref</td>
-<td>CONSTANT_InterfaceMethodref_info {<br>    &nbsp;u1 tag;<br>    &nbsp;u2 class_index;;//索引值<br>    &nbsp;u2 name_and_type_index;<br>}</td>
-<td>接口中方法的符号引用</td>
-</tr>
-<tr>
-<td>12</td>
-<td>CONSTANT_NameAndType_info</td>
-<td>CONSTANT_NameAndType_info {<br>    &nbsp;u1 tag;<br>    &nbsp;&nbsp;u2 name_index;<br>    &nbsp;&nbsp;u2 descriptor_index;<br>}</td>
-<td>接口中方法的符号引用</td>
-</tr>
-</tbody></table>
-<h4 id="三、字段的结构"><a href="#三、字段的结构" class="headerlink" title="三、字段的结构"></a>三、字段的结构</h4><p>每一个字段用一个 field_info的结构体表示</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">field_info &#123;</span><br><span class="line">    u2             access_flags;</span><br><span class="line">    u2             name_index;//指向常量池的index，表示字段名</span><br><span class="line">    u2             descriptor_index;//指向常量池的inde，字段的描述符</span><br><span class="line">    u2             attributes_count;</span><br><span class="line">    attribute_info attributes[attributes_count];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="四、方法的结构"><a href="#四、方法的结构" class="headerlink" title="四、方法的结构"></a>四、方法的结构</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">method_info &#123;</span><br><span class="line">    u2             access_flags;</span><br><span class="line">    u2             name_index;</span><br><span class="line">    u2             descriptor_index;</span><br><span class="line">    u2             attributes_count;</span><br><span class="line">    attribute_info attributes[attributes_count];//Code字节码信息</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="五、属性的结构"><a href="#五、属性的结构" class="headerlink" title="五、属性的结构"></a>五、属性的结构</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">attribute_info &#123;</span><br><span class="line">    u2 attribute_name_index;</span><br><span class="line">    u4 attribute_length;</span><br><span class="line">    u1 info[attribute_length];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="六、参考链接"><a href="#六、参考链接" class="headerlink" title="六、参考链接"></a>六、参考链接</h4><p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4">Chapter 4. The class File Format</a>  </p>
-<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/ae3f860499aa">Java Class文件结构解析</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1888,13 +1917,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">120k</span>
+    <span title="站点总字数">123k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">1:50</span>
+    <span title="站点阅读时长">1:52</span>
 </div>
 
         

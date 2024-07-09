@@ -20,6 +20,100 @@
 ]]></content>
   </entry>
   <entry>
+    <title>Admob的初始化过程</title>
+    <url>/admob-init-performance-test.html</url>
+    <content><![CDATA[<p>在接入Google Admob时，依据官方文档 或 依据开发习惯，我们一般先对Admob SDK进行初始化，然后进行广告加载：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// first init the admob sdk</span></span><br><span class="line">MobileAds.initialize(context) &#123;</span><br><span class="line">    <span class="comment">//init successful</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//second load Ad</span></span><br><span class="line"><span class="keyword">val</span> adRequest = AdRequest.Builder().build()</span><br><span class="line">adView.loadAd(adRequest)</span><br></pre></td></tr></table></figure>
+
+<p>那么，多思考一下，我们有个疑问：</p>
+<h4 id="1、一定要先初始化，才能加载广告吗❓"><a href="#1、一定要先初始化，才能加载广告吗❓" class="headerlink" title="1、一定要先初始化，才能加载广告吗❓"></a>1、一定要先初始化，才能加载广告吗❓</h4><p>实验设计：不执行初始化操作，直接请求广告。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> adRequest = AdRequest.Builder().build()</span><br><span class="line">adView.loadAd(adRequest)</span><br></pre></td></tr></table></figure>
+
+<p>实验结论：不初始化SDK也能成功加载到广告。</p>
+<h4 id="2、为什么不初始化也能加载广告呢❓"><a href="#2、为什么不初始化也能加载广告呢❓" class="headerlink" title="2、为什么不初始化也能加载广告呢❓"></a>2、为什么不初始化也能加载广告呢❓</h4><p>猜想：<br>1、初始化和加载有关联性：加载广告时，发现没有初始化，先进行了初始化，再执行广告加载操作。<br>2、初始化和加载无关联系：加载广告不需要SDK初始化，两者无关联。</p>
+<p>设：广告初始化耗时m毫秒，广告加载耗时n毫秒，总耗时m+n毫秒。</p>
+<p>实验设计：<br>A组：执行初始化，同时执行广告加载。<br>若初始化和加载有关联性，广告加载时长约等于m+n。<br>若初始化和加载无关联性，广告加载时长约等于n。</p>
+<p>日志输出示例：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">2024-07-06 10:10:06.061 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  call init....</span><br><span class="line">2024-07-06 10:10:06.224 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  start load....</span><br><span class="line">2024-07-06 10:10:07.401 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  after init = 1340</span><br><span class="line">2024-07-06 10:10:08.416 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  onAdLoaded...cost = 2192</span><br></pre></td></tr></table></figure>
+
+<p>初始化耗时 m=1340ms<br>加载耗时 n=2192ms</p>
+<p>B组：延迟10s执行初始化。立即执行广告加载。</p>
+<p>日志输出示例：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">2024-07-06 13:23:42.675 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  start load....</span><br><span class="line">2024-07-06 13:23:43.453 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  call init....</span><br><span class="line">2024-07-06 13:23:46.208 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  onAdLoaded...cost = 3532</span><br><span class="line">2024-07-06 13:23:53.486 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  after init = 24</span><br></pre></td></tr></table></figure>
+
+<p>初始化耗时 m=24ms<br>加载耗时 n=3532ms</p>
+<p>结论：由于广告加载成功后，才调用初始化逻辑，因此初始化时长大幅降低。故：初始化和加载有关联性。</p>
+<h4 id="3、聚合的SDK初始化了吗❓"><a href="#3、聚合的SDK初始化了吗❓" class="headerlink" title="3、聚合的SDK初始化了吗❓"></a>3、聚合的SDK初始化了吗❓</h4><p>实验设计：<br>A：不初始化SDK，加载广告后，打开AdInspector。<br>B：初始化SDK，加载广告后，打开AdInspector。</p>
+<table>
+    <tr>
+        <td><img src="../images/ad/mediator_failure.png" width="70%"/></td>
+        <td><img src="../images/ad/mediator_success.png" width="70%"/></td>
+    </tr>
+</table>
+
+<p>实验结论：不初始化只能加载Admob自身的广告，初始化后可以加载聚合源的广告。</p>
+<h4 id="3、初始化成功后再加载广告-VS-直接加载广告-加载速度的对比"><a href="#3、初始化成功后再加载广告-VS-直接加载广告-加载速度的对比" class="headerlink" title="3、初始化成功后再加载广告 VS 直接加载广告 加载速度的对比"></a>3、初始化成功后再加载广告 VS 直接加载广告 加载速度的对比</h4><p>直接加载：</p>
+<table>
+<thead>
+<tr>
+<th>第一组</th>
+<th>第二组</th>
+<th>第三组</th>
+<th>第四组</th>
+<th>第五组</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2915ms</td>
+<td>1581ms</td>
+<td>1435ms</td>
+<td>1621ms</td>
+<td>1581ms</td>
+</tr>
+</tbody></table>
+<p>初始化后加载：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>第一组</th>
+<th>第二组</th>
+<th>第三组</th>
+<th>第四组</th>
+<th>第五组</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>初始化</td>
+<td>2373ms</td>
+<td>2374</td>
+<td>2463</td>
+<td>2427</td>
+<td>2298</td>
+</tr>
+<tr>
+<td>加载</td>
+<td>1468ms</td>
+<td>1386</td>
+<td>1505</td>
+<td>2498</td>
+<td>1250</td>
+</tr>
+<tr>
+<td>日志总耗时</td>
+<td>3843</td>
+<td>3762</td>
+<td>3970</td>
+<td>4927</td>
+<td>3550</td>
+</tr>
+</tbody></table>
+<p>结论：初始化后才加载广告慢于直接加载广告。</p>
+<h4 id="4、一种开屏广告的优化方案"><a href="#4、一种开屏广告的优化方案" class="headerlink" title="4、一种开屏广告的优化方案"></a>4、一种开屏广告的优化方案</h4><p>不初始化SDK也能加载到Admob广告，且加载速度较快，但是没有参与bidding，价格较低。<br>初始化之后，加载聚合源广告，速度较慢，但经过bidding后，价格会高一点。</p>
+<p>结合两个加载方式，闪屏时段内加载广告，闪屏n秒时长内，加载到bidding类型则展示bidding类型。没加载到，则展示Admob类型。</p>
+]]></content>
+  </entry>
+  <entry>
     <title>Android消息机制</title>
     <url>/android-aosp-event-loop.html</url>
     <content><![CDATA[<hr>
@@ -591,6 +685,25 @@
       <tags>
         <tag>Android</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>android jetpack startup</title>
+    <url>/android-jetpack-startup.html</url>
+    <content><![CDATA[<h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p><a href="https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:startup/">源码</a></p>
+<p>startup库是一个极简启动优化库，可以解决启动中的依赖顺序问题。</p>
+<h4 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h4><p>1.1 实现Initializer接口</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoggerInitializer</span> : <span class="type">Initializer</span>&lt;<span class="type">Logger</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">create</span><span class="params">(context: <span class="type">Context</span>)</span></span>: Logger &#123;</span><br><span class="line">        Logger.<span class="keyword">init</span>(context)</span><br><span class="line">        <span class="keyword">return</span> Logger</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">dependencies</span><span class="params">()</span></span>: List&lt;Class&lt;<span class="keyword">out</span> Initializer&lt;*&gt;&gt;&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> emptyList()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>1.2 AndroidManifest.xml中声明</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">provider</span>&gt;</span></span><br><span class="line">    android:name=&quot;androidx.startup.InitializationProvider&quot;</span><br><span class="line">    android:authorities=&quot;$&#123;applicationId&#125;.androidx-startup&quot;</span><br><span class="line">    android:exported=&quot;false&quot;</span><br><span class="line">    tools:node=&quot;merge&quot;&gt;</span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;me.xxx.demo.LoggerInitializer&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:value</span>=<span class="string">&quot;androidx.startup&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h4><p>1、默认由ContentProvider onCreate中获取AppInitializer<strong>单例</strong><br>2、调用AppInitializer单例的discoverAndInitialize，<strong>解析Manifest</strong>里面的mate<br>3、解析完后放入Set&lt;Class<? extends Initializer<?>&gt;&gt;中<br>4、遍历Set，调用doInitialize进行初始化<br>    4.1 检查循环依赖问题<br>    4.2 找到此项的所有依赖项，递归调用doInitialize<br>    4.3 此项依赖初始化完成</p>
+<h4 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h4><ul>
+<li>不支持线程控制和等待</li>
+</ul>
+<h4 id="其他相关库"><a href="#其他相关库" class="headerlink" title="其他相关库"></a>其他相关库</h4><p><a href="https://github.com/idisfkj/android-startup">android-startup</a></p>
+]]></content>
   </entry>
   <entry>
     <title>Room数据库酷七条</title>
@@ -1337,6 +1450,27 @@
       </tags>
   </entry>
   <entry>
+    <title>开发者七条</title>
+    <url>/ep-good-developer-manifesto.html</url>
+    <content><![CDATA[<p>软件开发不只是API调用和基础语法，以下是应用开发的全貌：</p>
+<h4 id="一、相信数据"><a href="#一、相信数据" class="headerlink" title="一、相信数据"></a>一、相信数据</h4><p>如果你觉得系统正常运转，你应该拿出数据支撑你的想法。更重要的是，当研究证明你是错的时，你应该欣然接受实事。<br>这就需要做测试来验证你的代码，也需要一些流程来生成对应的数据。<br>你做的任何事都需要数据来辅助你下一步的决策。否则你将不知道自己做的事是对还是错。</p>
+<h4 id="二、软件开发不只是编码"><a href="#二、软件开发不只是编码" class="headerlink" title="二、软件开发不只是编码"></a>二、软件开发不只是编码</h4><p>除了编码，开发人员还需要协调、沟通、分析、设计、测试、项目管理等</p>
+<h4 id="三、代码就是和人沟通"><a href="#三、代码就是和人沟通" class="headerlink" title="三、代码就是和人沟通"></a>三、代码就是和人沟通</h4><p>如果我们真的只是“为计算机编程”，那么我们都将编写字节码。计算机最能理解它。但我们用的是一种“折衷”语言，这种语言其他人可以理解，也可以翻译成计算机可以理解的东西。</p>
+<p>好的软件开发是一个交流的过程。这是为了确保人们理解你在做什么。你的工作是与下一个阅读它的人交流。找到最好的表达方式可能需要同理心。</p>
+<h4 id="四、好的流程很重要"><a href="#四、好的流程很重要" class="headerlink" title="四、好的流程很重要"></a>四、好的流程很重要</h4><p>康威定律预言，你的软件注定要反映你的团队及其沟通结构。流程是沟通的结构。</p>
+<p>想象一下一架起飞的飞机:飞行员、副驾驶、机组人员和空中交通管制人员之间有一段非常有条理的对话。这确保了每个人都关注关键问题，每个人都有发言权。“机翼还在飞机上吗?””“检查。“没有别的飞机挡住我们的去路吗?”“可以起飞了。”</p>
+<h4 id="五、用结果证明自己，而不是身份低位"><a href="#五、用结果证明自己，而不是身份低位" class="headerlink" title="五、用结果证明自己，而不是身份低位"></a>五、用结果证明自己，而不是身份低位</h4><p>最糟糕的开发组织要么等级森严，要么每个开发人员有太多老板。这通常反映了管理者对地位的渴望。</p>
+<p>考虑“角色”，而不是“地位”。我工作过的最好的组织都首先认可那些推动事情的人，而不管他们在组织中扮演什么角色。</p>
+<h4 id="六、每个人都能从别人那学到"><a href="#六、每个人都能从别人那学到" class="headerlink" title="六、每个人都能从别人那学到"></a>六、每个人都能从别人那学到</h4><p>如果您认为人们的种族、性别或其他因素是判断他们的技能或他们必须教给您的东西的好方法，那么您就限制了自己作为软件开发人员的发展。</p>
+<h4 id="七、测试你所有的猜想，并随时准备改变这些猜想"><a href="#七、测试你所有的猜想，并随时准备改变这些猜想" class="headerlink" title="七、测试你所有的猜想，并随时准备改变这些猜想"></a>七、测试你所有的猜想，并随时准备改变这些猜想</h4><p>当指导年轻的开发者时，我总是强调你不应该证明自己是对的，而应该证明自己是错的。我还鼓励他们用证明自己正确的热情去做这件事。</p>
+<p>逻辑理论往往有一种方法可以证明你是错的。如果没有，这可能不是一个很好的理论。如果你不能证明它是错的，那么，只有那时，也许你可以试着证明它是对的。这与“相信数据”类似，但这不仅仅是关于数据，还有你使用数据的方式。</p>
+<p><a href="https://www.infoworld.com/article/3214481/the-good-software-development-manifesto.html">参考来源</a></p>
+]]></content>
+      <tags>
+        <tag>软件哲学</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Class文件的存储格式</title>
     <url>/file-format-class.html</url>
     <content><![CDATA[<h4 id="一、Class文件结构概览"><a href="#一、Class文件结构概览" class="headerlink" title="一、Class文件结构概览"></a>一、Class文件结构概览</h4><h5 id="1-1-概述"><a href="#1-1-概述" class="headerlink" title="1.1 概述"></a>1.1 概述</h5><ul>
@@ -1451,27 +1585,6 @@
       </tags>
   </entry>
   <entry>
-    <title>开发者七条</title>
-    <url>/ep-good-developer-manifesto.html</url>
-    <content><![CDATA[<p>软件开发不只是API调用和基础语法，以下是应用开发的全貌：</p>
-<h4 id="一、相信数据"><a href="#一、相信数据" class="headerlink" title="一、相信数据"></a>一、相信数据</h4><p>如果你觉得系统正常运转，你应该拿出数据支撑你的想法。更重要的是，当研究证明你是错的时，你应该欣然接受实事。<br>这就需要做测试来验证你的代码，也需要一些流程来生成对应的数据。<br>你做的任何事都需要数据来辅助你下一步的决策。否则你将不知道自己做的事是对还是错。</p>
-<h4 id="二、软件开发不只是编码"><a href="#二、软件开发不只是编码" class="headerlink" title="二、软件开发不只是编码"></a>二、软件开发不只是编码</h4><p>除了编码，开发人员还需要协调、沟通、分析、设计、测试、项目管理等</p>
-<h4 id="三、代码就是和人沟通"><a href="#三、代码就是和人沟通" class="headerlink" title="三、代码就是和人沟通"></a>三、代码就是和人沟通</h4><p>如果我们真的只是“为计算机编程”，那么我们都将编写字节码。计算机最能理解它。但我们用的是一种“折衷”语言，这种语言其他人可以理解，也可以翻译成计算机可以理解的东西。</p>
-<p>好的软件开发是一个交流的过程。这是为了确保人们理解你在做什么。你的工作是与下一个阅读它的人交流。找到最好的表达方式可能需要同理心。</p>
-<h4 id="四、好的流程很重要"><a href="#四、好的流程很重要" class="headerlink" title="四、好的流程很重要"></a>四、好的流程很重要</h4><p>康威定律预言，你的软件注定要反映你的团队及其沟通结构。流程是沟通的结构。</p>
-<p>想象一下一架起飞的飞机:飞行员、副驾驶、机组人员和空中交通管制人员之间有一段非常有条理的对话。这确保了每个人都关注关键问题，每个人都有发言权。“机翼还在飞机上吗?””“检查。“没有别的飞机挡住我们的去路吗?”“可以起飞了。”</p>
-<h4 id="五、用结果证明自己，而不是身份低位"><a href="#五、用结果证明自己，而不是身份低位" class="headerlink" title="五、用结果证明自己，而不是身份低位"></a>五、用结果证明自己，而不是身份低位</h4><p>最糟糕的开发组织要么等级森严，要么每个开发人员有太多老板。这通常反映了管理者对地位的渴望。</p>
-<p>考虑“角色”，而不是“地位”。我工作过的最好的组织都首先认可那些推动事情的人，而不管他们在组织中扮演什么角色。</p>
-<h4 id="六、每个人都能从别人那学到"><a href="#六、每个人都能从别人那学到" class="headerlink" title="六、每个人都能从别人那学到"></a>六、每个人都能从别人那学到</h4><p>如果您认为人们的种族、性别或其他因素是判断他们的技能或他们必须教给您的东西的好方法，那么您就限制了自己作为软件开发人员的发展。</p>
-<h4 id="七、测试你所有的猜想，并随时准备改变这些猜想"><a href="#七、测试你所有的猜想，并随时准备改变这些猜想" class="headerlink" title="七、测试你所有的猜想，并随时准备改变这些猜想"></a>七、测试你所有的猜想，并随时准备改变这些猜想</h4><p>当指导年轻的开发者时，我总是强调你不应该证明自己是对的，而应该证明自己是错的。我还鼓励他们用证明自己正确的热情去做这件事。</p>
-<p>逻辑理论往往有一种方法可以证明你是错的。如果没有，这可能不是一个很好的理论。如果你不能证明它是错的，那么，只有那时，也许你可以试着证明它是对的。这与“相信数据”类似，但这不仅仅是关于数据，还有你使用数据的方式。</p>
-<p><a href="https://www.infoworld.com/article/3214481/the-good-software-development-manifesto.html">参考来源</a></p>
-]]></content>
-      <tags>
-        <tag>软件哲学</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>重定位</title>
     <url>/file-format-elf-relocation.html</url>
     <content><![CDATA[<h4 id="一、可重定位文件"><a href="#一、可重定位文件" class="headerlink" title="一、可重定位文件"></a>一、可重定位文件</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//main.c                    //x.c</span><br><span class="line"></span><br><span class="line">extern void foo(void);      |   #include &lt;stdio.h&gt;</span><br><span class="line">                            |</span><br><span class="line">int main(void)              |   void foo()</span><br><span class="line">&#123;                           |   &#123;</span><br><span class="line">    foo();                  |       printf(&quot;foo\n&quot;);</span><br><span class="line">    return 0;               |   &#125;</span><br><span class="line">&#125;                           |</span><br></pre></td></tr></table></figure>
@@ -1503,45 +1616,6 @@
       </categories>
       <tags>
         <tag>C/C++</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>flutter状态管理之BloC</title>
-    <url>/flutter-state-bloc.html</url>
-    <content><![CDATA[<hr>
-<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>Bloc = Business Logic Component</p>
-<center>
-    <img src="../images/flutter/bloc_architecture.png" width="60%"/>
-</center>
-
-
-<h4 id="二、结构"><a href="#二、结构" class="headerlink" title="二、结构"></a>二、结构</h4><p>BloC本身是一个独立的package、flutter-bloc基于BloC和Provider实现，其结构如下图所示：</p>
-<center>
-    <img src="../images/flutter/flutter_bloc.png" width="100%"/>
-</center>
-
-<h4 id="三、-实现"><a href="#三、-实现" class="headerlink" title="三、 实现"></a>三、 实现</h4><h5 id="3-1-BloC是基于dart的Stream-API实现的发布订阅模式。"><a href="#3-1-BloC是基于dart的Stream-API实现的发布订阅模式。" class="headerlink" title="3.1 BloC是基于dart的Stream API实现的发布订阅模式。"></a>3.1 BloC是基于dart的Stream API实现的发布订阅模式。</h5><ul>
-<li>通过on方法订阅事件并提供处理函数，收到Event再将Event转换成State返回给Bloc</li>
-<li>通过add方法发布事件</li>
-</ul>
-<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Bloc</span>&lt;<span class="title">Event</span>, <span class="title">State</span>&gt; <span class="keyword">extends</span> <span class="title">BlocBase</span>&lt;<span class="title">State</span>&gt;</span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">BlocEventSink</span>&lt;<span class="title">Event</span>&gt; </span>&#123;</span><br><span class="line">     <span class="comment">//所有的订阅者</span></span><br><span class="line">     <span class="keyword">final</span> _subscriptions = &lt;StreamSubscription&lt;<span class="built_in">dynamic</span>&gt;&gt;[];</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">final</span> _eventController = StreamController&lt;Event&gt;.broadcast();</span><br><span class="line">     </span><br><span class="line">     <span class="comment">//添加订阅者</span></span><br><span class="line">     <span class="keyword">void</span> <span class="keyword">on</span>&lt;E <span class="keyword">extends</span> Event&gt;(</span><br><span class="line">       EventHandler&lt;E, State&gt; handler, &#123;</span><br><span class="line">       EventTransformer&lt;E&gt;? transformer,</span><br><span class="line">     &#125;) &#123;</span><br><span class="line">        <span class="comment">//这里开始了listen</span></span><br><span class="line">        <span class="keyword">final</span> subscription = xxx.listen(<span class="keyword">null</span>);</span><br><span class="line">        _subscriptions.add(subscription);</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">     <span class="meta">@override</span></span><br><span class="line">     <span class="keyword">void</span> add(Event event) &#123;</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">         onEvent(event);</span><br><span class="line">         _eventController.add(event);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">         onError(error, stackTrace);</span><br><span class="line">         <span class="keyword">rethrow</span>;</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<center>
-    <img src="../images/flutter/flutter-bloc-inner.png" width="50%"/>
-</center>
-
-
-<h5 id="3-1-事件和状态之间的转换"><a href="#3-1-事件和状态之间的转换" class="headerlink" title="3.1 事件和状态之间的转换"></a>3.1 事件和状态之间的转换</h5><ul>
-<li>转换逻辑有业务层通过on()注入</li>
-<li>内部的核心是_Emitter以及 <em>_eventController</em> 和 <em>_stateController</em></li>
-</ul>
-<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line">(<span class="built_in">dynamic</span> event) &#123;</span><br><span class="line">       <span class="keyword">void</span> onEmit(State state) &#123;</span><br><span class="line">         <span class="keyword">if</span> (isClosed) <span class="keyword">return</span>;</span><br><span class="line">         <span class="keyword">if</span> (<span class="keyword">this</span>.state == state &amp;&amp; _emitted) <span class="keyword">return</span>;</span><br><span class="line">         onTransition(Transition(</span><br><span class="line">           currentState: <span class="keyword">this</span>.state,</span><br><span class="line">           event: event <span class="keyword">as</span> E,</span><br><span class="line">           nextState: state,</span><br><span class="line">         ));</span><br><span class="line">         emit(state);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">final</span> emitter = _Emitter(onEmit);</span><br><span class="line">       <span class="keyword">final</span> controller = StreamController&lt;E&gt;.broadcast(</span><br><span class="line">         <span class="keyword">sync</span>: <span class="keyword">true</span>,</span><br><span class="line">         onCancel: emitter.cancel,</span><br><span class="line">       );</span><br><span class="line"></span><br><span class="line">       <span class="keyword">void</span> handleEvent() <span class="keyword">async</span> &#123;</span><br><span class="line">         <span class="keyword">void</span> onDone() &#123;</span><br><span class="line">           emitter.complete();</span><br><span class="line">           _emitters.remove(emitter);</span><br><span class="line">           <span class="keyword">if</span> (!controller.isClosed) controller.close();</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">try</span> &#123;</span><br><span class="line">           _emitters.add(emitter);</span><br><span class="line">           <span class="comment">//交给外部实现转换事件和状态</span></span><br><span class="line">           <span class="keyword">await</span> handler(event <span class="keyword">as</span> E, emitter);</span><br><span class="line">         &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">           onError(error, stackTrace);</span><br><span class="line">           <span class="keyword">rethrow</span>;</span><br><span class="line">         &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">           onDone();</span><br><span class="line">         &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       handleEvent();</span><br><span class="line">       <span class="keyword">return</span> controller.stream;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="四、参考"><a href="#四、参考" class="headerlink" title="四、参考"></a>四、参考</h4><p>主要参考和debug了bloc仓库里面examples中login的例子：<br><a href="https://github.com/felangel/bloc/tree/master/examples/flutter_login">这里</a></p>
-]]></content>
-      <tags>
-        <tag>Flutter</tag>
       </tags>
   </entry>
   <entry>
@@ -1761,6 +1835,45 @@
       </tags>
   </entry>
   <entry>
+    <title>flutter状态管理之BloC</title>
+    <url>/flutter-state-bloc.html</url>
+    <content><![CDATA[<hr>
+<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>Bloc = Business Logic Component</p>
+<center>
+    <img src="../images/flutter/bloc_architecture.png" width="60%"/>
+</center>
+
+
+<h4 id="二、结构"><a href="#二、结构" class="headerlink" title="二、结构"></a>二、结构</h4><p>BloC本身是一个独立的package、flutter-bloc基于BloC和Provider实现，其结构如下图所示：</p>
+<center>
+    <img src="../images/flutter/flutter_bloc.png" width="100%"/>
+</center>
+
+<h4 id="三、-实现"><a href="#三、-实现" class="headerlink" title="三、 实现"></a>三、 实现</h4><h5 id="3-1-BloC是基于dart的Stream-API实现的发布订阅模式。"><a href="#3-1-BloC是基于dart的Stream-API实现的发布订阅模式。" class="headerlink" title="3.1 BloC是基于dart的Stream API实现的发布订阅模式。"></a>3.1 BloC是基于dart的Stream API实现的发布订阅模式。</h5><ul>
+<li>通过on方法订阅事件并提供处理函数，收到Event再将Event转换成State返回给Bloc</li>
+<li>通过add方法发布事件</li>
+</ul>
+<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Bloc</span>&lt;<span class="title">Event</span>, <span class="title">State</span>&gt; <span class="keyword">extends</span> <span class="title">BlocBase</span>&lt;<span class="title">State</span>&gt;</span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">BlocEventSink</span>&lt;<span class="title">Event</span>&gt; </span>&#123;</span><br><span class="line">     <span class="comment">//所有的订阅者</span></span><br><span class="line">     <span class="keyword">final</span> _subscriptions = &lt;StreamSubscription&lt;<span class="built_in">dynamic</span>&gt;&gt;[];</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">final</span> _eventController = StreamController&lt;Event&gt;.broadcast();</span><br><span class="line">     </span><br><span class="line">     <span class="comment">//添加订阅者</span></span><br><span class="line">     <span class="keyword">void</span> <span class="keyword">on</span>&lt;E <span class="keyword">extends</span> Event&gt;(</span><br><span class="line">       EventHandler&lt;E, State&gt; handler, &#123;</span><br><span class="line">       EventTransformer&lt;E&gt;? transformer,</span><br><span class="line">     &#125;) &#123;</span><br><span class="line">        <span class="comment">//这里开始了listen</span></span><br><span class="line">        <span class="keyword">final</span> subscription = xxx.listen(<span class="keyword">null</span>);</span><br><span class="line">        _subscriptions.add(subscription);</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">     <span class="meta">@override</span></span><br><span class="line">     <span class="keyword">void</span> add(Event event) &#123;</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">         onEvent(event);</span><br><span class="line">         _eventController.add(event);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">         onError(error, stackTrace);</span><br><span class="line">         <span class="keyword">rethrow</span>;</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<center>
+    <img src="../images/flutter/flutter-bloc-inner.png" width="50%"/>
+</center>
+
+
+<h5 id="3-1-事件和状态之间的转换"><a href="#3-1-事件和状态之间的转换" class="headerlink" title="3.1 事件和状态之间的转换"></a>3.1 事件和状态之间的转换</h5><ul>
+<li>转换逻辑有业务层通过on()注入</li>
+<li>内部的核心是_Emitter以及 <em>_eventController</em> 和 <em>_stateController</em></li>
+</ul>
+<figure class="highlight dart"><table><tr><td class="code"><pre><span class="line">(<span class="built_in">dynamic</span> event) &#123;</span><br><span class="line">       <span class="keyword">void</span> onEmit(State state) &#123;</span><br><span class="line">         <span class="keyword">if</span> (isClosed) <span class="keyword">return</span>;</span><br><span class="line">         <span class="keyword">if</span> (<span class="keyword">this</span>.state == state &amp;&amp; _emitted) <span class="keyword">return</span>;</span><br><span class="line">         onTransition(Transition(</span><br><span class="line">           currentState: <span class="keyword">this</span>.state,</span><br><span class="line">           event: event <span class="keyword">as</span> E,</span><br><span class="line">           nextState: state,</span><br><span class="line">         ));</span><br><span class="line">         emit(state);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">final</span> emitter = _Emitter(onEmit);</span><br><span class="line">       <span class="keyword">final</span> controller = StreamController&lt;E&gt;.broadcast(</span><br><span class="line">         <span class="keyword">sync</span>: <span class="keyword">true</span>,</span><br><span class="line">         onCancel: emitter.cancel,</span><br><span class="line">       );</span><br><span class="line"></span><br><span class="line">       <span class="keyword">void</span> handleEvent() <span class="keyword">async</span> &#123;</span><br><span class="line">         <span class="keyword">void</span> onDone() &#123;</span><br><span class="line">           emitter.complete();</span><br><span class="line">           _emitters.remove(emitter);</span><br><span class="line">           <span class="keyword">if</span> (!controller.isClosed) controller.close();</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">try</span> &#123;</span><br><span class="line">           _emitters.add(emitter);</span><br><span class="line">           <span class="comment">//交给外部实现转换事件和状态</span></span><br><span class="line">           <span class="keyword">await</span> handler(event <span class="keyword">as</span> E, emitter);</span><br><span class="line">         &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">           onError(error, stackTrace);</span><br><span class="line">           <span class="keyword">rethrow</span>;</span><br><span class="line">         &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">           onDone();</span><br><span class="line">         &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       handleEvent();</span><br><span class="line">       <span class="keyword">return</span> controller.stream;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="四、参考"><a href="#四、参考" class="headerlink" title="四、参考"></a>四、参考</h4><p>主要参考和debug了bloc仓库里面examples中login的例子：<br><a href="https://github.com/felangel/bloc/tree/master/examples/flutter_login">这里</a></p>
+]]></content>
+      <tags>
+        <tag>Flutter</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Flutter状态管理之Provider</title>
     <url>/flutter-state-provider.html</url>
     <content><![CDATA[<hr>
@@ -1926,6 +2039,101 @@
       </tags>
   </entry>
   <entry>
+    <title>对象的内存布局</title>
+    <url>/java-object-layout.html</url>
+    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>很多时候我们都有一个疑问：一个对象在内存中占用多大的空间呢？</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> jdk8-64/java -jar jol-cli.jar internals java.lang.Object</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Running 64-bit HotSpot VM.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Using compressed oop with 3-bit <span class="built_in">shift</span>.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Using compressed klass with 3-bit <span class="built_in">shift</span>.</span></span><br><span class="line"></span><br><span class="line">Instantiated the sample instance via default constructor.</span><br><span class="line"></span><br><span class="line">java.lang.Object object internals:</span><br><span class="line"> OFFSET  SIZE   TYPE DESCRIPTION                  VALUE</span><br><span class="line">      0     4        (object header)              05 00 00 00 # Mark word</span><br><span class="line">      4     4        (object header)              00 00 00 00 # Mark word</span><br><span class="line">      8     4        (object header)              00 10 00 00 # (not mark word)</span><br><span class="line">     12     4        (loss due to the next object alignment)</span><br><span class="line">Instance size: 16 bytes</span><br><span class="line">Space losses: 0 bytes internal + 4 bytes external = 4 bytes total</span><br></pre></td></tr></table></figure>
+
+<p>通过OpenJDK的Java-Object-Layout我们看到<code>java.lang.Object</code>的一个实例占用16 bytes。</p>
+<p>同样的<code>java.lang.Boolean</code>类型占用的字节数：</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">java.lang.Boolean object internals:</span><br><span class="line"> OFFSET  SIZE      TYPE DESCRIPTION                               VALUE</span><br><span class="line">      0    12           (object header)                           N/A</span><br><span class="line">     12     1   boolean Boolean.value                             N/A</span><br><span class="line">     13     3           (loss due to the next object alignment)</span><br><span class="line">Instance size: 16 bytes</span><br><span class="line">Space losses: 0 bytes internal + 3 bytes external = 3 bytes total</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER: 12 bytes]  12 </span><br><span class="line">[value:   1 byte ]  13</span><br><span class="line">[padding: 3 bytes]  16</span><br></pre></td></tr></table></figure>
+
+<p>其实一个对象通常由三块组成，分别是：对象头、实例数据和对齐填充。</p>
+<h4 id="二、对象头（object-header）"><a href="#二、对象头（object-header）" class="headerlink" title="二、对象头（object header）"></a>二、对象头（object header）</h4><p>在前面通过JOL打印输出的关于java.lang.Object信息中，我们看到object header占用12字节，但是输出并没有包含详细的结构信息，我们可以通过<a href="http://hg.openjdk.java.net/jdk/jdk/file/19afeaa0fdbe/src/hotspot/share/oops/oop.hpp#l52">Hotspot的源码</a>了解到对象头包含两个部分：<strong>mark word</strong>和<strong>class word</strong>。</p>
+<h5 id="2-1-mark-word："><a href="#2-1-mark-word：" class="headerlink" title="2.1 mark word："></a>2.1 <a href="http://hg.openjdk.java.net/jdk/jdk/file/19afeaa0fdbe/src/hotspot/share/oops/markWord.hpp#l33">mark word</a>：</h5><p>mark word在32位和64位机分别占32位和64位，当其中锁标志位的值不同时，它前面的bit存储不同的含义。</p>
+<ul>
+<li>存储对象的gc年龄信息</li>
+<li>存储Hashcode</li>
+<li>存储锁信息</li>
+</ul>
+<center>
+    <img src="../images/mark-word-64bit.png" width="600"/>
+</center>
+
+<h5 id="2-2-class-word"><a href="#2-2-class-word" class="headerlink" title="2.2 class word:"></a>2.2 class word:</h5><p>代码运行的时候，对象只是一串字节，我们可以通过class-word获取一些对象的元信息，它存储指向方法区中表示对象类型的指针，比如以下使用场景：</p>
+<ul>
+<li>运行时类型检查</li>
+<li>决定对象大小</li>
+<li>计算接口调用的目标类</li>
+</ul>
+<h5 id="2-3-数组长度："><a href="#2-3-数组长度：" class="headerlink" title="2.3 数组长度："></a>2.3 数组长度：</h5><p>如果是数组类型，对象头会额外存储数组的长度信息。</p>
+<ul>
+<li>快速计算对象的大小</li>
+<li>数组边界检查</li>
+</ul>
+<h4 id="三、实例数据和对齐填充"><a href="#三、实例数据和对齐填充" class="headerlink" title="三、实例数据和对齐填充"></a>三、实例数据和对齐填充</h4><p>实例数据即我们在代码中声明的变量等信息，它的存储受到一些规则的约束以及虚拟机参数的控制。</p>
+<h5 id="3-1-没有属性的类的内存布局"><a href="#3-1-没有属性的类的内存布局" class="headerlink" title="3.1 没有属性的类的内存布局"></a>3.1 没有属性的类的内存布局</h5><blockquote>
+<p>规则一：每个对象都是八字节对齐。</p>
+</blockquote>
+<p>从前面Object的输出中，我们看到，当一个对象只有头部信息时占用16byte，刚好是8的整数倍。</p>
+<h5 id="3-2-Object子类的内存布局"><a href="#3-2-Object子类的内存布局" class="headerlink" title="3.2 Object子类的内存布局"></a>3.2 Object子类的内存布局</h5><p>跟在对象头后面的类属性按照它们的大小在内存中排序，例如：int是4字节、long是8字节。采用字节对齐可以提高性能，因为从内存读取4字节到4字节的寄存器性能更好。</p>
+<p>为了节约内存，Sun的虚拟机在分配对象字段的时候和它们声明的顺序不同，有如下顺序规则：</p>
+<p>1、double和long类型<br>2、int和float<br>3、short和char<br>4、boolean和byte<br>5、reference</p>
+<p>为什么可以优化内存呢？我们看一下这个例子：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClass</span> </span>&#123;</span><br><span class="line">    <span class="keyword">byte</span> a;</span><br><span class="line">    <span class="keyword">int</span> c;</span><br><span class="line">    <span class="keyword">boolean</span> d;</span><br><span class="line">    <span class="keyword">long</span> e;</span><br><span class="line">    Object f;        </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>它的对象布局如下：</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  8 bytes]  8</span><br><span class="line">[a:       1 byte ]  9</span><br><span class="line">[padding: 3 bytes] 12</span><br><span class="line">[c:       4 bytes] 16</span><br><span class="line">[d:       1 byte ] 17</span><br><span class="line">[padding: 7 bytes] 24</span><br><span class="line">[e:       8 bytes] 32</span><br><span class="line">[f:       4 bytes] 36</span><br><span class="line">[padding: 4 bytes] 40</span><br></pre></td></tr></table></figure>
+<p>总共使用了40字节内存，其中14个用于内存对齐而浪费掉。如果重排顺序则：</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  8 bytes]  8</span><br><span class="line">[e:       8 bytes] 16</span><br><span class="line">[c:       4 bytes] 20</span><br><span class="line">[a:       1 byte ] 21</span><br><span class="line">[d:       1 byte ] 22</span><br><span class="line">[padding: 2 bytes] 24</span><br><span class="line">[f:       4 bytes] 28</span><br><span class="line">[padding: 4 bytes] 32</span><br></pre></td></tr></table></figure>
+
+<p>经过优化后只有6个字节用于对齐填充，总内存也只有32byte。</p>
+<h5 id="3-3-子类的内存布局"><a href="#3-3-子类的内存布局" class="headerlink" title="3.3 子类的内存布局"></a>3.3 子类的内存布局</h5><blockquote>
+<p>规则三：继承结构中属于不同类的字段不混合在一起。父类优先，子类其次。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">   <span class="keyword">long</span> a;</span><br><span class="line">   <span class="keyword">int</span> b;</span><br><span class="line">   <span class="keyword">int</span> c;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> <span class="keyword">extends</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">   <span class="keyword">long</span> d;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>B类的布局如下：</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  8 bytes]  8</span><br><span class="line">[a:       8 bytes] 16</span><br><span class="line">[b:       4 bytes] 20</span><br><span class="line">[c:       4 bytes] 24</span><br><span class="line">[d:       8 bytes] 32</span><br></pre></td></tr></table></figure>
+
+<p>如果父类的字段不符合4字节对齐。</p>
+<blockquote>
+<p>规则四：父类的最后一个字段和子类第一个字段之间必须4字节对齐。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">   <span class="keyword">byte</span> a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">   <span class="keyword">byte</span> b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  8 bytes]  8</span><br><span class="line">[a:       1 byte ]  9</span><br><span class="line">[padding: 3 bytes] 12</span><br><span class="line">[b:       1 byte ] 13</span><br><span class="line">[padding: 3 bytes] 16</span><br></pre></td></tr></table></figure>
+<p>a后面的3个字节就是为了使其4字节对齐。这3个字节只能浪费不能给B使用。</p>
+<p>最后一个规则可以用于节约一些内存空间：当子类的第一个属性是long或者double类型且父类没有以8字节边界结束。</p>
+<blockquote>
+<p>规则五：子类的第一个字段是doubel或long且父类没有以8字节边界结束，JVM打破2的规则，先存储int、short、byte、reference来填补空缺。</p>
+</blockquote>
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">  <span class="keyword">byte</span> a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">  <span class="keyword">long</span> b;</span><br><span class="line">  <span class="keyword">short</span> c;  </span><br><span class="line">  <span class="keyword">byte</span> d;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>内存布局如下：</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  8 bytes]  8</span><br><span class="line">[a:       1 byte ]  9</span><br><span class="line">[padding: 3 bytes] 12</span><br><span class="line">[c:       2 bytes] 14</span><br><span class="line">[d:       1 byte ] 15</span><br><span class="line">[padding: 1 byte ] 16</span><br><span class="line">[b:       8 bytes] 24</span><br></pre></td></tr></table></figure>
+
+<p>在字节12的位置，A类结束了。JVM打破2的规则放入short和byte类型，节约了4字节中的3个字节，否则将浪费掉。</p>
+<h5 id="3-4-数组的内存布局"><a href="#3-4-数组的内存布局" class="headerlink" title="3.4 数组的内存布局"></a>3.4 数组的内存布局</h5><p>数组类型有一个额外的头部字段保存数组的长度，接下来是数组的元素，数组作为普通对象也是8字节对齐的。</p>
+<p>这是byte[3]的布局：</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  12 bytes] 12</span><br><span class="line">[[0]:      1 byte ] 13</span><br><span class="line">[[1]:      1 byte ] 14</span><br><span class="line">[[2]:      1 byte ] 15</span><br><span class="line">[padding:  1 byte ] 16</span><br></pre></td></tr></table></figure>
+
+<p>这是long[3]的布局:</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  12 bytes] 12</span><br><span class="line">[padding:  4 bytes] 16</span><br><span class="line">[[0]:      8 bytes] 24</span><br><span class="line">[[1]:      8 bytes] 32</span><br><span class="line">[[2]:      8 bytes] 40</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-5-内部类的内存布局"><a href="#3-5-内部类的内存布局" class="headerlink" title="3.5 内部类的内存布局"></a>3.5 内部类的内存布局</h5><p>非静态内部类有一个额外的隐藏字段，持有外部类的引用。这个字段是一个常规的引用,它符合对象在内存布局的规则。内部类因此有4字节额外的开销。</p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>JVM</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java synchronized</title>
     <url>/java-multithreading-synchronized.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>synchronized作为Java内建的关键字和锁机制，理解和使用它是必要的也是有难度的。个人认为深入理解此关键字在于以下几个方面：</p>
@@ -2040,101 +2248,6 @@
       </categories>
       <tags>
         <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>对象的内存布局</title>
-    <url>/java-object-layout.html</url>
-    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>很多时候我们都有一个疑问：一个对象在内存中占用多大的空间呢？</p>
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> jdk8-64/java -jar jol-cli.jar internals java.lang.Object</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Running 64-bit HotSpot VM.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Using compressed oop with 3-bit <span class="built_in">shift</span>.</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Using compressed klass with 3-bit <span class="built_in">shift</span>.</span></span><br><span class="line"></span><br><span class="line">Instantiated the sample instance via default constructor.</span><br><span class="line"></span><br><span class="line">java.lang.Object object internals:</span><br><span class="line"> OFFSET  SIZE   TYPE DESCRIPTION                  VALUE</span><br><span class="line">      0     4        (object header)              05 00 00 00 # Mark word</span><br><span class="line">      4     4        (object header)              00 00 00 00 # Mark word</span><br><span class="line">      8     4        (object header)              00 10 00 00 # (not mark word)</span><br><span class="line">     12     4        (loss due to the next object alignment)</span><br><span class="line">Instance size: 16 bytes</span><br><span class="line">Space losses: 0 bytes internal + 4 bytes external = 4 bytes total</span><br></pre></td></tr></table></figure>
-
-<p>通过OpenJDK的Java-Object-Layout我们看到<code>java.lang.Object</code>的一个实例占用16 bytes。</p>
-<p>同样的<code>java.lang.Boolean</code>类型占用的字节数：</p>
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">java.lang.Boolean object internals:</span><br><span class="line"> OFFSET  SIZE      TYPE DESCRIPTION                               VALUE</span><br><span class="line">      0    12           (object header)                           N/A</span><br><span class="line">     12     1   boolean Boolean.value                             N/A</span><br><span class="line">     13     3           (loss due to the next object alignment)</span><br><span class="line">Instance size: 16 bytes</span><br><span class="line">Space losses: 0 bytes internal + 3 bytes external = 3 bytes total</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER: 12 bytes]  12 </span><br><span class="line">[value:   1 byte ]  13</span><br><span class="line">[padding: 3 bytes]  16</span><br></pre></td></tr></table></figure>
-
-<p>其实一个对象通常由三块组成，分别是：对象头、实例数据和对齐填充。</p>
-<h4 id="二、对象头（object-header）"><a href="#二、对象头（object-header）" class="headerlink" title="二、对象头（object header）"></a>二、对象头（object header）</h4><p>在前面通过JOL打印输出的关于java.lang.Object信息中，我们看到object header占用12字节，但是输出并没有包含详细的结构信息，我们可以通过<a href="http://hg.openjdk.java.net/jdk/jdk/file/19afeaa0fdbe/src/hotspot/share/oops/oop.hpp#l52">Hotspot的源码</a>了解到对象头包含两个部分：<strong>mark word</strong>和<strong>class word</strong>。</p>
-<h5 id="2-1-mark-word："><a href="#2-1-mark-word：" class="headerlink" title="2.1 mark word："></a>2.1 <a href="http://hg.openjdk.java.net/jdk/jdk/file/19afeaa0fdbe/src/hotspot/share/oops/markWord.hpp#l33">mark word</a>：</h5><p>mark word在32位和64位机分别占32位和64位，当其中锁标志位的值不同时，它前面的bit存储不同的含义。</p>
-<ul>
-<li>存储对象的gc年龄信息</li>
-<li>存储Hashcode</li>
-<li>存储锁信息</li>
-</ul>
-<center>
-    <img src="../images/mark-word-64bit.png" width="600"/>
-</center>
-
-<h5 id="2-2-class-word"><a href="#2-2-class-word" class="headerlink" title="2.2 class word:"></a>2.2 class word:</h5><p>代码运行的时候，对象只是一串字节，我们可以通过class-word获取一些对象的元信息，它存储指向方法区中表示对象类型的指针，比如以下使用场景：</p>
-<ul>
-<li>运行时类型检查</li>
-<li>决定对象大小</li>
-<li>计算接口调用的目标类</li>
-</ul>
-<h5 id="2-3-数组长度："><a href="#2-3-数组长度：" class="headerlink" title="2.3 数组长度："></a>2.3 数组长度：</h5><p>如果是数组类型，对象头会额外存储数组的长度信息。</p>
-<ul>
-<li>快速计算对象的大小</li>
-<li>数组边界检查</li>
-</ul>
-<h4 id="三、实例数据和对齐填充"><a href="#三、实例数据和对齐填充" class="headerlink" title="三、实例数据和对齐填充"></a>三、实例数据和对齐填充</h4><p>实例数据即我们在代码中声明的变量等信息，它的存储受到一些规则的约束以及虚拟机参数的控制。</p>
-<h5 id="3-1-没有属性的类的内存布局"><a href="#3-1-没有属性的类的内存布局" class="headerlink" title="3.1 没有属性的类的内存布局"></a>3.1 没有属性的类的内存布局</h5><blockquote>
-<p>规则一：每个对象都是八字节对齐。</p>
-</blockquote>
-<p>从前面Object的输出中，我们看到，当一个对象只有头部信息时占用16byte，刚好是8的整数倍。</p>
-<h5 id="3-2-Object子类的内存布局"><a href="#3-2-Object子类的内存布局" class="headerlink" title="3.2 Object子类的内存布局"></a>3.2 Object子类的内存布局</h5><p>跟在对象头后面的类属性按照它们的大小在内存中排序，例如：int是4字节、long是8字节。采用字节对齐可以提高性能，因为从内存读取4字节到4字节的寄存器性能更好。</p>
-<p>为了节约内存，Sun的虚拟机在分配对象字段的时候和它们声明的顺序不同，有如下顺序规则：</p>
-<p>1、double和long类型<br>2、int和float<br>3、short和char<br>4、boolean和byte<br>5、reference</p>
-<p>为什么可以优化内存呢？我们看一下这个例子：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClass</span> </span>&#123;</span><br><span class="line">    <span class="keyword">byte</span> a;</span><br><span class="line">    <span class="keyword">int</span> c;</span><br><span class="line">    <span class="keyword">boolean</span> d;</span><br><span class="line">    <span class="keyword">long</span> e;</span><br><span class="line">    Object f;        </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>它的对象布局如下：</p>
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  8 bytes]  8</span><br><span class="line">[a:       1 byte ]  9</span><br><span class="line">[padding: 3 bytes] 12</span><br><span class="line">[c:       4 bytes] 16</span><br><span class="line">[d:       1 byte ] 17</span><br><span class="line">[padding: 7 bytes] 24</span><br><span class="line">[e:       8 bytes] 32</span><br><span class="line">[f:       4 bytes] 36</span><br><span class="line">[padding: 4 bytes] 40</span><br></pre></td></tr></table></figure>
-<p>总共使用了40字节内存，其中14个用于内存对齐而浪费掉。如果重排顺序则：</p>
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  8 bytes]  8</span><br><span class="line">[e:       8 bytes] 16</span><br><span class="line">[c:       4 bytes] 20</span><br><span class="line">[a:       1 byte ] 21</span><br><span class="line">[d:       1 byte ] 22</span><br><span class="line">[padding: 2 bytes] 24</span><br><span class="line">[f:       4 bytes] 28</span><br><span class="line">[padding: 4 bytes] 32</span><br></pre></td></tr></table></figure>
-
-<p>经过优化后只有6个字节用于对齐填充，总内存也只有32byte。</p>
-<h5 id="3-3-子类的内存布局"><a href="#3-3-子类的内存布局" class="headerlink" title="3.3 子类的内存布局"></a>3.3 子类的内存布局</h5><blockquote>
-<p>规则三：继承结构中属于不同类的字段不混合在一起。父类优先，子类其次。</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">   <span class="keyword">long</span> a;</span><br><span class="line">   <span class="keyword">int</span> b;</span><br><span class="line">   <span class="keyword">int</span> c;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> <span class="keyword">extends</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">   <span class="keyword">long</span> d;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>B类的布局如下：</p>
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  8 bytes]  8</span><br><span class="line">[a:       8 bytes] 16</span><br><span class="line">[b:       4 bytes] 20</span><br><span class="line">[c:       4 bytes] 24</span><br><span class="line">[d:       8 bytes] 32</span><br></pre></td></tr></table></figure>
-
-<p>如果父类的字段不符合4字节对齐。</p>
-<blockquote>
-<p>规则四：父类的最后一个字段和子类第一个字段之间必须4字节对齐。</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">   <span class="keyword">byte</span> a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">   <span class="keyword">byte</span> b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  8 bytes]  8</span><br><span class="line">[a:       1 byte ]  9</span><br><span class="line">[padding: 3 bytes] 12</span><br><span class="line">[b:       1 byte ] 13</span><br><span class="line">[padding: 3 bytes] 16</span><br></pre></td></tr></table></figure>
-<p>a后面的3个字节就是为了使其4字节对齐。这3个字节只能浪费不能给B使用。</p>
-<p>最后一个规则可以用于节约一些内存空间：当子类的第一个属性是long或者double类型且父类没有以8字节边界结束。</p>
-<blockquote>
-<p>规则五：子类的第一个字段是doubel或long且父类没有以8字节边界结束，JVM打破2的规则，先存储int、short、byte、reference来填补空缺。</p>
-</blockquote>
-<p>例如：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">  <span class="keyword">byte</span> a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</span><br><span class="line">  <span class="keyword">long</span> b;</span><br><span class="line">  <span class="keyword">short</span> c;  </span><br><span class="line">  <span class="keyword">byte</span> d;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>内存布局如下：</p>
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  8 bytes]  8</span><br><span class="line">[a:       1 byte ]  9</span><br><span class="line">[padding: 3 bytes] 12</span><br><span class="line">[c:       2 bytes] 14</span><br><span class="line">[d:       1 byte ] 15</span><br><span class="line">[padding: 1 byte ] 16</span><br><span class="line">[b:       8 bytes] 24</span><br></pre></td></tr></table></figure>
-
-<p>在字节12的位置，A类结束了。JVM打破2的规则放入short和byte类型，节约了4字节中的3个字节，否则将浪费掉。</p>
-<h5 id="3-4-数组的内存布局"><a href="#3-4-数组的内存布局" class="headerlink" title="3.4 数组的内存布局"></a>3.4 数组的内存布局</h5><p>数组类型有一个额外的头部字段保存数组的长度，接下来是数组的元素，数组作为普通对象也是8字节对齐的。</p>
-<p>这是byte[3]的布局：</p>
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  12 bytes] 12</span><br><span class="line">[[0]:      1 byte ] 13</span><br><span class="line">[[1]:      1 byte ] 14</span><br><span class="line">[[2]:      1 byte ] 15</span><br><span class="line">[padding:  1 byte ] 16</span><br></pre></td></tr></table></figure>
-
-<p>这是long[3]的布局:</p>
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">[HEADER:  12 bytes] 12</span><br><span class="line">[padding:  4 bytes] 16</span><br><span class="line">[[0]:      8 bytes] 24</span><br><span class="line">[[1]:      8 bytes] 32</span><br><span class="line">[[2]:      8 bytes] 40</span><br></pre></td></tr></table></figure>
-
-<h5 id="3-5-内部类的内存布局"><a href="#3-5-内部类的内存布局" class="headerlink" title="3.5 内部类的内存布局"></a>3.5 内部类的内存布局</h5><p>非静态内部类有一个额外的隐藏字段，持有外部类的引用。这个字段是一个常规的引用,它符合对象在内存布局的规则。内部类因此有4字节额外的开销。</p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>JVM</tag>
       </tags>
   </entry>
   <entry>
@@ -2389,47 +2502,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Kotlin之JvmStatic和override冲突问题</title>
-    <url>/kotlin-lang-jvmstatic-with-interface.html</url>
-    <content><![CDATA[<h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
-</center>
-
-
-<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
-</code></pre>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
-<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
-</blockquote>
-<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
-<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Kotlin中的JVM注解</title>
     <url>/kotlin-lang-jvm-annotation.html</url>
     <content><![CDATA[<p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
@@ -2500,6 +2572,47 @@
         <category>计算机</category>
       </categories>
       <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kotlin之JvmStatic和override冲突问题</title>
+    <url>/kotlin-lang-jvmstatic-with-interface.html</url>
+    <content><![CDATA[<h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
+</center>
+
+
+<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
+</code></pre>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
+<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
+</blockquote>
+<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
         <tag>Kotlin</tag>
       </tags>
   </entry>
@@ -3050,9 +3163,9 @@
 
 <h6 id="关于作者"><a href="#关于作者" class="headerlink" title="关于作者"></a>关于作者</h6><p>马尔科姆·格拉德威尔（Malcolm Gladwell）（1963年9月3日）毕业于多伦多大学的三一学院，主修历史学，是一位加拿大作家、记者和演讲者，以其畅销书和在《纽约客》杂志上的文章而闻名。他的作品通常探讨社会科学、心理学和行为经济学的主题，通过生动的故事和深刻的见解启发读者。</p>
 <p>其他出版物：<br>《引爆点》（The Tipping Point, 2000）：探讨了如何通过少数关键因素引发大的变化，书中引入了“引爆点”的概念。<br>《决断两秒间》（Blink, 2005）：研究了人们在瞬间决策中的潜意识过程和直觉判断。<br>《异类》（Outliers, 2008）：探讨了成功背后的非凡因素，提出了“1万小时定律”等概念。<br>《大开眼界》（What the Dog Saw, 2009）：这本书是他在《纽约客》杂志上发表的文章的集合，涵盖了各种主题。<br>《大卫与歌利亚》（David and Goliath, 2013）：讨论了在人们认为不利的条件下如何取得成功。<br>《谈话的力量》（Talking to Strangers, 2019）：探讨了人们在与陌生人交流时常犯的错误及其后果</p>
-<h4 id="第一部分：机遇"><a href="#第一部分：机遇" class="headerlink" title="第一部分：机遇"></a>第一部分：机遇</h4><h5 id="1、马太效应：英超球员的优势积累"><a href="#1、马太效应：英超球员的优势积累" class="headerlink" title="1、马太效应：英超球员的优势积累"></a>1、马太效应：英超球员的优势积累</h5><p>这一节分成六个部分：</p>
+<h4 id="第一部分：机遇"><a href="#第一部分：机遇" class="headerlink" title="第一部分：机遇"></a>第一部分：机遇</h4><h5 id="马太效应：英超球员的优势积累"><a href="#马太效应：英超球员的优势积累" class="headerlink" title="马太效应：英超球员的优势积累"></a>马太效应：英超球员的优势积累</h5><p>这一节分成六个部分：</p>
 <ul>
-<li>成功靠什么：成功靠的是个人意愿和能力优势，只能靠自己而不是他人的帮助。真的是这样吗？</li>
+<li>成功靠什么：成功靠的是个人意愿和能力优势，只能靠自己而不是他人的帮助。<strong>真的是这样吗？</strong></li>
 <li>成功者之幸</li>
 <li>生于年初：职业青年队绝大多 数球员的生日集中在1月、2月和3月</li>
 <li>优势积累：一个1月1日出生的选手，是在跟许多年纪比其小的队友争夺晋级权。晋级后接受更好的训练。</li>
@@ -3064,8 +3177,8 @@
 </li>
 <li>离绝对老大只剩三天：出生在1月4日，只差3天他就是同龄队员中绝对的老大了</li>
 </ul>
-<p>读书笔记：有意识的提前建立优势，并不断积累优势是成功的关键。</p>
-<h5 id="2、1万小时定律：生于1955年的乔布斯和比尔盖茨"><a href="#2、1万小时定律：生于1955年的乔布斯和比尔盖茨" class="headerlink" title="2、1万小时定律：生于1955年的乔布斯和比尔盖茨"></a>2、1万小时定律：生于1955年的乔布斯和比尔盖茨</h5><p>这一节分成六个部分：</p>
+<p>读书笔记：<strong>有意识的提前建立优势，并不断积累优势是成功的关键。</strong></p>
+<h5 id="1万小时定律：生于1955年的乔布斯和比尔盖茨"><a href="#1万小时定律：生于1955年的乔布斯和比尔盖茨" class="headerlink" title="1万小时定律：生于1955年的乔布斯和比尔盖茨"></a>1万小时定律：生于1955年的乔布斯和比尔盖茨</h5><p>这一节分成六个部分：</p>
 <ul>
 <li>天才创始人：计算机科学家比尔·乔伊。</li>
 <li>一万小时有多久：一万小时训练是成为优秀的必要条件。</li>
@@ -3078,7 +3191,7 @@
 <li>时势造成功：机遇造就了成功。</li>
 </ul>
 <p>读书笔记：成功 = 时代机遇 + 努力</p>
-<h5 id="3、智商和机遇：曼特人的谬误"><a href="#3、智商和机遇：曼特人的谬误" class="headerlink" title="3、智商和机遇：曼特人的谬误"></a>3、智商和机遇：曼特人的谬误</h5><p>这一节分成五个部分：</p>
+<h5 id="智商和机遇：曼特人的谬误"><a href="#智商和机遇：曼特人的谬误" class="headerlink" title="智商和机遇：曼特人的谬误"></a>智商和机遇：曼特人的谬误</h5><p>这一节分成五个部分：</p>
 <ul>
 <li>全美最聪明的人：智商195的兰根参加《以一敌百》节目。</li>
 <li>超常“特曼人”<blockquote>
@@ -3092,7 +3205,7 @@
 <li>充满想象力的心灵:发散性思维测试要求你运用想象力，寻找尽量多的不同的可能性。</li>
 <li>事与愿违的试验结果:特曼忽略了一个事实——智力在现实中的作用并 没有那么大。</li>
 </ul>
-<h5 id="4、社交与家庭：天才兰根的忧伤"><a href="#4、社交与家庭：天才兰根的忧伤" class="headerlink" title="4、社交与家庭：天才兰根的忧伤"></a>4、社交与家庭：天才兰根的忧伤</h5><p>这一节分成六个部分：</p>
+<h5 id="社交与家庭：天才兰根的忧伤"><a href="#社交与家庭：天才兰根的忧伤" class="headerlink" title="社交与家庭：天才兰根的忧伤"></a>社交与家庭：天才兰根的忧伤</h5><p>这一节分成六个部分：</p>
 <ul>
 <li>令人心碎的天才命运：天才兰根家庭环境不好，即使是天才，最后结局也很一般。</li>
 <li>另一位天才的命运：天才奥本海默，家庭环境好，结局成功。</li>
@@ -3105,7 +3218,7 @@
 <p>家境富裕的父母总是让孩子一刻也不能闲着， 让孩子穿梭于各项活动之 间，并听取孩子对老师、教练或是队友的评价<br>而穷人家孩子的生活中完全没有这种紧张的时间安排， 他们的活动不会 是每周两次足球训练，而是和亲戚或者邻居家的孩子在外面玩耍。</p>
 </blockquote>
 <p>读书笔记：家庭教育很重要，让孩子高效利用时间深度参与到有意义的社会活动中，鼓励孩子表达自己的想法，挑战权威，敢于表现自己。</p>
-<h5 id="5、最佳时代：乔-弗洛姆的律师生涯"><a href="#5、最佳时代：乔-弗洛姆的律师生涯" class="headerlink" title="5、最佳时代：乔-弗洛姆的律师生涯"></a>5、最佳时代：乔-弗洛姆的律师生涯</h5><p>这一节分为七个部分：</p>
+<h5 id="最佳时代：乔-弗洛姆的律师生涯"><a href="#最佳时代：乔-弗洛姆的律师生涯" class="headerlink" title="最佳时代：乔-弗洛姆的律师生涯"></a>最佳时代：乔-弗洛姆的律师生涯</h5><p>这一节分为七个部分：</p>
 <ul>
 <li>律师事务所之翘楚：贫穷的移民，被歧视的犹太人：乔-弗洛姆，从世达律师事务所的助理到合伙人，从几个人到几千人。<strong>这是时代造就了行业</strong>。</li>
 <li>纽约移民区的故事：弗洛姆成长环境下的几个小故事。<ul>
@@ -3118,7 +3231,7 @@
 <li>成功不是随机事件</li>
 </ul>
 <p>读书笔记：受歧视的乔-弗洛姆进不了大公司只能进小公司，自己创业，处理那些别人不愿处理的案子。随着时代或政策的转变业务激增，二流律师摇身一变成为一流。弗洛姆并不 是克服了逆境，而是原先的逆境忽然之间变成了机遇。</p>
-<h4 id="第二部分：文化传承"><a href="#第二部分：文化传承" class="headerlink" title="第二部分：文化传承"></a>第二部分：文化传承</h4><h5 id="6、文化差异：小镇哈伦"><a href="#6、文化差异：小镇哈伦" class="headerlink" title="6、文化差异：小镇哈伦"></a>6、文化差异：小镇哈伦</h5><p>这一节分为四部分：</p>
+<h4 id="第二部分：文化传承"><a href="#第二部分：文化传承" class="headerlink" title="第二部分：文化传承"></a>第二部分：文化传承</h4><h5 id="文化差异：小镇哈伦"><a href="#文化差异：小镇哈伦" class="headerlink" title="文化差异：小镇哈伦"></a>文化差异：小镇哈伦</h5><p>这一节分为四部分：</p>
 <ul>
 <li>血染哈伦<br>哈伦县城两大家族矛盾和枪战。</li>
 <li>荣誉文化<blockquote>
@@ -3134,7 +3247,7 @@
 </blockquote>
 </li>
 </ul>
-<h5 id="7、权力距离指数：韩国飞机失事率"><a href="#7、权力距离指数：韩国飞机失事率" class="headerlink" title="7、权力距离指数：韩国飞机失事率"></a>7、权力距离指数：韩国飞机失事率</h5><blockquote>
+<h5 id="权力距离指数：韩国飞机失事率"><a href="#权力距离指数：韩国飞机失事率" class="headerlink" title="权力距离指数：韩国飞机失事率"></a>权力距离指数：韩国飞机失事率</h5><blockquote>
 <p>权力距离是指人们对待比自己更高等级阶层的态度，特别是指对权威的重视和尊重的程度。</p>
 </blockquote>
 <ul>
@@ -3166,7 +3279,7 @@
 <li>卸下重担：</li>
 </ul>
 <p>读书笔记：客机失事的主要原因在于权利指数在副驾驶和主驾驶之间发挥着作用。这是一种文化特征，是一种上下级的阶级关系。我们应该对事不对人，客观辩证的处理问题，不屈服于权威。</p>
-<h5 id="8、内在优势：亚洲人精神"><a href="#8、内在优势：亚洲人精神" class="headerlink" title="8、内在优势：亚洲人精神"></a>8、内在优势：亚洲人精神</h5><p>这一节分为6个部分：</p>
+<h5 id="内在优势：亚洲人精神"><a href="#内在优势：亚洲人精神" class="headerlink" title="内在优势：亚洲人精神"></a>内在优势：亚洲人精神</h5><p>这一节分为6个部分：</p>
 <ul>
 <li>数字优势：亚洲人在数字方面有优势，一方面是因为他们对数字的发音更短，另一方面得益于族裔文化。</li>
 <li>稻田中的辛劳：种植水稻的亚洲农民一年的工作时长约为3000小时。</li>
@@ -3176,7 +3289,7 @@
 <li>劳有所得：哪个国家和地区的学 生更愿意花时间仔细回答冗长的问卷，哪个国家和地区的学生在TIMSS考试中的成绩就更好。</li>
 </ul>
 <p>读书笔记：亚洲人精神:吃苦耐劳，耐心，持之以恒。</p>
-<h5 id="9、扭转风气：玛丽塔之幸"><a href="#9、扭转风气：玛丽塔之幸" class="headerlink" title="9、扭转风气：玛丽塔之幸"></a>9、扭转风气：玛丽塔之幸</h5><p>这一节分为6个部分：</p>
+<h5 id="扭转风气：玛丽塔之幸"><a href="#扭转风气：玛丽塔之幸" class="headerlink" title="扭转风气：玛丽塔之幸"></a>扭转风气：玛丽塔之幸</h5><p>这一节分为6个部分：</p>
 <ul>
 <li>风气之先：KIPP项目代表了美国教育的新理念，它的成功并非依靠环境、师资或制度创新。</li>
 <li>西方教育的传统：<ul>

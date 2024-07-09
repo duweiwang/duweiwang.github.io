@@ -186,6 +186,279 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-github-source-workmanager.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/android-github-source-workmanager.html" class="post-title-link" itemprop="url">源码分析-WorkManager</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-04-17 13:51:57" itemprop="dateCreated datePublished" datetime="2022-04-17T13:51:57+08:00">2022-04-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="一、初始化流程"><a href="#一、初始化流程" class="headerlink" title="一、初始化流程"></a>一、初始化流程</h4><p>1、WorkManager集成了<code>androidx.startup</code> 库，通过<code>startup</code>库的<code>ContentProvider</code>在应用启动时进行初始化。<br>见<code>work-runtime</code>的Manifest文件：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">provider</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;androidx.startup.InitializationProvider&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:authorities</span>=<span class="string">&quot;$&#123;applicationId&#125;.androidx-startup&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:exported</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:node</span>=<span class="string">&quot;merge&quot;</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;androidx.work.WorkManagerInitializer&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:value</span>=<span class="string">&quot;androidx.startup&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>其初始化类为<code>WorkManagerInitializer</code>，其中调用了<code>WorkManager#initialize</code>，然后调用<code>WorkManager</code>的构造函数。<br>整个流程初始化了如下一些对象：</p>
+<center>
+    <img src="../images/android-workmanager_init.jpg" width="100%"/>
+</center>
+
+
+<h4 id="二、任务"><a href="#二、任务" class="headerlink" title="二、任务"></a>二、任务</h4><h5 id="2-1-定义任务"><a href="#2-1-定义任务" class="headerlink" title="2.1 定义任务"></a>2.1 定义任务</h5><p>当我们自定义任务时，需要继承<code>Work</code>类，WorkManager内部对<code>Work</code>的结构定义如下：</p>
+<center>
+    <img src="../images/android-workmanager-work.jpg" width="40%"/>
+</center>
+
+<p>其中<code>DiagnosticsWorker</code>和<code>CombineContinueationsWorker</code>是内部使用的两个任务。</p>
+<h5 id="2-2-提交任务"><a href="#2-2-提交任务" class="headerlink" title="2.2 提交任务"></a>2.2 提交任务</h5><p>我们将任务以请求（WorkRequest）的形式提交（enqueue）给WorkManager。WorkManager会将请求装换成内部的WorkContinuation对象。</p>
+<center>
+    <img src="../images/android-workmanager-request.jpg" width="70%"/>
+</center>
+
+<p>WorkContinuation可以将多个<code>OneTimeWorkrequest</code>构建成任意依赖关系的无环图。而WorkContinuation的<code>enqueue</code>方法则是任务被执行调度的入口。</p>
+<h5 id="2-3-执行任务"><a href="#2-3-执行任务" class="headerlink" title="2.3 执行任务"></a>2.3 执行任务</h5><p>对任务进行不同的操作，如：取消、结束、开始等。WorkManager内部会将这些行为转换成对应的Runnable交给调度系统进行执行。</p>
+<center>
+    <img src="../images/android-workmanager-action.jpg" width="70%"/>
+</center>
+
+
+<h4 id="三、任务的调度"><a href="#三、任务的调度" class="headerlink" title="三、任务的调度"></a>三、任务的调度</h4><p>提交给WorkManager的任务，会封装成<code>EnqueueRunnable</code>交给默认的<code>SerialExecutor</code>去执行。<br><code>EnqueueRunnable</code>的run方法会先将任务加入数据库中保存。然后进行任务调度。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (mWorkContinuation.hasCycles()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">                    String.format(<span class="string">&quot;WorkContinuation has cycles (%s)&quot;</span>, mWorkContinuation));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//加入数据库</span></span><br><span class="line">        <span class="keyword">boolean</span> needsScheduling = addToDatabase();</span><br><span class="line">        <span class="keyword">if</span> (needsScheduling) &#123;</span><br><span class="line">            <span class="comment">// Enable RescheduleReceiver, only when there are Worker&#x27;s that need scheduling.</span></span><br><span class="line">            <span class="keyword">final</span> Context context =</span><br><span class="line">                    mWorkContinuation.getWorkManagerImpl().getApplicationContext();</span><br><span class="line">            PackageManagerHelper.setComponentEnabled(context, RescheduleReceiver.class, <span class="keyword">true</span>);</span><br><span class="line">            <span class="comment">//进行任务调度</span></span><br><span class="line">            scheduleWorkInBackground();</span><br><span class="line">        &#125;</span><br><span class="line">        mOperation.setState(Operation.SUCCESS);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable exception) &#123;</span><br><span class="line">        mOperation.setState(<span class="keyword">new</span> Operation.State.FAILURE(exception));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="四、其他"><a href="#四、其他" class="headerlink" title="四、其他"></a>四、其他</h4><h5 id="4-1-任务的约束"><a href="#4-1-任务的约束" class="headerlink" title="4.1 任务的约束"></a>4.1 任务的约束</h5><h4 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h4><p>WorkManager库并不算复杂。这种对任务的管理和调度框架的源码，我们可以多看，学习一下里面的设计思路。有个大概的印象，后续写相关逻辑时可以借鉴。</p>
+<ul>
+<li>借助<code>startup</code>初始化你的框架</li>
+<li>构建有依赖关系的任务</li>
+<li>通过Runnable解耦任务的请求和执行。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-library-room-7-tips.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/android-library-room-7-tips.html" class="post-title-link" itemprop="url">Room数据库酷七条</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-30 22:01:39" itemprop="dateCreated datePublished" datetime="2022-01-30T22:01:39+08:00">2022-01-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="一、通过RoomDatabase-Callback预填充数据"><a href="#一、通过RoomDatabase-Callback预填充数据" class="headerlink" title="一、通过RoomDatabase#Callback预填充数据"></a>一、通过<code>RoomDatabase#Callback</code>预填充数据</h4><p>如果需要在数据库创建或数据库打开的时候添加一些默认数据，可以使用<code>RoomDatabase#Callback</code>接口并复写它的<code>onCreate</code>或<code>onOpen</code>方法。由于DAO对象只能在这两个方法返回后使用，所以我们创建一个新线程来插入数据：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">Room.databaseBuilder(context.applicationContext,</span><br><span class="line">        DataDatabase::<span class="keyword">class</span>.java, <span class="string">&quot;Sample.db&quot;</span>)</span><br><span class="line">        <span class="comment">// prepopulate the database after onCreate was called</span></span><br><span class="line">        .addCallback(<span class="keyword">object</span> : Callback() &#123;</span><br><span class="line">            <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(db: <span class="type">SupportSQLiteDatabase</span>)</span></span> &#123;</span><br><span class="line">                <span class="keyword">super</span>.onCreate(db)</span><br><span class="line">                <span class="comment">// moving to a new thread</span></span><br><span class="line">                ioThread &#123;</span><br><span class="line">                    getInstance(context).dataDao()</span><br><span class="line">                                        .insert(PREPOPULATE_DATA)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">        .build()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>需要注意的是</strong>：当app首次启动时，在create和insert之间崩溃的话，数据将永远不会被插入。</p>
+<h4 id="二、使用DAO的继承能力"><a href="#二、使用DAO的继承能力" class="headerlink" title="二、使用DAO的继承能力"></a>二、使用DAO的继承能力</h4><p>很多DAO里存在一样的<code>Insert</code>、<code>Update</code>、<code>Delete</code>方法。我们可以使用继承来避免这些重复的代码。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BaseDao</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">insert</span><span class="params">(<span class="keyword">vararg</span> obj: <span class="type">T</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">DataDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">Data</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;SELECT * FROM Data&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getData</span><span class="params">()</span></span>: List&lt;Data&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="三、通过-Transaction减少事务查询的模板代码"><a href="#三、通过-Transaction减少事务查询的模板代码" class="headerlink" title="三、通过@Transaction减少事务查询的模板代码"></a>三、通过<code>@Transaction</code>减少事务查询的模板代码</h4><p>用<code>@Transaction</code>注解的方法会在一个事务里面执行。当这些方法执行异常时，事务也会失败。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Transaction</span></span><br><span class="line">    <span class="keyword">open</span> <span class="function"><span class="keyword">fun</span> <span class="title">updateData</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span> &#123;</span><br><span class="line">        deleteAllUsers()</span><br><span class="line">        insertAll(users)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Insert</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">insertAll</span><span class="params">(users: <span class="type">List</span>&lt;<span class="type">User</span>&gt;)</span></span></span><br><span class="line">    <span class="meta">@Query(<span class="meta-string">&quot;DELETE FROM Users&quot;</span>)</span></span><br><span class="line">    <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">deleteAllUsers</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当<code>@Query</code>方法带有select语句时，在下列情况下你可能会使用<code>@Transation</code>注解</p>
+<ul>
+<li>当查询的结果集很大时，让查询在一次事务里完成能够保证：如果查询结果不满足单个游标窗口，它不会因为在游标窗口交换之间的数据库更改而中断。</li>
+<li>如果查询结果是一个带<code>@Relation</code>字段的POJO，此字段会单独查询，所以让他们运行在一个事务中可以确保结果一致。</li>
+</ul>
+<p><code>Delete</code>、<code>Update</code>、<code>Insert</code>方法包含多个参数时会自动在事务里执行。</p>
+<h4 id="四、只读需要的数据"><a href="#四、只读需要的数据" class="headerlink" title="四、只读需要的数据"></a>四、只读需要的数据</h4><p>关注App的内存消耗，只加载需要使用的字段，这能提高查询速度减少IO消耗。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;users&quot;</span>)</span></span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span></span>(<span class="meta">@PrimaryKey</span></span><br><span class="line">                <span class="keyword">val</span> id: String,</span><br><span class="line">                <span class="keyword">val</span> userName: String,</span><br><span class="line">                <span class="keyword">val</span> firstName: String, </span><br><span class="line">                <span class="keyword">val</span> lastName: String,</span><br><span class="line">                <span class="keyword">val</span> email: String,</span><br><span class="line">                <span class="keyword">val</span> dateOfBirth: Date, </span><br><span class="line">                <span class="keyword">val</span> registrationDate: Date)</span><br></pre></td></tr></table></figure>
+
+<p>上面的类中，很多字段我们用不到，定义一个类，只包含我们需要的字段：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserMinimal</span></span>(<span class="keyword">val</span> userId: String,</span><br><span class="line">                       <span class="keyword">val</span> firstName: String, </span><br><span class="line">                       <span class="keyword">val</span> lastName: String)</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，定义方法只查询所需字段：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">UserDao</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT userId, firstName, lastName FROM Users)</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getUsersMinimal</span><span class="params">()</span></span>: List&lt;UserMinimal&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="五、使用外键"><a href="#五、使用外键" class="headerlink" title="五、使用外键"></a>五、使用外键</h4><p>即使Room不直接支持关系，但它允许你定义外键来约束实体之间的关系。</p>
+<p>Room的<code>@ForeignKey</code>是<code>@Entity</code>注解的一部分，用来支持Sqlite的外键特性。它强制表之间的约束，当你修改表时，保证关系一致性。</p>
+<p>看一下<code>User</code>和<code>Pet</code>类，<code>Pet</code>有主人，以userId关联。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity(tableName = <span class="meta-string">&quot;pets&quot;</span>,</span></span><br><span class="line"><span class="meta">        foreignKeys = arrayOf(</span></span><br><span class="line"><span class="meta">            ForeignKey(entity = User::class,</span></span><br><span class="line"><span class="meta">                       parentColumns = arrayOf(<span class="meta-string">&quot;userId&quot;</span>)</span>,</span><br><span class="line">                       childColumns = arrayOf(<span class="string">&quot;owner&quot;</span>))))</span><br><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">Pet</span></span>(<span class="meta">@PrimaryKey</span> <span class="keyword">val</span> petId: String,</span><br><span class="line">              <span class="keyword">val</span> name: String,</span><br><span class="line">              <span class="keyword">val</span> owner: String)</span><br></pre></td></tr></table></figure>
+
+<p>你可以定义一些行为，当例子中的<code>User</code>在数据库中被删除或修改。你可以做以下一些操作：<code>NO_ACTION</code>、<code>RESTRICT</code>、<code>SET_NULL</code>、<code>SET_DEFAULT</code>或<code>CASCADE</code>，这些操作和Sqlite保持一致。</p>
+<p><strong>注意：</strong> 在Room中<code>SET_DEFAULT</code>和<code>SET_NULL</code>效果一致，因为Room还不允许为数据列设置默认值。</p>
+<h4 id="六、使用-Relation简化一对多查询"><a href="#六、使用-Relation简化一对多查询" class="headerlink" title="六、使用@Relation简化一对多查询"></a>六、使用<code>@Relation</code>简化一对多查询</h4><p>在前面<code>User-Pet</code>的例子中，我们有个一对多的关系，一个人可以有多个宠物。当我们想获取主人和宠物集合时：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>(<span class="keyword">val</span> user: User,</span><br><span class="line">                           <span class="keyword">val</span> pets: List&lt;Pet&gt; = ArrayList())</span><br></pre></td></tr></table></figure>
+
+<p>需要两个查询：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;User&gt; getUsers();</span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Pets where owner = :userId”)</span></span><br><span class="line"><span class="keyword">public</span> List&lt;Pet&gt; getPetsForUser(String userId);</span><br></pre></td></tr></table></figure>
+
+<p>我们需要遍历用户来查宠物。</p>
+<p>为了简化此过程，Room的<code>@Relation</code>注解自动关联实体。此注解只能用于<code>List</code>和<code>Set</code>对象。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserAndAllPets</span> </span>&#123;</span><br><span class="line">   <span class="meta">@Embedded</span></span><br><span class="line">   <span class="keyword">var</span> user: User? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">   <span class="meta">@Relation(parentColumn = “userId”,</span></span><br><span class="line"><span class="meta">             entityColumn = “owner”)</span></span><br><span class="line">   <span class="keyword">var</span> pets: List&lt;Pet&gt; = ArrayList()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，我们定义一次查询：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transaction</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users”)</span></span><br><span class="line">List&lt;UserAndAllPets&gt; getUsers();</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="七、避免可观察查询的假通知"><a href="#七、避免可观察查询的假通知" class="headerlink" title="七、避免可观察查询的假通知"></a>七、避免可观察查询的假通知</h4><p>可观察查询，只关心对应ID的对象：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; </span><br><span class="line"></span><br><span class="line"><span class="comment">// or</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userId = :id)</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br></pre></td></tr></table></figure>
+
+<p>每次此用户更新的时候你都得到一个新通知。但是其他的一些不影响此ID的修改（delete、update、insert）会发送通知。</p>
+<p>这种场景背后的原因是什么：<br>1、Sqlite支持触发器，<code>DELETE</code>、<code>UPDATE</code>、<code>INSERT</code>发生时或触发。<br>2、Room创建了一个<code>InvalidationTracker</code>来跟踪观察表的变化。<br>3、<code>LiveData</code>和<code>Flowable</code>查询依赖<code>InvalidationTracker.Observer#onInvalidated</code>通知，收到通知就做一次再查询操作。</p>
+<p>Room只知道表被修改了，不知道为什么修改也不知道什么被修改。因此，再查询操作会重新通知。由于Room不在内存保存数据也不能保证object的equals方法所以他不知道对象是否变化了。</p>
+<p>你需要自己保证DAO过滤收到的事件，只对关心的数据做出响应。</p>
+<p>如果观察的是<code>Flowable</code>，使用<code>Flowable#distinctUntilChanged</code>。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Get a user by id.</span></span><br><span class="line"><span class="comment">* <span class="doctag">@return</span> the user from the table with a specific id.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: Flowable&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: </span><br><span class="line">    Flowable&lt;User&gt; = getUserById(id).distinctUntilChanged()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果观察的是<code>LiveData</code>，可以用<code>MediatorLiveData</code>处理只让有变化的数据发送事件。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> LiveData<span class="type">&lt;T&gt;</span>.<span class="title">getDistinct</span><span class="params">()</span></span>: LiveData&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> distinctLiveData = MediatorLiveData&lt;T&gt;()</span><br><span class="line">    distinctLiveData.addSource(<span class="keyword">this</span>, <span class="keyword">object</span> : Observer&lt;T&gt; &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> initialized = <span class="literal">false</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">var</span> lastObj: T? = <span class="literal">null</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onChanged</span><span class="params">(obj: <span class="type">T</span>?)</span></span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!initialized) &#123;</span><br><span class="line">                initialized = <span class="literal">true</span></span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((obj == <span class="literal">null</span> &amp;&amp; lastObj != <span class="literal">null</span>) </span><br><span class="line">                       || obj != lastObj) &#123;</span><br><span class="line">                lastObj = obj</span><br><span class="line">                distinctLiveData.postValue(lastObj)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="keyword">return</span> distinctLiveData</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在DAO中，让真正关心变化的方法使用<code>public</code>修饰，查询方法用<code>protected</code>修饰</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Dao</span></span><br><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UserDao</span> : <span class="type">BaseDao</span>&lt;<span class="type">User</span>&gt;</span>() &#123;</span><br><span class="line">    <span class="meta">@Query(“SELECT * FROM Users WHERE userid = :id”)</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="function"><span class="keyword">fun</span> <span class="title">getUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getDistinctUserById</span><span class="params">(id: <span class="type">String</span>)</span></span>: LiveData&lt;User&gt; = getUserById(id).getDistinct()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong> 如果你返回列表用于展示，考虑使用<code>Paging</code>库，它能帮你处理数据的变化。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-github-source-retrofit.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1379,516 +1652,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-coroutine-deep-recursion.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/kotlin-coroutine-deep-recursion.html" class="post-title-link" itemprop="url">用Kotlin协程解决深度递归问题</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-10-30 10:38:30" itemprop="dateCreated datePublished" datetime="2021-10-30T10:38:30+08:00">2021-10-30</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>&ensp;&ensp;&ensp;&ensp;协程一般用于异步编程。在解决异步编程问题方面，Kotlin编译器在对协程的设计和实现是通用的。我们可以借助协程优雅的解决深度递归问题。</p>
-<h4 id="一、问题描述"><a href="#一、问题描述" class="headerlink" title="一、问题描述"></a>一、问题描述</h4><p>定义以下二叉树的结点，并构造一棵只含十万个左结点的树，进行深度遍历，求树的深度：  </p>
-<center>
-    <img src="../images/tree_only_left.png" width="500"/>
-</center>
-
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//结点定义</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Tree</span></span>(<span class="keyword">val</span> left: Tree?, <span class="keyword">val</span> right: Tree?)</span><br><span class="line"></span><br><span class="line"><span class="comment">//构造二叉树：以叶子结点开始，重复构造父结点，并把当前结点作为父结点的左子树</span></span><br><span class="line"><span class="keyword">val</span> n = <span class="number">100_000</span></span><br><span class="line"><span class="keyword">val</span> deepTree = generateSequence(Tree(<span class="literal">null</span>, <span class="literal">null</span>)) &#123; prev -&gt;</span><br><span class="line">    Tree(prev, <span class="literal">null</span>) </span><br><span class="line">&#125;.take(n).last()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h4 id="二、解决方案"><a href="#二、解决方案" class="headerlink" title="二、解决方案"></a>二、解决方案</h4><h5 id="2-1-解决方案一："><a href="#2-1-解决方案一：" class="headerlink" title="2.1 解决方案一："></a>2.1 解决方案一：</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">depth</span><span class="params">(t: <span class="type">Tree</span>?)</span></span>: <span class="built_in">Int</span> =</span><br><span class="line">    <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="number">0</span> <span class="keyword">else</span> maxOf(</span><br><span class="line">        depth(t.left), <span class="comment">// recursive call one</span></span><br><span class="line">        depth(t.right) <span class="comment">// recursive call two</span></span><br><span class="line">    ) + <span class="number">1</span></span><br></pre></td></tr></table></figure>
-
-<p>分析：<br>对树进行递归是最简洁直接的解决方案。而递归将保存函数的调用栈用于后续状态恢复，线程的调用栈是有大小限制的，此处将抛出<code>Exception in thread &quot;main&quot; java.lang.StackOverflowError</code>错误。</p>
-<h5 id="2-2-解决方案二："><a href="#2-2-解决方案二：" class="headerlink" title="2.2 解决方案二："></a>2.2 解决方案二：</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">depth</span><span class="params">(t: <span class="type">Tree</span>?)</span></span>: <span class="built_in">Int</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">      <span class="class"><span class="keyword">class</span> <span class="title">Frame</span></span>(<span class="keyword">val</span> node: Tree, <span class="keyword">var</span> state: <span class="built_in">Int</span> = <span class="number">0</span>, <span class="keyword">var</span> depth: <span class="built_in">Int</span> = <span class="number">1</span>)</span><br><span class="line">      <span class="keyword">val</span> stack = ArrayList&lt;Frame&gt;()</span><br><span class="line">      <span class="keyword">val</span> root = Frame(t)</span><br><span class="line">      stack.add(root)</span><br><span class="line">      <span class="keyword">while</span> (stack.isNotEmpty()) &#123;</span><br><span class="line">          <span class="keyword">val</span> frame = stack.last()</span><br><span class="line">          <span class="keyword">when</span> (frame.state++) &#123;</span><br><span class="line">              <span class="number">0</span> -&gt; frame.node.left?.let &#123; l -&gt; stack.add(Frame(l)) &#125;</span><br><span class="line">              <span class="number">1</span> -&gt; frame.node.right?.let &#123; r -&gt; stack.add(Frame(r)) &#125;</span><br><span class="line">              <span class="number">2</span> -&gt; &#123;</span><br><span class="line">                  stack.removeLast()</span><br><span class="line">                  stack.lastOrNull()?.let &#123; p -&gt; </span><br><span class="line">                      p.depth = maxOf(p.depth, frame.depth + <span class="number">1</span>) </span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> root.depth</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-<p>分析：<br>基于解决方案一，我们考虑将调用栈状态的保存转移到内存空间更大的堆区，并加入了状态机和<code>while</code>循环。在此例中，程序开始时将全部走状态0，将所有的左节点加入stack。然后全部走状态2(因为没有右结点)，由下到上计算每一个结点的深度。最后返回根节点的深度。</p>
-<h5 id="2-3-解决方案三："><a href="#2-3-解决方案三：" class="headerlink" title="2.3 解决方案三："></a>2.3 解决方案三：</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> depth = DeepRecursiveFunction&lt;Tree?, <span class="built_in">Int</span>&gt; &#123; t -&gt;</span><br><span class="line">        <span class="keyword">if</span> (t == <span class="literal">null</span>) <span class="number">0</span> <span class="keyword">else</span> maxOf(</span><br><span class="line">            callRecursive(t.left),</span><br><span class="line">            callRecursive(t.right)</span><br><span class="line">        ) + <span class="number">1</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>分析：<br>方案二中的状态机就是Kotlin挂起函数的实现原理。所以我们也可以利用Kotlin的挂起函数实现深度遍历。那么方案三是如何实现的呢？我们分析三个方面：  </p>
-<ul>
-<li>如何调用</li>
-<li>如何进入循环</li>
-<li>如何保存状态</li>
-</ul>
-<p>2.3.1 调用<br><code>DeepRecursiveFunction</code>类声明了<code>invoke</code>操作符，调用<code>depth</code>函数就是调用下面👇🏻的操作符。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SinceKotlin(<span class="meta-string">&quot;1.4&quot;</span>)</span></span><br><span class="line"><span class="meta">@ExperimentalStdlibApi</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">operator</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R&gt;</span> DeepRecursiveFunction<span class="type">&lt;T, R&gt;</span>.<span class="title">invoke</span><span class="params">(value: <span class="type">T</span>)</span></span>: R =</span><br><span class="line">    DeepRecursiveScopeImpl&lt;T, R&gt;(block, value).runCallLoop()</span><br></pre></td></tr></table></figure>
-
-<p>2.3.2 循环<br>调用<code>DeepRecursiveFunction</code>后直接进入<code>runCallLoop()</code>循环，result的默认值为UNDEFINED_RESULT，所以会启动我们的递归业务逻辑</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Suppress(<span class="meta-string">&quot;UNCHECKED_CAST&quot;</span>)</span></span><br><span class="line">   <span class="function"><span class="keyword">fun</span> <span class="title">runCallLoop</span><span class="params">()</span></span>: R &#123;</span><br><span class="line">       <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">           <span class="comment">// Note: cont is set to null in DeepRecursiveScopeImpl.resumeWith when the whole computation completes</span></span><br><span class="line">           <span class="keyword">val</span> result = <span class="keyword">this</span>.result</span><br><span class="line">           <span class="keyword">val</span> cont = <span class="keyword">this</span>.cont</span><br><span class="line">               ?: <span class="keyword">return</span> (result <span class="keyword">as</span> Result&lt;R&gt;).getOrThrow() <span class="comment">// done -- final result</span></span><br><span class="line">           <span class="comment">// The order of comparison is important here for that case of rogue class with broken equals</span></span><br><span class="line">           <span class="keyword">if</span> (UNDEFINED_RESULT == result) &#123;</span><br><span class="line">               <span class="comment">// call &quot;function&quot; with &quot;value&quot; using &quot;cont&quot; as completion</span></span><br><span class="line">               <span class="keyword">val</span> r = <span class="keyword">try</span> &#123;</span><br><span class="line">                   <span class="comment">// This is block.startCoroutine(this, value, cont)</span></span><br><span class="line">                   function.startCoroutineUninterceptedOrReturn(<span class="keyword">this</span>, value, cont)</span><br><span class="line">               &#125; <span class="keyword">catch</span> (e: Throwable) &#123;</span><br><span class="line">                   cont.resumeWithException(e)</span><br><span class="line">                   <span class="keyword">continue</span></span><br><span class="line">               &#125;</span><br><span class="line">               <span class="comment">// If the function returns without suspension -- calls its continuation immediately</span></span><br><span class="line">               <span class="keyword">if</span> (r !== COROUTINE_SUSPENDED)</span><br><span class="line">                   cont.resume(r <span class="keyword">as</span> R)</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="comment">// we returned from a crossFunctionCompletion trampoline -- call resume here</span></span><br><span class="line">               <span class="keyword">this</span>.result = UNDEFINED_RESULT <span class="comment">// reset result back</span></span><br><span class="line">               cont.resumeWith(result)</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-
-<p>2.3.3 状态保存<br>每次调用<code>callRecursive</code>时将保存当前的值和cont（continuation），注意这里cont对象每次都不是同一个对象。当进行挂起恢复时，拿到旧的continuation进行回调。</p>
-<center>
-    <img src="../images/kotlin_coroutine_resume.jpeg" width="500"/>
-</center>
-
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">callRecursive</span><span class="params">(value: <span class="type">T</span>)</span></span>: R = </span><br><span class="line">    suspendCoroutineUninterceptedOrReturn &#123; cont -&gt;</span><br><span class="line">        <span class="keyword">this</span>.cont = cont</span><br><span class="line">        <span class="keyword">this</span>.value = value</span><br><span class="line">        COROUTINE_SUSPENDED</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h4><p><a target="_blank" rel="noopener" href="https://elizarov.medium.com/deep-recursion-with-coroutines-7c53e15993e3">Deep recursion with coroutines</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-basic-constraintlayout.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/android-basic-constraintlayout.html" class="post-title-link" itemprop="url">Android中的约束布局</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-10-23 15:03:23" itemprop="dateCreated datePublished" datetime="2021-10-23T15:03:23+08:00">2021-10-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>5.4k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>5 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>&ensp;&ensp;&ensp;&ensp;Android中的视图是以树的形式组织起来的，它是一种层次结构。在代码中体现为组合模式，一个ViewGroup可以包含一个或多个View，同时ViewGroup又是一个View。在布局文件中体现为xml的结点和缩进。<br>&ensp;&ensp;&ensp;&ensp;同时视图的渲染少不了对其进行遍历，这就涉及数据结构中树的深度优先遍历和广度优先遍历。有时候一些复杂的布局一次遍历还无法完全确定View的信息。如何通过算法方式降低树的层次呢？也许这就是约束布局存在的意义吧。<br>&ensp;&ensp;&ensp;&ensp;在Android中，灵活运用ConstraintLayout包括以下几个点：</p>
-<ul>
-<li>主属性<ul>
-<li>通过相对位置约束View</li>
-<li>控制约束之间的距离</li>
-<li>居中和偏移百分比</li>
-<li>通过圆定位📌View</li>
-<li>通过可见性控制View</li>
-<li>通过分辨率约束View</li>
-<li>通过链⛓约束View</li>
-</ul>
-</li>
-<li>辅助工具<ul>
-<li>Barrier屏障约束</li>
-<li>Group分组约束</li>
-<li>Placeholder占位约束</li>
-<li>Guideline引导线约束</li>
-</ul>
-</li>
-</ul>
-<h4 id="二、使用"><a href="#二、使用" class="headerlink" title="二、使用"></a>二、使用</h4><h5 id="2-1-通过相对位置约束View"><a href="#2-1-通过相对位置约束View" class="headerlink" title="2.1 通过相对位置约束View"></a>2.1 通过相对位置约束View</h5><center>
-    <img src="../images/constraint/constraint_relative_position.png" width="500"/>
-</center>
-
-<table>
-<thead>
-<tr>
-<th>约束属性</th>
-<th>描述</th>
-<th>约束属性</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>layout_constraintLeft_toLeftOf</td>
-<td></td>
-<td>layout_constraintLeft_toRightOf</td>
-<td></td>
-</tr>
-<tr>
-<td>layout_constraintRight_toLeftOf</td>
-<td></td>
-<td>layout_constraintRight_toRightOf</td>
-<td></td>
-</tr>
-<tr>
-<td>layout_constraintTop_toTopOf</td>
-<td></td>
-<td>layout_constraintTop_toBottomOf</td>
-<td></td>
-</tr>
-<tr>
-<td>layout_constraintBottom_toTopOf</td>
-<td></td>
-<td>layout_constraintBottom_toBottomOf</td>
-<td></td>
-</tr>
-<tr>
-<td>layout_constraintStart_toEndOf</td>
-<td></td>
-<td>layout_constraintStart_toStartOf</td>
-<td></td>
-</tr>
-<tr>
-<td>layout_constraintEnd_toStartOf</td>
-<td></td>
-<td>layout_constraintEnd_toEndOf</td>
-<td></td>
-</tr>
-<tr>
-<td>layout_constraintBaseline_toBaselineOf</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody></table>
-<h5 id="2-2-控制约束之间的距离"><a href="#2-2-控制约束之间的距离" class="headerlink" title="2.2 控制约束之间的距离"></a>2.2 控制约束之间的距离</h5><center>
-    <img src="../images/constraint/constraint_margin.png" width="500"/>
-</center> 
-
-<table>
-<thead>
-<tr>
-<th>约束属性</th>
-<th>描述</th>
-<th>约束属性</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>android:layout_marginStart</td>
-<td></td>
-<td>layout_goneMarginStart</td>
-<td></td>
-</tr>
-<tr>
-<td>android:layout_marginEnd</td>
-<td></td>
-<td>layout_goneMarginEnd</td>
-<td></td>
-</tr>
-<tr>
-<td>android:layout_marginLeft</td>
-<td></td>
-<td>layout_goneMarginLeft</td>
-<td></td>
-</tr>
-<tr>
-<td>android:layout_marginTop</td>
-<td></td>
-<td>layout_goneMarginTop</td>
-<td></td>
-</tr>
-<tr>
-<td>android:layout_marginRight</td>
-<td></td>
-<td>layout_goneMarginRight</td>
-<td></td>
-</tr>
-<tr>
-<td>android:layout_marginBottom</td>
-<td></td>
-<td>layout_goneMarginBottom</td>
-<td></td>
-</tr>
-<tr>
-<td>android:layout_marginBaseline</td>
-<td></td>
-<td>layout_goneMarginBaseline</td>
-<td></td>
-</tr>
-</tbody></table>
-<h5 id="2-3-居中和偏移百分比"><a href="#2-3-居中和偏移百分比" class="headerlink" title="2.3 居中和偏移百分比"></a>2.3 居中和偏移百分比</h5><table>
-    <tr>
-        <td><img src="../images/constraint/constraint_center_position.png" width="300"/></td>
-        <td><img src="../images/constraint/constraint_center_position_bias.png" width="300"/></td>
-    </tr>
-</table>
-
-<table>
-<thead>
-<tr>
-<th>约束属性</th>
-<th>描述</th>
-<th>约束属性</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>layout_constraintHorizontal_bias</td>
-<td></td>
-<td>layout_constraintVertical_bias</td>
-<td></td>
-</tr>
-</tbody></table>
-<h5 id="2-4-通过圆定位📌View"><a href="#2-4-通过圆定位📌View" class="headerlink" title="2.4 通过圆定位📌View"></a>2.4 通过圆定位📌View</h5><center>
-    <img src="../images/constraint/constraint_circular_position.jpeg" width="400"/>
-</center>
-
-<table>
-<thead>
-<tr>
-<th>约束属性</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>layout_constraintCircle</td>
-<td>另一个widget的id</td>
-</tr>
-<tr>
-<td>layout_constraintCircleRadius</td>
-<td>圆的半径</td>
-</tr>
-<tr>
-<td>layout_constraintCircleAngle</td>
-<td>角度</td>
-</tr>
-</tbody></table>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonB&quot;</span> </span></span><br><span class="line"><span class="tag">   <span class="attr">app:layout_constraintCircle</span>=<span class="string">&quot;@+id/buttonA&quot;</span></span></span><br><span class="line"><span class="tag">   <span class="attr">app:layout_constraintCircleRadius</span>=<span class="string">&quot;100dp&quot;</span></span></span><br><span class="line"><span class="tag">   <span class="attr">app:layout_constraintCircleAngle</span>=<span class="string">&quot;45&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h5 id="2-5-通过可见性控制View"><a href="#2-5-通过可见性控制View" class="headerlink" title="2.5 通过可见性控制View"></a>2.5 通过可见性控制View</h5><center>
-    <img src="../images/constraint/constraint_visibility_behavior.jpeg" width="400"/>
-</center>
-
-<h5 id="2-6-通过分辨率约束View"><a href="#2-6-通过分辨率约束View" class="headerlink" title="2.6 通过分辨率约束View"></a>2.6 通过分辨率约束View</h5><table>
-<thead>
-<tr>
-<th>约束属性</th>
-<th>描述</th>
-<th>约束属性</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>android:minWidth</td>
-<td></td>
-<td>android:minHeight</td>
-<td></td>
-</tr>
-<tr>
-<td>android:maxWidth</td>
-<td></td>
-<td>android:maxHeight</td>
-<td></td>
-</tr>
-</tbody></table>
-<p>2.6.1 百分比</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonA&quot;</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:layout_constraintWidth_default</span>=<span class="string">&quot;percent&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:layout_constraintWidth_percent</span>=<span class="string">&quot;0.5&quot;</span></span></span><br><span class="line"><span class="tag">/&gt;</span></span><br></pre></td></tr></table></figure>
-<p><code>app:layout_constraintWidth_default</code>可以取的值包括：</p>
-<ul>
-<li>spread</li>
-<li>percent</li>
-<li>wrap</li>
-</ul>
-<p>在ConstraintLayout-1.1之后，使用<code>app:layout_constrainedWidth=&quot;true&quot;</code>替代<code>app:layout_constraintWidth_default=&quot;wrap&quot;</code></p>
-<p>2.6.2 比率<br>宽高一比一：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:id</span>=<span class="string">&quot;@+id/buttonA&quot;</span> </span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">app:layout_constraintDimensionRatio</span>=<span class="string">&quot;1:1&quot;</span></span></span><br><span class="line"><span class="tag">/&gt;</span></span><br></pre></td></tr></table></figure>
-<p>指定一条边符合约束比率：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span> <span class="attr">android:layout_width</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;0dp&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintDimensionRatio</span>=<span class="string">&quot;H,16:9&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintBottom_toBottomOf</span>=<span class="string">&quot;parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h5 id="2-7-通过链⛓约束View"><a href="#2-7-通过链⛓约束View" class="headerlink" title="2.7 通过链⛓约束View"></a>2.7 通过链⛓约束View</h5><table>
-    <tr>
-        <td><img src="../images/constraint/constraint_chain.png" width="300"/></td>
-        <td><img src="../images/constraint/constraint_chain_head.png" width="300"/></td>
-    </tr>
-</table>
-
-<table>
-    <tr>
-        <td>图示</td>
-        <td>Style</td>
-    </tr>
-    <tr>
-        <td><img src="../images/constraint/constraint_chain_spread.png" width="250"/></td>
-        <td> _chainStyle="spread" </td>
-    </tr>
-     <tr>
-      <td><img src="../images/constraint/constraint_chain_spread_inside.png" width="250"/></td>
-      <td> _chainStyle="spread_inside" </td>
-     </tr>
-     <tr>
-     <td><img src="../images/constraint/constraint_chain_weight.png" width="250"/></td>
-     <td> _chainStyle="spread" <br> _weight="1" </td>
-     </tr>
-     <tr>
-     <td><img src="../images/constraint/constraint_chain_packed.png" width="250"/></td>
-     <td> _chainStyle="packed" </td>
-     </tr>
-     <tr>
-     <td><img src="../images/constraint/constraint_chain_bias.png" width="250"/></td>
-     <td> _chainStyle="packed" <br> _bias="0.3"</td>
-     </tr>
-</table>
-
-<h5 id="2-8-Barrier"><a href="#2-8-Barrier" class="headerlink" title="2.8 Barrier"></a>2.8 Barrier</h5><p>将多个View的某一边的极端值作为约束：</p>
-<table>
-    <tr>
-        <td><img src="../images/constraint/constraint_barrier_start.png" width="300"/></td>
-        <td><img src="../images/constraint/constraint_barrier_end.png" width="300"/></td>
-    </tr>
-</table>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.Barrier</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:id</span>=<span class="string">&quot;@+id/barrier&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">app:barrierDirection</span>=<span class="string">&quot;start/end&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">app:constraint_referenced_ids</span>=<span class="string">&quot;button1,button2&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h5 id="2-9-Group分组约束"><a href="#2-9-Group分组约束" class="headerlink" title="2.9 Group分组约束"></a>2.9 Group分组约束</h5><p>将多个View作为一个组一起控制：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.Group</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:id</span>=<span class="string">&quot;@+id/group&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">android:visibility</span>=<span class="string">&quot;visible&quot;</span></span></span><br><span class="line"><span class="tag">              <span class="attr">app:constraint_referenced_ids</span>=<span class="string">&quot;button4,button9&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li>无法通过group设置点击事件<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">group.referencedIds.forEach &#123; id -&gt;</span><br><span class="line">     view.findViewById(id).setOnClickListener &#123;</span><br><span class="line">        <span class="comment">//do something</span></span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h5 id="2-10-Placeholder占位约束"><a href="#2-10-Placeholder占位约束" class="headerlink" title="2.10 Placeholder占位约束"></a>2.10 Placeholder占位约束</h5><p>&ensp;&ensp;&ensp;&ensp;Placeholder是一个虚拟的占位符View，界面上其他存在的View可以通过<code>placeholder.setContentId(R.id.xxx)</code>将自己的位置设置到placeholder的位置，原位置视图将不可见。<br>&ensp;&ensp;&ensp;&ensp;我们可以使用Placeholder搭建一个布局模板，include到其他布局当中，来填充模板中的视图，这将使所有的界面有一个通用的模板。</p>
-<h5 id="2-11-Guideline引导线约束"><a href="#2-11-Guideline引导线约束" class="headerlink" title="2.11 Guideline引导线约束"></a>2.11 Guideline引导线约束</h5><p>Guideline只能在ConstraintLayout中使用，在水平或垂直方向设置辅助布局的不可见线条。</p>
-<table>
-<thead>
-<tr>
-<th>约束属性</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>layout_constraintGuide_begin</td>
-<td>距布局的左边或者上边x处设置引导线</td>
-</tr>
-<tr>
-<td>layout_constraintGuide_end</td>
-<td>距布局右边或下面x处设置引导线</td>
-</tr>
-<tr>
-<td>layout_constraintGuide_percent</td>
-<td>宽或高的百分之x处设置引导线</td>
-</tr>
-</tbody></table>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:android</span>=<span class="string">&quot;http://schemas.android.com/apk/res/android&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:app</span>=<span class="string">&quot;http://schemas.android.com/apk/res-auto&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:tools</span>=<span class="string">&quot;http://schemas.android.com/tools&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">&quot;match_parent&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">&quot;match_parent&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">androidx.constraintlayout.widget.Guideline</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">&quot;@+id/guideline&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">app:layout_constraintGuide_begin</span>=<span class="string">&quot;100dp&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:orientation</span>=<span class="string">&quot;vertical&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:text</span>=<span class="string">&quot;Button&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">&quot;wrap_content&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:id</span>=<span class="string">&quot;@+id/button&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">app:layout_constraintLeft_toLeftOf</span>=<span class="string">&quot;@+id/guideline&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_marginTop</span>=<span class="string">&quot;16dp&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">app:layout_constraintTop_toTopOf</span>=<span class="string">&quot;parent&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">androidx.constraintlayout.widget.ConstraintLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="三、原理"><a href="#三、原理" class="headerlink" title="三、原理"></a>三、原理</h4><h5 id="3-1-解决约束问题"><a href="#3-1-解决约束问题" class="headerlink" title="3.1 解决约束问题"></a>3.1 解决约束问题</h5><p>3.1.1 定义变量</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x[1], x[2], ... x[n]</span><br></pre></td></tr></table></figure>
-<p>3.1.2 定义约束问题：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a[1]x[1] + ... + a[n]x[n] = b</span><br><span class="line">a[1]x[1] + ... + a[n]x[n] &lt;= b</span><br><span class="line">a[1]x[1] + ... + a[n]x[n] &gt;= b</span><br></pre></td></tr></table></figure>
-<p>3.2.3 计算约束方程<br>食火鸡算法：食火鸡是一种生活在新几内亚热带雨林中的鸟类，以水果为食。同时它也是一种解决线性方程和线性不等式的算法。1990年在华盛顿大学被证明和发现。线性方程非常适合用于表示用户界面中视图的位置、大小、与其他视图的关系。</p>
-<h5 id="3-2-个人理解："><a href="#3-2-个人理解：" class="headerlink" title="3.2 个人理解："></a>3.2 个人理解：</h5><p>定义变量 -&gt; 声明View对象<br>定义约束问题 -&gt; 建立View之间的约束关系<br>计算约束方程 -&gt; 计算视图的大小、坐标  </p>
-<h4 id="四、参考文档"><a href="#四、参考文档" class="headerlink" title="四、参考文档"></a>四、参考文档</h4><p><a target="_blank" rel="noopener" href="https://developer.android.com/reference/androidx/constraintlayout/widget/ConstraintLayout">1.官方文档</a><br><a target="_blank" rel="noopener" href="https://constraintlayout.com/layouts/">2.基本使用</a><br><a target="_blank" rel="noopener" href="https://biaomingzhong.github.io/2017/constraintlayout-basics-chains-2/">3.基本使用-译文</a><br><a target="_blank" rel="noopener" href="https://wiresareobsolete.com/2016/07/constraintlayout-part-1/">4.ConstraintLayout, Inside and Out: Part 1</a><br><a target="_blank" rel="noopener" href="https://wiresareobsolete.com/2016/07/constraintlayout-part-2/">5.ConstraintLayout, Inside and Out: Part 2</a><br><a target="_blank" rel="noopener" href="https://constraints.cs.washington.edu/cassowary/cassowary-tr.pdf">6.线性约束解决算法</a><br><a target="_blank" rel="noopener" href="https://cassowary.readthedocs.io/en/latest/topics/theory.html">7.解决约束</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1999,13 +1762,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">120k</span>
+    <span title="站点总字数">123k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">1:50</span>
+    <span title="站点阅读时长">1:52</span>
 </div>
 
         
