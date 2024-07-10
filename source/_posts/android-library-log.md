@@ -1,14 +1,23 @@
 ---
 title: Android中的日志库
+date: 2024-07-09 15:54:19
 tags:
+categories:
+description:
 ---
 
 
+日志库是一个项目的基础功能之一，它应该包括但不限于以下功能：
++ 扩展性：支持把日志记录到多个地方，如：本地文件、控制台、崩溃系统。
++ 高性能：日志记录较为频繁时，如何写文件，提高性能。
++ 稳定性：崩溃前一刻的日志不丢失。
 
-+ [Log4a](https://github.com/pqpo/Log4a)
-900 star
+以下是一些开源的日志库，做一个记录：
 
-    基于 mmap, 高性能、高可用的 Android 日志收集框架
+
++ [Log4a](https://github.com/pqpo/Log4a) 0.9k star
+
+基于 mmap, 高性能、高可用的 Android 日志收集框架
 
 ```shell
     Log4a.i(TAG, "Hello，Log4a!");
@@ -17,7 +26,7 @@ tags:
 ```
 
 
-+ [xLog](https://github.com/elvishew/xLog)
++ [xLog](https://github.com/elvishew/xLog) 3.1k star
 
 ```java
 class Test {
@@ -60,8 +69,7 @@ class Test {
 }
 ````
 
-+[logger](https://github.com/orhanobut/logger)
-13.7K star
++ [logger](https://github.com/orhanobut/logger) 13.7k star
 
 
 ```java

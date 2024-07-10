@@ -66,4 +66,4 @@ https://blog.csdn.net/helimin12345/article/details/108210763
 + 分块
 + 帧内预测
 + dct
-+  Arithmetic entropy encoding编码
++ Arithmetic entropy encoding编码
