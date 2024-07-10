@@ -186,6 +186,283 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/file-format-elf-relocation.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/file-format-elf-relocation.html" class="post-title-link" itemprop="url">重定位</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-04 21:53:33" itemprop="dateCreated datePublished" datetime="2021-09-04T21:53:33+08:00">2021-09-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="一、可重定位文件"><a href="#一、可重定位文件" class="headerlink" title="一、可重定位文件"></a>一、可重定位文件</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">//main.c                    //x.c</span><br><span class="line"></span><br><span class="line">extern void foo(void);      |   #include &lt;stdio.h&gt;</span><br><span class="line">                            |</span><br><span class="line">int main(void)              |   void foo()</span><br><span class="line">&#123;                           |   &#123;</span><br><span class="line">    foo();                  |       printf(&quot;foo\n&quot;);</span><br><span class="line">    return 0;               |   &#125;</span><br><span class="line">&#125;                           |</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&gt; objdump -d main.o</span><br><span class="line">00000000 &lt;main&gt;:</span><br><span class="line">   0:	55                   	push   %ebp</span><br><span class="line">   1:	89 e5                	mov    %esp,%ebp</span><br><span class="line">   3:	83 e4 f0             	and    $0xfffffff0,%esp</span><br><span class="line">   6:	e8 fc ff ff ff       	call   7 &lt;main+0x7&gt;</span><br><span class="line">   b:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  10:	c9                   	leave</span><br><span class="line">  11:	c3                   	ret</span><br></pre></td></tr></table></figure>
+
+<p>在编译和汇编阶段，[main.c -&gt; main.o] 汇编器无法确定外部定义的函数和全局变量的地址，所以它只能使用一个假地址占位，并产生一条额外的记录，让后面的链接器使用这条记录帮它完成地址修正。这条记录对于代码段来说放在[.rel.text] ，对于数据段来说放在[.rel.data],它们都是重定位文件的一个section。</p>
+<p>对于每一条记录都对应于如下的一个数据结构：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr r_offset;</span><br><span class="line">        uint32_t   r_info;</span><br><span class="line">        int32_t    r_addend;</span><br><span class="line">&#125; Elf32_Rela;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="二、静态链接"><a href="#二、静态链接" class="headerlink" title="二、静态链接"></a>二、静态链接</h4><p>1、多个目标文件的合并:</p>
+<center>
+    <img src="../images/elf_obj_file_merge.png" width="500"/>
+</center>
+
+<p>2、对代码段，数据段以及各符号进行地址分配<br>3、根据 [relocation entries] 重新计算代码和数据段中的假地址。</p>
+<h4 id="三、动态链接"><a href="#三、动态链接" class="headerlink" title="三、动态链接"></a>三、动态链接</h4><h5 id="1、静态链接的缺点"><a href="#1、静态链接的缺点" class="headerlink" title="1、静态链接的缺点"></a>1、静态链接的缺点</h5><ul>
+<li>静态链接将使一些公用代码如libc库产生冗余，浪费内存和磁盘空间</li>
+<li>如果模块化开发，一个模块更新就得重新链接</li>
+</ul>
+<h5 id="2、动态链接的概念"><a href="#2、动态链接的概念" class="headerlink" title="2、动态链接的概念"></a>2、动态链接的概念</h5><p>相较于静态链接在编译期进行链接操作，将链接过程推迟到运行时进行的过程叫动态链接。</p>
+<h5 id="3、动态链接的实现"><a href="#3、动态链接的实现" class="headerlink" title="3、动态链接的实现"></a>3、动态链接的实现</h5><p>   3.1 地址无关代码<br>    由于在运行时，代码段是共享的，只能读不能写，所以需要将指令中那些需要修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变，而数据部分可以在每一个进程中拥有一个副本。</p>
+<p>   3.2 全局偏移表（Global Offset Table）<br>    当链接过程发生在运行期时，外部的符号调用只有在运行时装载模块后才能确定模块被装载的地址，以及模块内符号的确切地址。所以ELF提供了一个全局偏移表（GOT）来记录这些外部模块的符号引用。当模块被装载时，会更新此表的内容。</p>
+<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p>1.<a target="_blank" rel="noopener" href="https://people.cs.pitt.edu/~xianeizhang/notes/Linking.html#symbol">Linking</a><br>2.<a target="_blank" rel="noopener" href="https://stac47.github.io/c/relocation/elf/tutorial/2018/03/01/understanding-relocation-elf.html">understanding-relocation-elf</a><br>3.<a target="_blank" rel="noopener" href="http://stffrdhrn.github.io/hardware/embedded/openrisc/2019/11/29/relocs.html">ELF Binaries and Relocation Entries</a><br>4.<a target="_blank" rel="noopener" href="http://chuquan.me/2018/06/03/linking-static-linking-dynamic-linking/">static-linking-dynamic-linking</a><br>5.<a target="_blank" rel="noopener" href="https://blog.csdn.net/ayu_ag/article/details/78655300">ELF函数重定位问题</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/base-economic-concept.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/base-economic-concept.html" class="post-title-link" itemprop="url">估值指标</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-02 17:30:12" itemprop="dateCreated datePublished" datetime="2021-09-02T17:30:12+08:00">2021-09-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BB%8F%E6%B5%8E%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">经济学</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>813</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <table>
+<thead>
+<tr>
+<th>英文名称</th>
+<th>中文名称</th>
+<th>计算方式</th>
+<th>理解</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PE = Price-to-Earning Ratio</td>
+<td>市盈率</td>
+<td>每股股价/每股盈余 = 市值/净利润</td>
+<td>创造财富的能力、回收成本的时间</td>
+</tr>
+<tr>
+<td>PS = Price-to-Sales Ratio</td>
+<td>市销率</td>
+<td>每股股价/每股营收 = 市值/营收</td>
+<td>获得公司1元的销售收入需要投入多少钱</td>
+</tr>
+<tr>
+<td>PCF =Price-to-Cash-Flow Ratio</td>
+<td>市现率</td>
+<td>每股股价/每股现金流 = 市值/12月现金流</td>
+<td></td>
+</tr>
+<tr>
+<td>PB = Price-to-Book Ratio</td>
+<td>市净率</td>
+<td>每股股价/每股净资产 = 市值/净资产</td>
+<td>净资产的溢价程度</td>
+</tr>
+</tbody></table>
+<h4 id="一、市盈率"><a href="#一、市盈率" class="headerlink" title="一、市盈率"></a>一、市盈率</h4><p>1.1 PE - 静态市盈率</p>
+<blockquote>
+<p>① 市盈率 = 当日收盘价 / 上一年度每股税后利润  </p>
+</blockquote>
+<blockquote>
+<p>② 市盈率 = 当前总市值 / 上年度净利润</p>
+</blockquote>
+<p>理解：</p>
+<ul>
+<li>公司需要累计多少年的盈利才能达到目前的市价水平。</li>
+<li>值越低说明投资回收期短，风险越小，投资价值越高。</li>
+<li>值越大说明翻本期长，风险大。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>取的是上一年度的净利润，是一个过去的值，有点滞后。</li>
+</ul>
+<p>例子：<br>你花了240w买了一套二手房，打算进行出租赚点外快，已知去年平均月租2w，一年收益大概24w。以去年这些数据为参考，你预计<strong>十年后</strong>才能赚回成本240w，所以市盈率 = 10。</p>
+<p>1.2 动态市盈率<br>为了弥补静态市盈率的滞后性，增加动态市盈率作为参考指标。</p>
+<blockquote>
+<p>市盈率 = 当前总市值 / X</p>
+</blockquote>
+<p>根据当前的时间节点不同计算X的值：<br>X = 当年最近一个季度的净利润 * 4<br>X = 最近半年净利润 * 2<br>X = 最近三季度净利润 * 1.5 </p>
+<p>1.3 静态市盈率 vs 动态市盈率</p>
+<ul>
+<li>静态市盈率反映的是过去的数据，动态市盈率反映的是未来的预估</li>
+<li>动态市盈率 &gt; 静态市盈率，说明最近（一个季度、半年、三个季度）公司的利润下降了。</li>
+</ul>
+<p>1.4 TTM-Trailing Twelve Months</p>
+<ul>
+<li>最近十二个月市盈率，也叫滚动市盈率。</li>
+<li>它也是一个对过去情况的分析说明。</li>
+</ul>
+<h4 id="二、每股净值产"><a href="#二、每股净值产" class="headerlink" title="二、每股净值产"></a>二、每股净值产</h4><blockquote>
+<p>每股净值产 = （总资产 - 总负债） / 总股数</p>
+</blockquote>
+<center>
+    <img src="../images/a_b_c.jpeg" width="300"/>
+</center>
+
+
+<h4 id="三、市净率"><a href="#三、市净率" class="headerlink" title="三、市净率"></a>三、市净率</h4><p>3.1 PB-市净率</p>
+<blockquote>
+<p>市净率 = 每股市价 / 每股净值产<br>每股净资产 = 股东权益 / 总股本</p>
+</blockquote>
+<p>市净率越低那么它的投资价值就越高，这也就意味着它的风险越低。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/file-format-elf.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1160,13 +1437,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">123k</span>
+    <span title="站点总字数">129k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">1:52</span>
+    <span title="站点阅读时长">1:58</span>
 </div>
 
         

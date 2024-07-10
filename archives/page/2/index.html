@@ -186,6 +186,261 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/flutter-state-bloc.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/flutter-state-bloc.html" class="post-title-link" itemprop="url">flutter状态管理之BloC</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-07-18 21:27:20" itemprop="dateCreated datePublished" datetime="2023-07-18T21:27:20+08:00">2023-07-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <hr>
+<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>Bloc = Business Logic Component</p>
+<center>
+    <img src="../images/flutter/bloc_architecture.png" width="60%"/>
+</center>
+
+
+<h4 id="二、结构"><a href="#二、结构" class="headerlink" title="二、结构"></a>二、结构</h4><p>BloC本身是一个独立的package、flutter-bloc基于BloC和Provider实现，其结构如下图所示：</p>
+<center>
+    <img src="../images/flutter/flutter_bloc.png" width="100%"/>
+</center>
+
+<h4 id="三、-实现"><a href="#三、-实现" class="headerlink" title="三、 实现"></a>三、 实现</h4><h5 id="3-1-BloC是基于dart的Stream-API实现的发布订阅模式。"><a href="#3-1-BloC是基于dart的Stream-API实现的发布订阅模式。" class="headerlink" title="3.1 BloC是基于dart的Stream API实现的发布订阅模式。"></a>3.1 BloC是基于dart的Stream API实现的发布订阅模式。</h5><ul>
+<li>通过on方法订阅事件并提供处理函数，收到Event再将Event转换成State返回给Bloc</li>
+<li>通过add方法发布事件</li>
+</ul>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Bloc</span>&lt;<span class="title">Event</span>, <span class="title">State</span>&gt; <span class="keyword">extends</span> <span class="title">BlocBase</span>&lt;<span class="title">State</span>&gt;</span></span><br><span class="line"><span class="class">    <span class="keyword">implements</span> <span class="title">BlocEventSink</span>&lt;<span class="title">Event</span>&gt; </span>&#123;</span><br><span class="line">     <span class="comment">//所有的订阅者</span></span><br><span class="line">     <span class="keyword">final</span> _subscriptions = &lt;StreamSubscription&lt;<span class="built_in">dynamic</span>&gt;&gt;[];</span><br><span class="line">     </span><br><span class="line">     <span class="keyword">final</span> _eventController = StreamController&lt;Event&gt;.broadcast();</span><br><span class="line">     </span><br><span class="line">     <span class="comment">//添加订阅者</span></span><br><span class="line">     <span class="keyword">void</span> <span class="keyword">on</span>&lt;E <span class="keyword">extends</span> Event&gt;(</span><br><span class="line">       EventHandler&lt;E, State&gt; handler, &#123;</span><br><span class="line">       EventTransformer&lt;E&gt;? transformer,</span><br><span class="line">     &#125;) &#123;</span><br><span class="line">        <span class="comment">//这里开始了listen</span></span><br><span class="line">        <span class="keyword">final</span> subscription = xxx.listen(<span class="keyword">null</span>);</span><br><span class="line">        _subscriptions.add(subscription);</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">     <span class="meta">@override</span></span><br><span class="line">     <span class="keyword">void</span> add(Event event) &#123;</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">         onEvent(event);</span><br><span class="line">         _eventController.add(event);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">         onError(error, stackTrace);</span><br><span class="line">         <span class="keyword">rethrow</span>;</span><br><span class="line">       &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<center>
+    <img src="../images/flutter/flutter-bloc-inner.png" width="50%"/>
+</center>
+
+
+<h5 id="3-1-事件和状态之间的转换"><a href="#3-1-事件和状态之间的转换" class="headerlink" title="3.1 事件和状态之间的转换"></a>3.1 事件和状态之间的转换</h5><ul>
+<li>转换逻辑有业务层通过on()注入</li>
+<li>内部的核心是_Emitter以及 <em>_eventController</em> 和 <em>_stateController</em></li>
+</ul>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">(<span class="built_in">dynamic</span> event) &#123;</span><br><span class="line">       <span class="keyword">void</span> onEmit(State state) &#123;</span><br><span class="line">         <span class="keyword">if</span> (isClosed) <span class="keyword">return</span>;</span><br><span class="line">         <span class="keyword">if</span> (<span class="keyword">this</span>.state == state &amp;&amp; _emitted) <span class="keyword">return</span>;</span><br><span class="line">         onTransition(Transition(</span><br><span class="line">           currentState: <span class="keyword">this</span>.state,</span><br><span class="line">           event: event <span class="keyword">as</span> E,</span><br><span class="line">           nextState: state,</span><br><span class="line">         ));</span><br><span class="line">         emit(state);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">final</span> emitter = _Emitter(onEmit);</span><br><span class="line">       <span class="keyword">final</span> controller = StreamController&lt;E&gt;.broadcast(</span><br><span class="line">         <span class="keyword">sync</span>: <span class="keyword">true</span>,</span><br><span class="line">         onCancel: emitter.cancel,</span><br><span class="line">       );</span><br><span class="line"></span><br><span class="line">       <span class="keyword">void</span> handleEvent() <span class="keyword">async</span> &#123;</span><br><span class="line">         <span class="keyword">void</span> onDone() &#123;</span><br><span class="line">           emitter.complete();</span><br><span class="line">           _emitters.remove(emitter);</span><br><span class="line">           <span class="keyword">if</span> (!controller.isClosed) controller.close();</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">try</span> &#123;</span><br><span class="line">           _emitters.add(emitter);</span><br><span class="line">           <span class="comment">//交给外部实现转换事件和状态</span></span><br><span class="line">           <span class="keyword">await</span> handler(event <span class="keyword">as</span> E, emitter);</span><br><span class="line">         &#125; <span class="keyword">catch</span> (error, stackTrace) &#123;</span><br><span class="line">           onError(error, stackTrace);</span><br><span class="line">           <span class="keyword">rethrow</span>;</span><br><span class="line">         &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">           onDone();</span><br><span class="line">         &#125;</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       handleEvent();</span><br><span class="line">       <span class="keyword">return</span> controller.stream;</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="四、参考"><a href="#四、参考" class="headerlink" title="四、参考"></a>四、参考</h4><p>主要参考和debug了bloc仓库里面examples中login的例子：<br><a target="_blank" rel="noopener" href="https://github.com/felangel/bloc/tree/master/examples/flutter_login">这里</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/flutter-state-provider.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/flutter-state-provider.html" class="post-title-link" itemprop="url">Flutter状态管理之Provider</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-06-01 15:30:50" itemprop="dateCreated datePublished" datetime="2023-06-01T15:30:50+08:00">2023-06-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-05-23 16:45:13" itemprop="dateModified" datetime="2024-05-23T16:45:13+08:00">2024-05-23</time>
+              </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <hr>
+<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><p>官方提供的一个简单的状态管理库。</p>
+<p>关键点：</p>
+<ul>
+<li>提取状态:状态变量和UI分离</li>
+<li>访问状态:将UI和状态建立联系</li>
+<li>使用状态:读取状态变量</li>
+</ul>
+<center>
+    <img src="../images/ui-equals-function-of-state.png" width="100%"/>
+</center>
+
+<h4 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h4><p>1、InheritedWidget</p>
+<center>
+    <img src="../images/flutter/flutter-inheritedwidget.png" width="100%"/>
+</center>
+
+<p>关键点：</p>
+<ul>
+<li>Element持有Widget对象</li>
+<li>Element也是一个BuildContext对象</li>
+<li>Element里面持有所有的<code>InheritedElement</code></li>
+</ul>
+<p>所以：通过BuildContext对象可以拿到所需的Widget对象，然后访问里面的数据。</p>
+<p>父节点存放数据</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">InheritedShareWidget</span> <span class="keyword">extends</span> <span class="title">InheritedWidget</span> </span>&#123;</span><br><span class="line">  <span class="keyword">final</span> <span class="built_in">int</span> data;<span class="comment">//用于共享的数据</span></span><br><span class="line">  InheritedShareWidget(&#123;<span class="keyword">this</span>.data, Widget child&#125;) : <span class="keyword">super</span>(child: child);</span><br><span class="line"></span><br><span class="line">  <span class="comment">//定义便捷方法，方便子控件获取共享数据</span></span><br><span class="line">  <span class="keyword">static</span> InheritedShareWidget of(BuildContext context) &#123;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">///<span class="markdown">当子控件依赖使用了我们的数据源时，数据变动会触发子控件中的 didChangeDependencies 方法</span></span></span><br><span class="line">    <span class="keyword">return</span> context.dependOnInheritedWidgetOfExactType&lt;InheritedShareWidget&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">///<span class="markdown">（前提：子控件使用了数据源）子控件中的 didChangeDependencies 方法不会被触发</span></span></span><br><span class="line">    <span class="comment">// return context.getElementForInheritedWidgetOfExactType&lt;InheritedShareWidget&gt;().widget;</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  <span class="built_in">bool</span> updateShouldNotify(<span class="keyword">covariant</span> InheritedShareWidget oldWidget) &#123;</span><br><span class="line">    <span class="keyword">return</span> oldWidget.data != <span class="keyword">this</span>.data;<span class="comment">//返回true时，才会通知子控件</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>子节点获取数据：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestShareChildWidget</span> <span class="keyword">extends</span> <span class="title">StatefulWidget</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> TestShareChildWidget(&#123;Key key&#125;) : <span class="keyword">super</span>(key: key);</span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  _TestShareChildWidgetState createState() =&gt; _TestShareChildWidgetState();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_TestShareChildWidgetState</span> <span class="keyword">extends</span> <span class="title">State</span>&lt;<span class="title">TestShareChildWidget</span>&gt; </span>&#123;</span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  <span class="keyword">void</span> didChangeDependencies() &#123;</span><br><span class="line">    <span class="comment">///<span class="markdown">如build 方法中没有使用 InheritedShareWidget 的数据，那么它的didChangeDependencies()将不会被调用</span></span></span><br><span class="line">    <span class="keyword">super</span>.didChangeDependencies();</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;enter didChangeDependencies&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;enter child build&quot;</span>);</span><br><span class="line">    <span class="comment">//获取Inherited的共享数据：</span></span><br><span class="line">    <span class="keyword">final</span> data = InheritedShareWidget.of(context).data.toString();</span><br><span class="line">    <span class="keyword">return</span> Text(data);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>父子节点嵌套：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_TestInheritedWidgetState</span> <span class="keyword">extends</span> <span class="title">State</span>&lt;<span class="title">TestInheritedWidget</span>&gt; </span>&#123;</span><br><span class="line">  <span class="built_in">int</span> count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> Center(</span><br><span class="line">      child: InheritedShareWidget(</span><br><span class="line">        data: count,</span><br><span class="line">        child: Column(</span><br><span class="line">          mainAxisAlignment: MainAxisAlignment.center,</span><br><span class="line">          children: [</span><br><span class="line">            TestShareChildWidget(),</span><br><span class="line">            RaisedButton(</span><br><span class="line">                child: Text(<span class="string">&#x27;add&#x27;</span>),</span><br><span class="line">                onPressed: () &#123;</span><br><span class="line">                  setState(() &#123;</span><br><span class="line">                    ++count;</span><br><span class="line">                  &#125;);</span><br><span class="line">                &#125;)</span><br><span class="line">          ],),),);&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2、InheritedProvider</p>
+<center>
+    <img src="../images/flutter/flutter-inheritedprovider.jpg" width="100%"/>
+</center>
+
+<p>关键点：</p>
+<ul>
+<li>通过<code>InheritedProvider</code>及其子类（如：ChangeNotifierProvider）来包裹其他Widget（child），其实是将child放入了<code>_InheritedProviderScope</code></li>
+<li><code>_InheritedProviderScope</code>是一个<code>InheritedWidget</code>所以，<code>InheritedProvider</code>及其子类将会持有child对象，及其数据。</li>
+</ul>
+<h4 id="Provider的基本使用"><a href="#Provider的基本使用" class="headerlink" title="Provider的基本使用"></a>Provider的基本使用</h4><figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">///<span class="markdown">这是状态</span></span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> <span class="title">with</span> <span class="title">ChangeNotifier</span> </span>&#123;</span><br><span class="line">  <span class="built_in">String</span> name = <span class="string">&quot;ChangeNotifierProvider&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">void</span> changName(&#123;<span class="keyword">required</span> <span class="built_in">String</span> newName&#125;) &#123;</span><br><span class="line">    name = newName;</span><br><span class="line">    notifyListeners();<span class="comment">//1</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainApp</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> MainApp(&#123;<span class="keyword">super</span>.key&#125;);</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> ChangeNotifierProvider&lt;Person&gt;(<span class="comment">///<span class="markdown">状态和UI之间建立联系</span></span></span><br><span class="line">      create: (ctx) =&gt; Person(),</span><br><span class="line">      child: <span class="keyword">const</span> MaterialApp(</span><br><span class="line">        home: ChangeNotifierProviderDemo(),</span><br><span class="line">      ),</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ChangeNotifierProviderDemo</span> <span class="keyword">extends</span> <span class="title">StatelessWidget</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> ChangeNotifierProviderDemo(&#123;Key? key&#125;) : <span class="keyword">super</span>(key: key);</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget build(BuildContext context) &#123;</span><br><span class="line">    <span class="keyword">return</span> Scaffold(</span><br><span class="line">      appBar: AppBar(title: <span class="keyword">const</span> Text(<span class="string">&quot;ChangeNotifierProvider&quot;</span>)),</span><br><span class="line">      body: Center(</span><br><span class="line">        child: Column(</span><br><span class="line">          mainAxisAlignment: MainAxisAlignment.spaceEvenly,</span><br><span class="line">          children: [</span><br><span class="line">            Consumer&lt;Person&gt;(<span class="comment">///<span class="markdown">使用状态</span></span></span><br><span class="line">              builder: (ctx, person, child) =&gt; Text(person.name),</span><br><span class="line">            ),</span><br><span class="line">            Consumer&lt;Person&gt;(</span><br><span class="line">              builder: (ctx, person, child) &#123;</span><br><span class="line">                <span class="keyword">return</span> ElevatedButton(</span><br><span class="line">                  onPressed: () =&gt; person.changName(newName: <span class="string">&quot;ChangeNotifierProvider更新了&quot;</span>),</span><br><span class="line">                  child: <span class="keyword">const</span> Text(<span class="string">&quot;点击更新&quot;</span>),</span><br><span class="line">                );&#125;,),],),),);&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="Provider的类结构"><a href="#Provider的类结构" class="headerlink" title="Provider的类结构"></a>Provider的类结构</h4><center>
+    <img src="../images/flutter/flutter_provider.png" width="100%"/>
+</center>
+
+
+<p>3.1 InheritedProvider的子类只是具体功能的实现，基础逻辑封装在InheritedProvider中<br>3.2 InheritedProvider将职责转嫁给_InheritedProviderScope而_InheritedProviderScope是一个InheritedWidget</p>
+<h4 id="如何实现监听"><a href="#如何实现监听" class="headerlink" title="如何实现监听"></a>如何实现监听</h4><p>1、数据实现了ChangeNotifier，变更后调用notifyListeners(),触发回调。</p>
+<p>2、ChangeNotifierProvider继承自ListenableProvider，ListenableProvider构建时开启监听：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> VoidCallback _startListening(</span><br><span class="line">  InheritedContext e,</span><br><span class="line">  Listenable? value,</span><br><span class="line">) &#123;</span><br><span class="line">  value?.addListener(e.markNeedsNotifyDependents);</span><br><span class="line">  <span class="keyword">return</span> () =&gt; value?.removeListener(e.markNeedsNotifyDependents);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>class InheritedContext extends BuildContext{<br>    void markNeedsNotifyDependents();<br>}</p>
+<p>3、markNeedsNotifyDependents是<code>InheritedContext</code>中的方法，其实现类是<code>_InheritedProviderScopeElement</code></p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@override</span></span><br><span class="line">  <span class="keyword">void</span> markNeedsNotifyDependents() &#123;</span><br><span class="line">    <span class="keyword">if</span> (!_isNotifyDependentsEnabled) &#123;</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    markNeedsBuild();</span><br><span class="line">    _shouldNotifyDependents = <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>4、markNeedsBuild是Element的方法：标记需要重新构建</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> markNeedsBuild() &#123;</span><br><span class="line">    ...  </span><br><span class="line">    <span class="keyword">if</span> (dirty) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    _dirty = <span class="keyword">true</span>;</span><br><span class="line">    owner!.scheduleBuildFor(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="局部更新"><a href="#局部更新" class="headerlink" title="局部更新"></a>局部更新</h4><p>Provider的<code>Selector</code>提供了缓存Widget的功能，当Widget没有变化时，将直接返回缓存，否则重新build。</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_Selector0State</span>&lt;<span class="title">T</span>&gt; <span class="keyword">extends</span> <span class="title">SingleChildState</span>&lt;<span class="title">Selector0</span>&lt;<span class="title">T</span>&gt;&gt; </span>&#123;</span><br><span class="line">  T? value;</span><br><span class="line">  Widget? cache;<span class="comment">//这是缓存</span></span><br><span class="line">  Widget? oldWidget;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  Widget buildWithChild(BuildContext context, Widget? child) &#123;</span><br><span class="line">    <span class="keyword">final</span> selected = widget.selector(context);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> shouldInvalidateCache = oldWidget != widget ||</span><br><span class="line">        (widget._shouldRebuild != <span class="keyword">null</span> &amp;&amp;</span><br><span class="line">            widget._shouldRebuild!(value <span class="keyword">as</span> T, selected)) ||</span><br><span class="line">        (widget._shouldRebuild == <span class="keyword">null</span> &amp;&amp;</span><br><span class="line">            !<span class="keyword">const</span> DeepCollectionEquality().equals(value, selected));</span><br><span class="line">    <span class="keyword">if</span> (shouldInvalidateCache) &#123;<span class="comment">//需要重新构建</span></span><br><span class="line">      value = selected;</span><br><span class="line">      oldWidget = widget;</span><br><span class="line">      cache = widget.builder(</span><br><span class="line">        context,</span><br><span class="line">        selected,</span><br><span class="line">        child,</span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> cache!;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@override</span></span><br><span class="line">  <span class="keyword">void</span> debugFillProperties(DiagnosticPropertiesBuilder properties) &#123;</span><br><span class="line">    <span class="keyword">super</span>.debugFillProperties(properties);</span><br><span class="line">    properties.add(DiagnosticsProperty&lt;T&gt;(<span class="string">&#x27;value&#x27;</span>, value));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7067356022272163847#heading-16">https://juejin.cn/post/7067356022272163847#heading-16</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/flutter-widget-row.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1207,272 +1462,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/kotlin-lang-jvmstatic-with-interface.html" class="post-title-link" itemprop="url">Kotlin之JvmStatic和override冲突问题</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-05-09 16:35:18" itemprop="dateCreated datePublished" datetime="2022-05-09T16:35:18+08:00">2022-05-09</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1.2k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
-</center>
-
-
-<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
-</code></pre>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
-<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
-</blockquote>
-<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
-<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a target="_blank" rel="noopener" href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-lang-jvm-annotation.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/kotlin-lang-jvm-annotation.html" class="post-title-link" itemprop="url">Kotlin中的JVM注解</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-05-01 15:29:44" itemprop="dateCreated datePublished" datetime="2022-05-01T15:29:44+08:00">2022-05-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
-<h4 id="1、-JvmName"><a href="#1、-JvmName" class="headerlink" title="1、@JvmName"></a>1、@JvmName</h4><p>用于文件、函数、属性、getter和setter。</p>
-<h5 id="1-1-给文件添加-JvmName注解"><a href="#1-1-给文件添加-JvmName注解" class="headerlink" title="1.1 给文件添加@JvmName注解"></a>1.1 给文件添加@JvmName注解</h5><p>默认情况下，一个Kotlin文件中的<strong>function</strong>和<strong>properties</strong>会被编译成<em>filenameKt.class</em>，其中的<strong>class</strong>会被编译成classname.class:</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmname-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmname-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h5 id="1-2-给函数名添加-JvmName注解"><a href="#1-2-给函数名添加-JvmName注解" class="headerlink" title="1.2 给函数名添加@JvmName注解"></a>1.2 给函数名添加@JvmName注解</h5><center>
-    <img src="../images/kotlin-annotation-jvmname-3.jpeg" width="500"/>
-</center>
-
-<h5 id="1-3-给getter和setting添加-JvmName"><a href="#1-3-给getter和setting添加-JvmName" class="headerlink" title="1.3 给getter和setting添加@JvmName"></a>1.3 给getter和setting添加@JvmName</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@get:JvmName</span>(<span class="string">&quot;getContent&quot;</span>)</span><br><span class="line"><span class="meta">@set:JvmName</span>(<span class="string">&quot;setContent&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="2、-JvmDefault"><a href="#2、-JvmDefault" class="headerlink" title="2、@JvmDefault"></a>2、@JvmDefault</h4><p>和Java8一样，Kotlin的接口也支持默认方法实现。即使针对Java7及以下版本，他也能正常编译，因为Kotlin使用静态内部类实现默认方法。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmdefault-1.jpeg" width="500"/>
-</center>
-
-<p>当在Java中实现此接口时，需要复写对应的方法，否则将报错。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmdefault-2.jpeg" width="100%"/>
-</center>
-
-<p>如果我们希望它在Java8中不报错，可以使用@JvmDefault注解标识方法：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Document</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JvmDefault</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getType</span><span class="params">()</span></span> = <span class="string">&quot;document&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="3、-JvmStatic"><a href="#3、-JvmStatic" class="headerlink" title="3、@JvmStatic"></a>3、@JvmStatic</h4><p>针对<code>object class</code> 或<code>companion object</code>使用此注解,可以避免Java访问时的INSTANCE调用</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h4 id="4、-JvmOverloads"><a href="#4、-JvmOverloads" class="headerlink" title="4、@JvmOverloads"></a>4、@JvmOverloads</h4><p>Kotlin的默认参数可以帮助我们减少函数重载，简化方法调用参数。在Java中调用含默认参数的Kotlin函数时，需要提供全部参数。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmoverloads-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmoverloads-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h4 id="5、-Throws"><a href="#5、-Throws" class="headerlink" title="5、@Throws"></a>5、@Throws</h4><p>Kotlin没有受检测异常，try-catch是非必须的。如果希望在Java调用中检测到异常，可以使用@Throws注解</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmthrows.jpeg" width="100%"/>
-</center>
-
-<h4 id="6、-JvmWildcard-amp-JvmSuppressWildcard"><a href="#6、-JvmWildcard-amp-JvmSuppressWildcard" class="headerlink" title="6、@JvmWildcard &amp; @JvmSuppressWildcard"></a>6、@JvmWildcard &amp; @JvmSuppressWildcard</h4><p>略</p>
-<h4 id="7、-JvmMultifileClass"><a href="#7、-JvmMultifileClass" class="headerlink" title="7、@JvmMultifileClass"></a>7、@JvmMultifileClass</h4><p>当在多个文件中定义的顶层函数或属性想要合并到一个编译的class中时，可以使用此注解。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmmultifileclass.jpeg" width="500"/>
-</center>
-
-
-<h4 id="8、-JvmPackageName"><a href="#8、-JvmPackageName" class="headerlink" title="8、@JvmPackageName"></a>8、@JvmPackageName</h4><p>和@JvmName一样，此注解可以修改包名，但是他被标记为internal，只能在kotlin库内部使用，这里不做过多介绍。</p>
-<h4 id="9、注解一览"><a href="#9、注解一览" class="headerlink" title="9、注解一览"></a>9、注解一览</h4><center>
-    <img src="../images/kotlin-annotation-overview.png" width="100%"/>
-</center>
-
-<h4 id="参考"><a href="#参考" class="headerlink" title="[参考]"></a>[参考]</h4><p><a target="_blank" rel="noopener" href="https://www.baeldung.com/kotlin/jvm-annotations">1.Guide to JVM Platform Annotations in Kotlin</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1583,13 +1572,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">123k</span>
+    <span title="站点总字数">129k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">1:52</span>
+    <span title="站点阅读时长">1:58</span>
 </div>
 
         

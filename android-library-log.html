@@ -20,26 +20,19 @@
     var CONFIG = {"hostname":"wangduwei.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="一、性能1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。参考 从数据可以看出，L1缓存和主存访问速度相差200倍。          二、缓存行CPU缓存的基本单位是缓存行，主存数据和缓存的映射存在下列关系： 2.1 直接映射缓存        1、 index用于计算在哪一个缓存行2、 offset用于计算在缓存行的哪个字节3、 tag用于判断缓存是否命中（假设0x7f6601 和">
+  <meta name="description" content="日志库是一个项目的基础功能之一，它应该包括但不限于以下功能：  扩展性：支持把日志记录到多个地方，如：本地文件、控制台、崩溃系统。 高性能：日志记录较为频繁时，如何写文件，提高性能。 稳定性：崩溃前一刻的日志不丢失。  以下是一些开源的日志库，做一个记录：  Log4a 0.9k star  基于 mmap, 高性能、高可用的 Android 日志收集框架 123Log4a.i(TAG, &amp;quo">
 <meta property="og:type" content="article">
-<meta property="og:title" content="CPU的缓存">
-<meta property="og:url" content="https://wangduwei.top/cpu-cache-overview.html">
+<meta property="og:title" content="Android中的日志库">
+<meta property="og:url" content="https://wangduwei.top/android-library-log.html">
 <meta property="og:site_name" content="蓝色的笔记本">
-<meta property="og:description" content="一、性能1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。参考 从数据可以看出，L1缓存和主存访问速度相差200倍。          二、缓存行CPU缓存的基本单位是缓存行，主存数据和缓存的映射存在下列关系： 2.1 直接映射缓存        1、 index用于计算在哪一个缓存行2、 offset用于计算在缓存行的哪个字节3、 tag用于判断缓存是否命中（假设0x7f6601 和">
+<meta property="og:description" content="日志库是一个项目的基础功能之一，它应该包括但不限于以下功能：  扩展性：支持把日志记录到多个地方，如：本地文件、控制台、崩溃系统。 高性能：日志记录较为频繁时，如何写文件，提高性能。 稳定性：崩溃前一刻的日志不丢失。  以下是一些开源的日志库，做一个记录：  Log4a 0.9k star  基于 mmap, 高性能、高可用的 Android 日志收集框架 123Log4a.i(TAG, &amp;quo">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://wangduwei.top/images/cpu_cache_speed.png">
-<meta property="og:image" content="https://wangduwei.top/images/cpu_cache_direct_map.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/cpu_cache_n_way.png">
-<meta property="og:image" content="https://wangduwei.top/images/cpu_cache_problem.jpeg">
-<meta property="og:image" content="https://wangduwei.top/images/cpu_cache_mesi_state.jpeg">
-<meta property="article:published_time" content="2021-10-13T07:28:59.000Z">
-<meta property="article:modified_time" content="2024-04-29T11:50:54.575Z">
+<meta property="article:published_time" content="2024-07-09T07:54:19.000Z">
+<meta property="article:modified_time" content="2024-07-09T07:54:19.360Z">
 <meta property="article:author" content="wangduwei">
-<meta property="article:tag" content="计算机基础">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://wangduwei.top/images/cpu_cache_speed.png">
 
-<link rel="canonical" href="https://wangduwei.top/cpu-cache-overview.html">
+<link rel="canonical" href="https://wangduwei.top/android-library-log.html">
 
 
 <script id="page-configurations">
@@ -52,7 +45,7 @@
   };
 </script>
 
-  <title>CPU的缓存 | 蓝色的笔记本</title>
+  <title>Android中的日志库 | 蓝色的笔记本</title>
   
 
 
@@ -196,7 +189,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/cpu-cache-overview.html">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-library-log.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -209,7 +202,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          CPU的缓存
+          Android中的日志库
         </h1>
 
         <div class="post-meta">
@@ -219,23 +212,7 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2021-10-13 15:28:59" itemprop="dateCreated datePublished" datetime="2021-10-13T15:28:59+08:00">2021-10-13</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
+              <time title="创建时间：2024-07-09 15:54:19" itemprop="dateCreated datePublished" datetime="2024-07-09T15:54:19+08:00">2024-07-09</time>
             </span>
 
           
@@ -251,14 +228,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>971</span>
+              <span>3.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>3 分钟</span>
             </span>
 
         </div>
@@ -270,60 +247,24 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h4 id="一、性能"><a href="#一、性能" class="headerlink" title="一、性能"></a>一、性能</h4><p>1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。<a target="_blank" rel="noopener" href="https://gist.github.com/jboner/2841832">参考</a></p>
-<p>从数据可以看出，L1缓存和主存访问速度相差200倍。</p>
-<center>
-    <img src="../images/cpu_cache_speed.png" width="500"/>
-</center>
-
-
-<h4 id="二、缓存行"><a href="#二、缓存行" class="headerlink" title="二、缓存行"></a>二、缓存行</h4><p>CPU缓存的基本单位是缓存行，主存数据和缓存的映射存在下列关系：</p>
-<h5 id="2-1-直接映射缓存"><a href="#2-1-直接映射缓存" class="headerlink" title="2.1 直接映射缓存"></a>2.1 直接映射缓存</h5><center>
-    <img src="../images/cpu_cache_direct_map.jpeg" width="600"/>
-</center>
-
-<p>1、 index用于计算在哪一个缓存行<br>2、 offset用于计算在缓存行的哪个字节<br>3、 tag用于判断缓存是否命中（假设0x7f6601 和 0x8f6602两个地址，低位都一样，缓存行和字节偏移都命中了，tag不命中）</p>
-<p>缺点：<br>图中，cache缓存8行数据，当访问第0行、第8行、第16行时，缓存无法命中，每次都要去主存加载，发生<strong>缓存颠簸</strong></p>
-<h5 id="2-2-多路组相连"><a href="#2-2-多路组相连" class="headerlink" title="2.2 多路组相连"></a>2.2 多路组相连</h5><p>这是一个两路组相连的示意图：</p>
-<center>
-    <img src="../images/cpu_cache_n_way.png" width="500"/>
-</center>
-
-<p>1、index定位组<br>2、组内依次对tag进行对比（可以通过硬件并行比较增加性能）</p>
-<h4 id="三、缓存一致性"><a href="#三、缓存一致性" class="headerlink" title="三、缓存一致性"></a>三、缓存一致性</h4><h5 id="3-1-问题描述："><a href="#3-1-问题描述：" class="headerlink" title="3.1 问题描述："></a>3.1 问题描述：</h5><center>
-    <img src="../images/cpu_cache_problem.jpeg" width="500"/>
-</center>
-
-<p>处理器 1 读 X ：从内存读取24并缓存<br>处理器 2 读 X ：从内存读取24并缓存<br>处理器 1 写 X = 32 ：更新自己的缓存<br>处理器 3 读 X = ？  </p>
-<p>如何保证缓存的一致性？<a target="_blank" rel="noopener" href="https://people.eecs.berkeley.edu/~pattrsn/252F96/Lecture18.pdf">参考</a></p>
-<h5 id="3-2-解决方案"><a href="#3-2-解决方案" class="headerlink" title="3.2 解决方案"></a>3.2 解决方案</h5><p>3.1.1 嗅探-Snooping Solution(Snoopy Bus)</p>
-<p>根据写操作对缓存数据的影响嗅探协议可分为：<br>Write-invalidate：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并标志自己的缓存失效。这保证了全局只有一份缓存是有效的。</p>
+        <p>日志库是一个项目的基础功能之一，它应该包括但不限于以下功能：</p>
 <ul>
-<li>MSI</li>
-<li>MESI</li>
-<li>MOSI</li>
-<li>MOESI</li>
-<li>MESIF </li>
+<li>扩展性：支持把日志记录到多个地方，如：本地文件、控制台、崩溃系统。</li>
+<li>高性能：日志记录较为频繁时，如何写文件，提高性能。</li>
+<li>稳定性：崩溃前一刻的日志不丢失。</li>
 </ul>
-<p>Write-update：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并更新自己的缓存。通过总线广播给所有的缓存造成了总线繁忙，所以不常见。</p>
-<p>3.1.2 目录-Directory-Based Schemes</p>
-<h5 id="3-2-MESI协议参考"><a href="#3-2-MESI协议参考" class="headerlink" title="3.2 MESI协议参考"></a>3.2 MESI协议<a target="_blank" rel="noopener" href="https://people.cs.pitt.edu/~melhem/courses/2410p/ch5-4.pdf">参考</a></h5><p>MESI是四个状态的首字母缩写，在缓存行中用2个bit标志该缓存行的状态。</p>
+<p>以下是一些开源的日志库，做一个记录：</p>
 <ul>
-<li>M:Modified（只存在当前缓存行，已被修改，和主存不一致，需要更新回主存）</li>
-<li>E:Exclusive（只存在当前缓存行，和主存一致）</li>
-<li>S:Shared（其他缓存行也存在该数据，和主存一致）</li>
-<li>I:Invalid（此缓存行失效）</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/pqpo/Log4a">Log4a</a> 0.9k star</li>
 </ul>
-<p>MESI的状态迁移：</p>
-<center>
-    <img src="../images/cpu_cache_mesi_state.jpeg" width="500"/>
-</center>
+<p>基于 mmap, 高性能、高可用的 Android 日志收集框架</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Log4a.i(TAG, &quot;Hello，Log4a!&quot;);</span><br><span class="line">Log4a.flush();</span><br><span class="line">Log4a.release();</span><br></pre></td></tr></table></figure>
 
 
-
-
-<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p><a target="_blank" rel="noopener" href="https://www.cnkirito.moe/cache-line/#%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%93%E5%AD%98%E8%A1%8C-Cache-Line-%EF%BC%9F">0.Java角度理解CPU缓存</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/102293437">1.Cache的基本原理</a><br><a target="_blank" rel="noopener" href="https://gist.github.com/jboner/2841832">2.每个开发者需要知道的数据</a><br><a target="_blank" rel="noopener" href="https://medium.com/fcamels-notes/%E5%BE%9E%E7%A1%AC%E9%AB%94%E8%A7%80%E9%BB%9E%E4%BA%86%E8%A7%A3-memry-barrier-%E7%9A%84%E5%AF%A6%E4%BD%9C%E5%92%8C%E6%95%88%E6%9E%9C-416ff0a64fc1">3.硬件角度看内存屏障</a><br><a target="_blank" rel="noopener" href="https://medium.com/fcamels-notes/%E5%BE%9E-double-checked-locking-%E4%BA%86%E8%A7%A3-memory-barrier-%E7%9A%84%E4%BD%9C%E7%94%A8-bb151a359c1b">4.软件角度内存屏障</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/3928995/how-do-cache-lines-work">5.stackoverflow-How do cache lines work?</a><br><a target="_blank" rel="noopener" href="https://courses.cs.duke.edu/spring09/cps104/lectures/2up-lecture17.pdf">6.courses-pdf</a></p>
-
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/elvishew/xLog">xLog</a> 3.1k star</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    LogConfiguration config = <span class="keyword">new</span> LogConfiguration.Builder()</span><br><span class="line">        .logLevel(BuildConfig.DEBUG ? LogLevel.ALL             <span class="comment">// Specify log level, logs below this level won&#x27;t be printed, default: LogLevel.ALL</span></span><br><span class="line">            : LogLevel.NONE)</span><br><span class="line">        .tag(<span class="string">&quot;MY_TAG&quot;</span>)                                         <span class="comment">// Specify TAG, default: &quot;X-LOG&quot;</span></span><br><span class="line">        .enableThreadInfo()                                    <span class="comment">// Enable thread info, disabled by default</span></span><br><span class="line">        .enableStackTrace(<span class="number">2</span>)                                   <span class="comment">// Enable stack trace info with depth 2, disabled by default</span></span><br><span class="line">        .enableBorder()                                        <span class="comment">// Enable border, disabled by default</span></span><br><span class="line">        .jsonFormatter(<span class="keyword">new</span> MyJsonFormatter())                  <span class="comment">// Default: DefaultJsonFormatter</span></span><br><span class="line">        .xmlFormatter(<span class="keyword">new</span> MyXmlFormatter())                    <span class="comment">// Default: DefaultXmlFormatter</span></span><br><span class="line">        .throwableFormatter(<span class="keyword">new</span> MyThrowableFormatter())        <span class="comment">// Default: DefaultThrowableFormatter</span></span><br><span class="line">        .threadFormatter(<span class="keyword">new</span> MyThreadFormatter())              <span class="comment">// Default: DefaultThreadFormatter</span></span><br><span class="line">        .stackTraceFormatter(<span class="keyword">new</span> MyStackTraceFormatter())      <span class="comment">// Default: DefaultStackTraceFormatter</span></span><br><span class="line">        .borderFormatter(<span class="keyword">new</span> MyBoardFormatter())               <span class="comment">// Default: DefaultBorderFormatter</span></span><br><span class="line">        .addObjectFormatter(AnyClass.class,                    <span class="comment">// Add formatter for specific class of object</span></span><br><span class="line">            <span class="keyword">new</span> AnyClassObjectFormatter())                     <span class="comment">// Use Object.toString() by default</span></span><br><span class="line">        .addInterceptor(<span class="keyword">new</span> BlacklistTagsFilterInterceptor(    <span class="comment">// Add blacklist tags filter</span></span><br><span class="line">            <span class="string">&quot;blacklist1&quot;</span>, <span class="string">&quot;blacklist2&quot;</span>, <span class="string">&quot;blacklist3&quot;</span>))</span><br><span class="line">        .addInterceptor(<span class="keyword">new</span> MyInterceptor())                   <span class="comment">// Add other log interceptor</span></span><br><span class="line">        .build();</span><br><span class="line">    </span><br><span class="line">    Printer androidPrinter = <span class="keyword">new</span> AndroidPrinter(<span class="keyword">true</span>);         <span class="comment">// Printer that print the log using android.util.Log</span></span><br><span class="line">    Printer consolePrinter = <span class="keyword">new</span> ConsolePrinter();             <span class="comment">// Printer that print the log to console using System.out</span></span><br><span class="line">    Printer filePrinter = <span class="keyword">new</span> FilePrinter                      <span class="comment">// Printer that print(save) the log to file</span></span><br><span class="line">        .Builder(<span class="string">&quot;&lt;path-to-logs-dir&gt;&quot;</span>)                         <span class="comment">// Specify the directory path of log file(s)</span></span><br><span class="line">        .fileNameGenerator(<span class="keyword">new</span> DateFileNameGenerator())        <span class="comment">// Default: ChangelessFileNameGenerator(&quot;log&quot;)</span></span><br><span class="line">        .backupStrategy(<span class="keyword">new</span> NeverBackupStrategy())             <span class="comment">// Default: FileSizeBackupStrategy(1024 * 1024)</span></span><br><span class="line">        .cleanStrategy(<span class="keyword">new</span> FileLastModifiedCleanStrategy(MAX_TIME))     <span class="comment">// Default: NeverCleanStrategy()</span></span><br><span class="line">        .flattener(<span class="keyword">new</span> MyFlattener())                          <span class="comment">// Default: DefaultFlattener</span></span><br><span class="line">        .writer(<span class="keyword">new</span> MyWriter())                                <span class="comment">// Default: SimpleWriter</span></span><br><span class="line">        .build();</span><br><span class="line">    </span><br><span class="line">    XLog.init(                                                 <span class="comment">// Initialize XLog</span></span><br><span class="line">        config,                                                <span class="comment">// Specify the log configuration, if not specified, will use new LogConfiguration.Builder().build()</span></span><br><span class="line">        androidPrinter,                                        <span class="comment">// Specify printers, if no printer is specified, AndroidPrinter(for Android)/ConsolePrinter(for java) will be used.</span></span><br><span class="line">        consolePrinter,</span><br><span class="line">        filePrinter);</span><br><span class="line">&#125;</span><br><span class="line">````</span><br><span class="line"></span><br><span class="line">+ [logger](https:<span class="comment">//github.com/orhanobut/logger) 13.7k star</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">```java</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123; </span><br><span class="line">    FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder()</span><br><span class="line">      .showThreadInfo(<span class="keyword">false</span>)  <span class="comment">// (Optional) Whether to show thread info or not. Default true</span></span><br><span class="line">      .methodCount(<span class="number">0</span>)         <span class="comment">// (Optional) How many method line to show. Default 2</span></span><br><span class="line">      .methodOffset(<span class="number">7</span>)        <span class="comment">// (Optional) Hides internal method calls up to offset. Default 5</span></span><br><span class="line">      .logStrategy(customLog) <span class="comment">// (Optional) Changes the log strategy to print out. Default LogCat</span></span><br><span class="line">      .tag(<span class="string">&quot;My custom tag&quot;</span>)   <span class="comment">// (Optional) Global tag for every log. Default PRETTY_LOGGER</span></span><br><span class="line">      .build();</span><br><span class="line"></span><br><span class="line">    Logger.addLogAdapter(<span class="keyword">new</span> AndroidLogAdapter(formatStrategy));</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
     </div>
 
     
@@ -358,7 +299,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://wangduwei.top/cpu-cache-overview.html" title="CPU的缓存">https://wangduwei.top/cpu-cache-overview.html</a>
+    <a href="https://wangduwei.top/android-library-log.html" title="Android中的日志库">https://wangduwei.top/android-library-log.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -368,9 +309,6 @@
 
 
       <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/" rel="tag"># 计算机基础</a>
-          </div>
 
         
   <div class="post-widgets">
@@ -383,12 +321,12 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/java-object-layout.html" rel="prev" title="对象的内存布局">
-      <i class="fa fa-chevron-left"></i> 对象的内存布局
+    <a href="/android-jetpack-startup.html" rel="prev" title="android jetpack startup">
+      <i class="fa fa-chevron-left"></i> android jetpack startup
     </a></div>
       <div class="post-nav-item">
-    <a href="/android-basic-constraintlayout.html" rel="next" title="Android中的约束布局">
-      Android中的约束布局 <i class="fa fa-chevron-right"></i>
+    <a href="/%E3%80%8A%E8%AE%A4%E7%9F%A5%E5%A4%A9%E6%80%A7%E3%80%8B.html" rel="next" title="《认知天性》">
+      《认知天性》 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -448,7 +386,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%80%A7%E8%83%BD"><span class="nav-number">1.</span> <span class="nav-text">一、性能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E7%BC%93%E5%AD%98%E8%A1%8C"><span class="nav-number">2.</span> <span class="nav-text">二、缓存行</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-%E7%9B%B4%E6%8E%A5%E6%98%A0%E5%B0%84%E7%BC%93%E5%AD%98"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 直接映射缓存</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-%E5%A4%9A%E8%B7%AF%E7%BB%84%E7%9B%B8%E8%BF%9E"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 多路组相连</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">3.</span> <span class="nav-text">三、缓存一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0%EF%BC%9A"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 问题描述：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 解决方案</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-MESI%E5%8D%8F%E8%AE%AE%E5%8F%82%E8%80%83"><span class="nav-number">3.3.</span> <span class="nav-text">3.2 MESI协议参考</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">4.</span> <span class="nav-text">四、参考文献</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

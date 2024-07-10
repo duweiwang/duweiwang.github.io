@@ -706,6 +706,28 @@
 ]]></content>
   </entry>
   <entry>
+    <title>Android中的日志库</title>
+    <url>/android-library-log.html</url>
+    <content><![CDATA[<p>日志库是一个项目的基础功能之一，它应该包括但不限于以下功能：</p>
+<ul>
+<li>扩展性：支持把日志记录到多个地方，如：本地文件、控制台、崩溃系统。</li>
+<li>高性能：日志记录较为频繁时，如何写文件，提高性能。</li>
+<li>稳定性：崩溃前一刻的日志不丢失。</li>
+</ul>
+<p>以下是一些开源的日志库，做一个记录：</p>
+<ul>
+<li><a href="https://github.com/pqpo/Log4a">Log4a</a> 0.9k star</li>
+</ul>
+<p>基于 mmap, 高性能、高可用的 Android 日志收集框架</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Log4a.i(TAG, &quot;Hello，Log4a!&quot;);</span><br><span class="line">Log4a.flush();</span><br><span class="line">Log4a.release();</span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li><a href="https://github.com/elvishew/xLog">xLog</a> 3.1k star</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    LogConfiguration config = <span class="keyword">new</span> LogConfiguration.Builder()</span><br><span class="line">        .logLevel(BuildConfig.DEBUG ? LogLevel.ALL             <span class="comment">// Specify log level, logs below this level won&#x27;t be printed, default: LogLevel.ALL</span></span><br><span class="line">            : LogLevel.NONE)</span><br><span class="line">        .tag(<span class="string">&quot;MY_TAG&quot;</span>)                                         <span class="comment">// Specify TAG, default: &quot;X-LOG&quot;</span></span><br><span class="line">        .enableThreadInfo()                                    <span class="comment">// Enable thread info, disabled by default</span></span><br><span class="line">        .enableStackTrace(<span class="number">2</span>)                                   <span class="comment">// Enable stack trace info with depth 2, disabled by default</span></span><br><span class="line">        .enableBorder()                                        <span class="comment">// Enable border, disabled by default</span></span><br><span class="line">        .jsonFormatter(<span class="keyword">new</span> MyJsonFormatter())                  <span class="comment">// Default: DefaultJsonFormatter</span></span><br><span class="line">        .xmlFormatter(<span class="keyword">new</span> MyXmlFormatter())                    <span class="comment">// Default: DefaultXmlFormatter</span></span><br><span class="line">        .throwableFormatter(<span class="keyword">new</span> MyThrowableFormatter())        <span class="comment">// Default: DefaultThrowableFormatter</span></span><br><span class="line">        .threadFormatter(<span class="keyword">new</span> MyThreadFormatter())              <span class="comment">// Default: DefaultThreadFormatter</span></span><br><span class="line">        .stackTraceFormatter(<span class="keyword">new</span> MyStackTraceFormatter())      <span class="comment">// Default: DefaultStackTraceFormatter</span></span><br><span class="line">        .borderFormatter(<span class="keyword">new</span> MyBoardFormatter())               <span class="comment">// Default: DefaultBorderFormatter</span></span><br><span class="line">        .addObjectFormatter(AnyClass.class,                    <span class="comment">// Add formatter for specific class of object</span></span><br><span class="line">            <span class="keyword">new</span> AnyClassObjectFormatter())                     <span class="comment">// Use Object.toString() by default</span></span><br><span class="line">        .addInterceptor(<span class="keyword">new</span> BlacklistTagsFilterInterceptor(    <span class="comment">// Add blacklist tags filter</span></span><br><span class="line">            <span class="string">&quot;blacklist1&quot;</span>, <span class="string">&quot;blacklist2&quot;</span>, <span class="string">&quot;blacklist3&quot;</span>))</span><br><span class="line">        .addInterceptor(<span class="keyword">new</span> MyInterceptor())                   <span class="comment">// Add other log interceptor</span></span><br><span class="line">        .build();</span><br><span class="line">    </span><br><span class="line">    Printer androidPrinter = <span class="keyword">new</span> AndroidPrinter(<span class="keyword">true</span>);         <span class="comment">// Printer that print the log using android.util.Log</span></span><br><span class="line">    Printer consolePrinter = <span class="keyword">new</span> ConsolePrinter();             <span class="comment">// Printer that print the log to console using System.out</span></span><br><span class="line">    Printer filePrinter = <span class="keyword">new</span> FilePrinter                      <span class="comment">// Printer that print(save) the log to file</span></span><br><span class="line">        .Builder(<span class="string">&quot;&lt;path-to-logs-dir&gt;&quot;</span>)                         <span class="comment">// Specify the directory path of log file(s)</span></span><br><span class="line">        .fileNameGenerator(<span class="keyword">new</span> DateFileNameGenerator())        <span class="comment">// Default: ChangelessFileNameGenerator(&quot;log&quot;)</span></span><br><span class="line">        .backupStrategy(<span class="keyword">new</span> NeverBackupStrategy())             <span class="comment">// Default: FileSizeBackupStrategy(1024 * 1024)</span></span><br><span class="line">        .cleanStrategy(<span class="keyword">new</span> FileLastModifiedCleanStrategy(MAX_TIME))     <span class="comment">// Default: NeverCleanStrategy()</span></span><br><span class="line">        .flattener(<span class="keyword">new</span> MyFlattener())                          <span class="comment">// Default: DefaultFlattener</span></span><br><span class="line">        .writer(<span class="keyword">new</span> MyWriter())                                <span class="comment">// Default: SimpleWriter</span></span><br><span class="line">        .build();</span><br><span class="line">    </span><br><span class="line">    XLog.init(                                                 <span class="comment">// Initialize XLog</span></span><br><span class="line">        config,                                                <span class="comment">// Specify the log configuration, if not specified, will use new LogConfiguration.Builder().build()</span></span><br><span class="line">        androidPrinter,                                        <span class="comment">// Specify printers, if no printer is specified, AndroidPrinter(for Android)/ConsolePrinter(for java) will be used.</span></span><br><span class="line">        consolePrinter,</span><br><span class="line">        filePrinter);</span><br><span class="line">&#125;</span><br><span class="line">````</span><br><span class="line"></span><br><span class="line">+ [logger](https:<span class="comment">//github.com/orhanobut/logger) 13.7k star</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">```java</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123; </span><br><span class="line">    FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder()</span><br><span class="line">      .showThreadInfo(<span class="keyword">false</span>)  <span class="comment">// (Optional) Whether to show thread info or not. Default true</span></span><br><span class="line">      .methodCount(<span class="number">0</span>)         <span class="comment">// (Optional) How many method line to show. Default 2</span></span><br><span class="line">      .methodOffset(<span class="number">7</span>)        <span class="comment">// (Optional) Hides internal method calls up to offset. Default 5</span></span><br><span class="line">      .logStrategy(customLog) <span class="comment">// (Optional) Changes the log strategy to print out. Default LogCat</span></span><br><span class="line">      .tag(<span class="string">&quot;My custom tag&quot;</span>)   <span class="comment">// (Optional) Global tag for every log. Default PRETTY_LOGGER</span></span><br><span class="line">      .build();</span><br><span class="line"></span><br><span class="line">    Logger.addLogAdapter(<span class="keyword">new</span> AndroidLogAdapter(formatStrategy));</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>]]></content>
+  </entry>
+  <entry>
     <title>Room数据库酷七条</title>
     <url>/android-library-room-7-tips.html</url>
     <content><![CDATA[<h4 id="一、通过RoomDatabase-Callback预填充数据"><a href="#一、通过RoomDatabase-Callback预填充数据" class="headerlink" title="一、通过RoomDatabase#Callback预填充数据"></a>一、通过<code>RoomDatabase#Callback</code>预填充数据</h4><p>如果需要在数据库创建或数据库打开的时候添加一些默认数据，可以使用<code>RoomDatabase#Callback</code>接口并复写它的<code>onCreate</code>或<code>onOpen</code>方法。由于DAO对象只能在这两个方法返回后使用，所以我们创建一个新线程来插入数据：</p>
@@ -2039,6 +2061,76 @@
       </tags>
   </entry>
   <entry>
+    <title>Java synchronized</title>
+    <url>/java-multithreading-synchronized.html</url>
+    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>synchronized作为Java内建的关键字和锁机制，理解和使用它是必要的也是有难度的。个人认为深入理解此关键字在于以下几个方面：</p>
+<ul>
+<li>基础层面：正确理解对象锁和类锁，并熟练使用</li>
+<li>能力提升：<ul>
+<li>了解对象的内存布局，观察锁如何影响对象的内存布局</li>
+<li>了解锁优化，锁升级及其过程</li>
+</ul>
+</li>
+<li>更上一层楼：OpenJDK源码走读</li>
+</ul>
+<p>本文只是记录和翻译了一些英文文档的内容，作为笔记以后翻阅。详细内容可看原文。</p>
+<h4 id="二、对象锁和类锁"><a href="#二、对象锁和类锁" class="headerlink" title="二、对象锁和类锁"></a>二、对象锁和类锁</h4><p>1.1 对象锁：修饰代码块和实例方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ObjectLock</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;<span class="comment">//此代码块锁住当前对象</span></span><br><span class="line">                <span class="keyword">int</span> i = <span class="number">5</span>;</span><br><span class="line">                <span class="keyword">while</span> (i-- &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + i);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">int</span> i = <span class="number">5</span>;</span><br><span class="line">            <span class="keyword">while</span> (i-- &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + i);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>1.2 类锁:修饰代码块和静态方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ClazzLock</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (ClazzLock.class) &#123;<span class="comment">//此代码块锁住class类</span></span><br><span class="line">                <span class="keyword">int</span> i = <span class="number">5</span>;</span><br><span class="line">                <span class="keyword">while</span> (i-- &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + i);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 静态方法属于类</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">int</span> i = <span class="number">5</span>;</span><br><span class="line">            <span class="keyword">while</span> (i-- &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + i);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="三、锁优化"><a href="#三、锁优化" class="headerlink" title="三、锁优化"></a>三、锁优化</h4><p>依据一：数据显示，许多锁有局部性特征，也就是说很多锁的锁定和释放都发生在特定的线程上。<br>依据二：数据显示，大部分Java对象不存在竞争。</p>
+<ul>
+<li>适应性自旋-Adaptive Spinning</li>
+<li>锁消除-Lock Elimination</li>
+<li>锁粗化-Lock Coarsening</li>
+<li>轻量级锁-Lightweight Locking</li>
+<li>偏向锁-Biased Locking</li>
+</ul>
+<h5 id="3-1-偏向锁"><a href="#3-1-偏向锁" class="headerlink" title="3.1 偏向锁"></a>3.1 偏向锁</h5><p>当我们开发了一个多线程环境下的模块时，其他人可能把它用在单线程环境下，此时加锁逻辑就是多余的。即使使用轻量级锁，每次获取锁都执行CAS原子指令也是一种性能损耗。使用偏向锁，线程首次获取锁时记录偏向于它自己,当有其他线程获取锁时，偏向锁要撤销，使用其他锁机制，如轻量级锁。</p>
+<p>lock-field中有一个bit用于记录是否偏向状态，初始状态下是处于偏向锁状态，但没有设置偏向的线程ID。当线程首次获取锁时，发现没有指定偏向的线程，则使用CAS设置偏向线程，来避免竞态条件。</p>
+<h5 id="3-2-轻量级锁（Thin-Lock）"><a href="#3-2-轻量级锁（Thin-Lock）" class="headerlink" title="3.2 轻量级锁（Thin Lock）"></a>3.2 轻量级锁（Thin Lock）</h5><p>相对于每次对象锁定都获取monitor结构的重量级锁而言，轻量级锁只是使用CAS原子指令修改lock-field（锁信息字段），因此轻量级锁不支持wait和notify。当发生锁竞争时，轻量级锁膨胀，同时分配monitor结构，lock-field更新成monitor的指针。</p>
+<p>Java的锁是可重入的，所以需要记录当前锁的重入次数和锁的持有者。</p>
+<ul>
+<li>记录方式一：<br>最直接的方式是把lock-field分成两部分，一个记录锁的持有者，一个记录锁重入次数。由于lock-field字段长度固定，所以重入次数被限制了。重入次数达到上限只能升级为重量级锁。</li>
+</ul>
+<ul>
+<li>记录方式二：<br>当线程需要获取锁时，在获取锁的线程栈中保存lock-records记录。线程获取的所有锁记录都将保存在这个集合中，它的顺序和获取锁的顺序一致。</li>
+</ul>
+<p>轻量级锁的变种和提升包含 <em>tasuki-lock</em> 和 <em>meta-lock</em> 其算法思想是一致的，差异在于实现细节，</p>
+<p>1、轻量级锁的加锁过程</p>
+<p>在代码进入同步块的时，如果同步对象锁状态为无锁（锁标志位为“01”，偏向锁位为“0”）虚拟机首先将在当前线程的栈帧中建立一个名为锁记录（Lock Record）的空间，用于存储锁对象目前的Mark Word的拷贝（官方称之为 Displaced Mark Word）。然后，虚拟机将使用CAS操作尝试将对象的Mark Word更新为指向Lock Record的指针，并将Lock record里的owner指针指向object mark word。如果这个更新动作成功了，那么这个线程就拥有了该对象的锁，并且对象Mark Word的锁标志位设置为“00”，即表示此对象处于轻量级锁定状态。</p>
+<p>如果这个更新操作失败了，虚拟机首先会检查对象的Mark Word是否指向当前线程的栈帧，如果是就说明当前线程已经拥有了这个对象的锁，那就可以直接进入同步块继续执行。<br>否则说明多个线程竞争锁，轻量级锁就要膨胀为重量级锁，锁标志的状态值变为“10”，Mark Word中存储的就是指向重量级锁（互斥量）的指针，后面等待锁的线程也要进入阻塞状态。<br>而当前线程便尝试使用自旋来获取锁，自旋就是为了不让线程阻塞，而采用循环去获取锁的过程。</p>
+<center>
+    <img src="../images/java-thin-lock-recorder.jpg" width="500"/>
+</center>
+
+<pre><code>                 图2.1 轻量级锁CAS操作前/后堆栈与对象的状态
+</code></pre>
+<p>2、轻量级锁的解锁过程：</p>
+<p>（1）通过CAS操作尝试把线程中复制的Displaced Mark Word对象替换当前的Mark Word。</p>
+<p>（2）如果替换成功，整个同步过程就完成了。</p>
+<p>（3）如果替换失败，说明有其他线程尝试过获取该锁（此时锁已膨胀），那就要在释放锁的同时，唤醒被挂起的线程。</p>
+<h5 id="3-3-锁消除"><a href="#3-3-锁消除" class="headerlink" title="3.3 锁消除"></a>3.3 锁消除</h5><p>锁消除即删除不必要的加锁操作。根据代码逃逸技术，如果判断到一段代码中，堆上的数据不会逃逸出当前线程，那么可以认为这段代码是线程安全的，不必要加锁。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        contactString(<span class="string">&quot;aa&quot;</span>, <span class="string">&quot;bb&quot;</span>, <span class="string">&quot;cc&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">contactString</span><span class="params">(String s1, String s2, String s3)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> StringBuffer().append(s1).append(s2).append(s3).toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>虽然StringBuffer的append是一个同步方法，但是这段程序中的StringBuffer属于一个局部变量，并且不会从该方法中逃逸出去，所以其实这过程是线程安全的，可以将锁消除。</p>
+<h5 id="3-4-锁粗化"><a href="#3-4-锁粗化" class="headerlink" title="3.4 锁粗化"></a>3.4 锁粗化</h5><p>虚拟机对连续的加锁操作（synchronized append）进行范围扩展（粗化）到整个操作序列的外部。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">concatString</span><span class="params">(String s1,String s2, String s3)</span></span>&#123;</span><br><span class="line">    StringBuffer sb = <span class="keyword">new</span> StringBUffer();</span><br><span class="line">    sb.append(s1);</span><br><span class="line">    sb.append(s2);</span><br><span class="line">    sb.append(s3);</span><br><span class="line">    <span class="keyword">return</span> sb.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="四、参考资料"><a href="#四、参考资料" class="headerlink" title="四、参考资料"></a>四、参考资料</h4><p>1.Evaluating and improving biased locking in the HotSpot virtual machine<br>2.<a href="https://www.cnblogs.com/paddix/p/5405678.html">Java并发编程：Synchronized底层优化（偏向锁、轻量级锁）</a><br>3.<a href="https://www.cnblogs.com/zhai1997/p/13546652.html">锁：锁优化（synchronized 锁升级过程、锁消除、锁粗化）</a><br>4.<a href="https://wiki.openjdk.java.net/display/HotSpot/Synchronization">Synchronization</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Concurrency</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>对象的内存布局</title>
     <url>/java-object-layout.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>很多时候我们都有一个疑问：一个对象在内存中占用多大的空间呢？</p>
@@ -2131,76 +2223,6 @@
       <tags>
         <tag>Java</tag>
         <tag>JVM</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java synchronized</title>
-    <url>/java-multithreading-synchronized.html</url>
-    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>synchronized作为Java内建的关键字和锁机制，理解和使用它是必要的也是有难度的。个人认为深入理解此关键字在于以下几个方面：</p>
-<ul>
-<li>基础层面：正确理解对象锁和类锁，并熟练使用</li>
-<li>能力提升：<ul>
-<li>了解对象的内存布局，观察锁如何影响对象的内存布局</li>
-<li>了解锁优化，锁升级及其过程</li>
-</ul>
-</li>
-<li>更上一层楼：OpenJDK源码走读</li>
-</ul>
-<p>本文只是记录和翻译了一些英文文档的内容，作为笔记以后翻阅。详细内容可看原文。</p>
-<h4 id="二、对象锁和类锁"><a href="#二、对象锁和类锁" class="headerlink" title="二、对象锁和类锁"></a>二、对象锁和类锁</h4><p>1.1 对象锁：修饰代码块和实例方法</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ObjectLock</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;<span class="comment">//此代码块锁住当前对象</span></span><br><span class="line">                <span class="keyword">int</span> i = <span class="number">5</span>;</span><br><span class="line">                <span class="keyword">while</span> (i-- &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + i);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">int</span> i = <span class="number">5</span>;</span><br><span class="line">            <span class="keyword">while</span> (i-- &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + i);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<p>1.2 类锁:修饰代码块和静态方法</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ClazzLock</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (ClazzLock.class) &#123;<span class="comment">//此代码块锁住class类</span></span><br><span class="line">                <span class="keyword">int</span> i = <span class="number">5</span>;</span><br><span class="line">                <span class="keyword">while</span> (i-- &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    System.out.println(Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + i);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 静态方法属于类</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">int</span> i = <span class="number">5</span>;</span><br><span class="line">            <span class="keyword">while</span> (i-- &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + i);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="三、锁优化"><a href="#三、锁优化" class="headerlink" title="三、锁优化"></a>三、锁优化</h4><p>依据一：数据显示，许多锁有局部性特征，也就是说很多锁的锁定和释放都发生在特定的线程上。<br>依据二：数据显示，大部分Java对象不存在竞争。</p>
-<ul>
-<li>适应性自旋-Adaptive Spinning</li>
-<li>锁消除-Lock Elimination</li>
-<li>锁粗化-Lock Coarsening</li>
-<li>轻量级锁-Lightweight Locking</li>
-<li>偏向锁-Biased Locking</li>
-</ul>
-<h5 id="3-1-偏向锁"><a href="#3-1-偏向锁" class="headerlink" title="3.1 偏向锁"></a>3.1 偏向锁</h5><p>当我们开发了一个多线程环境下的模块时，其他人可能把它用在单线程环境下，此时加锁逻辑就是多余的。即使使用轻量级锁，每次获取锁都执行CAS原子指令也是一种性能损耗。使用偏向锁，线程首次获取锁时记录偏向于它自己,当有其他线程获取锁时，偏向锁要撤销，使用其他锁机制，如轻量级锁。</p>
-<p>lock-field中有一个bit用于记录是否偏向状态，初始状态下是处于偏向锁状态，但没有设置偏向的线程ID。当线程首次获取锁时，发现没有指定偏向的线程，则使用CAS设置偏向线程，来避免竞态条件。</p>
-<h5 id="3-2-轻量级锁（Thin-Lock）"><a href="#3-2-轻量级锁（Thin-Lock）" class="headerlink" title="3.2 轻量级锁（Thin Lock）"></a>3.2 轻量级锁（Thin Lock）</h5><p>相对于每次对象锁定都获取monitor结构的重量级锁而言，轻量级锁只是使用CAS原子指令修改lock-field（锁信息字段），因此轻量级锁不支持wait和notify。当发生锁竞争时，轻量级锁膨胀，同时分配monitor结构，lock-field更新成monitor的指针。</p>
-<p>Java的锁是可重入的，所以需要记录当前锁的重入次数和锁的持有者。</p>
-<ul>
-<li>记录方式一：<br>最直接的方式是把lock-field分成两部分，一个记录锁的持有者，一个记录锁重入次数。由于lock-field字段长度固定，所以重入次数被限制了。重入次数达到上限只能升级为重量级锁。</li>
-</ul>
-<ul>
-<li>记录方式二：<br>当线程需要获取锁时，在获取锁的线程栈中保存lock-records记录。线程获取的所有锁记录都将保存在这个集合中，它的顺序和获取锁的顺序一致。</li>
-</ul>
-<p>轻量级锁的变种和提升包含 <em>tasuki-lock</em> 和 <em>meta-lock</em> 其算法思想是一致的，差异在于实现细节，</p>
-<p>1、轻量级锁的加锁过程</p>
-<p>在代码进入同步块的时，如果同步对象锁状态为无锁（锁标志位为“01”，偏向锁位为“0”）虚拟机首先将在当前线程的栈帧中建立一个名为锁记录（Lock Record）的空间，用于存储锁对象目前的Mark Word的拷贝（官方称之为 Displaced Mark Word）。然后，虚拟机将使用CAS操作尝试将对象的Mark Word更新为指向Lock Record的指针，并将Lock record里的owner指针指向object mark word。如果这个更新动作成功了，那么这个线程就拥有了该对象的锁，并且对象Mark Word的锁标志位设置为“00”，即表示此对象处于轻量级锁定状态。</p>
-<p>如果这个更新操作失败了，虚拟机首先会检查对象的Mark Word是否指向当前线程的栈帧，如果是就说明当前线程已经拥有了这个对象的锁，那就可以直接进入同步块继续执行。<br>否则说明多个线程竞争锁，轻量级锁就要膨胀为重量级锁，锁标志的状态值变为“10”，Mark Word中存储的就是指向重量级锁（互斥量）的指针，后面等待锁的线程也要进入阻塞状态。<br>而当前线程便尝试使用自旋来获取锁，自旋就是为了不让线程阻塞，而采用循环去获取锁的过程。</p>
-<center>
-    <img src="../images/java-thin-lock-recorder.jpg" width="500"/>
-</center>
-
-<pre><code>                 图2.1 轻量级锁CAS操作前/后堆栈与对象的状态
-</code></pre>
-<p>2、轻量级锁的解锁过程：</p>
-<p>（1）通过CAS操作尝试把线程中复制的Displaced Mark Word对象替换当前的Mark Word。</p>
-<p>（2）如果替换成功，整个同步过程就完成了。</p>
-<p>（3）如果替换失败，说明有其他线程尝试过获取该锁（此时锁已膨胀），那就要在释放锁的同时，唤醒被挂起的线程。</p>
-<h5 id="3-3-锁消除"><a href="#3-3-锁消除" class="headerlink" title="3.3 锁消除"></a>3.3 锁消除</h5><p>锁消除即删除不必要的加锁操作。根据代码逃逸技术，如果判断到一段代码中，堆上的数据不会逃逸出当前线程，那么可以认为这段代码是线程安全的，不必要加锁。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        contactString(<span class="string">&quot;aa&quot;</span>, <span class="string">&quot;bb&quot;</span>, <span class="string">&quot;cc&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">contactString</span><span class="params">(String s1, String s2, String s3)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> StringBuffer().append(s1).append(s2).append(s3).toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>虽然StringBuffer的append是一个同步方法，但是这段程序中的StringBuffer属于一个局部变量，并且不会从该方法中逃逸出去，所以其实这过程是线程安全的，可以将锁消除。</p>
-<h5 id="3-4-锁粗化"><a href="#3-4-锁粗化" class="headerlink" title="3.4 锁粗化"></a>3.4 锁粗化</h5><p>虚拟机对连续的加锁操作（synchronized append）进行范围扩展（粗化）到整个操作序列的外部。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">concatString</span><span class="params">(String s1,String s2, String s3)</span></span>&#123;</span><br><span class="line">    StringBuffer sb = <span class="keyword">new</span> StringBUffer();</span><br><span class="line">    sb.append(s1);</span><br><span class="line">    sb.append(s2);</span><br><span class="line">    sb.append(s3);</span><br><span class="line">    <span class="keyword">return</span> sb.toString();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="四、参考资料"><a href="#四、参考资料" class="headerlink" title="四、参考资料"></a>四、参考资料</h4><p>1.Evaluating and improving biased locking in the HotSpot virtual machine<br>2.<a href="https://www.cnblogs.com/paddix/p/5405678.html">Java并发编程：Synchronized底层优化（偏向锁、轻量级锁）</a><br>3.<a href="https://www.cnblogs.com/zhai1997/p/13546652.html">锁：锁优化（synchronized 锁升级过程、锁消除、锁粗化）</a><br>4.<a href="https://wiki.openjdk.java.net/display/HotSpot/Synchronization">Synchronization</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-        <tag>Concurrency</tag>
       </tags>
   </entry>
   <entry>
@@ -3487,6 +3509,203 @@
       <tags>
         <tag>Reading</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>《认知天性》</title>
+    <url>/%E3%80%8A%E8%AE%A4%E7%9F%A5%E5%A4%A9%E6%80%A7%E3%80%8B.html</url>
+    <content><![CDATA[<h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><h6 id="书籍简介"><a href="#书籍简介" class="headerlink" title="书籍简介"></a>书籍简介</h6><table>
+    <tr>
+        <td><img src="../images/books/renzhitianxing.jpg" width="100"/></td>
+        <td>认知天性 : 让学习轻而易举的心理学规律</td>
+    </tr>
+</table>
+
+<h6 id="关于作者"><a href="#关于作者" class="headerlink" title="关于作者"></a>关于作者</h6><p>三位作者：</p>
+<ul>
+<li>彼得·布朗（Peter C. Brown）<br>一位作家和独立出版人，专注于撰写历史、商业和心理学方面的书籍。他在《认知天性》中担任主要撰稿人，负责将科学家们的研究成果转化为易于理解和应用的内容</li>
+<li>亨利·勒迪格（Henry L. Roediger III）<br>华盛顿大学心理与脑科学系的教授。他的研究主要集中在记忆和学习方面，尤其是记忆的提取和测试效应（testing effect）。勒迪格教授在认知心理学领域发表了大量的研究论文，并获得了多项荣誉和奖项。</li>
+<li>马克·麦克丹尼尔（Mark A. McDaniel）<br>华盛顿大学心理与脑科学系的教授，专注于认知心理学和教育心理学。他的研究兴趣包括记忆、学习策略和如何在实际教育环境中应用这些策略。麦克丹尼尔教授也在认知心理学领域发表了许多重要的研究成果，并与勒迪格教授共同开展了大量的合作研究。</li>
+</ul>
+<h5 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h5><ul>
+<li>学习是挑战天性的必须课</li>
+<li>学习的本质：知识链和记忆结</li>
+<li>“后刻意练习”时代的到来</li>
+<li>知识的“滚雪球”效应</li>
+<li>打造适合自己的心智模型</li>
+<li>选择适合自己的学习风格</li>
+<li>终身学习者基本的基本</li>
+<li>写给大家的学习策略</li>
+</ul>
+<h5 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h5><ul>
+<li>1、学习是挑战天性的必须课<ul>
+<li>天性懒惰孕育了认知规律和心智模型<ul>
+<li>耗费心血的学习才是深层次的，效果也更持久。不花力气的学习就像在沙子上写字，今天写上，明天字就消失了。</li>
+<li>与反复阅读这种复习方法相比，<strong>回想事实、概念或事件</strong>会更有效。这种方法被称为检索式练习。</li>
+</ul>
+</li>
+<li>科学“照妖镜”下的学习方法<ul>
+<li>背诵、不断重复、反复阅读、<strong>功利性记忆</strong>、集中练习等方式，看起来很刻苦，其实效果不好，很快被忘记。</li>
+<li>对文字越熟悉、越流畅阅读，会造成一种掌握的假象。</li>
+<li>当事关重大时，当抽象的事务被形象化时，当事情和个人息息相关时，你就会把学到的东西记得更牢。</li>
+<li>轻易接受别人的观点，不给自己提问题，没有去想什么是自己不知道的</li>
+</ul>
+</li>
+<li>知识多不等于学习能力强<ul>
+<li>学习知识不能求快，要求扎实，循序渐进理解。</li>
+</ul>
+</li>
+<li>考试是最有效的学习策略之一<ul>
+<li>不要把考试当做衡量学习成果的标尺，而是记忆检索的练习，一种学习工具。</li>
+<li>主动检索（考试）可以强化记忆，而且检索花费的心思越多，受益就越多。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>读书笔记：不要无意识的重复，集中练习、把抽象形象化，找到知识与自己的关联。别太在意考试的成绩。</p>
+<ul>
+<li>2、学习的本质：知识链和记忆结<ul>
+<li>知识最终将变成条件反射<ul>
+<li>可以带来更好的学习效果：从记忆中检索知识或是早期的训练内容，把这些和新体验联系起来，借助观察和思考，预先演练你下次可能采取的不同做法。</li>
+</ul>
+</li>
+<li>自我检查：给知识链打上记忆结<ul>
+<li>重复检索能让记忆更清透，而且它把记忆这条绳子又缠了一圈，使其变得 更牢靠。</li>
+</ul>
+</li>
+<li>只需一次自测：一周后回忆率28%跃迁为39%<ul>
+<li>自测是一种检索式学习，可以强化记忆。</li>
+</ul>
+</li>
+<li>如何成为一名主动学习者</li>
+<li>为何学习越轻松效果越不好</li>
+</ul>
+</li>
+</ul>
+<p>读书笔记：不断回顾知识（考试）可以加深印象，减少遗忘。反思也是一种记忆检索。</p>
+<ul>
+<li>3、“后刻意练习”时代的到来<ul>
+<li>频繁的集中练习只会产生短期记忆</li>
+<li>间隔练习使知识存储得更牢固</li>
+<li>穿插练习有助于长期记忆</li>
+<li>多样化练习促进知识的活学活用</li>
+<li>善用练习组合，带来成长性思维</li>
+<li>知识是平面的，复合型知识是立体的</li>
+<li>关于练习的几条普适性原则</li>
+</ul>
+</li>
+</ul>
+<p>读书笔记：这一部分的副标题是连贯深入的。</p>
+<ul>
+<li>4、知识的“滚雪球”效应<ul>
+<li>学习的三个关键步骤<ul>
+<li>编码</li>
+<li>巩固</li>
+<li>检索</li>
+</ul>
+</li>
+<li>欲求新知，先忘旧事<ul>
+<li>使用Mac电脑，要先忘记Windows电脑，因为Windows的操作习惯会干扰你的学习。忘掉的不是知识本身，而是检索的线索。</li>
+</ul>
+</li>
+<li>越容易想起，越不容易记住</li>
+<li>学习中必须要做哪些努力<ul>
+<li>重新巩固记忆</li>
+<li>打造心智模型：复杂理论或连续运动技能融合成有意义的整体。</li>
+<li>举一反三</li>
+<li>构建概念学习</li>
+<li>学习迁移</li>
+<li>做好学习的心理准备</li>
+</ul>
+</li>
+<li>这些”良性干扰“能提升学习效果</li>
+<li>化解因失败带来的焦虑感</li>
+<li>创造性源于不设限的学习</li>
+<li>别在无法克服的困难上浪费时间</li>
+</ul>
+</li>
+</ul>
+<p>读书笔记：</p>
+<ul>
+<li>5、打造适合自己的心智模型<ul>
+<li>没头脑的机制1和爱自省的机制2<ul>
+<li>指反射脑和逻辑脑（《思考快与慢》）</li>
+</ul>
+</li>
+<li>学习时避免错觉和记忆扭曲</li>
+<li>打造适合自己的心智模型</li>
+<li>你无法从不擅长的事情里学到知识</li>
+<li>实践和测验才能暴露学习漏洞</li>
+</ul>
+</li>
+</ul>
+<p>读书笔记：</p>
+<ul>
+<li>6、选择适合自己的学习风格<ul>
+<li>主动学习能制造掌控感</li>
+<li>你是分析型、创新型、还是实践型思维<ul>
+<li>第一种智力区分模型：8种<ul>
+<li>逻辑——数学智力：批判性思考，以及使用数字和抽象概念的能 力，诸如此类。</li>
+<li>空间智力：三维判断，以及在脑海中具象化的能力。</li>
+<li>语言智力：使用文字和语言的能力。</li>
+<li>肢体动觉智力：行动敏捷和控制身体的能力。</li>
+<li>音乐智力：对声音、旋律、音色，以及音乐的敏感性。</li>
+<li>人际交往智力：“读懂”他人，以及与人有效协作的能力。</li>
+<li>内省智力：理解自身，准确判断自身知识、能力、效率的能力。</li>
+<li>自然观察智力：区分和关联周围自然环境的能力（例如园丁、猎人 或厨师特有的智力）。</li>
+</ul>
+</li>
+<li>第二种智力区分模型：3种<ul>
+<li>分析型智力 ：分析型智力是我们解决问题的能力，典型的例子就是解答测验中的问题</li>
+<li>创新型智力 ：创新型智力是我们综合并应用现有的知识与技能，应对那些新的特殊情况的能力；</li>
+<li>实践型智力 ：实践型智力是我们适应日常生活的能力——明白在具体环境下需要做什么并行动，也就是我们所说的“街头智慧”。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>学不好的领域暴露了你的能力结构</li>
+<li>用搭积木的方法构建知识</li>
+<li>有人喜欢看说明书，有人喜欢动手试错</li>
+</ul>
+</li>
+</ul>
+<p>读书笔记：不同的文化与学习场景需要不同的智力类型。</p>
+<ul>
+<li>7、终身学习者基本的基本<ul>
+<li>双胞胎的认知能力也会天差地别<br>大脑的结构与整体构造在很大程度上是由基因决定的，但神经网络的精细构造似乎也可以由经验来塑造，而且具备大幅修改的能力。</li>
+<li>性格、求知欲和家庭条件对学习的影响<br>智商是基因🧬与环境共同作用的产物。<br>人类智商在持续升高，因为教育、文化（电视机兴起）、营养（脂肪酸、铁、维B）发生了极大的变化。<br>社会经济地位也会影响智商。早期教育可以提升贫困孩子的智商。</li>
+<li>脑力训练可以提升学习自信<br>流体智力：指推理、发现关系、抽象 思维，以及在解决问题的同时头脑中保留信息的能力。<br>晶体智力：指积累的关于世界的知识，以及从过去的学习与经验中提炼出来的 程序或心智模型。</li>
+<li>想要终身成长，请像专家一样思考<br>1、信念：你要相信智力水平不是固定的，而是在很大程度上掌握在自己手中。<br>2、面对失败的态度：那些将失败归咎于本身无能的人——说“我就是不够聪明”的人——会变得无助；而那些认为失败是努力不够或策略不对的人则会深入发掘，尝试不同的做法。<br>3、目标：有的学生以成绩为目标，而有的学生则以学习为目标。对于前一种人来说，他们努力是为了证明自己的能力。对于第二种人来说，他们努力则是为了学到新的知识或技能</li>
+<li>学习执行力比学习技巧更重要：成为专家需要一万小时刻意练习。</li>
+<li>掌握几个适合自己的记忆方法：记忆宫殿等记忆技巧</li>
+</ul>
+</li>
+</ul>
+<p>读书笔记：智商 = 基因 + 环境因素。我们可以通过改变环境因素提升我们的智商。</p>
+<ul>
+<li>8、写给大家的学习策略<ul>
+<li>给学生的学习策略<ul>
+<li>练习从记忆中检索新知识</li>
+<li>有间隔的安排检索练习</li>
+<li>学习时穿插安排不同类型问题</li>
+</ul>
+</li>
+<li>给职场人士的学习策略</li>
+<li>给教师的学习策略<ul>
+<li>向学生解释学习的过程</li>
+<li>教学生如何学习</li>
+<li>在课堂上创造合意困难</li>
+<li>保证透明度：让学生理解用意。</li>
+</ul>
+</li>
+<li>给培训者的学习策略</li>
+</ul>
+</li>
+</ul>
+<h5 id="全书总结"><a href="#全书总结" class="headerlink" title="全书总结"></a>全书总结</h5><p>从作者的职业可以看出，一个出版人和两个教授合作出版的一本书。属于认知心理学范畴。主要介绍学习、认知、大脑相关实验和结论。</p>
+<p>1、自己究竟有没有掌握一个知识点。考试（测验、自测）是一个很好的检验手段。不像学校里的考试，要以正确的心态看待考试，只是检测自己知识的掌握度，而不是要一较高下。</p>
+<p>个人理解：<br>获取到新知识，停留在浅层记忆，会有迷惑性，以为自己懂了。实则过段时间就忘记了。我们应该间隔性的回忆知识，内化吸收，这样才能将知识灵活运用。</p>
+]]></content>
   </entry>
   <entry>
     <title>《麻省理工深度思考法》</title>

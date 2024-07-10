@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2024-07-09T07:04:39.813Z</updated>
+  <updated>2024-07-10T11:52:01.409Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,52 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>《认知天性》</title>
+    <link href="https://wangduwei.top/%E3%80%8A%E8%AE%A4%E7%9F%A5%E5%A4%A9%E6%80%A7%E3%80%8B.html"/>
+    <id>https://wangduwei.top/%E3%80%8A%E8%AE%A4%E7%9F%A5%E5%A4%A9%E6%80%A7%E3%80%8B.html</id>
+    <published>2024-07-10T11:52:01.000Z</published>
+    <updated>2024-07-10T11:52:01.409Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h4&gt;&lt;h6 id=&quot;书籍简介&quot;&gt;&lt;a href=&quot;#书籍简介&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Android中的日志库</title>
+    <link href="https://wangduwei.top/android-library-log.html"/>
+    <id>https://wangduwei.top/android-library-log.html</id>
+    <published>2024-07-09T07:54:19.000Z</published>
+    <updated>2024-07-09T07:54:19.360Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;日志库是一个项目的基础功能之一，它应该包括但不限于以下功能：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;扩展性：支持把日志记录到多个地方，如：本地文件、控制台、崩溃系统。&lt;/li&gt;
+&lt;li&gt;高性能：日志记录较为频繁时，如何写文件，提高性能。&lt;/li&gt;
+&lt;li&gt;稳定性：崩溃前一刻的日志不丢失</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>android jetpack startup</title>
@@ -467,59 +513,6 @@
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
     <category term="Compose" scheme="https://wangduwei.top/tags/Compose/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Kotlin之JvmStatic和override冲突问题</title>
-    <link href="https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html"/>
-    <id>https://wangduwei.top/kotlin-lang-jvmstatic-with-interface.html</id>
-    <published>2022-05-09T08:35:18.000Z</published>
-    <updated>2024-04-29T11:50:54.584Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、问题&quot;&gt;&lt;a href=&quot;#一、问题&quot; class=&quot;headerlink&quot; title=&quot;一、问题&quot;&gt;&lt;/a&gt;一、问题&lt;/h4&gt;&lt;p&gt;  </summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Java" scheme="https://wangduwei.top/tags/Java/"/>
-    
-    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Kotlin中的JVM注解</title>
-    <link href="https://wangduwei.top/kotlin-lang-jvm-annotation.html"/>
-    <id>https://wangduwei.top/kotlin-lang-jvm-annotation.html</id>
-    <published>2022-05-01T07:29:44.000Z</published>
-    <updated>2024-04-29T11:50:54.584Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;p&gt;Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。&lt;/p&gt;
-&lt;h4 id=&quot;1、-JvmName&quot;&gt;&lt;a href=&quot;#1、-JvmName&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
     
   </entry>
   
