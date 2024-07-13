@@ -186,6 +186,145 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/cpu-pipline-overview.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/cpu-pipline-overview.html" class="post-title-link" itemprop="url">CPU流水线工作原理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-08-22 21:56:21" itemprop="dateCreated datePublished" datetime="2023-08-22T21:56:21+08:00">2023-08-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h5 id="说明："><a href="#说明：" class="headerlink" title="说明："></a>说明：</h5><p>在<a target="_blank" rel="noopener" href="https://www.zhaixue.cc/weixin/weixin-cpu-pipeline.html">宅学部落</a>这个网站看到一篇讲CPU流水线的文章，写的非常好，为了便于翻阅回顾，转载之。</p>
+<h5 id="正文："><a href="#正文：" class="headerlink" title="正文："></a>正文：</h5><p>现在的CPU处理器一般都是超流水线工作，动不动就是10级以上流水线，超高主频，这两者之间有什么关系呢？今天就跟大家科普下CPU流水线的工作原理，以及他们之间的关系。</p>
+<p>说到流水线，很多人会想到富士康；说到富士康，很多人会想到张全蛋。作为富士康 3 号流水线资深质检员，下面就请张全蛋给大家科普下什么是流水线，大家鼓掌欢迎。</p>
+<h5 id="Micheal-Jack-眼中的流水线"><a href="#Micheal-Jack-眼中的流水线" class="headerlink" title="Micheal Jack 眼中的流水线"></a>Micheal Jack 眼中的流水线</h5><blockquote>
+<p>大家好，我是张全蛋，英文名叫Micheal Jack，法文名叫霍雷呆-杰Q赖，大家也可以叫我查理。作为iPhone 手机 3 号流水线的资深质检员，我很忙的，每分钟都是几百万的生意。像我们富士康这样的transnational enterprise，经常会和不同国家的客户说一些技术上的meeting啊、下班陪他们message啊，都需要英文的。像我们厂里不会说英语的啊，都会被经理 fire 掉的。在我们厂里，流水线叫法太 low了，我们都叫 pipeline，一条pipeline，每个人分工不同，从手机原材料到成品iPhone ，只需要短短几分钟。—- 《嵌入式C语言自我修养》</p>
+</blockquote>
+<center>
+    <img src="../images/cpu-pipeline-phone.jpeg" width="90%"/>
+</center>
+
+<p>查理很忙，介绍到这里就走了，接下来我们继续了解下什么叫流水线。</p>
+<p>流水线是工业大生产下的产物。在农业社会做一部手机，需要的是工匠、手艺人，就像故宫里制作钟表的那些匠人一样，是需要拜师学艺、慢慢学习的：从手机组装、质检、贴膜、包装都是一个人，什么都要学。手艺人慢工出细活，但成本很高，到了工业化社会就不一样了：大家分工合作，将做手机这个复杂过程拆分为多个简单步骤，每个人负责一个步骤，经过刻意（机械）练习和培训，就可以很快上手。每个人都做自己最擅长的，可以大大提高工作效率。</p>
+<p>如果每个人都单独做一部手机，焊接电路、组装成品这一步骤一般人需要8分钟，测试检验一般需要4分钟，贴膜包装成盒一般需要4分钟，总共需要16分钟。每16分钟，如果有3个工人的话，一共可以生产3部手机。一个新员工从进厂开始，要培训学习三个月才能掌握所有的技能，才能上岗。如果引入生产流水线就不一样了，每个人只负责一个工序，比如赵铁柱只负责焊接电路、组装手机，李小花只负责贴膜，进厂培训3天就可以快速上手了，对工人的技能要求大大降低！而且随着时间积累，每个人对自己所负责的工序越来越熟练，每道工序需要的时间大大减少：赵铁柱焊接电路越来越顺手，花费时间从原来的8分钟缩减为4分钟；张全蛋的质量检验练得如火纯情，整个流程做完只需要2分钟；李小花的贴膜技术也越来越溜了，从贴膜到包装2分钟搞定。每16分钟，赵铁柱可以焊接4块电路板 ，整个流水线可以生产出4部手机，产能整整提升了33.33%！老板高兴，赵铁柱高兴，张全蛋和李小花更高兴，因为每做2分钟，他们还可以休息2分钟，刷刷微博滑个抖音，岂不乐哉！</p>
+<p>看到这里可能有人抬杠了：你这么算是不对的，每道工序所用的时间都变为原来的一半，怎么可能做得到？其实要做到不难的，只要工序拆解得合理，容易上手，再加上足够时间的机械重复，很多人都可以做得到。只要奖金发到位，蛋糕店里的小姐姐夹蛋糕的速度比你眨眼的速度都快，银行柜台的小李数钞票的速度比点钞机都快，买单时饭店前台的小妹摁计算器的速度比你掏钱的速度都快。</p>
+<h5 id="流水线工作原理"><a href="#流水线工作原理" class="headerlink" title="流水线工作原理"></a>流水线工作原理</h5><p>一条指令的执行一般要经过：取指令、翻译指令、执行指令三个基本流程。CPU内部的电路分为不同的单元：取指单元、译码单元、执行单元等，指令的执行也是按照流水线工序一步一步执行的。我们假设每一个步骤执行时间都是一个时钟周期，那么一条指令执行需要3个时钟周期。</p>
+<center>
+    <img src="../images/cpu-arm-pipeline.png" width="50%"/>
+</center>
+
+
+<p>CPU 执行指令的3个时钟周期里，取指单元只在第一个时钟周期里工作，其余两个时钟周期都处于空闲状态，其它两个执行单元也是如此，效率太低了，消费者无法接受，老板也不能接受。解决方法就是引入流水线，让流水线每一颗螺丝钉都马不停蹄地运转起来，最好一刻也不要停。</p>
+<center>
+    <img src="../images/cpu-pipeline-multi.png" width="50%"/>
+</center>
+
+
+<p>引入流水线工作模式后可以看到，除了刚开始第一个时钟周期大家还可以偷懒外，其余的时间都不能闲着：从第二个时钟周期开始，当译码单元在翻译指令1时，取指单元也不能闲着，要接着去取指令2。同样如此，从第三个时钟周期开始，当执行单元执行指令1时，译码单元也不能闲着，要接着去翻译指令2，而取指单元要去取指令3。从第四个时钟周期开始，每个电路单元都会进入满荷负载工作状态，像富士康工厂里的流水线一样，源源不断地执行一条条指令。</p>
+<p>引入流水线后，虽然每一条指令执行流程不变，还是需要3个时钟周期，但是从整条流水线的输出看来，差不多平均每个时钟周期就能执行一条指令。原来执行一条指令需要3个时钟周期，现在平均只需要1个时钟周期，CPU 性能提升了不少。</p>
+<p>流水线的本质其实就是拿空间资源换时间。将每条指令分解为多步，指令的每一步都有独立的电路来执行，并让不同指令的各步操作重叠，从而实现几条指令并行处理，从而加快程序的运行。</p>
+<p>CPU内部的流水线如此，富士康工厂里的iPhone流水线也是如此，通过不断往流水线增加人手来提高流水线的生产效率，也就是吞吐率。</p>
+<h5 id="超流水线技术"><a href="#超流水线技术" class="headerlink" title="超流水线技术"></a>超流水线技术</h5><p>想知道什么是超流水线，让我们再回到富士康。</p>
+<p>在富士康 3 号 iPhone 流水生产线上，因为赵铁柱工作效率不高，焊接组装一步手机需要 4 分钟，导致生产一部iPhone手机也得需要 4 分钟，从而拖累了整条生产线的生产效率。老板很生气，后果很严重，赵铁柱没干到一个月就被 fire 掉了。后面几个月，陆陆续续来了不少人：小黑、皮裤哥、红姐，都想试试这份工作，可惜干得还不如赵铁柱，挑战电子厂失败，早已提桶跑路。</p>
+<p>老板招不到人，感觉又错怪了赵铁柱，于是决定升级生产线，并承诺加薪重新召回了赵铁柱。</p>
+<center>
+    <img src="../images/cpu-pipeline-phone2.png" width="50%"/>
+</center>
+
+<p>老板找出了生产线的瓶颈：每道工序都是需要2分钟，只有赵铁柱这道工序耗时4分钟，老板错怪了这铁柱，这不是赵铁柱的原因，是因为这道工序太复杂。于是把这道工序进行了拆解为2道工序：焊接电路板和组装手机。焊接电路仍由赵铁柱负责，把电路板、显示屏、手机外壳组装成手机这道工序则由新招员工王建国负责。生产流水线优化后，赵铁柱焊接电路只需要2分钟，王建国组装也只需要 2 分钟，生产每部 iPhone 的时间由原来的 4 分钟缩减为 2 分钟，生产流水线的瓶颈解决了！</p>
+<p>跟富士康流水线类似，优化CPU流水线也是提升CPU性能的有效手段。流水生产线存在木桶短板效应，我们只需要找出CPU流水线中的性能瓶颈，即耗时最长的那道工序，然后再进行细分、优化为更多的工序就可以了。每一道工序我们称为流水线的一级，流水线越深，每一道流水电路单元的执行时间就会变得越小，我们处理器的时钟周期就可以更短，从而可以通过提升CPU主频来提升CPU性能、提高工作效率。</p>
+<p>在富士康流水生产线中，每道工序的最长耗时时间决定了整条生产线的吞吐率。在CPU内部也是如此，每个流水单元的执行时间（即时间延迟）决定了CPU流水线的性能。CPU流水线中的每一道电路单元由组合逻辑电路和寄存器组成，逻辑单路用来执行本道工序的逻辑运算，寄存器用来保存结果，并作为下一道工序的输入。</p>
+<center>
+    <img src="../images/cpu-pipeline-line.png" width="50%"/>
+</center>
+
+<p>流水生产线是通过减少每一道工序的耗费时间来提升整条流水线效率的。在CPU内部也是如此，CPU内部的数字电路是靠时钟驱动来工作的，既然每条指令的执行时钟周期数不变，即执行每条指令需要3个时钟周期，但是我们可以通过缩短时钟周期的方法来提升效率，即减少每条指令所耗费的时间。减少时钟周期，也就是提升CPU主频，一个关键的制约因素就是CPU内部每一个执行单元的耗费时间。虽然说电信号在电路中的传播时间很快，可以接近光速，但是经过成千上万的晶体管，不停地信号翻转，还是会带来一定的时间延迟，这个时间延迟我们可以看做这道工作的执行时间。以上图为例，如果每个执行单元的延迟是 1.5 纳秒，那么你的时钟周期至少也得2纳秒以上，否则电路就会工作异常。如果驱动CPU工作的时钟周期是 2 纳秒，CPU的主频就是 500 MHz。现在的CPU流水线深度可以做到10级以上，流水线的每一级时间延迟可以做到皮秒级别，驱动CPU工作的时钟周期可以做到更短，因此可以把CPU的主频飙到 5 GHz 以上。</p>
+<p>我们把5级以上的流水线称为超流水线结构。高性能的处理器，为了提升CPU主频，一般都会采用这种超流水线结构。Intel的 i7 处理器有16级流水线，AMD的速龙64系列CPU流水线为20级。史上具有最长流水线的是Intel的第三代奔腾四处理器，有31级的流水线。</p>
+<p>想要提升CPU的主频，根本在于减少流水线中每一级流水的执行时间，消除木桶的短板效应，才能提升流水线的整体性能。解决方法有三个：一是优化流水线中各级流水线的性能，受限于当前集成电路的设计水平，这一步最难；二是依靠集成电路的制造工艺，更先进的纳米工艺，芯片面积越小，发热越小，更容易提升主频；三是不断地增加流水线，流水线越深，流水线的各级延迟就可以做得越小，更容易提高主频。</p>
+<p>流水线是否越深越好呢？非也。流水线的本质是拿空间换时间，流水线越深，电路就会越复杂，需要更多的组合逻辑电路和寄存器，芯片面积也就越大，功耗也就随之上升了。拿功耗增长换来性能提升，在PC机和服务器上还行，但对于很多靠电池供电的移动设备的处理器来说就无法接受了，CPU设计人员需要在性能和功耗之间做一个很好的平衡。</p>
+<p>流水线越深，就越能提升性能吗？也不一定。流水线是靠指令的并行来提升性能的，第一条指令还没有执行完，下面的第二条指令就开始取指、译码了。执行的程序指令如果是顺序结构，没有中断或跳转，流水线确实可以提高执行效率。但是当程序指令中存在跳转、分支结构时，下面预取的指令可能就要全部丢掉了，需要到要跳转的地方重新取指令执行。如下面的分支，如果BEQ条件不满足，处理器可能就会将预期的ADD指令全部丢弃，重新到here标签处取SUB指令执行。</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">BEQ R1, R2, here</span><br><span class="line">ADD R2, R1, R0</span><br><span class="line">ADD R5, R4, R3</span><br><span class="line">...</span><br><span class="line">here:</span><br><span class="line">SUB R2, R1, R0</span><br><span class="line">SUB R5, R4, R3</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>流水线越深，一旦预取指令失败，浪费和损失就会越严重，因为流水线中预取的几十条指令可能都要丢弃掉，流水线发生了停顿，无法按照预期继续执行，这种情况我们一般称之为流水线冒险（hazard）。在现在很多超流水线处理器中，为了避免这种情况出现，会采取各种各样的方法去避免这种情况，以免影响处理器的性能。</p>
+<p>流水线越深，一旦预取指令失败，浪费和损失就会越严重，因为流水线中预取的几十条指令可能都要丢弃掉，流水线发生了停顿，无法按照预期继续执行，这种情况我们一般称之为流水线冒险（hazard）。在现在很多超流水线处理器中，为了避免这种情况出现，会采取各种各样的方法去避免这种情况发生，以免影响处理器的性能。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/flutter-state-bloc.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1332,136 +1471,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-jetpack-compose-sideeffect.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/android-jetpack-compose-sideeffect.html" class="post-title-link" itemprop="url">Jetpack Compose Side Effects</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-05-17 16:11:13" itemprop="dateCreated datePublished" datetime="2022-05-17T16:11:13+08:00">2022-05-17</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="一、什么是Side-Effect"><a href="#一、什么是Side-Effect" class="headerlink" title="一、什么是Side-Effect"></a>一、什么是Side-Effect</h4><blockquote>
-<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Side_effect_(computer_science)">wiki</a>:在计算机科学中，当函数、表达式、操作会修改它作用域之外的状态变量值时，我们就说它具有副作用。也就是说除返回值之外其他的对外修改都叫副作用。<br>常见的例子包括：修改非本地变量、修改参数传进来的可变引用、执行I/O等。</p>
-</blockquote>
-<h4 id="二、Compose中的Side-Effect"><a href="#二、Compose中的Side-Effect" class="headerlink" title="二、Compose中的Side-Effect"></a>二、Compose中的Side-Effect</h4><p>因为Jetpack Compose是由一系列的<code>@Composable</code>函数组成的，<code>@Composable</code>函数在执行时可能会被跳过（出于优化的角度）或执行多次（recomposition）。<br>那对于函数内部的网络请求、对外部状态的修改怎么办？有可能执行多次？有可能不执行？这就产生了某种不可预期的错误状态，或者泄露。<br>为了解决此类问题，Compose提供了相应的API，这些API主要聚焦于对这些副作用的生命周期进行管理。</p>
-<p>这些API可以分成两大类：</p>
-<ul>
-<li>SuspendedEffect<ul>
-<li>rememberCoroutineScope</li>
-<li>launchedEffect</li>
-</ul>
-</li>
-<li>Non-Suspended Side Effects<ul>
-<li>DisposableEffect</li>
-<li>SideEffect</li>
-</ul>
-</li>
-</ul>
-<h4 id="三、SuspendedEffect"><a href="#三、SuspendedEffect" class="headerlink" title="三、SuspendedEffect"></a>三、SuspendedEffect</h4><h5 id="3-1-LaunchedEffect"><a href="#3-1-LaunchedEffect" class="headerlink" title="3.1 LaunchedEffect"></a>3.1 LaunchedEffect</h5><p>在首次composition的时候被调用。recomposition时不会再次调用。可以通过改变Key让其重新调用。<br>它是一个协程作用域，我们可以执行一些挂起函数，当composable函数退出时，协程会被取消。</p>
-<p>下面的例子中，启动即执行循环逻辑，每秒修改一次状态值并触发recomposition，但recomposition并不影响LaunchedEffect内的逻辑。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">LaunchedEffect</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> timer <span class="keyword">by</span> remember &#123; mutableStateOf(<span class="number">0</span>) &#125;</span><br><span class="line">    Box(modifier = Modifier.fillMaxSize(), </span><br><span class="line">        contentAlignment = Alignment.Center) &#123;</span><br><span class="line">        Text(<span class="string">&quot;Time <span class="variable">$timer</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    LaunchedEffect(key1 = <span class="built_in">Unit</span>) &#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            delay(<span class="number">1000</span>)</span><br><span class="line">            timer++</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="3-2-RememberCoroutineScope"><a href="#3-2-RememberCoroutineScope" class="headerlink" title="3.2 RememberCoroutineScope"></a>3.2 RememberCoroutineScope</h5><p><code>LaunchedEffect</code>的启动和取消跟随Composable函数的生命周期。如果想自己控制生命周期可以使用<code>RememberCoroutineScope</code></p>
-<p>下面的例子中，协程的控制权转移到我们自己手中：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">JustRememberCoroutineScope</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> scope = rememberCoroutineScope()</span><br><span class="line">    <span class="keyword">var</span> timer <span class="keyword">by</span> remember &#123; mutableStateOf(<span class="number">0</span>) &#125;</span><br><span class="line">    <span class="keyword">var</span> timerStartStop <span class="keyword">by</span> remember &#123; mutableStateOf(<span class="literal">false</span>) &#125;</span><br><span class="line">    <span class="keyword">var</span> job: Job? <span class="keyword">by</span> remember &#123; mutableStateOf(<span class="literal">null</span>) &#125;</span><br><span class="line"></span><br><span class="line">    Box(modifier = Modifier.fillMaxSize(),</span><br><span class="line">        contentAlignment = Alignment.Center) &#123;</span><br><span class="line">        Column(horizontalAlignment = Alignment.CenterHorizontally) &#123;</span><br><span class="line">            Text(<span class="string">&quot;Time <span class="variable">$timer</span>&quot;</span>)</span><br><span class="line">            Button(onClick = &#123;</span><br><span class="line">                timerStartStop = !timerStartStop</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (timerStartStop) &#123;</span><br><span class="line">                    job?.cancel()</span><br><span class="line">                    job = scope.launch &#123;</span><br><span class="line">                        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">                            delay(<span class="number">1000</span>)</span><br><span class="line">                            timer++</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    job?.cancel()</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125;) &#123;</span><br><span class="line">                Text(<span class="keyword">if</span> (timerStartStop) <span class="string">&quot;Stop&quot;</span> <span class="keyword">else</span> <span class="string">&quot;Start&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="四、Non-Suspended-Side-Effects"><a href="#四、Non-Suspended-Side-Effects" class="headerlink" title="四、Non-Suspended Side Effects"></a>四、Non-Suspended Side Effects</h4><h5 id="4-1-DisposableEffect"><a href="#4-1-DisposableEffect" class="headerlink" title="4.1 DisposableEffect"></a>4.1 DisposableEffect</h5><p>与<code>LaunchedEffect</code>一样，立即启动，通过修改key可以再次启动。它提供了一个销毁时的回调，当再次启动时，前一个的<code>onDispose</code>方法会被回调。</p>
-<p>下面的例子每次点击按钮改变状态进行recompose，同时会改变<code>DisposableEffect</code>的key，销毁上一个Effect并收到回调。</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">JustDisposableEffect</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> timerStartStop <span class="keyword">by</span> remember &#123; mutableStateOf(<span class="literal">false</span>) &#125;</span><br><span class="line">    Box(modifier = Modifier.fillMaxSize(),</span><br><span class="line">        contentAlignment = Alignment.Center) &#123;</span><br><span class="line">        Column(horizontalAlignment = Alignment.CenterHorizontally) &#123;</span><br><span class="line">            Button(onClick = &#123;</span><br><span class="line">                timerStartStop = !timerStartStop</span><br><span class="line">            &#125;) &#123;</span><br><span class="line">                Text(<span class="keyword">if</span> (timerStartStop) <span class="string">&quot;Stop&quot;</span> <span class="keyword">else</span> <span class="string">&quot;Start&quot;</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> context = LocalContext.current</span><br><span class="line"></span><br><span class="line">    DisposableEffect(key1 = timerStartStop) &#123;</span><br><span class="line">        <span class="keyword">val</span> x = (<span class="number">1.</span><span class="number">.10</span>).random()</span><br><span class="line">        Toast.makeText(context, <span class="string">&quot;Start <span class="variable">$x</span>&quot;</span>, LENGTH_SHORT).show()</span><br><span class="line"></span><br><span class="line">        onDispose &#123;</span><br><span class="line">            Toast.makeText(context, <span class="string">&quot;Stop <span class="variable">$x</span>&quot;</span>, LENGTH_SHORT).show()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="4-2-SideEffect"><a href="#4-2-SideEffect" class="headerlink" title="4.2 SideEffect"></a>4.2 SideEffect</h5><p>使用场景：</p>
-<ul>
-<li>每次composition / recomposition成功后被调用</li>
-<li>用于对外部状态的更新</li>
-<li>无需做清理回收操作时</li>
-</ul>
-<p>例1：对外部状态的更新</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">MyScreen</span><span class="params">(drawerTouchHandler: <span class="type">TouchHandler</span>)</span></span> &#123;</span><br><span class="line">  <span class="keyword">val</span> drawerState = rememberDrawerState(DrawerValue.Closed)</span><br><span class="line"></span><br><span class="line">  SideEffect &#123;</span><br><span class="line">    drawerTouchHandler.enabled = drawerState.isOpen</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>例2：</p>
-<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> i = <span class="number">0</span></span><br><span class="line"><span class="meta">@Composable</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">MyComposable</span><span class="params">()</span></span>&#123;</span><br><span class="line">    SideEffect &#123; <span class="comment">//this will handle the side effect that may occur</span></span><br><span class="line">        i++</span><br><span class="line">    &#125;</span><br><span class="line">    Button(onClick = &#123;&#125;)&#123;</span><br><span class="line">        Text(text = <span class="string">&quot;Click&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="五、参考"><a href="#五、参考" class="headerlink" title="五、参考"></a>五、参考</h4><p><a target="_blank" rel="noopener" href="https://jorgecastillo.dev/jetpack-compose-effect-handlers">Jetpack Compose Effect Handlers</a><br><a target="_blank" rel="noopener" href="https://www.section.io/engineering-education/side-effects-and-effects-handling-in-jetpack-compose/">SideEffects and Effects Handling in Jetpack Compose</a><br><a target="_blank" rel="noopener" href="https://medium.com/mobile-app-development-publication/jetpack-compose-side-effects-made-easy-a4867f876928">Jetpack Compose Side Effects Made Easy</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1535,7 +1544,7 @@
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
-        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-count">27</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1572,7 +1581,7 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">129k</span>
+    <span title="站点总字数">130k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
