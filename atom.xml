@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2024-07-13T13:58:57.585Z</updated>
+  <updated>2024-09-22T06:35:15.822Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -17,11 +17,34 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>《高纬度思考法》</title>
+    <link href="https://wangduwei.top/%E3%80%8A%E9%AB%98%E7%BA%AC%E5%BA%A6%E6%80%9D%E8%80%83%E6%B3%95%E3%80%8B.html"/>
+    <id>https://wangduwei.top/%E3%80%8A%E9%AB%98%E7%BA%AC%E5%BA%A6%E6%80%9D%E8%80%83%E6%B3%95%E3%80%8B.html</id>
+    <published>2024-09-22T06:34:32.000Z</published>
+    <updated>2024-09-22T06:35:15.822Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h4&gt;&lt;h6 id=&quot;书籍简介&quot;&gt;&lt;a href=&quot;#书籍简介&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Reading" scheme="https://wangduwei.top/tags/Reading/"/>
+    
+  </entry>
+  
+  <entry>
     <title>数据结构之布隆过滤器</title>
     <link href="https://wangduwei.top/cs-data-structure-bloomfilter.html"/>
     <id>https://wangduwei.top/cs-data-structure-bloomfilter.html</id>
     <published>2024-07-13T13:58:57.000Z</published>
-    <updated>2024-07-13T13:58:57.585Z</updated>
+    <updated>2024-07-13T14:01:35.081Z</updated>
     
     
       
@@ -480,36 +503,6 @@
     
     
     <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Jetpack Compose State Management</title>
-    <link href="https://wangduwei.top/android-jetpack-compose-state-management.html"/>
-    <id>https://wangduwei.top/android-jetpack-compose-state-management.html</id>
-    <published>2022-05-18T06:34:49.000Z</published>
-    <updated>2024-04-29T11:50:54.568Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;p&gt;–&lt;/p&gt;
-&lt;center&gt;
-    &lt;img src=&quot;../images/ui-equals-function-of-state.png&quot; width=&quot;100%&quot;/&gt;
-&lt;/center&gt;
-
-&lt;h4 id=&quot;一、什么是状态&quot;&gt;&lt;a href=&quot;#一、什么是状态&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
   </entry>
   

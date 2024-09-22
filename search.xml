@@ -20,6 +20,100 @@
 ]]></content>
   </entry>
   <entry>
+    <title>Admob的初始化过程</title>
+    <url>/admob-init-performance-test.html</url>
+    <content><![CDATA[<p>在接入Google Admob时，依据官方文档 或 依据开发习惯，我们一般先对Admob SDK进行初始化，然后进行广告加载：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// first init the admob sdk</span></span><br><span class="line">MobileAds.initialize(context) &#123;</span><br><span class="line">    <span class="comment">//init successful</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//second load Ad</span></span><br><span class="line"><span class="keyword">val</span> adRequest = AdRequest.Builder().build()</span><br><span class="line">adView.loadAd(adRequest)</span><br></pre></td></tr></table></figure>
+
+<p>那么，多思考一下，我们有个疑问：</p>
+<h4 id="1、一定要先初始化，才能加载广告吗❓"><a href="#1、一定要先初始化，才能加载广告吗❓" class="headerlink" title="1、一定要先初始化，才能加载广告吗❓"></a>1、一定要先初始化，才能加载广告吗❓</h4><p>实验设计：不执行初始化操作，直接请求广告。</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> adRequest = AdRequest.Builder().build()</span><br><span class="line">adView.loadAd(adRequest)</span><br></pre></td></tr></table></figure>
+
+<p>实验结论：不初始化SDK也能成功加载到广告。</p>
+<h4 id="2、为什么不初始化也能加载广告呢❓"><a href="#2、为什么不初始化也能加载广告呢❓" class="headerlink" title="2、为什么不初始化也能加载广告呢❓"></a>2、为什么不初始化也能加载广告呢❓</h4><p>猜想：<br>1、初始化和加载有关联性：加载广告时，发现没有初始化，先进行了初始化，再执行广告加载操作。<br>2、初始化和加载无关联系：加载广告不需要SDK初始化，两者无关联。</p>
+<p>设：广告初始化耗时m毫秒，广告加载耗时n毫秒，总耗时m+n毫秒。</p>
+<p>实验设计：<br>A组：执行初始化，同时执行广告加载。<br>若初始化和加载有关联性，广告加载时长约等于m+n。<br>若初始化和加载无关联性，广告加载时长约等于n。</p>
+<p>日志输出示例：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">2024-07-06 10:10:06.061 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  call init....</span><br><span class="line">2024-07-06 10:10:06.224 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  start load....</span><br><span class="line">2024-07-06 10:10:07.401 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  after init = 1340</span><br><span class="line">2024-07-06 10:10:08.416 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  onAdLoaded...cost = 2192</span><br></pre></td></tr></table></figure>
+
+<p>初始化耗时 m=1340ms<br>加载耗时 n=2192ms</p>
+<p>B组：延迟10s执行初始化。立即执行广告加载。</p>
+<p>日志输出示例：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">2024-07-06 13:23:42.675 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  start load....</span><br><span class="line">2024-07-06 13:23:43.453 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  call init....</span><br><span class="line">2024-07-06 13:23:46.208 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  onAdLoaded...cost = 3532</span><br><span class="line">2024-07-06 13:23:53.486 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  after init = 24</span><br></pre></td></tr></table></figure>
+
+<p>初始化耗时 m=24ms<br>加载耗时 n=3532ms</p>
+<p>结论：由于广告加载成功后，才调用初始化逻辑，因此初始化时长大幅降低。故：初始化和加载有关联性。</p>
+<h4 id="3、聚合的SDK初始化了吗❓"><a href="#3、聚合的SDK初始化了吗❓" class="headerlink" title="3、聚合的SDK初始化了吗❓"></a>3、聚合的SDK初始化了吗❓</h4><p>实验设计：<br>A：不初始化SDK，加载广告后，打开AdInspector。<br>B：初始化SDK，加载广告后，打开AdInspector。</p>
+<table>
+    <tr>
+        <td><img src="../images/ad/mediator_failure.png" width="70%"/></td>
+        <td><img src="../images/ad/mediator_success.png" width="70%"/></td>
+    </tr>
+</table>
+
+<p>实验结论：不初始化只能加载Admob自身的广告，初始化后可以加载聚合源的广告。</p>
+<h4 id="3、初始化成功后再加载广告-VS-直接加载广告-加载速度的对比"><a href="#3、初始化成功后再加载广告-VS-直接加载广告-加载速度的对比" class="headerlink" title="3、初始化成功后再加载广告 VS 直接加载广告 加载速度的对比"></a>3、初始化成功后再加载广告 VS 直接加载广告 加载速度的对比</h4><p>直接加载：</p>
+<table>
+<thead>
+<tr>
+<th>第一组</th>
+<th>第二组</th>
+<th>第三组</th>
+<th>第四组</th>
+<th>第五组</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2915ms</td>
+<td>1581ms</td>
+<td>1435ms</td>
+<td>1621ms</td>
+<td>1581ms</td>
+</tr>
+</tbody></table>
+<p>初始化后加载：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>第一组</th>
+<th>第二组</th>
+<th>第三组</th>
+<th>第四组</th>
+<th>第五组</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>初始化</td>
+<td>2373ms</td>
+<td>2374</td>
+<td>2463</td>
+<td>2427</td>
+<td>2298</td>
+</tr>
+<tr>
+<td>加载</td>
+<td>1468ms</td>
+<td>1386</td>
+<td>1505</td>
+<td>2498</td>
+<td>1250</td>
+</tr>
+<tr>
+<td>日志总耗时</td>
+<td>3843</td>
+<td>3762</td>
+<td>3970</td>
+<td>4927</td>
+<td>3550</td>
+</tr>
+</tbody></table>
+<p>结论：初始化后才加载广告慢于直接加载广告。</p>
+<h4 id="4、一种开屏广告的优化方案"><a href="#4、一种开屏广告的优化方案" class="headerlink" title="4、一种开屏广告的优化方案"></a>4、一种开屏广告的优化方案</h4><p>不初始化SDK也能加载到Admob广告，且加载速度较快，但是没有参与bidding，价格较低。<br>初始化之后，加载聚合源广告，速度较慢，但经过bidding后，价格会高一点。</p>
+<p>结合两个加载方式，闪屏时段内加载广告，闪屏n秒时长内，加载到bidding类型则展示bidding类型。没加载到，则展示Admob类型。</p>
+]]></content>
+  </entry>
+  <entry>
     <title>Android消息机制</title>
     <url>/android-aosp-event-loop.html</url>
     <content><![CDATA[<hr>
@@ -380,100 +474,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Admob的初始化过程</title>
-    <url>/admob-init-performance-test.html</url>
-    <content><![CDATA[<p>在接入Google Admob时，依据官方文档 或 依据开发习惯，我们一般先对Admob SDK进行初始化，然后进行广告加载：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// first init the admob sdk</span></span><br><span class="line">MobileAds.initialize(context) &#123;</span><br><span class="line">    <span class="comment">//init successful</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//second load Ad</span></span><br><span class="line"><span class="keyword">val</span> adRequest = AdRequest.Builder().build()</span><br><span class="line">adView.loadAd(adRequest)</span><br></pre></td></tr></table></figure>
-
-<p>那么，多思考一下，我们有个疑问：</p>
-<h4 id="1、一定要先初始化，才能加载广告吗❓"><a href="#1、一定要先初始化，才能加载广告吗❓" class="headerlink" title="1、一定要先初始化，才能加载广告吗❓"></a>1、一定要先初始化，才能加载广告吗❓</h4><p>实验设计：不执行初始化操作，直接请求广告。</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> adRequest = AdRequest.Builder().build()</span><br><span class="line">adView.loadAd(adRequest)</span><br></pre></td></tr></table></figure>
-
-<p>实验结论：不初始化SDK也能成功加载到广告。</p>
-<h4 id="2、为什么不初始化也能加载广告呢❓"><a href="#2、为什么不初始化也能加载广告呢❓" class="headerlink" title="2、为什么不初始化也能加载广告呢❓"></a>2、为什么不初始化也能加载广告呢❓</h4><p>猜想：<br>1、初始化和加载有关联性：加载广告时，发现没有初始化，先进行了初始化，再执行广告加载操作。<br>2、初始化和加载无关联系：加载广告不需要SDK初始化，两者无关联。</p>
-<p>设：广告初始化耗时m毫秒，广告加载耗时n毫秒，总耗时m+n毫秒。</p>
-<p>实验设计：<br>A组：执行初始化，同时执行广告加载。<br>若初始化和加载有关联性，广告加载时长约等于m+n。<br>若初始化和加载无关联性，广告加载时长约等于n。</p>
-<p>日志输出示例：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">2024-07-06 10:10:06.061 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  call init....</span><br><span class="line">2024-07-06 10:10:06.224 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  start load....</span><br><span class="line">2024-07-06 10:10:07.401 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  after init = 1340</span><br><span class="line">2024-07-06 10:10:08.416 23555-23555 InitAndLoad     com...oid.gms.example.bannerexample  D  onAdLoaded...cost = 2192</span><br></pre></td></tr></table></figure>
-
-<p>初始化耗时 m=1340ms<br>加载耗时 n=2192ms</p>
-<p>B组：延迟10s执行初始化。立即执行广告加载。</p>
-<p>日志输出示例：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">2024-07-06 13:23:42.675 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  start load....</span><br><span class="line">2024-07-06 13:23:43.453 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  call init....</span><br><span class="line">2024-07-06 13:23:46.208 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  onAdLoaded...cost = 3532</span><br><span class="line">2024-07-06 13:23:53.486 27481-27481 DelayInitAndLoad    com...oid.gms.example.bannerexample  D  after init = 24</span><br></pre></td></tr></table></figure>
-
-<p>初始化耗时 m=24ms<br>加载耗时 n=3532ms</p>
-<p>结论：由于广告加载成功后，才调用初始化逻辑，因此初始化时长大幅降低。故：初始化和加载有关联性。</p>
-<h4 id="3、聚合的SDK初始化了吗❓"><a href="#3、聚合的SDK初始化了吗❓" class="headerlink" title="3、聚合的SDK初始化了吗❓"></a>3、聚合的SDK初始化了吗❓</h4><p>实验设计：<br>A：不初始化SDK，加载广告后，打开AdInspector。<br>B：初始化SDK，加载广告后，打开AdInspector。</p>
-<table>
-    <tr>
-        <td><img src="../images/ad/mediator_failure.png" width="70%"/></td>
-        <td><img src="../images/ad/mediator_success.png" width="70%"/></td>
-    </tr>
-</table>
-
-<p>实验结论：不初始化只能加载Admob自身的广告，初始化后可以加载聚合源的广告。</p>
-<h4 id="3、初始化成功后再加载广告-VS-直接加载广告-加载速度的对比"><a href="#3、初始化成功后再加载广告-VS-直接加载广告-加载速度的对比" class="headerlink" title="3、初始化成功后再加载广告 VS 直接加载广告 加载速度的对比"></a>3、初始化成功后再加载广告 VS 直接加载广告 加载速度的对比</h4><p>直接加载：</p>
-<table>
-<thead>
-<tr>
-<th>第一组</th>
-<th>第二组</th>
-<th>第三组</th>
-<th>第四组</th>
-<th>第五组</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>2915ms</td>
-<td>1581ms</td>
-<td>1435ms</td>
-<td>1621ms</td>
-<td>1581ms</td>
-</tr>
-</tbody></table>
-<p>初始化后加载：</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>第一组</th>
-<th>第二组</th>
-<th>第三组</th>
-<th>第四组</th>
-<th>第五组</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>初始化</td>
-<td>2373ms</td>
-<td>2374</td>
-<td>2463</td>
-<td>2427</td>
-<td>2298</td>
-</tr>
-<tr>
-<td>加载</td>
-<td>1468ms</td>
-<td>1386</td>
-<td>1505</td>
-<td>2498</td>
-<td>1250</td>
-</tr>
-<tr>
-<td>日志总耗时</td>
-<td>3843</td>
-<td>3762</td>
-<td>3970</td>
-<td>4927</td>
-<td>3550</td>
-</tr>
-</tbody></table>
-<p>结论：初始化后才加载广告慢于直接加载广告。</p>
-<h4 id="4、一种开屏广告的优化方案"><a href="#4、一种开屏广告的优化方案" class="headerlink" title="4、一种开屏广告的优化方案"></a>4、一种开屏广告的优化方案</h4><p>不初始化SDK也能加载到Admob广告，且加载速度较快，但是没有参与bidding，价格较低。<br>初始化之后，加载聚合源广告，速度较慢，但经过bidding后，价格会高一点。</p>
-<p>结合两个加载方式，闪屏时段内加载广告，闪屏n秒时长内，加载到bidding类型则展示bidding类型。没加载到，则展示Admob类型。</p>
-]]></content>
-  </entry>
-  <entry>
     <title>源码分析-网络框架之Retrofit</title>
     <url>/android-github-source-retrofit.html</url>
     <content><![CDATA[<h4 id="一、使用"><a href="#一、使用" class="headerlink" title="一、使用"></a>一、使用</h4><h5 id="1-1-定义API方法"><a href="#1-1-定义API方法" class="headerlink" title="1.1 定义API方法"></a>1.1 定义API方法</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">RemoteApi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(<span class="meta-string">&quot;timeline&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">timeline</span><span class="params">()</span></span>: RemoteLaunchesResponse </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -498,6 +498,52 @@
       <tags>
         <tag>Android</tag>
         <tag>安卓框架</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>源码分析-WorkManager</title>
+    <url>/android-github-source-workmanager.html</url>
+    <content><![CDATA[<h4 id="一、初始化流程"><a href="#一、初始化流程" class="headerlink" title="一、初始化流程"></a>一、初始化流程</h4><p>1、WorkManager集成了<code>androidx.startup</code> 库，通过<code>startup</code>库的<code>ContentProvider</code>在应用启动时进行初始化。<br>见<code>work-runtime</code>的Manifest文件：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">provider</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;androidx.startup.InitializationProvider&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:authorities</span>=<span class="string">&quot;$&#123;applicationId&#125;.androidx-startup&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:exported</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:node</span>=<span class="string">&quot;merge&quot;</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;androidx.work.WorkManagerInitializer&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:value</span>=<span class="string">&quot;androidx.startup&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>其初始化类为<code>WorkManagerInitializer</code>，其中调用了<code>WorkManager#initialize</code>，然后调用<code>WorkManager</code>的构造函数。<br>整个流程初始化了如下一些对象：</p>
+<center>
+    <img src="../images/android-workmanager_init.jpg" width="100%"/>
+</center>
+
+
+<h4 id="二、任务"><a href="#二、任务" class="headerlink" title="二、任务"></a>二、任务</h4><h5 id="2-1-定义任务"><a href="#2-1-定义任务" class="headerlink" title="2.1 定义任务"></a>2.1 定义任务</h5><p>当我们自定义任务时，需要继承<code>Work</code>类，WorkManager内部对<code>Work</code>的结构定义如下：</p>
+<center>
+    <img src="../images/android-workmanager-work.jpg" width="40%"/>
+</center>
+
+<p>其中<code>DiagnosticsWorker</code>和<code>CombineContinueationsWorker</code>是内部使用的两个任务。</p>
+<h5 id="2-2-提交任务"><a href="#2-2-提交任务" class="headerlink" title="2.2 提交任务"></a>2.2 提交任务</h5><p>我们将任务以请求（WorkRequest）的形式提交（enqueue）给WorkManager。WorkManager会将请求装换成内部的WorkContinuation对象。</p>
+<center>
+    <img src="../images/android-workmanager-request.jpg" width="70%"/>
+</center>
+
+<p>WorkContinuation可以将多个<code>OneTimeWorkrequest</code>构建成任意依赖关系的无环图。而WorkContinuation的<code>enqueue</code>方法则是任务被执行调度的入口。</p>
+<h5 id="2-3-执行任务"><a href="#2-3-执行任务" class="headerlink" title="2.3 执行任务"></a>2.3 执行任务</h5><p>对任务进行不同的操作，如：取消、结束、开始等。WorkManager内部会将这些行为转换成对应的Runnable交给调度系统进行执行。</p>
+<center>
+    <img src="../images/android-workmanager-action.jpg" width="70%"/>
+</center>
+
+
+<h4 id="三、任务的调度"><a href="#三、任务的调度" class="headerlink" title="三、任务的调度"></a>三、任务的调度</h4><p>提交给WorkManager的任务，会封装成<code>EnqueueRunnable</code>交给默认的<code>SerialExecutor</code>去执行。<br><code>EnqueueRunnable</code>的run方法会先将任务加入数据库中保存。然后进行任务调度。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (mWorkContinuation.hasCycles()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">                    String.format(<span class="string">&quot;WorkContinuation has cycles (%s)&quot;</span>, mWorkContinuation));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//加入数据库</span></span><br><span class="line">        <span class="keyword">boolean</span> needsScheduling = addToDatabase();</span><br><span class="line">        <span class="keyword">if</span> (needsScheduling) &#123;</span><br><span class="line">            <span class="comment">// Enable RescheduleReceiver, only when there are Worker&#x27;s that need scheduling.</span></span><br><span class="line">            <span class="keyword">final</span> Context context =</span><br><span class="line">                    mWorkContinuation.getWorkManagerImpl().getApplicationContext();</span><br><span class="line">            PackageManagerHelper.setComponentEnabled(context, RescheduleReceiver.class, <span class="keyword">true</span>);</span><br><span class="line">            <span class="comment">//进行任务调度</span></span><br><span class="line">            scheduleWorkInBackground();</span><br><span class="line">        &#125;</span><br><span class="line">        mOperation.setState(Operation.SUCCESS);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable exception) &#123;</span><br><span class="line">        mOperation.setState(<span class="keyword">new</span> Operation.State.FAILURE(exception));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="四、其他"><a href="#四、其他" class="headerlink" title="四、其他"></a>四、其他</h4><h5 id="4-1-任务的约束"><a href="#4-1-任务的约束" class="headerlink" title="4.1 任务的约束"></a>4.1 任务的约束</h5><h4 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h4><p>WorkManager库并不算复杂。这种对任务的管理和调度框架的源码，我们可以多看，学习一下里面的设计思路。有个大概的印象，后续写相关逻辑时可以借鉴。</p>
+<ul>
+<li>借助<code>startup</code>初始化你的框架</li>
+<li>构建有依赖关系的任务</li>
+<li>通过Runnable解耦任务的请求和执行。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
       </tags>
   </entry>
   <entry>
@@ -592,71 +638,6 @@
       </tags>
   </entry>
   <entry>
-    <title>源码分析-WorkManager</title>
-    <url>/android-github-source-workmanager.html</url>
-    <content><![CDATA[<h4 id="一、初始化流程"><a href="#一、初始化流程" class="headerlink" title="一、初始化流程"></a>一、初始化流程</h4><p>1、WorkManager集成了<code>androidx.startup</code> 库，通过<code>startup</code>库的<code>ContentProvider</code>在应用启动时进行初始化。<br>见<code>work-runtime</code>的Manifest文件：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">provider</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;androidx.startup.InitializationProvider&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:authorities</span>=<span class="string">&quot;$&#123;applicationId&#125;.androidx-startup&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:exported</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:node</span>=<span class="string">&quot;merge&quot;</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;androidx.work.WorkManagerInitializer&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:value</span>=<span class="string">&quot;androidx.startup&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>其初始化类为<code>WorkManagerInitializer</code>，其中调用了<code>WorkManager#initialize</code>，然后调用<code>WorkManager</code>的构造函数。<br>整个流程初始化了如下一些对象：</p>
-<center>
-    <img src="../images/android-workmanager_init.jpg" width="100%"/>
-</center>
-
-
-<h4 id="二、任务"><a href="#二、任务" class="headerlink" title="二、任务"></a>二、任务</h4><h5 id="2-1-定义任务"><a href="#2-1-定义任务" class="headerlink" title="2.1 定义任务"></a>2.1 定义任务</h5><p>当我们自定义任务时，需要继承<code>Work</code>类，WorkManager内部对<code>Work</code>的结构定义如下：</p>
-<center>
-    <img src="../images/android-workmanager-work.jpg" width="40%"/>
-</center>
-
-<p>其中<code>DiagnosticsWorker</code>和<code>CombineContinueationsWorker</code>是内部使用的两个任务。</p>
-<h5 id="2-2-提交任务"><a href="#2-2-提交任务" class="headerlink" title="2.2 提交任务"></a>2.2 提交任务</h5><p>我们将任务以请求（WorkRequest）的形式提交（enqueue）给WorkManager。WorkManager会将请求装换成内部的WorkContinuation对象。</p>
-<center>
-    <img src="../images/android-workmanager-request.jpg" width="70%"/>
-</center>
-
-<p>WorkContinuation可以将多个<code>OneTimeWorkrequest</code>构建成任意依赖关系的无环图。而WorkContinuation的<code>enqueue</code>方法则是任务被执行调度的入口。</p>
-<h5 id="2-3-执行任务"><a href="#2-3-执行任务" class="headerlink" title="2.3 执行任务"></a>2.3 执行任务</h5><p>对任务进行不同的操作，如：取消、结束、开始等。WorkManager内部会将这些行为转换成对应的Runnable交给调度系统进行执行。</p>
-<center>
-    <img src="../images/android-workmanager-action.jpg" width="70%"/>
-</center>
-
-
-<h4 id="三、任务的调度"><a href="#三、任务的调度" class="headerlink" title="三、任务的调度"></a>三、任务的调度</h4><p>提交给WorkManager的任务，会封装成<code>EnqueueRunnable</code>交给默认的<code>SerialExecutor</code>去执行。<br><code>EnqueueRunnable</code>的run方法会先将任务加入数据库中保存。然后进行任务调度。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (mWorkContinuation.hasCycles()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">                    String.format(<span class="string">&quot;WorkContinuation has cycles (%s)&quot;</span>, mWorkContinuation));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//加入数据库</span></span><br><span class="line">        <span class="keyword">boolean</span> needsScheduling = addToDatabase();</span><br><span class="line">        <span class="keyword">if</span> (needsScheduling) &#123;</span><br><span class="line">            <span class="comment">// Enable RescheduleReceiver, only when there are Worker&#x27;s that need scheduling.</span></span><br><span class="line">            <span class="keyword">final</span> Context context =</span><br><span class="line">                    mWorkContinuation.getWorkManagerImpl().getApplicationContext();</span><br><span class="line">            PackageManagerHelper.setComponentEnabled(context, RescheduleReceiver.class, <span class="keyword">true</span>);</span><br><span class="line">            <span class="comment">//进行任务调度</span></span><br><span class="line">            scheduleWorkInBackground();</span><br><span class="line">        &#125;</span><br><span class="line">        mOperation.setState(Operation.SUCCESS);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable exception) &#123;</span><br><span class="line">        mOperation.setState(<span class="keyword">new</span> Operation.State.FAILURE(exception));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="四、其他"><a href="#四、其他" class="headerlink" title="四、其他"></a>四、其他</h4><h5 id="4-1-任务的约束"><a href="#4-1-任务的约束" class="headerlink" title="4.1 任务的约束"></a>4.1 任务的约束</h5><h4 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h4><p>WorkManager库并不算复杂。这种对任务的管理和调度框架的源码，我们可以多看，学习一下里面的设计思路。有个大概的印象，后续写相关逻辑时可以借鉴。</p>
-<ul>
-<li>借助<code>startup</code>初始化你的框架</li>
-<li>构建有依赖关系的任务</li>
-<li>通过Runnable解耦任务的请求和执行。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>android jetpack startup</title>
-    <url>/android-jetpack-startup.html</url>
-    <content><![CDATA[<h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p><a href="https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:startup/">源码</a></p>
-<p>startup库是一个极简启动优化库，可以解决启动中的依赖顺序问题。</p>
-<h4 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h4><p>1.1 实现Initializer接口</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoggerInitializer</span> : <span class="type">Initializer</span>&lt;<span class="type">Logger</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">create</span><span class="params">(context: <span class="type">Context</span>)</span></span>: Logger &#123;</span><br><span class="line">        Logger.<span class="keyword">init</span>(context)</span><br><span class="line">        <span class="keyword">return</span> Logger</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">dependencies</span><span class="params">()</span></span>: List&lt;Class&lt;<span class="keyword">out</span> Initializer&lt;*&gt;&gt;&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> emptyList()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>1.2 AndroidManifest.xml中声明</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">provider</span>&gt;</span></span><br><span class="line">    android:name=&quot;androidx.startup.InitializationProvider&quot;</span><br><span class="line">    android:authorities=&quot;$&#123;applicationId&#125;.androidx-startup&quot;</span><br><span class="line">    android:exported=&quot;false&quot;</span><br><span class="line">    tools:node=&quot;merge&quot;&gt;</span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;me.xxx.demo.LoggerInitializer&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:value</span>=<span class="string">&quot;androidx.startup&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-
-<h4 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h4><p>1、默认由ContentProvider onCreate中获取AppInitializer<strong>单例</strong><br>2、调用AppInitializer单例的discoverAndInitialize，<strong>解析Manifest</strong>里面的mate<br>3、解析完后放入Set&lt;Class<? extends Initializer<?>&gt;&gt;中<br>4、遍历Set，调用doInitialize进行初始化<br>    4.1 检查循环依赖问题<br>    4.2 找到此项的所有依赖项，递归调用doInitialize<br>    4.3 此项依赖初始化完成</p>
-<h4 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h4><ul>
-<li>不支持线程控制和等待</li>
-</ul>
-<h4 id="其他相关库"><a href="#其他相关库" class="headerlink" title="其他相关库"></a>其他相关库</h4><p><a href="https://github.com/idisfkj/android-startup">android-startup</a></p>
-]]></content>
-  </entry>
-  <entry>
     <title>Jetpack Compose State Management</title>
     <url>/android-jetpack-compose-state-management.html</url>
     <content><![CDATA[<p>–</p>
@@ -704,6 +685,25 @@
       <tags>
         <tag>Android</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>android jetpack startup</title>
+    <url>/android-jetpack-startup.html</url>
+    <content><![CDATA[<h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p><a href="https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:startup/">源码</a></p>
+<p>startup库是一个极简启动优化库，可以解决启动中的依赖顺序问题。</p>
+<h4 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h4><p>1.1 实现Initializer接口</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LoggerInitializer</span> : <span class="type">Initializer</span>&lt;<span class="type">Logger</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">create</span><span class="params">(context: <span class="type">Context</span>)</span></span>: Logger &#123;</span><br><span class="line">        Logger.<span class="keyword">init</span>(context)</span><br><span class="line">        <span class="keyword">return</span> Logger</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">dependencies</span><span class="params">()</span></span>: List&lt;Class&lt;<span class="keyword">out</span> Initializer&lt;*&gt;&gt;&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> emptyList()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>1.2 AndroidManifest.xml中声明</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">provider</span>&gt;</span></span><br><span class="line">    android:name=&quot;androidx.startup.InitializationProvider&quot;</span><br><span class="line">    android:authorities=&quot;$&#123;applicationId&#125;.androidx-startup&quot;</span><br><span class="line">    android:exported=&quot;false&quot;</span><br><span class="line">    tools:node=&quot;merge&quot;&gt;</span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:name</span>=<span class="string">&quot;me.xxx.demo.LoggerInitializer&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:value</span>=<span class="string">&quot;androidx.startup&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">provider</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h4><p>1、默认由ContentProvider onCreate中获取AppInitializer<strong>单例</strong><br>2、调用AppInitializer单例的discoverAndInitialize，<strong>解析Manifest</strong>里面的mate<br>3、解析完后放入Set&lt;Class<? extends Initializer<?>&gt;&gt;中<br>4、遍历Set，调用doInitialize进行初始化<br>    4.1 检查循环依赖问题<br>    4.2 找到此项的所有依赖项，递归调用doInitialize<br>    4.3 此项依赖初始化完成</p>
+<h4 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h4><ul>
+<li>不支持线程控制和等待</li>
+</ul>
+<h4 id="其他相关库"><a href="#其他相关库" class="headerlink" title="其他相关库"></a>其他相关库</h4><p><a href="https://github.com/idisfkj/android-startup">android-startup</a></p>
+]]></content>
   </entry>
   <entry>
     <title>Android中的日志库</title>
@@ -996,97 +996,6 @@
       </tags>
   </entry>
   <entry>
-    <title>估值指标</title>
-    <url>/base-economic-concept.html</url>
-    <content><![CDATA[<table>
-<thead>
-<tr>
-<th>英文名称</th>
-<th>中文名称</th>
-<th>计算方式</th>
-<th>理解</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>PE = Price-to-Earning Ratio</td>
-<td>市盈率</td>
-<td>每股股价/每股盈余 = 市值/净利润</td>
-<td>创造财富的能力、回收成本的时间</td>
-</tr>
-<tr>
-<td>PS = Price-to-Sales Ratio</td>
-<td>市销率</td>
-<td>每股股价/每股营收 = 市值/营收</td>
-<td>获得公司1元的销售收入需要投入多少钱</td>
-</tr>
-<tr>
-<td>PCF =Price-to-Cash-Flow Ratio</td>
-<td>市现率</td>
-<td>每股股价/每股现金流 = 市值/12月现金流</td>
-<td></td>
-</tr>
-<tr>
-<td>PB = Price-to-Book Ratio</td>
-<td>市净率</td>
-<td>每股股价/每股净资产 = 市值/净资产</td>
-<td>净资产的溢价程度</td>
-</tr>
-</tbody></table>
-<h4 id="一、市盈率"><a href="#一、市盈率" class="headerlink" title="一、市盈率"></a>一、市盈率</h4><p>1.1 PE - 静态市盈率</p>
-<blockquote>
-<p>① 市盈率 = 当日收盘价 / 上一年度每股税后利润  </p>
-</blockquote>
-<blockquote>
-<p>② 市盈率 = 当前总市值 / 上年度净利润</p>
-</blockquote>
-<p>理解：</p>
-<ul>
-<li>公司需要累计多少年的盈利才能达到目前的市价水平。</li>
-<li>值越低说明投资回收期短，风险越小，投资价值越高。</li>
-<li>值越大说明翻本期长，风险大。</li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>取的是上一年度的净利润，是一个过去的值，有点滞后。</li>
-</ul>
-<p>例子：<br>你花了240w买了一套二手房，打算进行出租赚点外快，已知去年平均月租2w，一年收益大概24w。以去年这些数据为参考，你预计<strong>十年后</strong>才能赚回成本240w，所以市盈率 = 10。</p>
-<p>1.2 动态市盈率<br>为了弥补静态市盈率的滞后性，增加动态市盈率作为参考指标。</p>
-<blockquote>
-<p>市盈率 = 当前总市值 / X</p>
-</blockquote>
-<p>根据当前的时间节点不同计算X的值：<br>X = 当年最近一个季度的净利润 * 4<br>X = 最近半年净利润 * 2<br>X = 最近三季度净利润 * 1.5 </p>
-<p>1.3 静态市盈率 vs 动态市盈率</p>
-<ul>
-<li>静态市盈率反映的是过去的数据，动态市盈率反映的是未来的预估</li>
-<li>动态市盈率 &gt; 静态市盈率，说明最近（一个季度、半年、三个季度）公司的利润下降了。</li>
-</ul>
-<p>1.4 TTM-Trailing Twelve Months</p>
-<ul>
-<li>最近十二个月市盈率，也叫滚动市盈率。</li>
-<li>它也是一个对过去情况的分析说明。</li>
-</ul>
-<h4 id="二、每股净值产"><a href="#二、每股净值产" class="headerlink" title="二、每股净值产"></a>二、每股净值产</h4><blockquote>
-<p>每股净值产 = （总资产 - 总负债） / 总股数</p>
-</blockquote>
-<center>
-    <img src="../images/a_b_c.jpeg" width="300"/>
-</center>
-
-
-<h4 id="三、市净率"><a href="#三、市净率" class="headerlink" title="三、市净率"></a>三、市净率</h4><p>3.1 PB-市净率</p>
-<blockquote>
-<p>市净率 = 每股市价 / 每股净值产<br>每股净资产 = 股东权益 / 总股本</p>
-</blockquote>
-<p>市净率越低那么它的投资价值就越高，这也就意味着它的风险越低。</p>
-]]></content>
-      <categories>
-        <category>经济学</category>
-      </categories>
-      <tags>
-        <tag>Economics</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>对称/非对称加密和数字签名</title>
     <url>/basic-encryption-algorithm.html</url>
     <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
@@ -1282,101 +1191,14 @@
 
 
 
-<h4 id="应用："><a href="#应用：" class="headerlink" title="应用："></a>应用：</h4><ul>
+<h4 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h4><ul>
 <li>网页爬虫对 URL 去重，避免爬取相同的 URL 地址；</li>
 <li>反垃圾邮件，从数十亿个垃圾邮件列表中判断某邮箱是否垃圾邮箱；</li>
 </ul>
-<p><a href="https://freecontent.manning.com/all-about-bloom-filters/">图片来源</a></p>
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><p><a href="https://freecontent.manning.com/all-about-bloom-filters/">图片来源</a><br><a href="https://juejin.cn/post/6844904007790673933">1</a></p>
 ]]></content>
       <tags>
         <tag>计算机</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>投资回报率</title>
-    <url>/econonmics-roa-roe-roic-roce.html</url>
-    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><ul>
-<li>资产回报率（ROA）</li>
-<li>净资产回报率（ROE）</li>
-<li>投入资本回报率（ROIC）</li>
-<li>使用资本回报率（ROCE）</li>
-</ul>
-<p>不同的回报率，实际上是衡量公司的不同视角。</p>
-<h4 id="二、资产回报率（ROA）"><a href="#二、资产回报率（ROA）" class="headerlink" title="二、资产回报率（ROA）"></a>二、资产回报率（ROA）</h4><h5 id="2-1-基本概念"><a href="#2-1-基本概念" class="headerlink" title="2.1 基本概念"></a>2.1 基本概念</h5><p><strong>运用全部资金获取利润能力的集中体现</strong></p>
-<center>
-    <img src="../images/ec-roa.png" width="50%"/>
-</center>
-
-<p>$$<br>    ROA=\frac{净利润}{总资产}<br>$$</p>
-<h5 id="2-2-概念拆分"><a href="#2-2-概念拆分" class="headerlink" title="2.2 概念拆分"></a>2.2 概念拆分</h5><p>$$<br>    ROA = 净利润率NPM * 资产利用率AU = \frac{净利润}{营业总收入} * \frac{营业总收入}{总资产} = \frac{（主营业务收入+非主营业务收入）}{总资产}<br>$$</p>
-<h5 id="2-3-概念理解"><a href="#2-3-概念理解" class="headerlink" title="2.3 概念理解"></a>2.3 概念理解</h5><p>ROA这个回报率衡量的是资产的回报率。<br>但是一个公司资产负债表上的资产价值更多的是反映了历史而不是当前，<br>而且不同的行业的ROA具有不可比性。<br>最简单的例子，很多类金融企业有无息流动负债，增加了总资产，降低了ROA，<br>但是无偿使用上下游资金实际上是公司有竞争力的体现。</p>
-<h4 id="三、净资产回报率（ROE）"><a href="#三、净资产回报率（ROE）" class="headerlink" title="三、净资产回报率（ROE）"></a>三、净资产回报率（ROE）</h4><h5 id="2-1-基本概念-1"><a href="#2-1-基本概念-1" class="headerlink" title="2.1 基本概念"></a>2.1 基本概念</h5><p>ROE的视角是从股东的角度看问题，单纯从股权的角度衡量回报，而不考虑公司的资本结构及负债情况。衡量公司赚钱的效率。</p>
-<center>
-    <img src="../images/ec-roe.png" width="50%"/>
-</center>
-
-<p>$$<br>    净资产收益率 = \frac{净利润}{净资产}<br>$$</p>
-<blockquote>
-<p>A公司：10亿净资产赚2亿。ROE = 20%<br>B公司：50亿净资产赚5亿。ROE = 10%</p>
-</blockquote>
-<h5 id="2-2-概念拆分-1"><a href="#2-2-概念拆分-1" class="headerlink" title="2.2 概念拆分"></a>2.2 概念拆分</h5><p>$$<br>    净资产收益率 = \frac{净利润}{净资产} = \frac{净利润}{营业收入} * \frac{营业收入}{总资产} * \frac{总资产}{净资产}<br>$$</p>
-<p>$$<br>    净资产收益率 = 净利润 * 资产周转率 * 权益乘数<br>$$</p>
-<p>$$<br>    权益乘数 = \frac{总资产}{净资产}<br>$$</p>
-<p>$$<br>    资产周转率 = \frac{营业收入}{总资产}<br>$$</p>
-<p>影响因素：</p>
-<ul>
-<li>净利润：反应盈利能力</li>
-<li>资产周转率：反应资产使用效率</li>
-<li>权益乘数：反应负债程度</li>
-</ul>
-<p>提升ROE的办法：</p>
-<ul>
-<li>提高周转率</li>
-<li>廉价的债务杠杆</li>
-<li>更高的债务杠杆</li>
-<li>更低的所得税</li>
-<li>更高的运营利润率</li>
-</ul>
-<h5 id="2-3-概念理解-1"><a href="#2-3-概念理解-1" class="headerlink" title="2.3 概念理解"></a>2.3 概念理解</h5><p>ROE对股东来说意义最大，是股票复利增长的源泉。<br>ROE可以在不同行业与不同企业之间横向比较。<br>相当于股票这种“股权债券”的收益率。<br>对投资人来说无论是投资铁路还是互联网，都相当于是买了“股权债券”。<br>在同等风险情况下，当然是收益率越高越好。<br>而且，ROE还可以与政府债券、企业债券的收益率跨资产类别横向比较。</p>
-<h5 id="不足"><a href="#不足" class="headerlink" title="不足"></a>不足</h5><p>ROE的问题在于无法反映债务杠杆对净利润的影响。<br>如果一个企业借更多的债，一般就能产生更多净利润，ROE也会提高。<br>但是这样的提高是以牺牲企业经营稳健程度为代价的。<br>因此，分析ROE一定要结合杜邦公式，并与同行业进行比较。</p>
-<hr>
-<h4 id="四、投入资本回报率（ROIC）"><a href="#四、投入资本回报率（ROIC）" class="headerlink" title="四、投入资本回报率（ROIC）"></a>四、投入资本回报率（ROIC）</h4><center>
-    <img src="../images/ec-roic-1.png" width="50%"/>
-</center>
-
-
-<p>ROIC是从资本的角度看问题，综合考虑股权与债权，衡量投资的效率。与ROIC对应的是平均资金成本（WACC）。如果ROIC小于WACC，就说明投入资本的回报小于平均资本成本，公司是在浪费资本。</p>
-<p>ROIC=息税前收益（EBIT）*（1-税率）/投入资本</p>
-<p>$$<br>    ROIC = \frac{息税前收益（EBIT）*（1-税率）}{投入资本}<br>$$</p>
-<p>$$<br>    投入资本 = 股东权益 + 有息负债<br>$$</p>
-<p>$$<br>    ROIC = \frac{EBIT（1-税率）}{有息负债+权益）}<br>$$</p>
-<p>公式中分子是指一家公司如果完全以权益筹资所应报告的净利润，分母是指公司所有要求回报的现金来源的总和，也就是说，尽管应付账款也是公司的一种现金来源，但因其未附带明确的成本而被排除在外。实质上，ROIC是生产经营活动中所有投入资本赚取的收益率，而不论这些投入资本是被称为债务还是权益。</p>
-<center>
-    <img src="../images/ec-roic-2.png" width="50%"/>
-</center>
-
-
-<p>投入资本回报率是EBIT（税及利息前盈利）经过税率调整比上投入的资本，也就是股东权益加负债减去非运营现金和投资。之所以用EBIT就是因为利息是由债务产生的，是对债权的回报，当计算债权加股权的总的投入资本的回报率时应该把利息加回来。</p>
-<p>投入资本也可以表示为净运营资金（流动运营资产减去无息流动负债）加固定资产，加无形资产及商誉，加其他运营资产。</p>
-<p>ROIC的问题在于没有考虑无息流动负债的影响。ROIC实际上是衡量投入的总资本的使用效率，与平均资金成本WACC相结合可以揭示一个企业的真正效率。ROIC &lt; WACC 是卖空大师Jim Chanos经常用来寻找卖空对象的一个重要指标。</p>
-<p>但是，ROIC对于类金融企业的分析不太容易。一些类金融企业如国美、苏宁、联想、格力等，占用了大量上下游资金作为无息流动负债，因此提高了EBIT。但是，和有息负债一样，无息负债也存在风险。虽然不用付利息，但是一旦经营形式改变，这些资金很有可能像“热钱”一样撤走。国美在黄光裕被捕后就陷入了这样的危险境地，只要供应商撤资，国美就会破产。这些企业虽然ROIC很高，但是静态不稳定，动态稳定。</p>
-<h4 id="五、使用资本回报率-ROCE-Return-on-Capital-Employed"><a href="#五、使用资本回报率-ROCE-Return-on-Capital-Employed" class="headerlink" title="五、使用资本回报率(ROCE = Return on Capital Employed)"></a>五、使用资本回报率(ROCE = Return on Capital Employed)</h4><center>
-    <img src="../images/ec-roce.png" width="50%"/>
-</center>
-
-<p>$$<br>    ROCE資本運用報酬率 = \frac{息税前收益（EBIT）}{已動用資本(Capital Employed)}<br>$$</p>
-<p>$$<br>    已動用資本 = 總資產 -流動負債<br>$$</p>
-<p>ROCE实质上是从企业价值（EnterpriseValue，EV）的角度，从并购的角度看资本的回报率。ROCE中的使用资本是股东权益加有息负债再减现金。这实质上相当于1倍PB并购企业时的企业价值。因为如果你以1倍PB并购一个企业，你要付的价格就是股东权益，并且承担所有负债，但也获得所有现金。</p>
-<p>ROCE实际上是从一个并购者的角度看问题，如果并购一个企业，付出企业价值EV后的回报率有多少？这与ROIC最大的不同是：ROIC从企业的拥有者的角度看问题，衡量投入资本的使用效率与回报率。而ROCE是从潜在并购者的角度看问题，衡量如果1倍PB并购付出EV后的回报率，也就是并购到底值不值的问题。这接近价值投资买股票就是买公司的原则。</p>
-<p>ROCE：使用资本回报率是EBIT（税及利息前盈利）比上使用的资本，也就是所有有息负债加上股东权益。这个指标与ROIC相近，但是使用的是EBIT而没有经过税率调整，因此可以用来比较不同税率的企业。ROCE也容易忽视公司无息负债的融资效应。</p>
-<p>总之，本质上是从四个不同的视角看问题，衡量不同的指标。只有全面综合考虑，才能更全面的看问题</p>
-<h4 id="六、参考来源"><a href="#六、参考来源" class="headerlink" title="六、参考来源"></a>六、参考来源</h4><p><a href="https://xueqiu.com/1484348349/107966592">雪球-老韩7</a><br><a href="https://rich01.com/what-is-roce/">ROCE資本運用報酬率</a></p>
-]]></content>
-      <categories>
-        <category>经济学</category>
-      </categories>
-      <tags>
-        <tag>经济学</tag>
       </tags>
   </entry>
   <entry>
@@ -1502,6 +1324,93 @@
       </tags>
   </entry>
   <entry>
+    <title>投资回报率</title>
+    <url>/econonmics-roa-roe-roic-roce.html</url>
+    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><ul>
+<li>资产回报率（ROA）</li>
+<li>净资产回报率（ROE）</li>
+<li>投入资本回报率（ROIC）</li>
+<li>使用资本回报率（ROCE）</li>
+</ul>
+<p>不同的回报率，实际上是衡量公司的不同视角。</p>
+<h4 id="二、资产回报率（ROA）"><a href="#二、资产回报率（ROA）" class="headerlink" title="二、资产回报率（ROA）"></a>二、资产回报率（ROA）</h4><h5 id="2-1-基本概念"><a href="#2-1-基本概念" class="headerlink" title="2.1 基本概念"></a>2.1 基本概念</h5><p><strong>运用全部资金获取利润能力的集中体现</strong></p>
+<center>
+    <img src="../images/ec-roa.png" width="50%"/>
+</center>
+
+<p>$$<br>    ROA=\frac{净利润}{总资产}<br>$$</p>
+<h5 id="2-2-概念拆分"><a href="#2-2-概念拆分" class="headerlink" title="2.2 概念拆分"></a>2.2 概念拆分</h5><p>$$<br>    ROA = 净利润率NPM * 资产利用率AU = \frac{净利润}{营业总收入} * \frac{营业总收入}{总资产} = \frac{（主营业务收入+非主营业务收入）}{总资产}<br>$$</p>
+<h5 id="2-3-概念理解"><a href="#2-3-概念理解" class="headerlink" title="2.3 概念理解"></a>2.3 概念理解</h5><p>ROA这个回报率衡量的是资产的回报率。<br>但是一个公司资产负债表上的资产价值更多的是反映了历史而不是当前，<br>而且不同的行业的ROA具有不可比性。<br>最简单的例子，很多类金融企业有无息流动负债，增加了总资产，降低了ROA，<br>但是无偿使用上下游资金实际上是公司有竞争力的体现。</p>
+<h4 id="三、净资产回报率（ROE）"><a href="#三、净资产回报率（ROE）" class="headerlink" title="三、净资产回报率（ROE）"></a>三、净资产回报率（ROE）</h4><h5 id="2-1-基本概念-1"><a href="#2-1-基本概念-1" class="headerlink" title="2.1 基本概念"></a>2.1 基本概念</h5><p>ROE的视角是从股东的角度看问题，单纯从股权的角度衡量回报，而不考虑公司的资本结构及负债情况。衡量公司赚钱的效率。</p>
+<center>
+    <img src="../images/ec-roe.png" width="50%"/>
+</center>
+
+<p>$$<br>    净资产收益率 = \frac{净利润}{净资产}<br>$$</p>
+<blockquote>
+<p>A公司：10亿净资产赚2亿。ROE = 20%<br>B公司：50亿净资产赚5亿。ROE = 10%</p>
+</blockquote>
+<h5 id="2-2-概念拆分-1"><a href="#2-2-概念拆分-1" class="headerlink" title="2.2 概念拆分"></a>2.2 概念拆分</h5><p>$$<br>    净资产收益率 = \frac{净利润}{净资产} = \frac{净利润}{营业收入} * \frac{营业收入}{总资产} * \frac{总资产}{净资产}<br>$$</p>
+<p>$$<br>    净资产收益率 = 净利润 * 资产周转率 * 权益乘数<br>$$</p>
+<p>$$<br>    权益乘数 = \frac{总资产}{净资产}<br>$$</p>
+<p>$$<br>    资产周转率 = \frac{营业收入}{总资产}<br>$$</p>
+<p>影响因素：</p>
+<ul>
+<li>净利润：反应盈利能力</li>
+<li>资产周转率：反应资产使用效率</li>
+<li>权益乘数：反应负债程度</li>
+</ul>
+<p>提升ROE的办法：</p>
+<ul>
+<li>提高周转率</li>
+<li>廉价的债务杠杆</li>
+<li>更高的债务杠杆</li>
+<li>更低的所得税</li>
+<li>更高的运营利润率</li>
+</ul>
+<h5 id="2-3-概念理解-1"><a href="#2-3-概念理解-1" class="headerlink" title="2.3 概念理解"></a>2.3 概念理解</h5><p>ROE对股东来说意义最大，是股票复利增长的源泉。<br>ROE可以在不同行业与不同企业之间横向比较。<br>相当于股票这种“股权债券”的收益率。<br>对投资人来说无论是投资铁路还是互联网，都相当于是买了“股权债券”。<br>在同等风险情况下，当然是收益率越高越好。<br>而且，ROE还可以与政府债券、企业债券的收益率跨资产类别横向比较。</p>
+<h5 id="不足"><a href="#不足" class="headerlink" title="不足"></a>不足</h5><p>ROE的问题在于无法反映债务杠杆对净利润的影响。<br>如果一个企业借更多的债，一般就能产生更多净利润，ROE也会提高。<br>但是这样的提高是以牺牲企业经营稳健程度为代价的。<br>因此，分析ROE一定要结合杜邦公式，并与同行业进行比较。</p>
+<hr>
+<h4 id="四、投入资本回报率（ROIC）"><a href="#四、投入资本回报率（ROIC）" class="headerlink" title="四、投入资本回报率（ROIC）"></a>四、投入资本回报率（ROIC）</h4><center>
+    <img src="../images/ec-roic-1.png" width="50%"/>
+</center>
+
+
+<p>ROIC是从资本的角度看问题，综合考虑股权与债权，衡量投资的效率。与ROIC对应的是平均资金成本（WACC）。如果ROIC小于WACC，就说明投入资本的回报小于平均资本成本，公司是在浪费资本。</p>
+<p>ROIC=息税前收益（EBIT）*（1-税率）/投入资本</p>
+<p>$$<br>    ROIC = \frac{息税前收益（EBIT）*（1-税率）}{投入资本}<br>$$</p>
+<p>$$<br>    投入资本 = 股东权益 + 有息负债<br>$$</p>
+<p>$$<br>    ROIC = \frac{EBIT（1-税率）}{有息负债+权益）}<br>$$</p>
+<p>公式中分子是指一家公司如果完全以权益筹资所应报告的净利润，分母是指公司所有要求回报的现金来源的总和，也就是说，尽管应付账款也是公司的一种现金来源，但因其未附带明确的成本而被排除在外。实质上，ROIC是生产经营活动中所有投入资本赚取的收益率，而不论这些投入资本是被称为债务还是权益。</p>
+<center>
+    <img src="../images/ec-roic-2.png" width="50%"/>
+</center>
+
+
+<p>投入资本回报率是EBIT（税及利息前盈利）经过税率调整比上投入的资本，也就是股东权益加负债减去非运营现金和投资。之所以用EBIT就是因为利息是由债务产生的，是对债权的回报，当计算债权加股权的总的投入资本的回报率时应该把利息加回来。</p>
+<p>投入资本也可以表示为净运营资金（流动运营资产减去无息流动负债）加固定资产，加无形资产及商誉，加其他运营资产。</p>
+<p>ROIC的问题在于没有考虑无息流动负债的影响。ROIC实际上是衡量投入的总资本的使用效率，与平均资金成本WACC相结合可以揭示一个企业的真正效率。ROIC &lt; WACC 是卖空大师Jim Chanos经常用来寻找卖空对象的一个重要指标。</p>
+<p>但是，ROIC对于类金融企业的分析不太容易。一些类金融企业如国美、苏宁、联想、格力等，占用了大量上下游资金作为无息流动负债，因此提高了EBIT。但是，和有息负债一样，无息负债也存在风险。虽然不用付利息，但是一旦经营形式改变，这些资金很有可能像“热钱”一样撤走。国美在黄光裕被捕后就陷入了这样的危险境地，只要供应商撤资，国美就会破产。这些企业虽然ROIC很高，但是静态不稳定，动态稳定。</p>
+<h4 id="五、使用资本回报率-ROCE-Return-on-Capital-Employed"><a href="#五、使用资本回报率-ROCE-Return-on-Capital-Employed" class="headerlink" title="五、使用资本回报率(ROCE = Return on Capital Employed)"></a>五、使用资本回报率(ROCE = Return on Capital Employed)</h4><center>
+    <img src="../images/ec-roce.png" width="50%"/>
+</center>
+
+<p>$$<br>    ROCE資本運用報酬率 = \frac{息税前收益（EBIT）}{已動用資本(Capital Employed)}<br>$$</p>
+<p>$$<br>    已動用資本 = 總資產 -流動負債<br>$$</p>
+<p>ROCE实质上是从企业价值（EnterpriseValue，EV）的角度，从并购的角度看资本的回报率。ROCE中的使用资本是股东权益加有息负债再减现金。这实质上相当于1倍PB并购企业时的企业价值。因为如果你以1倍PB并购一个企业，你要付的价格就是股东权益，并且承担所有负债，但也获得所有现金。</p>
+<p>ROCE实际上是从一个并购者的角度看问题，如果并购一个企业，付出企业价值EV后的回报率有多少？这与ROIC最大的不同是：ROIC从企业的拥有者的角度看问题，衡量投入资本的使用效率与回报率。而ROCE是从潜在并购者的角度看问题，衡量如果1倍PB并购付出EV后的回报率，也就是并购到底值不值的问题。这接近价值投资买股票就是买公司的原则。</p>
+<p>ROCE：使用资本回报率是EBIT（税及利息前盈利）比上使用的资本，也就是所有有息负债加上股东权益。这个指标与ROIC相近，但是使用的是EBIT而没有经过税率调整，因此可以用来比较不同税率的企业。ROCE也容易忽视公司无息负债的融资效应。</p>
+<p>总之，本质上是从四个不同的视角看问题，衡量不同的指标。只有全面综合考虑，才能更全面的看问题</p>
+<h4 id="六、参考来源"><a href="#六、参考来源" class="headerlink" title="六、参考来源"></a>六、参考来源</h4><p><a href="https://xueqiu.com/1484348349/107966592">雪球-老韩7</a><br><a href="https://rich01.com/what-is-roce/">ROCE資本運用報酬率</a></p>
+]]></content>
+      <categories>
+        <category>经济学</category>
+      </categories>
+      <tags>
+        <tag>经济学</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>开发者七条</title>
     <url>/ep-good-developer-manifesto.html</url>
     <content><![CDATA[<p>软件开发不只是API调用和基础语法，以下是应用开发的全貌：</p>
@@ -1520,6 +1429,97 @@
 ]]></content>
       <tags>
         <tag>软件哲学</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>估值指标</title>
+    <url>/base-economic-concept.html</url>
+    <content><![CDATA[<table>
+<thead>
+<tr>
+<th>英文名称</th>
+<th>中文名称</th>
+<th>计算方式</th>
+<th>理解</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PE = Price-to-Earning Ratio</td>
+<td>市盈率</td>
+<td>每股股价/每股盈余 = 市值/净利润</td>
+<td>创造财富的能力、回收成本的时间</td>
+</tr>
+<tr>
+<td>PS = Price-to-Sales Ratio</td>
+<td>市销率</td>
+<td>每股股价/每股营收 = 市值/营收</td>
+<td>获得公司1元的销售收入需要投入多少钱</td>
+</tr>
+<tr>
+<td>PCF =Price-to-Cash-Flow Ratio</td>
+<td>市现率</td>
+<td>每股股价/每股现金流 = 市值/12月现金流</td>
+<td></td>
+</tr>
+<tr>
+<td>PB = Price-to-Book Ratio</td>
+<td>市净率</td>
+<td>每股股价/每股净资产 = 市值/净资产</td>
+<td>净资产的溢价程度</td>
+</tr>
+</tbody></table>
+<h4 id="一、市盈率"><a href="#一、市盈率" class="headerlink" title="一、市盈率"></a>一、市盈率</h4><p>1.1 PE - 静态市盈率</p>
+<blockquote>
+<p>① 市盈率 = 当日收盘价 / 上一年度每股税后利润  </p>
+</blockquote>
+<blockquote>
+<p>② 市盈率 = 当前总市值 / 上年度净利润</p>
+</blockquote>
+<p>理解：</p>
+<ul>
+<li>公司需要累计多少年的盈利才能达到目前的市价水平。</li>
+<li>值越低说明投资回收期短，风险越小，投资价值越高。</li>
+<li>值越大说明翻本期长，风险大。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>取的是上一年度的净利润，是一个过去的值，有点滞后。</li>
+</ul>
+<p>例子：<br>你花了240w买了一套二手房，打算进行出租赚点外快，已知去年平均月租2w，一年收益大概24w。以去年这些数据为参考，你预计<strong>十年后</strong>才能赚回成本240w，所以市盈率 = 10。</p>
+<p>1.2 动态市盈率<br>为了弥补静态市盈率的滞后性，增加动态市盈率作为参考指标。</p>
+<blockquote>
+<p>市盈率 = 当前总市值 / X</p>
+</blockquote>
+<p>根据当前的时间节点不同计算X的值：<br>X = 当年最近一个季度的净利润 * 4<br>X = 最近半年净利润 * 2<br>X = 最近三季度净利润 * 1.5 </p>
+<p>1.3 静态市盈率 vs 动态市盈率</p>
+<ul>
+<li>静态市盈率反映的是过去的数据，动态市盈率反映的是未来的预估</li>
+<li>动态市盈率 &gt; 静态市盈率，说明最近（一个季度、半年、三个季度）公司的利润下降了。</li>
+</ul>
+<p>1.4 TTM-Trailing Twelve Months</p>
+<ul>
+<li>最近十二个月市盈率，也叫滚动市盈率。</li>
+<li>它也是一个对过去情况的分析说明。</li>
+</ul>
+<h4 id="二、每股净值产"><a href="#二、每股净值产" class="headerlink" title="二、每股净值产"></a>二、每股净值产</h4><blockquote>
+<p>每股净值产 = （总资产 - 总负债） / 总股数</p>
+</blockquote>
+<center>
+    <img src="../images/a_b_c.jpeg" width="300"/>
+</center>
+
+
+<h4 id="三、市净率"><a href="#三、市净率" class="headerlink" title="三、市净率"></a>三、市净率</h4><p>3.1 PB-市净率</p>
+<blockquote>
+<p>市净率 = 每股市价 / 每股净值产<br>每股净资产 = 股东权益 / 总股本</p>
+</blockquote>
+<p>市净率越低那么它的投资价值就越高，这也就意味着它的风险越低。</p>
+]]></content>
+      <categories>
+        <category>经济学</category>
+      </categories>
+      <tags>
+        <tag>Economics</tag>
       </tags>
   </entry>
   <entry>
@@ -2303,41 +2303,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Kotlin Flow的工作原理</title>
-    <url>/kotlin-lang-flow-under-the-hood.html</url>
-    <content><![CDATA[<hr>
-<p>我们有一个会被重复调用的lambda表达式：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: () -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        print(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        print(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        print(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f() <span class="comment">// ABC</span></span><br><span class="line">    f() <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们给这个lambda加个参数：<code>(String) -&gt; Unit</code> ,因为参数是个函数，为了能调用到函数，我们把它叫做<code>emit</code>吧：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: ((String) -&gt; <span class="built_in">Unit</span>) -&gt; <span class="built_in">Unit</span> = &#123; emit -&gt; <span class="comment">// 1</span></span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>添加的参数看起来有点乱🤔，稍微修改一下，抽出来吧：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: (FlowCollector) -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        it.emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        it.emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        it.emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>好像能把<code>it</code>的调用逻辑去掉，这样更简洁：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: FlowCollector.() -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>调用lambda表达式不是很方便。如果把它抽成接口🤔</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> builder: FlowCollector.() -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">val</span> flow: Flow = <span class="keyword">object</span> : Flow &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span> &#123;</span><br><span class="line">            collector.builder()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    flow.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    flow.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>抽成可以重复调用的构建器：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">flow</span><span class="params">(builder: <span class="type">FlowCollector</span>.() -&gt; <span class="type">Unit</span>)</span></span> = <span class="keyword">object</span> : Flow &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span> &#123;</span><br><span class="line">        collector.builder()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: Flow = flow &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>泛型化参数更通用：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector<span class="type">&lt;T&gt;</span> &#123;</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">T</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">flow</span><span class="params">(builder: <span class="type">suspend</span> <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;.() -&gt; <span class="type">Unit</span>)</span></span> = <span class="keyword">object</span> : Flow&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;)</span></span> &#123;</span><br><span class="line">        collector.builder()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: Flow&lt;String&gt; = flow &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<p><a href="https://kt.academy/article/how-flow-works">参考</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Kotlin Flow 基础</title>
     <url>/kotlin-lang-flow.html</url>
     <content><![CDATA[<h4 id="一、什么是Flow"><a href="#一、什么是Flow" class="headerlink" title="一、什么是Flow"></a>一、什么是Flow</h4><h5 id="1、如何通过同步和异步方式返回多个值？"><a href="#1、如何通过同步和异步方式返回多个值？" class="headerlink" title="1、如何通过同步和异步方式返回多个值？"></a>1、如何通过同步和异步方式返回多个值？</h5><p>1.1 同步方式返回多个值</p>
@@ -2405,6 +2370,156 @@
         <category>计算机</category>
       </categories>
       <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kotlin Flow的工作原理</title>
+    <url>/kotlin-lang-flow-under-the-hood.html</url>
+    <content><![CDATA[<hr>
+<p>我们有一个会被重复调用的lambda表达式：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: () -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        print(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        print(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        print(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f() <span class="comment">// ABC</span></span><br><span class="line">    f() <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们给这个lambda加个参数：<code>(String) -&gt; Unit</code> ,因为参数是个函数，为了能调用到函数，我们把它叫做<code>emit</code>吧：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: ((String) -&gt; <span class="built_in">Unit</span>) -&gt; <span class="built_in">Unit</span> = &#123; emit -&gt; <span class="comment">// 1</span></span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>添加的参数看起来有点乱🤔，稍微修改一下，抽出来吧：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: (FlowCollector) -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        it.emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        it.emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        it.emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好像能把<code>it</code>的调用逻辑去掉，这样更简洁：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: FlowCollector.() -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用lambda表达式不是很方便。如果把它抽成接口🤔</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> builder: FlowCollector.() -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">val</span> flow: Flow = <span class="keyword">object</span> : Flow &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span> &#123;</span><br><span class="line">            collector.builder()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    flow.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    flow.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>抽成可以重复调用的构建器：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">flow</span><span class="params">(builder: <span class="type">FlowCollector</span>.() -&gt; <span class="type">Unit</span>)</span></span> = <span class="keyword">object</span> : Flow &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span> &#123;</span><br><span class="line">        collector.builder()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: Flow = flow &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>泛型化参数更通用：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector<span class="type">&lt;T&gt;</span> &#123;</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">T</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">flow</span><span class="params">(builder: <span class="type">suspend</span> <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;.() -&gt; <span class="type">Unit</span>)</span></span> = <span class="keyword">object</span> : Flow&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;)</span></span> &#123;</span><br><span class="line">        collector.builder()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: Flow&lt;String&gt; = flow &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p><a href="https://kt.academy/article/how-flow-works">参考</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kotlin中的JVM注解</title>
+    <url>/kotlin-lang-jvm-annotation.html</url>
+    <content><![CDATA[<p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
+<h4 id="1、-JvmName"><a href="#1、-JvmName" class="headerlink" title="1、@JvmName"></a>1、@JvmName</h4><p>用于文件、函数、属性、getter和setter。</p>
+<h5 id="1-1-给文件添加-JvmName注解"><a href="#1-1-给文件添加-JvmName注解" class="headerlink" title="1.1 给文件添加@JvmName注解"></a>1.1 给文件添加@JvmName注解</h5><p>默认情况下，一个Kotlin文件中的<strong>function</strong>和<strong>properties</strong>会被编译成<em>filenameKt.class</em>，其中的<strong>class</strong>会被编译成classname.class:</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmname-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmname-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h5 id="1-2-给函数名添加-JvmName注解"><a href="#1-2-给函数名添加-JvmName注解" class="headerlink" title="1.2 给函数名添加@JvmName注解"></a>1.2 给函数名添加@JvmName注解</h5><center>
+    <img src="../images/kotlin-annotation-jvmname-3.jpeg" width="500"/>
+</center>
+
+<h5 id="1-3-给getter和setting添加-JvmName"><a href="#1-3-给getter和setting添加-JvmName" class="headerlink" title="1.3 给getter和setting添加@JvmName"></a>1.3 给getter和setting添加@JvmName</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@get:JvmName</span>(<span class="string">&quot;getContent&quot;</span>)</span><br><span class="line"><span class="meta">@set:JvmName</span>(<span class="string">&quot;setContent&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="2、-JvmDefault"><a href="#2、-JvmDefault" class="headerlink" title="2、@JvmDefault"></a>2、@JvmDefault</h4><p>和Java8一样，Kotlin的接口也支持默认方法实现。即使针对Java7及以下版本，他也能正常编译，因为Kotlin使用静态内部类实现默认方法。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmdefault-1.jpeg" width="500"/>
+</center>
+
+<p>当在Java中实现此接口时，需要复写对应的方法，否则将报错。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmdefault-2.jpeg" width="100%"/>
+</center>
+
+<p>如果我们希望它在Java8中不报错，可以使用@JvmDefault注解标识方法：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Document</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JvmDefault</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getType</span><span class="params">()</span></span> = <span class="string">&quot;document&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3、-JvmStatic"><a href="#3、-JvmStatic" class="headerlink" title="3、@JvmStatic"></a>3、@JvmStatic</h4><p>针对<code>object class</code> 或<code>companion object</code>使用此注解,可以避免Java访问时的INSTANCE调用</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h4 id="4、-JvmOverloads"><a href="#4、-JvmOverloads" class="headerlink" title="4、@JvmOverloads"></a>4、@JvmOverloads</h4><p>Kotlin的默认参数可以帮助我们减少函数重载，简化方法调用参数。在Java中调用含默认参数的Kotlin函数时，需要提供全部参数。</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmoverloads-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmoverloads-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h4 id="5、-Throws"><a href="#5、-Throws" class="headerlink" title="5、@Throws"></a>5、@Throws</h4><p>Kotlin没有受检测异常，try-catch是非必须的。如果希望在Java调用中检测到异常，可以使用@Throws注解</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmthrows.jpeg" width="100%"/>
+</center>
+
+<h4 id="6、-JvmWildcard-amp-JvmSuppressWildcard"><a href="#6、-JvmWildcard-amp-JvmSuppressWildcard" class="headerlink" title="6、@JvmWildcard &amp; @JvmSuppressWildcard"></a>6、@JvmWildcard &amp; @JvmSuppressWildcard</h4><p>略</p>
+<h4 id="7、-JvmMultifileClass"><a href="#7、-JvmMultifileClass" class="headerlink" title="7、@JvmMultifileClass"></a>7、@JvmMultifileClass</h4><p>当在多个文件中定义的顶层函数或属性想要合并到一个编译的class中时，可以使用此注解。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmmultifileclass.jpeg" width="500"/>
+</center>
+
+
+<h4 id="8、-JvmPackageName"><a href="#8、-JvmPackageName" class="headerlink" title="8、@JvmPackageName"></a>8、@JvmPackageName</h4><p>和@JvmName一样，此注解可以修改包名，但是他被标记为internal，只能在kotlin库内部使用，这里不做过多介绍。</p>
+<h4 id="9、注解一览"><a href="#9、注解一览" class="headerlink" title="9、注解一览"></a>9、注解一览</h4><center>
+    <img src="../images/kotlin-annotation-overview.png" width="100%"/>
+</center>
+
+<h4 id="参考"><a href="#参考" class="headerlink" title="[参考]"></a>[参考]</h4><p><a href="https://www.baeldung.com/kotlin/jvm-annotations">1.Guide to JVM Platform Annotations in Kotlin</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kotlin之JvmStatic和override冲突问题</title>
+    <url>/kotlin-lang-jvmstatic-with-interface.html</url>
+    <content><![CDATA[<h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
+</center>
+
+
+<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
+</code></pre>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
+<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
+</blockquote>
+<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
         <tag>Kotlin</tag>
       </tags>
   </entry>
@@ -2550,121 +2665,6 @@
         <category>计算机</category>
       </categories>
       <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Kotlin中的JVM注解</title>
-    <url>/kotlin-lang-jvm-annotation.html</url>
-    <content><![CDATA[<p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
-<h4 id="1、-JvmName"><a href="#1、-JvmName" class="headerlink" title="1、@JvmName"></a>1、@JvmName</h4><p>用于文件、函数、属性、getter和setter。</p>
-<h5 id="1-1-给文件添加-JvmName注解"><a href="#1-1-给文件添加-JvmName注解" class="headerlink" title="1.1 给文件添加@JvmName注解"></a>1.1 给文件添加@JvmName注解</h5><p>默认情况下，一个Kotlin文件中的<strong>function</strong>和<strong>properties</strong>会被编译成<em>filenameKt.class</em>，其中的<strong>class</strong>会被编译成classname.class:</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmname-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmname-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h5 id="1-2-给函数名添加-JvmName注解"><a href="#1-2-给函数名添加-JvmName注解" class="headerlink" title="1.2 给函数名添加@JvmName注解"></a>1.2 给函数名添加@JvmName注解</h5><center>
-    <img src="../images/kotlin-annotation-jvmname-3.jpeg" width="500"/>
-</center>
-
-<h5 id="1-3-给getter和setting添加-JvmName"><a href="#1-3-给getter和setting添加-JvmName" class="headerlink" title="1.3 给getter和setting添加@JvmName"></a>1.3 给getter和setting添加@JvmName</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@get:JvmName</span>(<span class="string">&quot;getContent&quot;</span>)</span><br><span class="line"><span class="meta">@set:JvmName</span>(<span class="string">&quot;setContent&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="2、-JvmDefault"><a href="#2、-JvmDefault" class="headerlink" title="2、@JvmDefault"></a>2、@JvmDefault</h4><p>和Java8一样，Kotlin的接口也支持默认方法实现。即使针对Java7及以下版本，他也能正常编译，因为Kotlin使用静态内部类实现默认方法。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmdefault-1.jpeg" width="500"/>
-</center>
-
-<p>当在Java中实现此接口时，需要复写对应的方法，否则将报错。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmdefault-2.jpeg" width="100%"/>
-</center>
-
-<p>如果我们希望它在Java8中不报错，可以使用@JvmDefault注解标识方法：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Document</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JvmDefault</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getType</span><span class="params">()</span></span> = <span class="string">&quot;document&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="3、-JvmStatic"><a href="#3、-JvmStatic" class="headerlink" title="3、@JvmStatic"></a>3、@JvmStatic</h4><p>针对<code>object class</code> 或<code>companion object</code>使用此注解,可以避免Java访问时的INSTANCE调用</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h4 id="4、-JvmOverloads"><a href="#4、-JvmOverloads" class="headerlink" title="4、@JvmOverloads"></a>4、@JvmOverloads</h4><p>Kotlin的默认参数可以帮助我们减少函数重载，简化方法调用参数。在Java中调用含默认参数的Kotlin函数时，需要提供全部参数。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmoverloads-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmoverloads-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h4 id="5、-Throws"><a href="#5、-Throws" class="headerlink" title="5、@Throws"></a>5、@Throws</h4><p>Kotlin没有受检测异常，try-catch是非必须的。如果希望在Java调用中检测到异常，可以使用@Throws注解</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmthrows.jpeg" width="100%"/>
-</center>
-
-<h4 id="6、-JvmWildcard-amp-JvmSuppressWildcard"><a href="#6、-JvmWildcard-amp-JvmSuppressWildcard" class="headerlink" title="6、@JvmWildcard &amp; @JvmSuppressWildcard"></a>6、@JvmWildcard &amp; @JvmSuppressWildcard</h4><p>略</p>
-<h4 id="7、-JvmMultifileClass"><a href="#7、-JvmMultifileClass" class="headerlink" title="7、@JvmMultifileClass"></a>7、@JvmMultifileClass</h4><p>当在多个文件中定义的顶层函数或属性想要合并到一个编译的class中时，可以使用此注解。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmmultifileclass.jpeg" width="500"/>
-</center>
-
-
-<h4 id="8、-JvmPackageName"><a href="#8、-JvmPackageName" class="headerlink" title="8、@JvmPackageName"></a>8、@JvmPackageName</h4><p>和@JvmName一样，此注解可以修改包名，但是他被标记为internal，只能在kotlin库内部使用，这里不做过多介绍。</p>
-<h4 id="9、注解一览"><a href="#9、注解一览" class="headerlink" title="9、注解一览"></a>9、注解一览</h4><center>
-    <img src="../images/kotlin-annotation-overview.png" width="100%"/>
-</center>
-
-<h4 id="参考"><a href="#参考" class="headerlink" title="[参考]"></a>[参考]</h4><p><a href="https://www.baeldung.com/kotlin/jvm-annotations">1.Guide to JVM Platform Annotations in Kotlin</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Kotlin之JvmStatic和override冲突问题</title>
-    <url>/kotlin-lang-jvmstatic-with-interface.html</url>
-    <content><![CDATA[<h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
-</center>
-
-
-<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
-</code></pre>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
-<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
-</blockquote>
-<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
-<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
         <tag>Kotlin</tag>
       </tags>
   </entry>
@@ -3736,6 +3736,101 @@
 <p>1、自己究竟有没有掌握一个知识点。考试（测验、自测）是一个很好的检验手段。不像学校里的考试，要以正确的心态看待考试，只是检测自己知识的掌握度，而不是要一较高下。</p>
 <p>个人理解：<br>获取到新知识，停留在浅层记忆，会有迷惑性，以为自己懂了。实则过段时间就忘记了。我们应该间隔性的回忆知识，内化吸收，这样才能将知识灵活运用。</p>
 ]]></content>
+  </entry>
+  <entry>
+    <title>《高纬度思考法》</title>
+    <url>/%E3%80%8A%E9%AB%98%E7%BA%AC%E5%BA%A6%E6%80%9D%E8%80%83%E6%B3%95%E3%80%8B.html</url>
+    <content><![CDATA[<h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><h6 id="书籍简介"><a href="#书籍简介" class="headerlink" title="书籍简介"></a>书籍简介</h6><table>
+    <tr>
+        <td><img src="../images/books/gaoweidusikaofa.jpg" width="100"/></td>
+        <td>高纬度思考法：如何从解决问题进化到发现问题</td>
+    </tr>
+</table>
+
+<p>作者简介：<br>细谷功，商务顾问。毕业于东京大学工学部。初任职于东芝，后进入安永咨询公司（Ernst&amp;Young Consulting，QUNIE 前身），负责产品开发等领域的战略制定及业务改革计划的制订、执行和定义。现任QUNIE 顾问研究员，另于企业和大学开展思维能力相关的研修和业务。</p>
+<p>书本结构：</p>
+<center>
+    <img src="../images/books/book-overview.jpg" width="400"/>
+</center>
+
+<h4 id="第一部分：知、无知、未知及其结构"><a href="#第一部分：知、无知、未知及其结构" class="headerlink" title="第一部分：知、无知、未知及其结构"></a>第一部分：知、无知、未知及其结构</h4><p>1.1 “未知的未知”这一死角<br>认识到知的三个层次，即：已知的已知、已知的未知、未知的未知。尤其是要意识到未知的未知这一层。</p>
+<p>1.2 “知”是“事实和解释的组合”</p>
+<ul>
+<li>事实和解释的关系：事实只有一个，解释因人而异<center>
+<img src="../images/books/shishi-vs-jieshi.jpg" width="400"/>
+</center></li>
+</ul>
+<p>1.3 “无知、未知”的思考框架</p>
+<p>1.4 已知和未知的不可逆循环</p>
+<p>1.5 苏格拉底和德鲁克所提倡的”无知”的两种视角</p>
+<h4 id="第二部分：解决问题的困境：能解决问题的人，不能发现问题"><a href="#第二部分：解决问题的困境：能解决问题的人，不能发现问题" class="headerlink" title="第二部分：解决问题的困境：能解决问题的人，不能发现问题"></a>第二部分：解决问题的困境：能解决问题的人，不能发现问题</h4><p>2.1 “知”的困境<br>2.2 封闭体系的困境<br>2.3 “解决问题”的困境</p>
+<h4 id="第三部分：从解决问题到发现问题"><a href="#第三部分：从解决问题到发现问题" class="headerlink" title="第三部分：从解决问题到发现问题"></a>第三部分：从解决问题到发现问题</h4><p>3.1 蚂蚁思维与蝈蝈思维的差异</p>
+<p>蝈蝈：发现问题型思维<br>蚂蚁：解决问题型思维</p>
+<table>
+<thead>
+<tr>
+<th>蝈蝈的思维</th>
+<th>蚂蚁的思维</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>流量</td>
+<td>存量</td>
+</tr>
+<tr>
+<td>开放体系</td>
+<td>封闭体系</td>
+</tr>
+<tr>
+<td>可变维度</td>
+<td>固定维度</td>
+</tr>
+</tbody></table>
+<p>什么是蝈蝈和蚂蚁的流量与存量：蚂蚁储存食物、蝈蝈不储存食物<br>什么是开放和封闭体系：有巢和无巢<br>什么是可变维度和固定维度：蚂蚁平面移动，蝈蝈会跳跃</p>
+<p>3.2 从存量到流量</p>
+<ul>
+<li><p>在变化少的环境下，存量思维是有益的</p>
+</li>
+<li><p>在变化激烈的世界里，流量思维更具价值</p>
+</li>
+<li><p>蚂蚁是有产者，重视守护自己的产业、口碑和名声</p>
+</li>
+<li><p>蝈蝈是无产者，没有什么可守护的，更具开放性</p>
+</li>
+</ul>
+<p>3.3 从封闭体系到开放体系</p>
+<ul>
+<li>蚂蚁以巢为中心活动、蝈蝈无巢活动。</li>
+<li>封闭体系以主观为中心进行思考，开放体系则拥有客观看待自身的视角。</li>
+</ul>
+<p>3.4 从固定思维到可变思维</p>
+<p>3.5 从“奇点”出发的问题发现法</p>
+<p>3.6 蚂蚁和蝈蝈能否共存共荣：两种思维在同一个人中、两种思维在不同人之间的相处中，的作用、分配、影响。</p>
+<ul>
+<li>各领域的蚂蚁和蝈蝈：这里借用数学领域简单阐述</li>
+<li>在“二维”中，蚂蚁常占据压倒性的优势：<br>假如只用手攻击的拳击选手和手脚并用的自由搏击选手“公平地同台”较量，自由搏击选手就不能用脚。在这种情况下不难推测，始终只用手攻击的拳击选手比手脚并用的自由搏击选手更占优势。</li>
+<li>蝈蝈在蚂蚁窝里跳不起来：</li>
+<li>互相怎么看</li>
+<li>通过“元级”克服对立结构</li>
+<li>决定是蚂蚁还是蝈蝈的性格和环境</li>
+</ul>
+<h4 id="第四部分：发现问题的元思考法，升维发现问题"><a href="#第四部分：发现问题的元思考法，升维发现问题" class="headerlink" title="第四部分：发现问题的元思考法，升维发现问题"></a>第四部分：发现问题的元思考法，升维发现问题</h4><center>
+    <img src="../images/books/high_level_thinking_part_4.jpg" width="400"/>
+</center>
+
+<p>4.1 上位概念&amp;下位概念</p>
+<p>理解：“上位”是一种思考抽象度的提升。作者说“上位概念是指用以思考的解释层”，这句话应该这么理解：我们观察到现象A/B/C，这三个现象有一些共性，那么我们提炼这些共性，再去思考现象ABC，就是一种思维提升，站在上位的概念思考问题。</p>
+<p>4.2 通过“抽象化、类推”升维</p>
+<blockquote>
+<p>若将个别事实视作具体，则基于某共同点抛弃其他所有特征、视 为“同一范畴内”的解释，就是抽象。顾名思义，抽象意味着“提取特征”。<br>科学的进化一言以蔽之，就是找到各个特殊事象间的共同点，得出定律，再将其适用 于各种各样的事象。各类科学技术的进步，都基本上均遵循这一原则。</p>
+</blockquote>
+<p>4.3 通过思考的“轴”升维<br>书本定义：“观察个别事象（即下位概念）时，作为基准的上位概念的视角”<br>4.4 通过“Why”升维<br>4.5 为了活用“元思考法”</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>1、知的三个层次：已知的已知、已知的未知、未知的未知<br>2、蚂蚁和蝈蝈两种动物类比两种思维方式：解决问题思维vs发现问题思维<br>3、在组织管理中，如何使蚂蚁思维和蝈蝈思维的人都能发挥自己的才能。<br>4、三种升维方式：抽象化类推、思考轴、Why</p>
+<p>本书借用两个动物的生活习性，类比两种思维方式。全书被划分成四个部分，重点是第四部分的三种升维方式，可以帮助我们提升思考的维度。粗读一遍总体感觉没有特别大的收获。<br>创造了一些“上位”，“下位”等专有名词的概念，反而让读者觉得神秘高大上，其实没什么新意，增加了理解难度，不知道是不是翻译的不好导致的。<br>总体推荐阅读指数3.5星。</p>
+]]></content>
+      <tags>
+        <tag>Reading</tag>
+      </tags>
   </entry>
   <entry>
     <title>《麻省理工深度思考法》</title>

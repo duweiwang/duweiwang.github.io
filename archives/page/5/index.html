@@ -186,6 +186,130 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/basic-encryption-algorithm.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/basic-encryption-algorithm.html" class="post-title-link" itemprop="url">对称/非对称加密和数字签名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-14 21:31:08" itemprop="dateCreated datePublished" datetime="2021-09-14T21:31:08+08:00">2021-09-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
+<p>一般加密和解密的算法是公开的，需要保持隐秘的是密钥k<br>流行的对称加密算法有：DES，Triple-DES，RC2和RC4，AES</p>
+<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>发送方和接收方首先需要共享相同的密钥，即存在密钥k的分发问题，如何安全的把共享密钥在双方进行分享，这本身也是一个如何安全通信的问题，一种方法是提前双方约定好，不通过具体的通信进行协商，避免被监听和截获。另外一种方式，将是下面我们介绍的通过非对称加密信道进行对称密码的分发和共享，即混合加密系统。</li>
+<li>密钥管理的复杂度问题。由于对称加密的密钥是一对一的使用方式，若一方要跟n方通信，则需要维护n对密钥。</li>
+</ul>
+<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>加密和解密的速度要比非对称加密快很多，因此常用非对称加密建立的安全信道进行共享密钥的分享，完成后，具体的加解密则使用对称加密。即混合加密系统。</li>
+</ul>
+<p>另外一个点需要重点说明的是，密钥k的长度对解密破解的难度有很重大的影响，k的长度越长，对应的密码空间就越大，遭到暴力破解或者词典破解的难度就更大，就更加安全。</p>
+<center>
+    <img src="../images/dcjm.png" width="400"/>
+</center>
+
+<h4 id="2-数字签名的过程："><a href="#2-数字签名的过程：" class="headerlink" title="2.数字签名的过程："></a>2.数字签名的过程：</h4><ul>
+<li>发送方A首先对变长的报文提取成一个定长的摘要，一般是md5等</li>
+<li>A对摘要应用了一个签名函数，并且用A自己的私钥作为参数，因为只有A才知道私钥，所以正确的签名会说明签名者就是其所有者。</li>
+<li>一旦计算出签名，节点A就将其附加到报文的末尾，并将报文和签名一起都发送给B</li>
+<li>在接收端B，首先会按照同样的算法计算出报文的摘要，然后对签名用A的公钥进行解码，得出解码后的摘要，两个摘要进行比较，则可以判断是否是A发送的且内容没被篡改过。</li>
+</ul>
+<center>
+    <img src="../images/szqm.png" width="400"/>
+</center>
+
+
+<h4 id="3-非对称加解密的过程："><a href="#3-非对称加解密的过程：" class="headerlink" title="3.非对称加解密的过程："></a>3.非对称加解密的过程：</h4><p>加密一方找到接收方的公钥e (如何找到呢？大部分的公钥查找工作实际上都是通过数字证书来实现的)，然后用公钥e对明文p进行加密后得到密文c，并将得到的密文发送给接收方，接收方收到密文后，用自己保留的私钥d进行解密，得到明文p，需要注意的是：用公钥加密的密文，只有拥有私钥的一方才能解密，这样就可以解决加密的各方可以统一使用一个公钥即可。</p>
+<p>常用的非对称加密算法有：RSA</p>
+<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>不存在密钥分发的问题，解码方可以自己生成密钥对，一个做私钥存起来，另外一个作为公钥进行发布。</li>
+<li>解决了密钥管理的复杂度问题，多个加密方都可以使用一个已知的公钥进行加密，但只有拥有私钥的一方才能解密。</li>
+</ul>
+<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>非对称加密不足的地方是加解密的速度没有对称加密快。</li>
+</ul>
+<p>综上，分析了对称加密和非对称加密各自的优缺点后，有没有一种办法是可以利用两者的优点但避开对应的缺点呢？答应是有的，实际上用得最多的是混合加密系统，比如在两个节点间通过便捷的公开密码加密技术建立起安全通信，然后再用安全的通信产生并发送临时的随机对称密钥，通过更快的对称加密技术对剩余的数据进行加密。</p>
+<center>
+    <img src="../images/fdcjm.png" width="400"/>
+</center>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/principles-of-economics.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1549,13 +1673,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">130k</span>
+    <span title="站点总字数">131k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">1:58</span>
+    <span title="站点阅读时长">1:59</span>
 </div>
 
         
