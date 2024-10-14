@@ -3,8 +3,6 @@ title: 《OpenGL ES应用开发实践指南Android卷》
 tags:
 ---
 
-
-
 ##### 第一章：准备开始
 略
 
