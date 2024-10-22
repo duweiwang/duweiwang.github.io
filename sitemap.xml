@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://wangduwei.top/%E5%BF%98%E5%B8%A6%E9%92%A5%E5%8C%99%E5%BC%95%E5%8F%91%E7%9A%84%E6%80%9D%E8%80%83.html</loc>
+    
+    <lastmod>2024-10-22</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://wangduwei.top/android-github-source-measure.html</loc>
     
     <lastmod>2024-10-22</lastmod>
@@ -93,14 +100,14 @@
   </url>
   
   <url>
-    <loc>https://wangduwei.top/about/index.html</loc>
+    <loc>https://wangduwei.top/categories/index.html</loc>
     
     <lastmod>2024-04-29</lastmod>
     
   </url>
   
   <url>
-    <loc>https://wangduwei.top/categories/index.html</loc>
+    <loc>https://wangduwei.top/about/index.html</loc>
     
     <lastmod>2024-04-29</lastmod>
     
@@ -282,14 +289,14 @@
   </url>
   
   <url>
-    <loc>https://wangduwei.top/cpu-pipline-overview.html</loc>
+    <loc>https://wangduwei.top/cs-operating-systems-file-system.html</loc>
     
     <lastmod>2024-04-29</lastmod>
     
   </url>
   
   <url>
-    <loc>https://wangduwei.top/cs-operating-systems-file-system.html</loc>
+    <loc>https://wangduwei.top/cpu-pipline-overview.html</loc>
     
     <lastmod>2024-04-29</lastmod>
     
@@ -366,13 +373,6 @@
   </url>
   
   <url>
-    <loc>https://wangduwei.top/android-github-source-retrofit.html</loc>
-    
-    <lastmod>2024-04-29</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://wangduwei.top/android-github-source-spacex.html</loc>
     
     <lastmod>2024-04-29</lastmod>
@@ -381,6 +381,13 @@
   
   <url>
     <loc>https://wangduwei.top/android-github-source-workmanager.html</loc>
+    
+    <lastmod>2024-04-29</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://wangduwei.top/android-github-source-retrofit.html</loc>
     
     <lastmod>2024-04-29</lastmod>
     
@@ -459,7 +466,7 @@
   </url>
   
   <url>
-    <loc>https://wangduwei.top/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/</loc>
+    <loc>https://wangduwei.top/tags/Linux/</loc>
     <lastmod>2024-10-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -473,7 +480,7 @@
   </url>
   
   <url>
-    <loc>https://wangduwei.top/tags/Linux/</loc>
+    <loc>https://wangduwei.top/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/</loc>
     <lastmod>2024-10-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -481,13 +488,6 @@
   
   <url>
     <loc>https://wangduwei.top/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/</loc>
-    <lastmod>2024-10-22</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://wangduwei.top/tags/%E8%BD%AF%E4%BB%B6%E5%93%B2%E5%AD%A6/</loc>
     <lastmod>2024-10-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -509,6 +509,13 @@
   
   <url>
     <loc>https://wangduwei.top/tags/C-C/</loc>
+    <lastmod>2024-10-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://wangduwei.top/tags/%E8%BD%AF%E4%BB%B6%E5%93%B2%E5%AD%A6/</loc>
     <lastmod>2024-10-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -591,6 +598,13 @@
     <priority>0.6</priority>
   </url>
   
+  <url>
+    <loc>https://wangduwei.top/tags/%E7%94%9F%E6%B4%BB/</loc>
+    <lastmod>2024-10-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
 
   
   <url>
@@ -616,6 +630,13 @@
   
   <url>
     <loc>https://wangduwei.top/categories/Reading/</loc>
+    <lastmod>2024-10-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://wangduwei.top/categories/%E7%94%9F%E6%B4%BB/</loc>
     <lastmod>2024-10-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>

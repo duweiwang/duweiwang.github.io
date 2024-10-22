@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2024-10-21T10:29:03.762Z</updated>
+  <updated>2024-10-22T10:06:10.773Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>忘带钥匙引发的思考</title>
+    <link href="https://wangduwei.top/%E5%BF%98%E5%B8%A6%E9%92%A5%E5%8C%99%E5%BC%95%E5%8F%91%E7%9A%84%E6%80%9D%E8%80%83.html"/>
+    <id>https://wangduwei.top/%E5%BF%98%E5%B8%A6%E9%92%A5%E5%8C%99%E5%BC%95%E5%8F%91%E7%9A%84%E6%80%9D%E8%80%83.html</id>
+    <published>2024-10-22T10:05:31.000Z</published>
+    <updated>2024-10-22T10:06:10.773Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;昨天晚饭后去天河公园散步，回来时才发现出门没拿钥匙，最后找了开锁师傅解决。事情虽然解决了，却让我想起了几个月前曾和老婆开玩笑：我们得备把钥匙🔑藏起来，万一哪天忘记带钥匙我们也能回家。&lt;/p&gt;
+&lt;p&gt;谁知一句玩笑话却真的出现了。让我不禁想到了著名的墨菲定律：&lt;/p&gt;
+&lt;bl</summary>
+        
+      
+    
+    
+    
+    <category term="生活" scheme="https://wangduwei.top/categories/%E7%94%9F%E6%B4%BB/"/>
+    
+    
+    <category term="生活" scheme="https://wangduwei.top/tags/%E7%94%9F%E6%B4%BB/"/>
+    
+  </entry>
   
   <entry>
     <title>做事必须搞清的十六个顺序</title>
@@ -477,33 +504,6 @@
     
     
     <category term="软件哲学" scheme="https://wangduwei.top/tags/%E8%BD%AF%E4%BB%B6%E5%93%B2%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Android消息机制</title>
-    <link href="https://wangduwei.top/android-aosp-event-loop.html"/>
-    <id>https://wangduwei.top/android-aosp-event-loop.html</id>
-    <published>2022-06-20T07:34:15.000Z</published>
-    <updated>2024-04-29T11:50:54.567Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;hr&gt;
-&lt;h4 id=&quot;一、相关类和结构&quot;&gt;&lt;a href=&quot;#一、相关类和结构&quot; class=&quot;headerlink&quot; title=&quot;一、相关类和结构&quot;&gt;&lt;/a&gt;一、相关类和结构&lt;/h4&gt;&lt;center&gt;
-    &lt;img</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
     
   </entry>
   
