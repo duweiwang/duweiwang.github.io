@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2024-09-22T06:35:15.822Z</updated>
+  <updated>2024-10-21T10:29:03.762Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,59 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>做事必须搞清的十六个顺序</title>
+    <link href="https://wangduwei.top/%E5%81%9A%E4%BA%8B%E5%BF%85%E9%A1%BB%E6%90%9E%E6%B8%85%E7%9A%84%E5%8D%81%E5%85%AD%E4%B8%AA%E9%A1%BA%E5%BA%8F.html"/>
+    <id>https://wangduwei.top/%E5%81%9A%E4%BA%8B%E5%BF%85%E9%A1%BB%E6%90%9E%E6%B8%85%E7%9A%84%E5%8D%81%E5%85%AD%E4%B8%AA%E9%A1%BA%E5%BA%8F.html</id>
+    <published>2024-10-19T12:27:56.000Z</published>
+    <updated>2024-10-21T10:29:03.762Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;blockquote&gt;
+&lt;p&gt;以下内容在一篇公众号里面看到的，觉得很有道理，记录在此，常思之。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;01 沟通：先求同，再求异&lt;br&gt;   </summary>
+        
+      
+    
+    
+    
+    
+    <category term="道理" scheme="https://wangduwei.top/tags/%E9%81%93%E7%90%86/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>源码分析-性能监控之Measure</title>
+    <link href="https://wangduwei.top/android-github-source-measure.html"/>
+    <id>https://wangduwei.top/android-github-source-measure.html</id>
+    <published>2024-09-24T07:42:26.000Z</published>
+    <updated>2024-10-22T09:06:07.973Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h5 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h5&gt;&lt;p&gt;&lt;a</summary>
+        
+      
+    
+    
+    
+    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
+    
+    <category term="安卓框架" scheme="https://wangduwei.top/tags/%E5%AE%89%E5%8D%93%E6%A1%86%E6%9E%B6/"/>
+    
+  </entry>
   
   <entry>
     <title>《高纬度思考法》</title>
@@ -451,58 +504,6 @@
     
     
     <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>投资回报率</title>
-    <link href="https://wangduwei.top/econonmics-roa-roe-roic-roce.html"/>
-    <id>https://wangduwei.top/econonmics-roa-roe-roic-roce.html</id>
-    <published>2022-06-13T09:04:39.000Z</published>
-    <updated>2024-04-29T11:50:54.577Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;一、概述&quot;&gt;&lt;a href=&quot;#一、概述&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="经济学" scheme="https://wangduwei.top/categories/%E7%BB%8F%E6%B5%8E%E5%AD%A6/"/>
-    
-    
-    <category term="经济学" scheme="https://wangduwei.top/tags/%E7%BB%8F%E6%B5%8E%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Kotlin Flow的工作原理</title>
-    <link href="https://wangduwei.top/kotlin-lang-flow-under-the-hood.html"/>
-    <id>https://wangduwei.top/kotlin-lang-flow-under-the-hood.html</id>
-    <published>2022-05-25T03:08:23.000Z</published>
-    <updated>2024-04-29T11:50:54.582Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;hr&gt;
-&lt;p&gt;我们有一个会被重复调用的lambda表达式：&lt;/p&gt;
-&lt;figure class=&quot;highlight kotlin&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Kotlin" scheme="https://wangduwei.top/tags/Kotlin/"/>
     
   </entry>
   

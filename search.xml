@@ -474,6 +474,52 @@
       </tags>
   </entry>
   <entry>
+    <title>源码分析-性能监控之Measure</title>
+    <url>/android-github-source-measure.html</url>
+    <content><![CDATA[<h5 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h5><p><a href="https://github.com/measure-sh/measure.git">Measure</a>是一个开源的性能监控项目，它包含：Android、iOS、前端、后端。这里分析一下Android端的逻辑实现。</p>
+<h5 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h5><p>项目的基本结构：</p>
+<ul>
+<li><p>measure-android</p>
+<ul>
+<li>measure</li>
+<li>measure-android-gradle</li>
+<li>sample</li>
+</ul>
+</li>
+<li><p>measure模块的内容：</p>
+<ul>
+<li>ANR捕获：Native实现，注册信号处理器，捕获SIGQUIT信号</li>
+<li>AppLaunch:区分冷起、热起、温启动，并对外回调。</li>
+<li>AppExit:ActivityManager#getHistoricalProcessExitReasons的使用</li>
+<li>performance:<ul>
+<li>cpu usage</li>
+<li>memory usage</li>
+</ul>
+</li>
+<li>NetworkChange:网络变化的监控</li>
+<li>ScreenShot：生成屏幕截图，PixelCopy的使用，或者Canvas画上去</li>
+<li>其他模块：周期性的心跳包（Heartbeat）去执行任务。Okhttp拦截器。</li>
+</ul>
+</li>
+<li><p>measure-android-gradle</p>
+<ul>
+<li>Manifest数据读取，AppId、VersionCode、VersionName</li>
+<li>Mapping文件上传</li>
+<li>Apk、Aab大小信息上传</li>
+</ul>
+</li>
+</ul>
+<h5 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h5><p>1、冷热起的判断逻辑，这部分代码参考自Square的<a href="https://github.com/square/papa/">PaPa</a>有参考价值<br>2、各功能的对外调用都是接口化的，无侵入性<br>3、项目简单，阅读起来很顺。<br>4、包含前后端代码，看板，值得学习。</p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>安卓框架</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>源码分析-网络框架之Retrofit</title>
     <url>/android-github-source-retrofit.html</url>
     <content><![CDATA[<h4 id="一、使用"><a href="#一、使用" class="headerlink" title="一、使用"></a>一、使用</h4><h5 id="1-1-定义API方法"><a href="#1-1-定义API方法" class="headerlink" title="1.1 定义API方法"></a>1.1 定义API方法</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">RemoteApi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(<span class="meta-string">&quot;timeline&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">timeline</span><span class="params">()</span></span>: RemoteLaunchesResponse </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -498,6 +544,42 @@
       <tags>
         <tag>Android</tag>
         <tag>安卓框架</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>源码分析-项目架构之SpaceX</title>
+    <url>/android-github-source-spacex.html</url>
+    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>此文是对Github开源项目<a href="https://github.com/ferPrieto/SpaceX-prepare-for-Clean-Architecture-liftoff">SpaceX-prepare-for-Clean-Architecture-liftoff</a> 的源码阅读记录。它是一个为了阐述对<strong>Clean Architecture</strong>的理解而作的Demo项目，是一个值得学习的项目。</p>
+<h4 id="二、源码分析"><a href="#二、源码分析" class="headerlink" title="二、源码分析"></a>二、源码分析</h4><h5 id="2-1-模块之间的依赖关系"><a href="#2-1-模块之间的依赖关系" class="headerlink" title="2.1 模块之间的依赖关系"></a>2.1 模块之间的依赖关系</h5><p>项目包含以下library：</p>
+<ul>
+<li>app</li>
+<li>buildSrc</li>
+<li>core</li>
+<li>core-android-test</li>
+<li>data</li>
+<li>data-api</li>
+<li>domain</li>
+<li>navigation</li>
+<li>presentation</li>
+</ul>
+<p>模块之间的依赖关系可用下图简述：</p>
+<center>
+    <img src="../images/android-source-spacex.jpeg" width="500"/>
+</center>
+
+<h5 id="2-2-类和模块之间的关系"><a href="#2-2-类和模块之间的关系" class="headerlink" title="2.2 类和模块之间的关系"></a>2.2 类和模块之间的关系</h5><center>
+    <img src="../images/android-source-spacex-overview.jpeg" width="600"/>
+</center>
+
+
+<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>项目重在阐述架构思想所以比较简单，其中很多东西值得我们在项目中借鉴。数据层的架构模式参看<a href="https://martinfowler.com/bliki/PresentationDomainDataLayering.html">martin fowler</a> 的文章。</p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -544,42 +626,6 @@
       </categories>
       <tags>
         <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>源码分析-项目架构之SpaceX</title>
-    <url>/android-github-source-spacex.html</url>
-    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>此文是对Github开源项目<a href="https://github.com/ferPrieto/SpaceX-prepare-for-Clean-Architecture-liftoff">SpaceX-prepare-for-Clean-Architecture-liftoff</a> 的源码阅读记录。它是一个为了阐述对<strong>Clean Architecture</strong>的理解而作的Demo项目，是一个值得学习的项目。</p>
-<h4 id="二、源码分析"><a href="#二、源码分析" class="headerlink" title="二、源码分析"></a>二、源码分析</h4><h5 id="2-1-模块之间的依赖关系"><a href="#2-1-模块之间的依赖关系" class="headerlink" title="2.1 模块之间的依赖关系"></a>2.1 模块之间的依赖关系</h5><p>项目包含以下library：</p>
-<ul>
-<li>app</li>
-<li>buildSrc</li>
-<li>core</li>
-<li>core-android-test</li>
-<li>data</li>
-<li>data-api</li>
-<li>domain</li>
-<li>navigation</li>
-<li>presentation</li>
-</ul>
-<p>模块之间的依赖关系可用下图简述：</p>
-<center>
-    <img src="../images/android-source-spacex.jpeg" width="500"/>
-</center>
-
-<h5 id="2-2-类和模块之间的关系"><a href="#2-2-类和模块之间的关系" class="headerlink" title="2.2 类和模块之间的关系"></a>2.2 类和模块之间的关系</h5><center>
-    <img src="../images/android-source-spacex-overview.jpeg" width="600"/>
-</center>
-
-
-<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>项目重在阐述架构思想所以比较简单，其中很多东西值得我们在项目中借鉴。数据层的架构模式参看<a href="https://martinfowler.com/bliki/PresentationDomainDataLayering.html">martin fowler</a> 的文章。</p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -996,6 +1042,97 @@
       </tags>
   </entry>
   <entry>
+    <title>估值指标</title>
+    <url>/base-economic-concept.html</url>
+    <content><![CDATA[<table>
+<thead>
+<tr>
+<th>英文名称</th>
+<th>中文名称</th>
+<th>计算方式</th>
+<th>理解</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PE = Price-to-Earning Ratio</td>
+<td>市盈率</td>
+<td>每股股价/每股盈余 = 市值/净利润</td>
+<td>创造财富的能力、回收成本的时间</td>
+</tr>
+<tr>
+<td>PS = Price-to-Sales Ratio</td>
+<td>市销率</td>
+<td>每股股价/每股营收 = 市值/营收</td>
+<td>获得公司1元的销售收入需要投入多少钱</td>
+</tr>
+<tr>
+<td>PCF =Price-to-Cash-Flow Ratio</td>
+<td>市现率</td>
+<td>每股股价/每股现金流 = 市值/12月现金流</td>
+<td></td>
+</tr>
+<tr>
+<td>PB = Price-to-Book Ratio</td>
+<td>市净率</td>
+<td>每股股价/每股净资产 = 市值/净资产</td>
+<td>净资产的溢价程度</td>
+</tr>
+</tbody></table>
+<h4 id="一、市盈率"><a href="#一、市盈率" class="headerlink" title="一、市盈率"></a>一、市盈率</h4><p>1.1 PE - 静态市盈率</p>
+<blockquote>
+<p>① 市盈率 = 当日收盘价 / 上一年度每股税后利润  </p>
+</blockquote>
+<blockquote>
+<p>② 市盈率 = 当前总市值 / 上年度净利润</p>
+</blockquote>
+<p>理解：</p>
+<ul>
+<li>公司需要累计多少年的盈利才能达到目前的市价水平。</li>
+<li>值越低说明投资回收期短，风险越小，投资价值越高。</li>
+<li>值越大说明翻本期长，风险大。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>取的是上一年度的净利润，是一个过去的值，有点滞后。</li>
+</ul>
+<p>例子：<br>你花了240w买了一套二手房，打算进行出租赚点外快，已知去年平均月租2w，一年收益大概24w。以去年这些数据为参考，你预计<strong>十年后</strong>才能赚回成本240w，所以市盈率 = 10。</p>
+<p>1.2 动态市盈率<br>为了弥补静态市盈率的滞后性，增加动态市盈率作为参考指标。</p>
+<blockquote>
+<p>市盈率 = 当前总市值 / X</p>
+</blockquote>
+<p>根据当前的时间节点不同计算X的值：<br>X = 当年最近一个季度的净利润 * 4<br>X = 最近半年净利润 * 2<br>X = 最近三季度净利润 * 1.5 </p>
+<p>1.3 静态市盈率 vs 动态市盈率</p>
+<ul>
+<li>静态市盈率反映的是过去的数据，动态市盈率反映的是未来的预估</li>
+<li>动态市盈率 &gt; 静态市盈率，说明最近（一个季度、半年、三个季度）公司的利润下降了。</li>
+</ul>
+<p>1.4 TTM-Trailing Twelve Months</p>
+<ul>
+<li>最近十二个月市盈率，也叫滚动市盈率。</li>
+<li>它也是一个对过去情况的分析说明。</li>
+</ul>
+<h4 id="二、每股净值产"><a href="#二、每股净值产" class="headerlink" title="二、每股净值产"></a>二、每股净值产</h4><blockquote>
+<p>每股净值产 = （总资产 - 总负债） / 总股数</p>
+</blockquote>
+<center>
+    <img src="../images/a_b_c.jpeg" width="300"/>
+</center>
+
+
+<h4 id="三、市净率"><a href="#三、市净率" class="headerlink" title="三、市净率"></a>三、市净率</h4><p>3.1 PB-市净率</p>
+<blockquote>
+<p>市净率 = 每股市价 / 每股净值产<br>每股净资产 = 股东权益 / 总股本</p>
+</blockquote>
+<p>市净率越低那么它的投资价值就越高，这也就意味着它的风险越低。</p>
+]]></content>
+      <categories>
+        <category>经济学</category>
+      </categories>
+      <tags>
+        <tag>Economics</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>对称/非对称加密和数字签名</title>
     <url>/basic-encryption-algorithm.html</url>
     <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
@@ -1108,6 +1245,36 @@
       </tags>
   </entry>
   <entry>
+    <title>数据结构之布隆过滤器</title>
+    <url>/cs-data-structure-bloomfilter.html</url>
+    <content><![CDATA[<hr>
+<h4 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h4><p>一种空间高效的概率型数据结构，用于判断一个元素是否存在于集合中。</p>
+<p>空间高效：用几个比特位来标识存在与否，不占用太多内存空间。<br>概率型：有几率把一个不存在的元素判定为存在。</p>
+<p>Hash表存在的问题：数据量很大时，占用内存太多了。</p>
+<h4 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h4><h5 id="插入操作："><a href="#插入操作：" class="headerlink" title="插入操作："></a>插入操作：</h5><p>初始bit数组A[m-1]全部置0，通过映射函数，将要插入的值随机映射到数组范围内，将该位置为1</p>
+<center>
+    <img src="../images/bloom-filters-insert.png" width="50%"/>
+</center>
+
+
+<h5 id="查找操作："><a href="#查找操作：" class="headerlink" title="查找操作："></a>查找操作：</h5><p>将要查找的元素通过映射函数，映射到数组中，判断该bit位是否为1</p>
+<center>
+    <img src="../images/bloom-filters_03.png" width="50%"/>
+</center>
+
+
+
+<h4 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h4><ul>
+<li>网页爬虫对 URL 去重，避免爬取相同的 URL 地址；</li>
+<li>反垃圾邮件，从数十亿个垃圾邮件列表中判断某邮箱是否垃圾邮箱；</li>
+</ul>
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><p><a href="https://freecontent.manning.com/all-about-bloom-filters/">图片来源</a><br><a href="https://juejin.cn/post/6844904007790673933">1</a></p>
+]]></content>
+      <tags>
+        <tag>计算机</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>CPU流水线工作原理</title>
     <url>/cpu-pipline-overview.html</url>
     <content><![CDATA[<h5 id="说明："><a href="#说明：" class="headerlink" title="说明："></a>说明：</h5><p>在<a href="https://www.zhaixue.cc/weixin/weixin-cpu-pipeline.html">宅学部落</a>这个网站看到一篇讲CPU流水线的文章，写的非常好，为了便于翻阅回顾，转载之。</p>
@@ -1169,36 +1336,6 @@
       <tags>
         <tag>计算机基础</tag>
         <tag>CPU</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>数据结构之布隆过滤器</title>
-    <url>/cs-data-structure-bloomfilter.html</url>
-    <content><![CDATA[<hr>
-<h4 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h4><p>一种空间高效的概率型数据结构，用于判断一个元素是否存在于集合中。</p>
-<p>空间高效：用几个比特位来标识存在与否，不占用太多内存空间。<br>概率型：有几率把一个不存在的元素判定为存在。</p>
-<p>Hash表存在的问题：数据量很大时，占用内存太多了。</p>
-<h4 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h4><h5 id="插入操作："><a href="#插入操作：" class="headerlink" title="插入操作："></a>插入操作：</h5><p>初始bit数组A[m-1]全部置0，通过映射函数，将要插入的值随机映射到数组范围内，将该位置为1</p>
-<center>
-    <img src="../images/bloom-filters-insert.png" width="50%"/>
-</center>
-
-
-<h5 id="查找操作："><a href="#查找操作：" class="headerlink" title="查找操作："></a>查找操作：</h5><p>将要查找的元素通过映射函数，映射到数组中，判断该bit位是否为1</p>
-<center>
-    <img src="../images/bloom-filters_03.png" width="50%"/>
-</center>
-
-
-
-<h4 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h4><ul>
-<li>网页爬虫对 URL 去重，避免爬取相同的 URL 地址；</li>
-<li>反垃圾邮件，从数十亿个垃圾邮件列表中判断某邮箱是否垃圾邮箱；</li>
-</ul>
-<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><p><a href="https://freecontent.manning.com/all-about-bloom-filters/">图片来源</a><br><a href="https://juejin.cn/post/6844904007790673933">1</a></p>
-]]></content>
-      <tags>
-        <tag>计算机</tag>
       </tags>
   </entry>
   <entry>
@@ -1429,97 +1566,6 @@
 ]]></content>
       <tags>
         <tag>软件哲学</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>估值指标</title>
-    <url>/base-economic-concept.html</url>
-    <content><![CDATA[<table>
-<thead>
-<tr>
-<th>英文名称</th>
-<th>中文名称</th>
-<th>计算方式</th>
-<th>理解</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>PE = Price-to-Earning Ratio</td>
-<td>市盈率</td>
-<td>每股股价/每股盈余 = 市值/净利润</td>
-<td>创造财富的能力、回收成本的时间</td>
-</tr>
-<tr>
-<td>PS = Price-to-Sales Ratio</td>
-<td>市销率</td>
-<td>每股股价/每股营收 = 市值/营收</td>
-<td>获得公司1元的销售收入需要投入多少钱</td>
-</tr>
-<tr>
-<td>PCF =Price-to-Cash-Flow Ratio</td>
-<td>市现率</td>
-<td>每股股价/每股现金流 = 市值/12月现金流</td>
-<td></td>
-</tr>
-<tr>
-<td>PB = Price-to-Book Ratio</td>
-<td>市净率</td>
-<td>每股股价/每股净资产 = 市值/净资产</td>
-<td>净资产的溢价程度</td>
-</tr>
-</tbody></table>
-<h4 id="一、市盈率"><a href="#一、市盈率" class="headerlink" title="一、市盈率"></a>一、市盈率</h4><p>1.1 PE - 静态市盈率</p>
-<blockquote>
-<p>① 市盈率 = 当日收盘价 / 上一年度每股税后利润  </p>
-</blockquote>
-<blockquote>
-<p>② 市盈率 = 当前总市值 / 上年度净利润</p>
-</blockquote>
-<p>理解：</p>
-<ul>
-<li>公司需要累计多少年的盈利才能达到目前的市价水平。</li>
-<li>值越低说明投资回收期短，风险越小，投资价值越高。</li>
-<li>值越大说明翻本期长，风险大。</li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>取的是上一年度的净利润，是一个过去的值，有点滞后。</li>
-</ul>
-<p>例子：<br>你花了240w买了一套二手房，打算进行出租赚点外快，已知去年平均月租2w，一年收益大概24w。以去年这些数据为参考，你预计<strong>十年后</strong>才能赚回成本240w，所以市盈率 = 10。</p>
-<p>1.2 动态市盈率<br>为了弥补静态市盈率的滞后性，增加动态市盈率作为参考指标。</p>
-<blockquote>
-<p>市盈率 = 当前总市值 / X</p>
-</blockquote>
-<p>根据当前的时间节点不同计算X的值：<br>X = 当年最近一个季度的净利润 * 4<br>X = 最近半年净利润 * 2<br>X = 最近三季度净利润 * 1.5 </p>
-<p>1.3 静态市盈率 vs 动态市盈率</p>
-<ul>
-<li>静态市盈率反映的是过去的数据，动态市盈率反映的是未来的预估</li>
-<li>动态市盈率 &gt; 静态市盈率，说明最近（一个季度、半年、三个季度）公司的利润下降了。</li>
-</ul>
-<p>1.4 TTM-Trailing Twelve Months</p>
-<ul>
-<li>最近十二个月市盈率，也叫滚动市盈率。</li>
-<li>它也是一个对过去情况的分析说明。</li>
-</ul>
-<h4 id="二、每股净值产"><a href="#二、每股净值产" class="headerlink" title="二、每股净值产"></a>二、每股净值产</h4><blockquote>
-<p>每股净值产 = （总资产 - 总负债） / 总股数</p>
-</blockquote>
-<center>
-    <img src="../images/a_b_c.jpeg" width="300"/>
-</center>
-
-
-<h4 id="三、市净率"><a href="#三、市净率" class="headerlink" title="三、市净率"></a>三、市净率</h4><p>3.1 PB-市净率</p>
-<blockquote>
-<p>市净率 = 每股市价 / 每股净值产<br>每股净资产 = 股东权益 / 总股本</p>
-</blockquote>
-<p>市净率越低那么它的投资价值就越高，这也就意味着它的风险越低。</p>
-]]></content>
-      <categories>
-        <category>经济学</category>
-      </categories>
-      <tags>
-        <tag>Economics</tag>
       </tags>
   </entry>
   <entry>
@@ -2303,6 +2349,41 @@
       </tags>
   </entry>
   <entry>
+    <title>Kotlin Flow的工作原理</title>
+    <url>/kotlin-lang-flow-under-the-hood.html</url>
+    <content><![CDATA[<hr>
+<p>我们有一个会被重复调用的lambda表达式：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: () -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        print(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        print(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        print(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f() <span class="comment">// ABC</span></span><br><span class="line">    f() <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们给这个lambda加个参数：<code>(String) -&gt; Unit</code> ,因为参数是个函数，为了能调用到函数，我们把它叫做<code>emit</code>吧：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: ((String) -&gt; <span class="built_in">Unit</span>) -&gt; <span class="built_in">Unit</span> = &#123; emit -&gt; <span class="comment">// 1</span></span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>添加的参数看起来有点乱🤔，稍微修改一下，抽出来吧：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: (FlowCollector) -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        it.emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        it.emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        it.emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好像能把<code>it</code>的调用逻辑去掉，这样更简洁：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: FlowCollector.() -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用lambda表达式不是很方便。如果把它抽成接口🤔</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> builder: FlowCollector.() -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">val</span> flow: Flow = <span class="keyword">object</span> : Flow &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span> &#123;</span><br><span class="line">            collector.builder()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    flow.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    flow.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>抽成可以重复调用的构建器：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">flow</span><span class="params">(builder: <span class="type">FlowCollector</span>.() -&gt; <span class="type">Unit</span>)</span></span> = <span class="keyword">object</span> : Flow &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span> &#123;</span><br><span class="line">        collector.builder()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: Flow = flow &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>泛型化参数更通用：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector<span class="type">&lt;T&gt;</span> &#123;</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">T</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">flow</span><span class="params">(builder: <span class="type">suspend</span> <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;.() -&gt; <span class="type">Unit</span>)</span></span> = <span class="keyword">object</span> : Flow&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;)</span></span> &#123;</span><br><span class="line">        collector.builder()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: Flow&lt;String&gt; = flow &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p><a href="https://kt.academy/article/how-flow-works">参考</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Kotlin Flow 基础</title>
     <url>/kotlin-lang-flow.html</url>
     <content><![CDATA[<h4 id="一、什么是Flow"><a href="#一、什么是Flow" class="headerlink" title="一、什么是Flow"></a>一、什么是Flow</h4><h5 id="1、如何通过同步和异步方式返回多个值？"><a href="#1、如何通过同步和异步方式返回多个值？" class="headerlink" title="1、如何通过同步和异步方式返回多个值？"></a>1、如何通过同步和异步方式返回多个值？</h5><p>1.1 同步方式返回多个值</p>
@@ -2370,156 +2451,6 @@
         <category>计算机</category>
       </categories>
       <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Kotlin Flow的工作原理</title>
-    <url>/kotlin-lang-flow-under-the-hood.html</url>
-    <content><![CDATA[<hr>
-<p>我们有一个会被重复调用的lambda表达式：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: () -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        print(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        print(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        print(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f() <span class="comment">// ABC</span></span><br><span class="line">    f() <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们给这个lambda加个参数：<code>(String) -&gt; Unit</code> ,因为参数是个函数，为了能调用到函数，我们把它叫做<code>emit</code>吧：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: ((String) -&gt; <span class="built_in">Unit</span>) -&gt; <span class="built_in">Unit</span> = &#123; emit -&gt; <span class="comment">// 1</span></span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>添加的参数看起来有点乱🤔，稍微修改一下，抽出来吧：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: (FlowCollector) -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        it.emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        it.emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        it.emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>好像能把<code>it</code>的调用逻辑去掉，这样更简洁：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: FlowCollector.() -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>调用lambda表达式不是很方便。如果把它抽成接口🤔</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> builder: FlowCollector.() -&gt; <span class="built_in">Unit</span> = &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">val</span> flow: Flow = <span class="keyword">object</span> : Flow &#123;</span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span> &#123;</span><br><span class="line">            collector.builder()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    flow.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    flow.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>抽成可以重复调用的构建器：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">String</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">flow</span><span class="params">(builder: <span class="type">FlowCollector</span>.() -&gt; <span class="type">Unit</span>)</span></span> = <span class="keyword">object</span> : Flow &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>)</span></span> &#123;</span><br><span class="line">        collector.builder()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: Flow = flow &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>泛型化参数更通用：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> kotlin.*</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="keyword">interface</span> FlowCollector<span class="type">&lt;T&gt;</span> &#123;</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">emit</span><span class="params">(value: <span class="type">T</span>)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Flow</span>&lt;<span class="type">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;)</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="type">&lt;T&gt;</span> <span class="title">flow</span><span class="params">(builder: <span class="type">suspend</span> <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;.() -&gt; <span class="type">Unit</span>)</span></span> = <span class="keyword">object</span> : Flow&lt;T&gt; &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">collect</span><span class="params">(collector: <span class="type">FlowCollector</span>&lt;<span class="type">T</span>&gt;)</span></span> &#123;</span><br><span class="line">        collector.builder()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> f: Flow&lt;String&gt; = flow &#123;</span><br><span class="line">        emit(<span class="string">&quot;A&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;B&quot;</span>)</span><br><span class="line">        emit(<span class="string">&quot;C&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">    f.collect &#123; print(it) &#125; <span class="comment">// ABC</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<p><a href="https://kt.academy/article/how-flow-works">参考</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Kotlin中的JVM注解</title>
-    <url>/kotlin-lang-jvm-annotation.html</url>
-    <content><![CDATA[<p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
-<h4 id="1、-JvmName"><a href="#1、-JvmName" class="headerlink" title="1、@JvmName"></a>1、@JvmName</h4><p>用于文件、函数、属性、getter和setter。</p>
-<h5 id="1-1-给文件添加-JvmName注解"><a href="#1-1-给文件添加-JvmName注解" class="headerlink" title="1.1 给文件添加@JvmName注解"></a>1.1 给文件添加@JvmName注解</h5><p>默认情况下，一个Kotlin文件中的<strong>function</strong>和<strong>properties</strong>会被编译成<em>filenameKt.class</em>，其中的<strong>class</strong>会被编译成classname.class:</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmname-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmname-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h5 id="1-2-给函数名添加-JvmName注解"><a href="#1-2-给函数名添加-JvmName注解" class="headerlink" title="1.2 给函数名添加@JvmName注解"></a>1.2 给函数名添加@JvmName注解</h5><center>
-    <img src="../images/kotlin-annotation-jvmname-3.jpeg" width="500"/>
-</center>
-
-<h5 id="1-3-给getter和setting添加-JvmName"><a href="#1-3-给getter和setting添加-JvmName" class="headerlink" title="1.3 给getter和setting添加@JvmName"></a>1.3 给getter和setting添加@JvmName</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@get:JvmName</span>(<span class="string">&quot;getContent&quot;</span>)</span><br><span class="line"><span class="meta">@set:JvmName</span>(<span class="string">&quot;setContent&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="2、-JvmDefault"><a href="#2、-JvmDefault" class="headerlink" title="2、@JvmDefault"></a>2、@JvmDefault</h4><p>和Java8一样，Kotlin的接口也支持默认方法实现。即使针对Java7及以下版本，他也能正常编译，因为Kotlin使用静态内部类实现默认方法。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmdefault-1.jpeg" width="500"/>
-</center>
-
-<p>当在Java中实现此接口时，需要复写对应的方法，否则将报错。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmdefault-2.jpeg" width="100%"/>
-</center>
-
-<p>如果我们希望它在Java8中不报错，可以使用@JvmDefault注解标识方法：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Document</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JvmDefault</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getType</span><span class="params">()</span></span> = <span class="string">&quot;document&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="3、-JvmStatic"><a href="#3、-JvmStatic" class="headerlink" title="3、@JvmStatic"></a>3、@JvmStatic</h4><p>针对<code>object class</code> 或<code>companion object</code>使用此注解,可以避免Java访问时的INSTANCE调用</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h4 id="4、-JvmOverloads"><a href="#4、-JvmOverloads" class="headerlink" title="4、@JvmOverloads"></a>4、@JvmOverloads</h4><p>Kotlin的默认参数可以帮助我们减少函数重载，简化方法调用参数。在Java中调用含默认参数的Kotlin函数时，需要提供全部参数。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmoverloads-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmoverloads-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<h4 id="5、-Throws"><a href="#5、-Throws" class="headerlink" title="5、@Throws"></a>5、@Throws</h4><p>Kotlin没有受检测异常，try-catch是非必须的。如果希望在Java调用中检测到异常，可以使用@Throws注解</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmthrows.jpeg" width="100%"/>
-</center>
-
-<h4 id="6、-JvmWildcard-amp-JvmSuppressWildcard"><a href="#6、-JvmWildcard-amp-JvmSuppressWildcard" class="headerlink" title="6、@JvmWildcard &amp; @JvmSuppressWildcard"></a>6、@JvmWildcard &amp; @JvmSuppressWildcard</h4><p>略</p>
-<h4 id="7、-JvmMultifileClass"><a href="#7、-JvmMultifileClass" class="headerlink" title="7、@JvmMultifileClass"></a>7、@JvmMultifileClass</h4><p>当在多个文件中定义的顶层函数或属性想要合并到一个编译的class中时，可以使用此注解。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmmultifileclass.jpeg" width="500"/>
-</center>
-
-
-<h4 id="8、-JvmPackageName"><a href="#8、-JvmPackageName" class="headerlink" title="8、@JvmPackageName"></a>8、@JvmPackageName</h4><p>和@JvmName一样，此注解可以修改包名，但是他被标记为internal，只能在kotlin库内部使用，这里不做过多介绍。</p>
-<h4 id="9、注解一览"><a href="#9、注解一览" class="headerlink" title="9、注解一览"></a>9、注解一览</h4><center>
-    <img src="../images/kotlin-annotation-overview.png" width="100%"/>
-</center>
-
-<h4 id="参考"><a href="#参考" class="headerlink" title="[参考]"></a>[参考]</h4><p><a href="https://www.baeldung.com/kotlin/jvm-annotations">1.Guide to JVM Platform Annotations in Kotlin</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Kotlin之JvmStatic和override冲突问题</title>
-    <url>/kotlin-lang-jvmstatic-with-interface.html</url>
-    <content><![CDATA[<h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
-</center>
-
-
-<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
-</code></pre>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
-<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
-</blockquote>
-<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
-<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
         <tag>Kotlin</tag>
       </tags>
   </entry>
@@ -2665,6 +2596,121 @@
         <category>计算机</category>
       </categories>
       <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kotlin中的JVM注解</title>
+    <url>/kotlin-lang-jvm-annotation.html</url>
+    <content><![CDATA[<p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
+<h4 id="1、-JvmName"><a href="#1、-JvmName" class="headerlink" title="1、@JvmName"></a>1、@JvmName</h4><p>用于文件、函数、属性、getter和setter。</p>
+<h5 id="1-1-给文件添加-JvmName注解"><a href="#1-1-给文件添加-JvmName注解" class="headerlink" title="1.1 给文件添加@JvmName注解"></a>1.1 给文件添加@JvmName注解</h5><p>默认情况下，一个Kotlin文件中的<strong>function</strong>和<strong>properties</strong>会被编译成<em>filenameKt.class</em>，其中的<strong>class</strong>会被编译成classname.class:</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmname-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmname-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h5 id="1-2-给函数名添加-JvmName注解"><a href="#1-2-给函数名添加-JvmName注解" class="headerlink" title="1.2 给函数名添加@JvmName注解"></a>1.2 给函数名添加@JvmName注解</h5><center>
+    <img src="../images/kotlin-annotation-jvmname-3.jpeg" width="500"/>
+</center>
+
+<h5 id="1-3-给getter和setting添加-JvmName"><a href="#1-3-给getter和setting添加-JvmName" class="headerlink" title="1.3 给getter和setting添加@JvmName"></a>1.3 给getter和setting添加@JvmName</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@get:JvmName</span>(<span class="string">&quot;getContent&quot;</span>)</span><br><span class="line"><span class="meta">@set:JvmName</span>(<span class="string">&quot;setContent&quot;</span>)</span><br><span class="line"><span class="keyword">var</span> text = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="2、-JvmDefault"><a href="#2、-JvmDefault" class="headerlink" title="2、@JvmDefault"></a>2、@JvmDefault</h4><p>和Java8一样，Kotlin的接口也支持默认方法实现。即使针对Java7及以下版本，他也能正常编译，因为Kotlin使用静态内部类实现默认方法。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmdefault-1.jpeg" width="500"/>
+</center>
+
+<p>当在Java中实现此接口时，需要复写对应的方法，否则将报错。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmdefault-2.jpeg" width="100%"/>
+</center>
+
+<p>如果我们希望它在Java8中不报错，可以使用@JvmDefault注解标识方法：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Document</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JvmDefault</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getType</span><span class="params">()</span></span> = <span class="string">&quot;document&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3、-JvmStatic"><a href="#3、-JvmStatic" class="headerlink" title="3、@JvmStatic"></a>3、@JvmStatic</h4><p>针对<code>object class</code> 或<code>companion object</code>使用此注解,可以避免Java访问时的INSTANCE调用</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h4 id="4、-JvmOverloads"><a href="#4、-JvmOverloads" class="headerlink" title="4、@JvmOverloads"></a>4、@JvmOverloads</h4><p>Kotlin的默认参数可以帮助我们减少函数重载，简化方法调用参数。在Java中调用含默认参数的Kotlin函数时，需要提供全部参数。</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmoverloads-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmoverloads-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<h4 id="5、-Throws"><a href="#5、-Throws" class="headerlink" title="5、@Throws"></a>5、@Throws</h4><p>Kotlin没有受检测异常，try-catch是非必须的。如果希望在Java调用中检测到异常，可以使用@Throws注解</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmthrows.jpeg" width="100%"/>
+</center>
+
+<h4 id="6、-JvmWildcard-amp-JvmSuppressWildcard"><a href="#6、-JvmWildcard-amp-JvmSuppressWildcard" class="headerlink" title="6、@JvmWildcard &amp; @JvmSuppressWildcard"></a>6、@JvmWildcard &amp; @JvmSuppressWildcard</h4><p>略</p>
+<h4 id="7、-JvmMultifileClass"><a href="#7、-JvmMultifileClass" class="headerlink" title="7、@JvmMultifileClass"></a>7、@JvmMultifileClass</h4><p>当在多个文件中定义的顶层函数或属性想要合并到一个编译的class中时，可以使用此注解。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmmultifileclass.jpeg" width="500"/>
+</center>
+
+
+<h4 id="8、-JvmPackageName"><a href="#8、-JvmPackageName" class="headerlink" title="8、@JvmPackageName"></a>8、@JvmPackageName</h4><p>和@JvmName一样，此注解可以修改包名，但是他被标记为internal，只能在kotlin库内部使用，这里不做过多介绍。</p>
+<h4 id="9、注解一览"><a href="#9、注解一览" class="headerlink" title="9、注解一览"></a>9、注解一览</h4><center>
+    <img src="../images/kotlin-annotation-overview.png" width="100%"/>
+</center>
+
+<h4 id="参考"><a href="#参考" class="headerlink" title="[参考]"></a>[参考]</h4><p><a href="https://www.baeldung.com/kotlin/jvm-annotations">1.Guide to JVM Platform Annotations in Kotlin</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kotlin之JvmStatic和override冲突问题</title>
+    <url>/kotlin-lang-jvmstatic-with-interface.html</url>
+    <content><![CDATA[<h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
+</center>
+
+
+<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
+</code></pre>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
+<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
+</blockquote>
+<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
         <tag>Kotlin</tag>
       </tags>
   </entry>
@@ -3007,60 +3053,6 @@
       </tags>
   </entry>
   <entry>
-    <title>LeetCode 反转单链表</title>
-    <url>/leetcode-reverse-list.html</url>
-    <content><![CDATA[<h3 id="LeetCode-206-反转单链表"><a href="#LeetCode-206-反转单链表" class="headerlink" title="LeetCode-206 反转单链表"></a>LeetCode-206 反转单链表</h3><blockquote>
-<p>给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</p>
-</blockquote>
-<p>问题分析：</p>
-<p>这是初始状态的链表</p>
-<center>
-    <img src="../images/revert_list_0.png" width="400"/>
-</center>
-由于反转链表后 **head** 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  
-
-<p>尝试一次反转后，我们发现，后续结点信息丢失了！我们不得不声明一个新的变量保存原链表的信息。</p>
-<center>
-    <img src="../images/revert_list_7.png" width="400"/>
-</center>
-
-<p>所以，我们一共需要三个指针来记录转换过程  </p>
-<ul>
-<li>prev、 head 用于交换</li>
-<li>next 用于记录  </li>
-</ul>
-<p>分析到这里，我们再回到初始状态  ：</p>
-<center>
-    <img src="../images/revert_list_4.png" width="400"/>
-</center>
-
-<p>接下来我们进行第一次反转，<strong>head.next</strong> 指向虚拟的空结点，且后续链表信息没有丢失。</p>
-<center>
-    <img src="../images/revert_list_5.png" width="400"/>
-</center>
-
-<p>三个指针一起往后移动一个单位。我们发现此时链表又回到了最初的状态。</p>
-<center>
-    <img src="../images/revert_list_6.png" width="400"/>
-</center>
-
-
-<p>至此，我们可以尝试写出如下代码：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">reverseIteratively</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">    ListNode pre = <span class="keyword">null</span>;</span><br><span class="line">    ListNode next = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = head.next;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//改变指针方向，对第一个节点来说，他的前一个节点是null</span></span><br><span class="line">        head.next = pre;</span><br><span class="line">        <span class="comment">//向前移动两个指针</span></span><br><span class="line">        pre = head;</span><br><span class="line">        head = next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<p>思考：<br>你能使用递归的方式改写上述代码逻辑吗？</p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>LeetCode</tag>
-        <tag>算法</tag>
-        <tag>List</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>无等级CSP中的死锁</title>
     <url>/model-csp-deadlocks.html</url>
     <content><![CDATA[<h4 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h4><p>本文是 Roman Elizarov 关于CSP中产生死锁问题的讨论，解释了其中的原因，并逐步给出了一种解决方案。部分翻译不恰当的可参考<a href="https://elizarov.medium.com/deadlocks-in-non-hierarchical-csp-e5910d137cc">原文</a></p>
@@ -3123,8 +3115,62 @@
         <category>计算机</category>
       </categories>
       <tags>
-        <tag>Kotlin</tag>
         <tag>Concurrency</tag>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>LeetCode 反转单链表</title>
+    <url>/leetcode-reverse-list.html</url>
+    <content><![CDATA[<h3 id="LeetCode-206-反转单链表"><a href="#LeetCode-206-反转单链表" class="headerlink" title="LeetCode-206 反转单链表"></a>LeetCode-206 反转单链表</h3><blockquote>
+<p>给你单链表的头结点 head，请你反转链表，并返回反转后的链表。</p>
+</blockquote>
+<p>问题分析：</p>
+<p>这是初始状态的链表</p>
+<center>
+    <img src="../images/revert_list_0.png" width="400"/>
+</center>
+由于反转链表后 **head** 结点将指向空（null），我们可以假设存在这么一个为空的结点prev。  
+
+<p>尝试一次反转后，我们发现，后续结点信息丢失了！我们不得不声明一个新的变量保存原链表的信息。</p>
+<center>
+    <img src="../images/revert_list_7.png" width="400"/>
+</center>
+
+<p>所以，我们一共需要三个指针来记录转换过程  </p>
+<ul>
+<li>prev、 head 用于交换</li>
+<li>next 用于记录  </li>
+</ul>
+<p>分析到这里，我们再回到初始状态  ：</p>
+<center>
+    <img src="../images/revert_list_4.png" width="400"/>
+</center>
+
+<p>接下来我们进行第一次反转，<strong>head.next</strong> 指向虚拟的空结点，且后续链表信息没有丢失。</p>
+<center>
+    <img src="../images/revert_list_5.png" width="400"/>
+</center>
+
+<p>三个指针一起往后移动一个单位。我们发现此时链表又回到了最初的状态。</p>
+<center>
+    <img src="../images/revert_list_6.png" width="400"/>
+</center>
+
+
+<p>至此，我们可以尝试写出如下代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ListNode <span class="title">reverseIteratively</span><span class="params">(ListNode head)</span> </span>&#123;</span><br><span class="line">    ListNode pre = <span class="keyword">null</span>;</span><br><span class="line">    ListNode next = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (head != <span class="keyword">null</span>) &#123;</span><br><span class="line">        next = head.next;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//改变指针方向，对第一个节点来说，他的前一个节点是null</span></span><br><span class="line">        head.next = pre;</span><br><span class="line">        <span class="comment">//向前移动两个指针</span></span><br><span class="line">        pre = head;</span><br><span class="line">        head = next;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> pre;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>思考：<br>你能使用递归的方式改写上述代码逻辑吗？</p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>LeetCode</tag>
+        <tag>算法</tag>
+        <tag>List</tag>
       </tags>
   </entry>
   <entry>
@@ -3972,6 +4018,56 @@
       </categories>
       <tags>
         <tag>Reading</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>做事必须搞清的十六个顺序</title>
+    <url>/%E5%81%9A%E4%BA%8B%E5%BF%85%E9%A1%BB%E6%90%9E%E6%B8%85%E7%9A%84%E5%8D%81%E5%85%AD%E4%B8%AA%E9%A1%BA%E5%BA%8F.html</url>
+    <content><![CDATA[<blockquote>
+<p>以下内容在一篇公众号里面看到的，觉得很有道理，记录在此，常思之。</p>
+</blockquote>
+<p>01 沟通：先求同，再求异<br>    明确共同目标，塑造价值认同。保持开放心态，积极倾听对方。</p>
+<blockquote>
+<p>自评：</p>
+</blockquote>
+<p>02 共情：先理解，再表达<br>    准确辨识情绪，正确解读语义。听对方想说的，说对方想听的。</p>
+<blockquote>
+<p>自评：</p>
+</blockquote>
+<p>03 人际：先交流，再交心<br>    选择交流对象，探索交流领域。尝试交流情感，保持稳定交往。</p>
+<blockquote>
+<p>自评：</p>
+</blockquote>
+<p>04 情商：先心情，再事情<br>    安抚对方情绪，恢复正常对话。寻找共同利益，解决冲突矛盾。</p>
+<blockquote>
+<p>自评：</p>
+</blockquote>
+<p>05 职场：先升值，再升职<br>    认清商业本质，正视价值交换。接受共性塑造，获得职务晋升。</p>
+<blockquote>
+<p>自评：</p>
+</blockquote>
+<p>06 工作：先计划，再行动<br>    设定清晰目标，分析评估现状。制订详细计划，设定执行步骤。</p>
+<blockquote>
+<p>自评：计划就是把大目标拆成更容易实现的小目标，给自己设定期限，坚定的完成小目标。有了目标，才不会放松自己，浑浑噩噩。</p>
+</blockquote>
+<p>07 执行：先完成，再完美<br>    舍弃完美主义，坚持效率优先。总结经验教训，快速优化迭代。</p>
+<blockquote>
+<p>自评：早期写代码时追求完美，总想着要设计好代码。花过多的时间在代码设计上。后面还是想明白了，先把事情做完是最基本的要求，做完后有时间再去优化代码细节。因为思考是逐渐深入的，只有完成了，在完成过程中的思考，才能为后面的更好做好理论铺垫。</p>
+</blockquote>
+<p>08 学习：先记录，再记忆<br>    准备记录工具，捕捉关键信息。定期整理回顾，转为长期记忆。</p>
+<blockquote>
+<p>自评：知识要结构化才能变成脑子里的思路，结构化就是对一方面知识进行概括，由多到少，由繁到简，由细节到抽象。记录和整理就是对知识进行结构化。尤其是现在快节奏的生活，大家没时间体系性的看书，都是碎片化的知识，看时很爽，很快忘记，不妨把小知识点记录成系统，归纳到自己的知识体系里面。</p>
+</blockquote>
+<p>09 能力：先专注，再专业<br>    正确选择方向，排除外界干扰。深度学习知识，持续精进技能。<br>10 事业：先成长，再成功<br>    磨砺心灵意志，坚持求知探索。明确价值取向，积小胜为大胜。<br>11 发展：先站住，再站高<br>    明确发展定位，夯实事业基础。进行长远规划，开展品牌建设。</p>
+<p>12 创新：先仿造，再创造<br>    寻找模仿对象，仔细观察学习。研究原理结构，思考优化改进。</p>
+<p>13 流程：先僵化，再优化<br>    设计业务流程，坚持落地执行。消除流程阻力，提升流程效率。</p>
+<p>14 制度：先细化，再简化<br>    杜绝制度弹性，堵住制度漏洞。提炼制度要点，进行制度宣贯。</p>
+<p>15 管理：先自己，再别人<br>    约束自身言行，做好团队表率。明确团队规则，落实奖惩措施。</p>
+<p>16 影响：先管理，再领导<br>    建立团队秩序，做好利益平衡。激发团队动能，引领创新变革。</p>
+<p>总之，做事，顺序不能错，逻辑不能反！</p>
+]]></content>
+      <tags>
+        <tag>道理</tag>
       </tags>
   </entry>
 </search>
