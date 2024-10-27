@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2024-10-22T10:06:10.773Z</updated>
+  <updated>2024-10-27T03:27:45.990Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用SDKMAN管理JDK</title>
+    <link href="https://wangduwei.top/%E4%BD%BF%E7%94%A8SDKMAN%E7%AE%A1%E7%90%86JDK.html"/>
+    <id>https://wangduwei.top/%E4%BD%BF%E7%94%A8SDKMAN%E7%AE%A1%E7%90%86JDK.html</id>
+    <published>2024-10-27T03:27:45.000Z</published>
+    <updated>2024-10-27T03:27:45.990Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;在电脑安装多个版本的JDK，并自由切换，具有一定的灵活性。因为下载新JDK再配新环境变量真的很麻烦。SDKMAN可以帮我们解决这些烦恼。&lt;/p&gt;
+&lt;p&gt;以下是在Mac电脑安装SDKMAN并使用：&lt;/p&gt;
+&lt;figure class=&quot;highlight</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>忘带钥匙引发的思考</title>
@@ -480,30 +503,6 @@
     
     
     <category term="Reading" scheme="https://wangduwei.top/tags/Reading/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>开发者七条</title>
-    <link href="https://wangduwei.top/ep-good-developer-manifesto.html"/>
-    <id>https://wangduwei.top/ep-good-developer-manifesto.html</id>
-    <published>2022-10-09T09:20:32.000Z</published>
-    <updated>2024-04-29T11:50:54.577Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;p&gt;软件开发不只是API调用和基础语法，以下是应用开发的全貌：&lt;/p&gt;
-&lt;h4 id=&quot;一、相信数据&quot;&gt;&lt;a href=&quot;#一、相信数据&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    
-    <category term="软件哲学" scheme="https://wangduwei.top/tags/%E8%BD%AF%E4%BB%B6%E5%93%B2%E5%AD%A6/"/>
     
   </entry>
   

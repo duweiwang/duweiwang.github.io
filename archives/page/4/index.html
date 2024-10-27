@@ -186,6 +186,108 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-github-source-retrofit.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/android-github-source-retrofit.html" class="post-title-link" itemprop="url">源码分析-网络框架之Retrofit</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-12-30 21:37:29" itemprop="dateCreated datePublished" datetime="2021-12-30T21:37:29+08:00">2021-12-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>831</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="一、使用"><a href="#一、使用" class="headerlink" title="一、使用"></a>一、使用</h4><h5 id="1-1-定义API方法"><a href="#1-1-定义API方法" class="headerlink" title="1.1 定义API方法"></a>1.1 定义API方法</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">RemoteApi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(<span class="meta-string">&quot;timeline&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">timeline</span><span class="params">()</span></span>: RemoteLaunchesResponse </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="1-2-获取服务"><a href="#1-2-获取服务" class="headerlink" title="1.2 获取服务"></a>1.2 获取服务</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> client = OkHttpClient.Builder()</span><br><span class="line">             .addInterceptor(loggingInterceptor)</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">             .client(client)</span><br><span class="line">             .baseUrl(<span class="string">&quot;http://10.0.0.2:8080/&quot;</span>)</span><br><span class="line">             .addConverterFactory(GsonConverterFactory.create())</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> api = retrofit.create(RemoteApi::<span class="keyword">class</span>.java) <span class="comment">//1、create做了什么？</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="1-3-发起请求"><a href="#1-3-发起请求" class="headerlink" title="1.3 发起请求"></a>1.3 发起请求</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">api.timeline() <span class="comment">//2、调用接口方法怎么发起请求?</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="二、原理"><a href="#二、原理" class="headerlink" title="二、原理"></a>二、原理</h4><center>
+    <img src="../images/android-source-retrofit.jpeg" width="100%"/>
+</center>
+
+<h5 id="2-1-create做了什么"><a href="#2-1-create做了什么" class="headerlink" title="2.1 create做了什么"></a>2.1 create做了什么</h5><p>Retrofit的网络请求方法都是定义在接口中的，它会在运行时利用Java的动态代理产生代理对象，所以<code>create()</code>就是创建代理对象的方法。</p>
+<h5 id="2-2-调用接口方法怎么发起请求"><a href="#2-2-调用接口方法怎么发起请求" class="headerlink" title="2.2 调用接口方法怎么发起请求"></a>2.2 调用接口方法怎么发起请求</h5><p>当调用接口方法时，实际上是调用了代理对象的方法。它会去Retrofit中找该方法对应的<code>ServiceMethod</code>，如果找到缓存直接使用，否则解析后再使用。</p>
+<p>解析的结果是<code>ServiceMethod</code>的子类<code>CallAdapted</code>、<code>SuspendForResponse</code>、<code>SuspendForBody</code>三者之一。</p>
+<p>解析结束后调用返回对象的<code>invoke</code>方法初始化OkHttpCall对象发起真正的请求。</p>
+<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>阅读源码的过程当中，画了详细的代码执行流程图供后续回顾。另外源码中还有两个重要的对外拓展接口<code>CallAdapter</code>和<code>Converter</code>没有详细分析。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-github-source-spacex.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1772,146 +1874,6 @@
 <p>3.2.3 计算约束方程<br>食火鸡算法：食火鸡是一种生活在新几内亚热带雨林中的鸟类，以水果为食。同时它也是一种解决线性方程和线性不等式的算法。1990年在华盛顿大学被证明和发现。线性方程非常适合用于表示用户界面中视图的位置、大小、与其他视图的关系。</p>
 <h5 id="3-2-个人理解："><a href="#3-2-个人理解：" class="headerlink" title="3.2 个人理解："></a>3.2 个人理解：</h5><p>定义变量 -&gt; 声明View对象<br>定义约束问题 -&gt; 建立View之间的约束关系<br>计算约束方程 -&gt; 计算视图的大小、坐标  </p>
 <h4 id="四、参考文档"><a href="#四、参考文档" class="headerlink" title="四、参考文档"></a>四、参考文档</h4><p><a target="_blank" rel="noopener" href="https://developer.android.com/reference/androidx/constraintlayout/widget/ConstraintLayout">1.官方文档</a><br><a target="_blank" rel="noopener" href="https://constraintlayout.com/layouts/">2.基本使用</a><br><a target="_blank" rel="noopener" href="https://biaomingzhong.github.io/2017/constraintlayout-basics-chains-2/">3.基本使用-译文</a><br><a target="_blank" rel="noopener" href="https://wiresareobsolete.com/2016/07/constraintlayout-part-1/">4.ConstraintLayout, Inside and Out: Part 1</a><br><a target="_blank" rel="noopener" href="https://wiresareobsolete.com/2016/07/constraintlayout-part-2/">5.ConstraintLayout, Inside and Out: Part 2</a><br><a target="_blank" rel="noopener" href="https://constraints.cs.washington.edu/cassowary/cassowary-tr.pdf">6.线性约束解决算法</a><br><a target="_blank" rel="noopener" href="https://cassowary.readthedocs.io/en/latest/topics/theory.html">7.解决约束</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/cpu-cache-overview.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/cpu-cache-overview.html" class="post-title-link" itemprop="url">CPU的缓存</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-10-13 15:28:59" itemprop="dateCreated datePublished" datetime="2021-10-13T15:28:59+08:00">2021-10-13</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>971</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="一、性能"><a href="#一、性能" class="headerlink" title="一、性能"></a>一、性能</h4><p>1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。<a target="_blank" rel="noopener" href="https://gist.github.com/jboner/2841832">参考</a></p>
-<p>从数据可以看出，L1缓存和主存访问速度相差200倍。</p>
-<center>
-    <img src="../images/cpu_cache_speed.png" width="500"/>
-</center>
-
-
-<h4 id="二、缓存行"><a href="#二、缓存行" class="headerlink" title="二、缓存行"></a>二、缓存行</h4><p>CPU缓存的基本单位是缓存行，主存数据和缓存的映射存在下列关系：</p>
-<h5 id="2-1-直接映射缓存"><a href="#2-1-直接映射缓存" class="headerlink" title="2.1 直接映射缓存"></a>2.1 直接映射缓存</h5><center>
-    <img src="../images/cpu_cache_direct_map.jpeg" width="600"/>
-</center>
-
-<p>1、 index用于计算在哪一个缓存行<br>2、 offset用于计算在缓存行的哪个字节<br>3、 tag用于判断缓存是否命中（假设0x7f6601 和 0x8f6602两个地址，低位都一样，缓存行和字节偏移都命中了，tag不命中）</p>
-<p>缺点：<br>图中，cache缓存8行数据，当访问第0行、第8行、第16行时，缓存无法命中，每次都要去主存加载，发生<strong>缓存颠簸</strong></p>
-<h5 id="2-2-多路组相连"><a href="#2-2-多路组相连" class="headerlink" title="2.2 多路组相连"></a>2.2 多路组相连</h5><p>这是一个两路组相连的示意图：</p>
-<center>
-    <img src="../images/cpu_cache_n_way.png" width="500"/>
-</center>
-
-<p>1、index定位组<br>2、组内依次对tag进行对比（可以通过硬件并行比较增加性能）</p>
-<h4 id="三、缓存一致性"><a href="#三、缓存一致性" class="headerlink" title="三、缓存一致性"></a>三、缓存一致性</h4><h5 id="3-1-问题描述："><a href="#3-1-问题描述：" class="headerlink" title="3.1 问题描述："></a>3.1 问题描述：</h5><center>
-    <img src="../images/cpu_cache_problem.jpeg" width="500"/>
-</center>
-
-<p>处理器 1 读 X ：从内存读取24并缓存<br>处理器 2 读 X ：从内存读取24并缓存<br>处理器 1 写 X = 32 ：更新自己的缓存<br>处理器 3 读 X = ？  </p>
-<p>如何保证缓存的一致性？<a target="_blank" rel="noopener" href="https://people.eecs.berkeley.edu/~pattrsn/252F96/Lecture18.pdf">参考</a></p>
-<h5 id="3-2-解决方案"><a href="#3-2-解决方案" class="headerlink" title="3.2 解决方案"></a>3.2 解决方案</h5><p>3.1.1 嗅探-Snooping Solution(Snoopy Bus)</p>
-<p>根据写操作对缓存数据的影响嗅探协议可分为：<br>Write-invalidate：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并标志自己的缓存失效。这保证了全局只有一份缓存是有效的。</p>
-<ul>
-<li>MSI</li>
-<li>MESI</li>
-<li>MOSI</li>
-<li>MOESI</li>
-<li>MESIF </li>
-</ul>
-<p>Write-update：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并更新自己的缓存。通过总线广播给所有的缓存造成了总线繁忙，所以不常见。</p>
-<p>3.1.2 目录-Directory-Based Schemes</p>
-<h5 id="3-2-MESI协议参考"><a href="#3-2-MESI协议参考" class="headerlink" title="3.2 MESI协议参考"></a>3.2 MESI协议<a target="_blank" rel="noopener" href="https://people.cs.pitt.edu/~melhem/courses/2410p/ch5-4.pdf">参考</a></h5><p>MESI是四个状态的首字母缩写，在缓存行中用2个bit标志该缓存行的状态。</p>
-<ul>
-<li>M:Modified（只存在当前缓存行，已被修改，和主存不一致，需要更新回主存）</li>
-<li>E:Exclusive（只存在当前缓存行，和主存一致）</li>
-<li>S:Shared（其他缓存行也存在该数据，和主存一致）</li>
-<li>I:Invalid（此缓存行失效）</li>
-</ul>
-<p>MESI的状态迁移：</p>
-<center>
-    <img src="../images/cpu_cache_mesi_state.jpeg" width="500"/>
-</center>
-
-
-
-
-<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p><a target="_blank" rel="noopener" href="https://www.cnkirito.moe/cache-line/#%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%93%E5%AD%98%E8%A1%8C-Cache-Line-%EF%BC%9F">0.Java角度理解CPU缓存</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/102293437">1.Cache的基本原理</a><br><a target="_blank" rel="noopener" href="https://gist.github.com/jboner/2841832">2.每个开发者需要知道的数据</a><br><a target="_blank" rel="noopener" href="https://medium.com/fcamels-notes/%E5%BE%9E%E7%A1%AC%E9%AB%94%E8%A7%80%E9%BB%9E%E4%BA%86%E8%A7%A3-memry-barrier-%E7%9A%84%E5%AF%A6%E4%BD%9C%E5%92%8C%E6%95%88%E6%9E%9C-416ff0a64fc1">3.硬件角度看内存屏障</a><br><a target="_blank" rel="noopener" href="https://medium.com/fcamels-notes/%E5%BE%9E-double-checked-locking-%E4%BA%86%E8%A7%A3-memory-barrier-%E7%9A%84%E4%BD%9C%E7%94%A8-bb151a359c1b">4.软件角度内存屏障</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/3928995/how-do-cache-lines-work">5.stackoverflow-How do cache lines work?</a><br><a target="_blank" rel="noopener" href="https://courses.cs.duke.edu/spring09/cps104/lectures/2up-lecture17.pdf">6.courses-pdf</a></p>
 
       
     </div>

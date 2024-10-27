@@ -186,6 +186,89 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/%E4%BD%BF%E7%94%A8SDKMAN%E7%AE%A1%E7%90%86JDK.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/%E4%BD%BF%E7%94%A8SDKMAN%E7%AE%A1%E7%90%86JDK.html" class="post-title-link" itemprop="url">使用SDKMAN管理JDK</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-10-27 11:27:45" itemprop="dateCreated datePublished" datetime="2024-10-27T11:27:45+08:00">2024-10-27</time>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>317</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在电脑安装多个版本的JDK，并自由切换，具有一定的灵活性。因为下载新JDK再配新环境变量真的很麻烦。SDKMAN可以帮我们解决这些烦恼。</p>
+<p>以下是在Mac电脑安装SDKMAN并使用：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -s &quot;https://get.sdkman.io&quot; | bash</span><br></pre></td></tr></table></figure>
+<p>访问：<a target="_blank" rel="noopener" href="https://get.sdkman.io/">https://get.sdkman.io/</a> 网站上的脚本，并使用bash执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source $HOME/.sdkman/bin/sdkman-init.sh</span><br></pre></td></tr></table></figure>
+<p>执行sdkman初始化脚本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sdk list java</span><br></pre></td></tr></table></figure>
+<p>列出所有可用的jdk</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sdk install java 19.0.2-oracle</span><br></pre></td></tr></table></figure>
+<p>安装指定的jdk</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sdk use java 19.0.2-oracle</span><br></pre></td></tr></table></figure>
+<p>使用指定的jdk</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/%E5%BF%98%E5%B8%A6%E9%92%A5%E5%8C%99%E5%BC%95%E5%8F%91%E7%9A%84%E6%80%9D%E8%80%83.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1349,235 +1432,6 @@
 <p>结论：初始化后才加载广告慢于直接加载广告。</p>
 <h4 id="4、一种开屏广告的优化方案"><a href="#4、一种开屏广告的优化方案" class="headerlink" title="4、一种开屏广告的优化方案"></a>4、一种开屏广告的优化方案</h4><p>不初始化SDK也能加载到Admob广告，且加载速度较快，但是没有参与bidding，价格较低。<br>初始化之后，加载聚合源广告，速度较慢，但经过bidding后，价格会高一点。</p>
 <p>结合两个加载方式，闪屏时段内加载广告，闪屏n秒时长内，加载到bidding类型则展示bidding类型。没加载到，则展示Admob类型。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/%E3%80%8A%E5%BC%82%E7%B1%BB-%E4%B8%8D%E4%B8%80%E6%A0%B7%E7%9A%84%E6%88%90%E5%8A%9F%E5%90%AF%E7%A4%BA%E5%BD%95%E3%80%8B.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/%E3%80%8A%E5%BC%82%E7%B1%BB-%E4%B8%8D%E4%B8%80%E6%A0%B7%E7%9A%84%E6%88%90%E5%8A%9F%E5%90%AF%E7%A4%BA%E5%BD%95%E3%80%8B.html" class="post-title-link" itemprop="url">《异类-不一样的成功启示录》</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-05-25 11:33:10" itemprop="dateCreated datePublished" datetime="2024-05-25T11:33:10+08:00">2024-05-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-06-06 16:04:38" itemprop="dateModified" datetime="2024-06-06T16:04:38+08:00">2024-06-06</time>
-              </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>4.5k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><h6 id="书籍简介"><a href="#书籍简介" class="headerlink" title="书籍简介"></a>书籍简介</h6><table>
-    <tr>
-        <td><img src="../images/books/book-cover-yilei.jpg" width="100"/></td>
-        <td>异类：不一样的成功启示录</td>
-    </tr>
-</table>
-
-<h6 id="关于作者"><a href="#关于作者" class="headerlink" title="关于作者"></a>关于作者</h6><p>马尔科姆·格拉德威尔（Malcolm Gladwell）（1963年9月3日）毕业于多伦多大学的三一学院，主修历史学，是一位加拿大作家、记者和演讲者，以其畅销书和在《纽约客》杂志上的文章而闻名。他的作品通常探讨社会科学、心理学和行为经济学的主题，通过生动的故事和深刻的见解启发读者。</p>
-<p>其他出版物：<br>《引爆点》（The Tipping Point, 2000）：探讨了如何通过少数关键因素引发大的变化，书中引入了“引爆点”的概念。<br>《决断两秒间》（Blink, 2005）：研究了人们在瞬间决策中的潜意识过程和直觉判断。<br>《异类》（Outliers, 2008）：探讨了成功背后的非凡因素，提出了“1万小时定律”等概念。<br>《大开眼界》（What the Dog Saw, 2009）：这本书是他在《纽约客》杂志上发表的文章的集合，涵盖了各种主题。<br>《大卫与歌利亚》（David and Goliath, 2013）：讨论了在人们认为不利的条件下如何取得成功。<br>《谈话的力量》（Talking to Strangers, 2019）：探讨了人们在与陌生人交流时常犯的错误及其后果</p>
-<h4 id="第一部分：机遇"><a href="#第一部分：机遇" class="headerlink" title="第一部分：机遇"></a>第一部分：机遇</h4><h5 id="马太效应：英超球员的优势积累"><a href="#马太效应：英超球员的优势积累" class="headerlink" title="马太效应：英超球员的优势积累"></a>马太效应：英超球员的优势积累</h5><p>这一节分成六个部分：</p>
-<ul>
-<li>成功靠什么：成功靠的是个人意愿和能力优势，只能靠自己而不是他人的帮助。<strong>真的是这样吗？</strong></li>
-<li>成功者之幸</li>
-<li>生于年初：职业青年队绝大多 数球员的生日集中在1月、2月和3月</li>
-<li>优势积累：一个1月1日出生的选手，是在跟许多年纪比其小的队友争夺晋级权。晋级后接受更好的训练。</li>
-<li>我们要做怎样的改变：制度改革。<ul>
-<li>领先优势造就了天才们辉煌的成就。</li>
-<li>在社会学领域，所谓的成功就是“优势积累”的结果</li>
-<li>很多制度甚至过早地将一部分人划入了失败者的行列，阻碍了这些人成才</li>
-</ul>
-</li>
-<li>离绝对老大只剩三天：出生在1月4日，只差3天他就是同龄队员中绝对的老大了</li>
-</ul>
-<p>读书笔记：<strong>有意识的提前建立优势，并不断积累优势是成功的关键。</strong></p>
-<h5 id="1万小时定律：生于1955年的乔布斯和比尔盖茨"><a href="#1万小时定律：生于1955年的乔布斯和比尔盖茨" class="headerlink" title="1万小时定律：生于1955年的乔布斯和比尔盖茨"></a>1万小时定律：生于1955年的乔布斯和比尔盖茨</h5><p>这一节分成六个部分：</p>
-<ul>
-<li>天才创始人：计算机科学家比尔·乔伊。</li>
-<li>一万小时有多久：一万小时训练是成为优秀的必要条件。</li>
-<li>安娜堡计算机中心的日日夜夜：<blockquote>
-<p>现在， 让我们理一理比尔·乔伊的机遇链吧。<br>他有幸考入作为计算机学 科领跑者的密歇根大学；<br>有幸第一批使用分时系统，而不是键盘打孔机；<br>又恰巧密歇根大学的机房管理系统有漏洞， 他得以想学多长时间就学多长时间；<br>因为计算机中心24小时开放，他又得以夜以继日地学习；<br>他获得了充分的时间练习编程，所以当改造UNI;系统项目开始的时候，他顺理成章地进入了项目组。<br>比尔·乔伊的确聪明绝顶，他也热爱学习，这是他成功的一大因素。<br>但是，在他成为专家以前，他首先依靠运气获得了成为专家的机会。</p>
-</blockquote>
-</li>
-<li>甲壳虫乐队的汉堡之行:正是在汉堡的超量训练才使甲壳虫乐队脱颖而出的。</li>
-<li>1968年的电脑:比尔盖茨的机遇和更多使用电脑的机会。</li>
-<li>时势造成功：机遇造就了成功。</li>
-</ul>
-<p>读书笔记：成功 = 时代机遇 + 努力</p>
-<h5 id="智商和机遇：曼特人的谬误"><a href="#智商和机遇：曼特人的谬误" class="headerlink" title="智商和机遇：曼特人的谬误"></a>智商和机遇：曼特人的谬误</h5><p>这一节分成五个部分：</p>
-<ul>
-<li>全美最聪明的人：智商195的兰根参加《以一敌百》节目。</li>
-<li>超常“特曼人”<blockquote>
-<p>这些被挑选出来的天才少年，正式成为历史上最著名的心理学研究的研究对象，他们被统称为“特曼 人”。</p>
-</blockquote>
-</li>
-<li>智商的门槛效应<blockquote>
-<p>智商与成功只在一定程度上相互关联， 一旦某 人的智商超过120分，此时更高的智商并不意味着会同比转化成更多的现实优</p>
-</blockquote>
-</li>
-<li>充满想象力的心灵:发散性思维测试要求你运用想象力，寻找尽量多的不同的可能性。</li>
-<li>事与愿违的试验结果:特曼忽略了一个事实——智力在现实中的作用并 没有那么大。</li>
-</ul>
-<h5 id="社交与家庭：天才兰根的忧伤"><a href="#社交与家庭：天才兰根的忧伤" class="headerlink" title="社交与家庭：天才兰根的忧伤"></a>社交与家庭：天才兰根的忧伤</h5><p>这一节分成六个部分：</p>
-<ul>
-<li>令人心碎的天才命运：天才兰根家庭环境不好，即使是天才，最后结局也很一般。</li>
-<li>另一位天才的命运：天才奥本海默，家庭环境好，结局成功。</li>
-<li>实践智力从哪来：两个天才的结局为何如此不同？实践智力不同！</li>
-<li>协同培养的典范：奥本海默是协同培养的典范。</li>
-<li>协同培养与自然成长</li>
-<li>如何避免悲剧重演</li>
-</ul>
-<blockquote>
-<p>家境富裕的父母总是让孩子一刻也不能闲着， 让孩子穿梭于各项活动之 间，并听取孩子对老师、教练或是队友的评价<br>而穷人家孩子的生活中完全没有这种紧张的时间安排， 他们的活动不会 是每周两次足球训练，而是和亲戚或者邻居家的孩子在外面玩耍。</p>
-</blockquote>
-<p>读书笔记：家庭教育很重要，让孩子高效利用时间深度参与到有意义的社会活动中，鼓励孩子表达自己的想法，挑战权威，敢于表现自己。</p>
-<h5 id="最佳时代：乔-弗洛姆的律师生涯"><a href="#最佳时代：乔-弗洛姆的律师生涯" class="headerlink" title="最佳时代：乔-弗洛姆的律师生涯"></a>最佳时代：乔-弗洛姆的律师生涯</h5><p>这一节分为七个部分：</p>
-<ul>
-<li>律师事务所之翘楚：贫穷的移民，被歧视的犹太人：乔-弗洛姆，从世达律师事务所的助理到合伙人，从几个人到几千人。<strong>这是时代造就了行业</strong>。</li>
-<li>纽约移民区的故事：弗洛姆成长环境下的几个小故事。<ul>
-<li>启示一：身为犹太人的重要性：<br>在那个年代，如果你的家庭背景、宗教信仰、社会地位不符合要 求， 即便你是从法学院毕业的， 你也只能去那些二流的、 刚起步的小事务所，或者自己创业。</li>
-<li>启示二：生育潮低谷之幸<br>受20世纪30年代的经济大萧条和第二次世界大战（1939—1945年）的影响，不同阶段出生的人的命运截然不同。</li>
-<li>启示三：服装厂与有意义的工作<br>路易斯·波吉尼特和瑞吉娜·波吉尼特夫妇移民美国后卖围裙成长起来的故事。</li>
-</ul>
-</li>
-<li>一代新人胜旧人</li>
-<li>成功不是随机事件</li>
-</ul>
-<p>读书笔记：受歧视的乔-弗洛姆进不了大公司只能进小公司，自己创业，处理那些别人不愿处理的案子。随着时代或政策的转变业务激增，二流律师摇身一变成为一流。弗洛姆并不 是克服了逆境，而是原先的逆境忽然之间变成了机遇。</p>
-<h4 id="第二部分：文化传承"><a href="#第二部分：文化传承" class="headerlink" title="第二部分：文化传承"></a>第二部分：文化传承</h4><h5 id="文化差异：小镇哈伦"><a href="#文化差异：小镇哈伦" class="headerlink" title="文化差异：小镇哈伦"></a>文化差异：小镇哈伦</h5><p>这一节分为四部分：</p>
-<ul>
-<li>血染哈伦<br>哈伦县城两大家族矛盾和枪战。</li>
-<li>荣誉文化<blockquote>
-<p>“荣誉文化”植根于高地或富庶地区的边缘地带，如意大利的西西里岛 和西班牙的巴斯克山区。这种解释的逻辑是，当人们居住在多岩石的山坡地 带时，由于那里的土地很难耕种，人们大多会依靠放牧生活。游牧文明和耕 种文明大相径庭。<br>从事耕种的农民要想维持生计依靠的是人与人之间的合 作，而从事游牧的牧民所依靠的更多的是自己。农民不必担心他们的庄稼一 夜之间就被人全部偷走，除非盗贼有本事一个晚上就把地里的所有庄稼收割 完。但是牧民就有这样的担忧。<br>实际上，他们一直生活在牲口被偷，整个生 活被毁的恐惧之下。所以他们养成了好斗的性情：他们必须通过自己的言行 表明自己不是弱者，要对危及他们名誉的哪怕是最轻微的挑战予以最坚决的 反击——这就是“荣誉文化”的含义。在游牧文化所在的地方，荣誉感往往是当地男性的存在感与自我价值的中心。</p>
-</blockquote>
-</li>
-<li>遗泽百世<br>心理学家做实验，发现：<blockquote>
-<p>有些人的回应被其之前遭到的侮辱影响，有些人的则没有。志愿者的行为是否改变，并不取决于他们的情绪是否稳定，也不取决于他们是知识分子还是运动员， 同样也不取决于他们的相貌。 这其中的决定性因素——我想你一定已经 猜到了——是他们来自何方。</p>
-</blockquote>
-</li>
-<li>文化传承的力量<blockquote>
-<p>文化传承是事件背后更强大的力量， 它根深蒂固，影响长存。 经过数代 传承，即便塑造文化的经济、社会、人口等条件已经消失，这种文化也会一 直完好无损地留传下来。文化直接决定了我们看待世界的方法和行为模式，其作用如此巨大，以至于没有它，我们将无法认识世界。</p>
-</blockquote>
-</li>
-</ul>
-<h5 id="权力距离指数：韩国飞机失事率"><a href="#权力距离指数：韩国飞机失事率" class="headerlink" title="权力距离指数：韩国飞机失事率"></a>权力距离指数：韩国飞机失事率</h5><blockquote>
-<p>权力距离是指人们对待比自己更高等级阶层的态度，特别是指对权威的重视和尊重的程度。</p>
-</blockquote>
-<ul>
-<li>大韩航空801航班：大韩航空空难的故事。</li>
-<li>祸不单行：大韩航空是如何从一家安全记录糟糕的公司转变成世界最好的航空公司之一的。</li>
-<li>阿维安卡航空052航班：燃油耗尽导致的空难。</li>
-<li>初探052航班坠毁：飞机本身操作难度大，机长多次误判，副机长缺乏和塔台的沟通</li>
-<li>成功化解空中危机的案例：老人机上晕厥，需要紧急降落，机长决策各种情况，和同事沟通最后完美降落。<blockquote>
-<p>这次降落要求拉特瓦特必须具备一定 的沟通素质。这里的沟通不仅意味着向机组下达降落指令，还意味着鼓励、 安抚、说服他人，与他人商讨，以及用清晰无误的语言与他人共享信息。</p>
-</blockquote>
-</li>
-<li>再探052航班坠毁事件:沟通和表达存在问题。<blockquote>
-<p>那晚与052航班通过话的另一个航空管制员形容克洛茨“语调冷淡……声音中丝毫听不出紧急之意”。</p>
-</blockquote>
-</li>
-<li>严禁客套：与缓和性语气做斗争， 成为过去15年间商业航空业的主要战役</li>
-<li>052航班的最后时刻：</li>
-<li>三探052航班坠毁：</li>
-<li>空难的深层原因：<ul>
-<li>这次事故在很大程度上源于哥伦比亚人长久以来对权威的敬畏与服从</li>
-<li>副机长只把自己定位为下属，既然是下属关键性的决定就不应由自己做出，这个决定应由机长做出。</li>
-</ul>
-</li>
-<li>不断积累的小问题:具备飞机失事的3个典型前提：轻微的技术故障、坏天气、疲惫的飞行员</li>
-<li>高权力距离指数之恶：(我觉得所谓的高权威，其实就是一种等级制度)<blockquote>
-<p>高权力距离指数文化的这种对话方式，只有在聆听者有条件揣摩 对方话语的情况下才是适宜的。也就是说，双方得有足够的时间相互揣摩。 这种方式绝不应该在暴风雨的夜晚，在精疲力竭的机长准备把飞机降落在一 个下滑角指示灯有故障的机场时使用。</p>
-</blockquote>
-</li>
-<li>卸下重担：</li>
-</ul>
-<p>读书笔记：客机失事的主要原因在于权利指数在副驾驶和主驾驶之间发挥着作用。这是一种文化特征，是一种上下级的阶级关系。我们应该对事不对人，客观辩证的处理问题，不屈服于权威。</p>
-<h5 id="内在优势：亚洲人精神"><a href="#内在优势：亚洲人精神" class="headerlink" title="内在优势：亚洲人精神"></a>内在优势：亚洲人精神</h5><p>这一节分为6个部分：</p>
-<ul>
-<li>数字优势：亚洲人在数字方面有优势，一方面是因为他们对数字的发音更短，另一方面得益于族裔文化。</li>
-<li>稻田中的辛劳：种植水稻的亚洲农民一年的工作时长约为3000小时。</li>
-<li>稻田精神：努力工作的精神品质在亚洲人身上很常见。</li>
-<li>斜率难题：一个计算直线的斜率的实验。</li>
-<li>怎样做才算是勤奋：态度比能力更重要。 只要你有意愿，你就能驾驭数学。</li>
-<li>劳有所得：哪个国家和地区的学 生更愿意花时间仔细回答冗长的问卷，哪个国家和地区的学生在TIMSS考试中的成绩就更好。</li>
-</ul>
-<p>读书笔记：亚洲人精神:吃苦耐劳，耐心，持之以恒。</p>
-<h5 id="扭转风气：玛丽塔之幸"><a href="#扭转风气：玛丽塔之幸" class="headerlink" title="扭转风气：玛丽塔之幸"></a>扭转风气：玛丽塔之幸</h5><p>这一节分为6个部分：</p>
-<ul>
-<li>风气之先：KIPP项目代表了美国教育的新理念，它的成功并非依靠环境、师资或制度创新。</li>
-<li>西方教育的传统：<ul>
-<li>亚洲：水稻耕种次数越多收获越多 -&gt; 学习越努力收获越多</li>
-<li>西方：小麦需要休耕让土地保持肥沃 -&gt; 过度学习会对学生个性生活习惯造成恶劣影响</li>
-</ul>
-</li>
-<li>成绩到底差在哪儿：假期时间导致低收入家庭孩子成绩没长进，而高收入家庭孩子在假期做的事情更有意义。</li>
-<li>对症下药：更多的学习时间，更慢的节奏，更多理解和思考。</li>
-<li>挑战自我：KIPP学园的学生(玛丽塔)：多出50%-60%的时间学习，早上5点就起床，很晚才睡。</li>
-<li>机遇之歌：玛丽塔需要的其实只有一样东西——机遇.(玛丽塔放弃一些自由时间，放弃一些个性，通过更多的学习时间和努力改变自己的命运，原本上不了大学，现在有机会了)<blockquote>
-<p>“异类”是那些获得特殊机遇之人，是那些耐心等待，当机遇到来时就当仁不让地把握住的人。<br>对于加拿大的冰球运动 员来说，生于1月就是他们进入全明星队的机遇。<br>对于甲壳虫乐队来说，汉堡 之旅就是他们成名的机遇。<br>对于比尔·盖茨来说，他的特殊机遇就是生在正 确的年代，并在初中时代就获得电脑终端。<br>对于弗洛姆和沃切尔·利普顿· 罗森·卡茨律师行的创始人来说，机遇是多重的：他们出生于最佳年代，有着能给他们最勤勉激励的父母；他们拥有少数族裔身份，这种身份帮助他们在纽约其他传统律师事务所涉足公司并购官司以前，就已在这个领域实践了20年。<br>最后是大韩航空，直到公司帮助飞行员突破原有文化的禁锢，他们才最终扭转了局势。</p>
-</blockquote>
-</li>
-</ul>
 
       
     </div>

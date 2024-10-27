@@ -520,6 +520,33 @@
       </tags>
   </entry>
   <entry>
+    <title>源码分析-网络框架之Retrofit</title>
+    <url>/android-github-source-retrofit.html</url>
+    <content><![CDATA[<h4 id="一、使用"><a href="#一、使用" class="headerlink" title="一、使用"></a>一、使用</h4><h5 id="1-1-定义API方法"><a href="#1-1-定义API方法" class="headerlink" title="1.1 定义API方法"></a>1.1 定义API方法</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">RemoteApi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(<span class="meta-string">&quot;timeline&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">timeline</span><span class="params">()</span></span>: RemoteLaunchesResponse </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="1-2-获取服务"><a href="#1-2-获取服务" class="headerlink" title="1.2 获取服务"></a>1.2 获取服务</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> client = OkHttpClient.Builder()</span><br><span class="line">             .addInterceptor(loggingInterceptor)</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">             .client(client)</span><br><span class="line">             .baseUrl(<span class="string">&quot;http://10.0.0.2:8080/&quot;</span>)</span><br><span class="line">             .addConverterFactory(GsonConverterFactory.create())</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> api = retrofit.create(RemoteApi::<span class="keyword">class</span>.java) <span class="comment">//1、create做了什么？</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="1-3-发起请求"><a href="#1-3-发起请求" class="headerlink" title="1.3 发起请求"></a>1.3 发起请求</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">api.timeline() <span class="comment">//2、调用接口方法怎么发起请求?</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="二、原理"><a href="#二、原理" class="headerlink" title="二、原理"></a>二、原理</h4><center>
+    <img src="../images/android-source-retrofit.jpeg" width="100%"/>
+</center>
+
+<h5 id="2-1-create做了什么"><a href="#2-1-create做了什么" class="headerlink" title="2.1 create做了什么"></a>2.1 create做了什么</h5><p>Retrofit的网络请求方法都是定义在接口中的，它会在运行时利用Java的动态代理产生代理对象，所以<code>create()</code>就是创建代理对象的方法。</p>
+<h5 id="2-2-调用接口方法怎么发起请求"><a href="#2-2-调用接口方法怎么发起请求" class="headerlink" title="2.2 调用接口方法怎么发起请求"></a>2.2 调用接口方法怎么发起请求</h5><p>当调用接口方法时，实际上是调用了代理对象的方法。它会去Retrofit中找该方法对应的<code>ServiceMethod</code>，如果找到缓存直接使用，否则解析后再使用。</p>
+<p>解析的结果是<code>ServiceMethod</code>的子类<code>CallAdapted</code>、<code>SuspendForResponse</code>、<code>SuspendForBody</code>三者之一。</p>
+<p>解析结束后调用返回对象的<code>invoke</code>方法初始化OkHttpCall对象发起真正的请求。</p>
+<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>阅读源码的过程当中，画了详细的代码执行流程图供后续回顾。另外源码中还有两个重要的对外拓展接口<code>CallAdapter</code>和<code>Converter</code>没有详细分析。</p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>安卓框架</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>源码分析-项目架构之SpaceX</title>
     <url>/android-github-source-spacex.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>此文是对Github开源项目<a href="https://github.com/ferPrieto/SpaceX-prepare-for-Clean-Architecture-liftoff">SpaceX-prepare-for-Clean-Architecture-liftoff</a> 的源码阅读记录。它是一个为了阐述对<strong>Clean Architecture</strong>的理解而作的Demo项目，是一个值得学习的项目。</p>
@@ -599,33 +626,6 @@
       </categories>
       <tags>
         <tag>Android</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>源码分析-网络框架之Retrofit</title>
-    <url>/android-github-source-retrofit.html</url>
-    <content><![CDATA[<h4 id="一、使用"><a href="#一、使用" class="headerlink" title="一、使用"></a>一、使用</h4><h5 id="1-1-定义API方法"><a href="#1-1-定义API方法" class="headerlink" title="1.1 定义API方法"></a>1.1 定义API方法</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">RemoteApi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(<span class="meta-string">&quot;timeline&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">timeline</span><span class="params">()</span></span>: RemoteLaunchesResponse </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="1-2-获取服务"><a href="#1-2-获取服务" class="headerlink" title="1.2 获取服务"></a>1.2 获取服务</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> client = OkHttpClient.Builder()</span><br><span class="line">             .addInterceptor(loggingInterceptor)</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">             .client(client)</span><br><span class="line">             .baseUrl(<span class="string">&quot;http://10.0.0.2:8080/&quot;</span>)</span><br><span class="line">             .addConverterFactory(GsonConverterFactory.create())</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> api = retrofit.create(RemoteApi::<span class="keyword">class</span>.java) <span class="comment">//1、create做了什么？</span></span><br></pre></td></tr></table></figure>
-
-<h5 id="1-3-发起请求"><a href="#1-3-发起请求" class="headerlink" title="1.3 发起请求"></a>1.3 发起请求</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">api.timeline() <span class="comment">//2、调用接口方法怎么发起请求?</span></span><br></pre></td></tr></table></figure>
-
-
-<h4 id="二、原理"><a href="#二、原理" class="headerlink" title="二、原理"></a>二、原理</h4><center>
-    <img src="../images/android-source-retrofit.jpeg" width="100%"/>
-</center>
-
-<h5 id="2-1-create做了什么"><a href="#2-1-create做了什么" class="headerlink" title="2.1 create做了什么"></a>2.1 create做了什么</h5><p>Retrofit的网络请求方法都是定义在接口中的，它会在运行时利用Java的动态代理产生代理对象，所以<code>create()</code>就是创建代理对象的方法。</p>
-<h5 id="2-2-调用接口方法怎么发起请求"><a href="#2-2-调用接口方法怎么发起请求" class="headerlink" title="2.2 调用接口方法怎么发起请求"></a>2.2 调用接口方法怎么发起请求</h5><p>当调用接口方法时，实际上是调用了代理对象的方法。它会去Retrofit中找该方法对应的<code>ServiceMethod</code>，如果找到缓存直接使用，否则解析后再使用。</p>
-<p>解析的结果是<code>ServiceMethod</code>的子类<code>CallAdapted</code>、<code>SuspendForResponse</code>、<code>SuspendForBody</code>三者之一。</p>
-<p>解析结束后调用返回对象的<code>invoke</code>方法初始化OkHttpCall对象发起真正的请求。</p>
-<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>阅读源码的过程当中，画了详细的代码执行流程图供后续回顾。另外源码中还有两个重要的对外拓展接口<code>CallAdapter</code>和<code>Converter</code>没有详细分析。</p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>安卓框架</tag>
       </tags>
   </entry>
   <entry>
@@ -752,6 +752,28 @@
 ]]></content>
   </entry>
   <entry>
+    <title>Android中的日志库</title>
+    <url>/android-library-log.html</url>
+    <content><![CDATA[<p>日志库是一个项目的基础功能之一，它应该包括但不限于以下功能：</p>
+<ul>
+<li>扩展性：支持把日志记录到多个地方，如：本地文件、控制台、崩溃系统。</li>
+<li>高性能：日志记录较为频繁时，如何写文件，提高性能。</li>
+<li>稳定性：崩溃前一刻的日志不丢失。</li>
+</ul>
+<p>以下是一些开源的日志库，做一个记录：</p>
+<ul>
+<li><a href="https://github.com/pqpo/Log4a">Log4a</a> 0.9k star</li>
+</ul>
+<p>基于 mmap, 高性能、高可用的 Android 日志收集框架</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Log4a.i(TAG, &quot;Hello，Log4a!&quot;);</span><br><span class="line">Log4a.flush();</span><br><span class="line">Log4a.release();</span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li><a href="https://github.com/elvishew/xLog">xLog</a> 3.1k star</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    LogConfiguration config = <span class="keyword">new</span> LogConfiguration.Builder()</span><br><span class="line">        .logLevel(BuildConfig.DEBUG ? LogLevel.ALL             <span class="comment">// Specify log level, logs below this level won&#x27;t be printed, default: LogLevel.ALL</span></span><br><span class="line">            : LogLevel.NONE)</span><br><span class="line">        .tag(<span class="string">&quot;MY_TAG&quot;</span>)                                         <span class="comment">// Specify TAG, default: &quot;X-LOG&quot;</span></span><br><span class="line">        .enableThreadInfo()                                    <span class="comment">// Enable thread info, disabled by default</span></span><br><span class="line">        .enableStackTrace(<span class="number">2</span>)                                   <span class="comment">// Enable stack trace info with depth 2, disabled by default</span></span><br><span class="line">        .enableBorder()                                        <span class="comment">// Enable border, disabled by default</span></span><br><span class="line">        .jsonFormatter(<span class="keyword">new</span> MyJsonFormatter())                  <span class="comment">// Default: DefaultJsonFormatter</span></span><br><span class="line">        .xmlFormatter(<span class="keyword">new</span> MyXmlFormatter())                    <span class="comment">// Default: DefaultXmlFormatter</span></span><br><span class="line">        .throwableFormatter(<span class="keyword">new</span> MyThrowableFormatter())        <span class="comment">// Default: DefaultThrowableFormatter</span></span><br><span class="line">        .threadFormatter(<span class="keyword">new</span> MyThreadFormatter())              <span class="comment">// Default: DefaultThreadFormatter</span></span><br><span class="line">        .stackTraceFormatter(<span class="keyword">new</span> MyStackTraceFormatter())      <span class="comment">// Default: DefaultStackTraceFormatter</span></span><br><span class="line">        .borderFormatter(<span class="keyword">new</span> MyBoardFormatter())               <span class="comment">// Default: DefaultBorderFormatter</span></span><br><span class="line">        .addObjectFormatter(AnyClass.class,                    <span class="comment">// Add formatter for specific class of object</span></span><br><span class="line">            <span class="keyword">new</span> AnyClassObjectFormatter())                     <span class="comment">// Use Object.toString() by default</span></span><br><span class="line">        .addInterceptor(<span class="keyword">new</span> BlacklistTagsFilterInterceptor(    <span class="comment">// Add blacklist tags filter</span></span><br><span class="line">            <span class="string">&quot;blacklist1&quot;</span>, <span class="string">&quot;blacklist2&quot;</span>, <span class="string">&quot;blacklist3&quot;</span>))</span><br><span class="line">        .addInterceptor(<span class="keyword">new</span> MyInterceptor())                   <span class="comment">// Add other log interceptor</span></span><br><span class="line">        .build();</span><br><span class="line">    </span><br><span class="line">    Printer androidPrinter = <span class="keyword">new</span> AndroidPrinter(<span class="keyword">true</span>);         <span class="comment">// Printer that print the log using android.util.Log</span></span><br><span class="line">    Printer consolePrinter = <span class="keyword">new</span> ConsolePrinter();             <span class="comment">// Printer that print the log to console using System.out</span></span><br><span class="line">    Printer filePrinter = <span class="keyword">new</span> FilePrinter                      <span class="comment">// Printer that print(save) the log to file</span></span><br><span class="line">        .Builder(<span class="string">&quot;&lt;path-to-logs-dir&gt;&quot;</span>)                         <span class="comment">// Specify the directory path of log file(s)</span></span><br><span class="line">        .fileNameGenerator(<span class="keyword">new</span> DateFileNameGenerator())        <span class="comment">// Default: ChangelessFileNameGenerator(&quot;log&quot;)</span></span><br><span class="line">        .backupStrategy(<span class="keyword">new</span> NeverBackupStrategy())             <span class="comment">// Default: FileSizeBackupStrategy(1024 * 1024)</span></span><br><span class="line">        .cleanStrategy(<span class="keyword">new</span> FileLastModifiedCleanStrategy(MAX_TIME))     <span class="comment">// Default: NeverCleanStrategy()</span></span><br><span class="line">        .flattener(<span class="keyword">new</span> MyFlattener())                          <span class="comment">// Default: DefaultFlattener</span></span><br><span class="line">        .writer(<span class="keyword">new</span> MyWriter())                                <span class="comment">// Default: SimpleWriter</span></span><br><span class="line">        .build();</span><br><span class="line">    </span><br><span class="line">    XLog.init(                                                 <span class="comment">// Initialize XLog</span></span><br><span class="line">        config,                                                <span class="comment">// Specify the log configuration, if not specified, will use new LogConfiguration.Builder().build()</span></span><br><span class="line">        androidPrinter,                                        <span class="comment">// Specify printers, if no printer is specified, AndroidPrinter(for Android)/ConsolePrinter(for java) will be used.</span></span><br><span class="line">        consolePrinter,</span><br><span class="line">        filePrinter);</span><br><span class="line">&#125;</span><br><span class="line">````</span><br><span class="line"></span><br><span class="line">+ [logger](https:<span class="comment">//github.com/orhanobut/logger) 13.7k star</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">```java</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123; </span><br><span class="line">    FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder()</span><br><span class="line">      .showThreadInfo(<span class="keyword">false</span>)  <span class="comment">// (Optional) Whether to show thread info or not. Default true</span></span><br><span class="line">      .methodCount(<span class="number">0</span>)         <span class="comment">// (Optional) How many method line to show. Default 2</span></span><br><span class="line">      .methodOffset(<span class="number">7</span>)        <span class="comment">// (Optional) Hides internal method calls up to offset. Default 5</span></span><br><span class="line">      .logStrategy(customLog) <span class="comment">// (Optional) Changes the log strategy to print out. Default LogCat</span></span><br><span class="line">      .tag(<span class="string">&quot;My custom tag&quot;</span>)   <span class="comment">// (Optional) Global tag for every log. Default PRETTY_LOGGER</span></span><br><span class="line">      .build();</span><br><span class="line"></span><br><span class="line">    Logger.addLogAdapter(<span class="keyword">new</span> AndroidLogAdapter(formatStrategy));</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>]]></content>
+  </entry>
+  <entry>
     <title>Room数据库酷七条</title>
     <url>/android-library-room-7-tips.html</url>
     <content><![CDATA[<h4 id="一、通过RoomDatabase-Callback预填充数据"><a href="#一、通过RoomDatabase-Callback预填充数据" class="headerlink" title="一、通过RoomDatabase#Callback预填充数据"></a>一、通过<code>RoomDatabase#Callback</code>预填充数据</h4><p>如果需要在数据库创建或数据库打开的时候添加一些默认数据，可以使用<code>RoomDatabase#Callback</code>接口并复写它的<code>onCreate</code>或<code>onOpen</code>方法。由于DAO对象只能在这两个方法返回后使用，所以我们创建一个新线程来插入数据：</p>
@@ -826,28 +848,6 @@
         <tag>Android</tag>
         <tag>数据库</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>Android中的日志库</title>
-    <url>/android-library-log.html</url>
-    <content><![CDATA[<p>日志库是一个项目的基础功能之一，它应该包括但不限于以下功能：</p>
-<ul>
-<li>扩展性：支持把日志记录到多个地方，如：本地文件、控制台、崩溃系统。</li>
-<li>高性能：日志记录较为频繁时，如何写文件，提高性能。</li>
-<li>稳定性：崩溃前一刻的日志不丢失。</li>
-</ul>
-<p>以下是一些开源的日志库，做一个记录：</p>
-<ul>
-<li><a href="https://github.com/pqpo/Log4a">Log4a</a> 0.9k star</li>
-</ul>
-<p>基于 mmap, 高性能、高可用的 Android 日志收集框架</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Log4a.i(TAG, &quot;Hello，Log4a!&quot;);</span><br><span class="line">Log4a.flush();</span><br><span class="line">Log4a.release();</span><br></pre></td></tr></table></figure>
-
-
-<ul>
-<li><a href="https://github.com/elvishew/xLog">xLog</a> 3.1k star</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    LogConfiguration config = <span class="keyword">new</span> LogConfiguration.Builder()</span><br><span class="line">        .logLevel(BuildConfig.DEBUG ? LogLevel.ALL             <span class="comment">// Specify log level, logs below this level won&#x27;t be printed, default: LogLevel.ALL</span></span><br><span class="line">            : LogLevel.NONE)</span><br><span class="line">        .tag(<span class="string">&quot;MY_TAG&quot;</span>)                                         <span class="comment">// Specify TAG, default: &quot;X-LOG&quot;</span></span><br><span class="line">        .enableThreadInfo()                                    <span class="comment">// Enable thread info, disabled by default</span></span><br><span class="line">        .enableStackTrace(<span class="number">2</span>)                                   <span class="comment">// Enable stack trace info with depth 2, disabled by default</span></span><br><span class="line">        .enableBorder()                                        <span class="comment">// Enable border, disabled by default</span></span><br><span class="line">        .jsonFormatter(<span class="keyword">new</span> MyJsonFormatter())                  <span class="comment">// Default: DefaultJsonFormatter</span></span><br><span class="line">        .xmlFormatter(<span class="keyword">new</span> MyXmlFormatter())                    <span class="comment">// Default: DefaultXmlFormatter</span></span><br><span class="line">        .throwableFormatter(<span class="keyword">new</span> MyThrowableFormatter())        <span class="comment">// Default: DefaultThrowableFormatter</span></span><br><span class="line">        .threadFormatter(<span class="keyword">new</span> MyThreadFormatter())              <span class="comment">// Default: DefaultThreadFormatter</span></span><br><span class="line">        .stackTraceFormatter(<span class="keyword">new</span> MyStackTraceFormatter())      <span class="comment">// Default: DefaultStackTraceFormatter</span></span><br><span class="line">        .borderFormatter(<span class="keyword">new</span> MyBoardFormatter())               <span class="comment">// Default: DefaultBorderFormatter</span></span><br><span class="line">        .addObjectFormatter(AnyClass.class,                    <span class="comment">// Add formatter for specific class of object</span></span><br><span class="line">            <span class="keyword">new</span> AnyClassObjectFormatter())                     <span class="comment">// Use Object.toString() by default</span></span><br><span class="line">        .addInterceptor(<span class="keyword">new</span> BlacklistTagsFilterInterceptor(    <span class="comment">// Add blacklist tags filter</span></span><br><span class="line">            <span class="string">&quot;blacklist1&quot;</span>, <span class="string">&quot;blacklist2&quot;</span>, <span class="string">&quot;blacklist3&quot;</span>))</span><br><span class="line">        .addInterceptor(<span class="keyword">new</span> MyInterceptor())                   <span class="comment">// Add other log interceptor</span></span><br><span class="line">        .build();</span><br><span class="line">    </span><br><span class="line">    Printer androidPrinter = <span class="keyword">new</span> AndroidPrinter(<span class="keyword">true</span>);         <span class="comment">// Printer that print the log using android.util.Log</span></span><br><span class="line">    Printer consolePrinter = <span class="keyword">new</span> ConsolePrinter();             <span class="comment">// Printer that print the log to console using System.out</span></span><br><span class="line">    Printer filePrinter = <span class="keyword">new</span> FilePrinter                      <span class="comment">// Printer that print(save) the log to file</span></span><br><span class="line">        .Builder(<span class="string">&quot;&lt;path-to-logs-dir&gt;&quot;</span>)                         <span class="comment">// Specify the directory path of log file(s)</span></span><br><span class="line">        .fileNameGenerator(<span class="keyword">new</span> DateFileNameGenerator())        <span class="comment">// Default: ChangelessFileNameGenerator(&quot;log&quot;)</span></span><br><span class="line">        .backupStrategy(<span class="keyword">new</span> NeverBackupStrategy())             <span class="comment">// Default: FileSizeBackupStrategy(1024 * 1024)</span></span><br><span class="line">        .cleanStrategy(<span class="keyword">new</span> FileLastModifiedCleanStrategy(MAX_TIME))     <span class="comment">// Default: NeverCleanStrategy()</span></span><br><span class="line">        .flattener(<span class="keyword">new</span> MyFlattener())                          <span class="comment">// Default: DefaultFlattener</span></span><br><span class="line">        .writer(<span class="keyword">new</span> MyWriter())                                <span class="comment">// Default: SimpleWriter</span></span><br><span class="line">        .build();</span><br><span class="line">    </span><br><span class="line">    XLog.init(                                                 <span class="comment">// Initialize XLog</span></span><br><span class="line">        config,                                                <span class="comment">// Specify the log configuration, if not specified, will use new LogConfiguration.Builder().build()</span></span><br><span class="line">        androidPrinter,                                        <span class="comment">// Specify printers, if no printer is specified, AndroidPrinter(for Android)/ConsolePrinter(for java) will be used.</span></span><br><span class="line">        consolePrinter,</span><br><span class="line">        filePrinter);</span><br><span class="line">&#125;</span><br><span class="line">````</span><br><span class="line"></span><br><span class="line">+ [logger](https:<span class="comment">//github.com/orhanobut/logger) 13.7k star</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">```java</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123; </span><br><span class="line">    FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder()</span><br><span class="line">      .showThreadInfo(<span class="keyword">false</span>)  <span class="comment">// (Optional) Whether to show thread info or not. Default true</span></span><br><span class="line">      .methodCount(<span class="number">0</span>)         <span class="comment">// (Optional) How many method line to show. Default 2</span></span><br><span class="line">      .methodOffset(<span class="number">7</span>)        <span class="comment">// (Optional) Hides internal method calls up to offset. Default 5</span></span><br><span class="line">      .logStrategy(customLog) <span class="comment">// (Optional) Changes the log strategy to print out. Default LogCat</span></span><br><span class="line">      .tag(<span class="string">&quot;My custom tag&quot;</span>)   <span class="comment">// (Optional) Global tag for every log. Default PRETTY_LOGGER</span></span><br><span class="line">      .build();</span><br><span class="line"></span><br><span class="line">    Logger.addLogAdapter(<span class="keyword">new</span> AndroidLogAdapter(formatStrategy));</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>]]></content>
   </entry>
   <entry>
     <title>Android分区存储</title>
@@ -1245,6 +1245,100 @@
       </tags>
   </entry>
   <entry>
+    <title>CPU流水线工作原理</title>
+    <url>/cpu-pipline-overview.html</url>
+    <content><![CDATA[<h5 id="说明："><a href="#说明：" class="headerlink" title="说明："></a>说明：</h5><p>在<a href="https://www.zhaixue.cc/weixin/weixin-cpu-pipeline.html">宅学部落</a>这个网站看到一篇讲CPU流水线的文章，写的非常好，为了便于翻阅回顾，转载之。</p>
+<h5 id="正文："><a href="#正文：" class="headerlink" title="正文："></a>正文：</h5><p>现在的CPU处理器一般都是超流水线工作，动不动就是10级以上流水线，超高主频，这两者之间有什么关系呢？今天就跟大家科普下CPU流水线的工作原理，以及他们之间的关系。</p>
+<p>说到流水线，很多人会想到富士康；说到富士康，很多人会想到张全蛋。作为富士康 3 号流水线资深质检员，下面就请张全蛋给大家科普下什么是流水线，大家鼓掌欢迎。</p>
+<h5 id="Micheal-Jack-眼中的流水线"><a href="#Micheal-Jack-眼中的流水线" class="headerlink" title="Micheal Jack 眼中的流水线"></a>Micheal Jack 眼中的流水线</h5><blockquote>
+<p>大家好，我是张全蛋，英文名叫Micheal Jack，法文名叫霍雷呆-杰Q赖，大家也可以叫我查理。作为iPhone 手机 3 号流水线的资深质检员，我很忙的，每分钟都是几百万的生意。像我们富士康这样的transnational enterprise，经常会和不同国家的客户说一些技术上的meeting啊、下班陪他们message啊，都需要英文的。像我们厂里不会说英语的啊，都会被经理 fire 掉的。在我们厂里，流水线叫法太 low了，我们都叫 pipeline，一条pipeline，每个人分工不同，从手机原材料到成品iPhone ，只需要短短几分钟。—- 《嵌入式C语言自我修养》</p>
+</blockquote>
+<center>
+    <img src="../images/cpu-pipeline-phone.jpeg" width="90%"/>
+</center>
+
+<p>查理很忙，介绍到这里就走了，接下来我们继续了解下什么叫流水线。</p>
+<p>流水线是工业大生产下的产物。在农业社会做一部手机，需要的是工匠、手艺人，就像故宫里制作钟表的那些匠人一样，是需要拜师学艺、慢慢学习的：从手机组装、质检、贴膜、包装都是一个人，什么都要学。手艺人慢工出细活，但成本很高，到了工业化社会就不一样了：大家分工合作，将做手机这个复杂过程拆分为多个简单步骤，每个人负责一个步骤，经过刻意（机械）练习和培训，就可以很快上手。每个人都做自己最擅长的，可以大大提高工作效率。</p>
+<p>如果每个人都单独做一部手机，焊接电路、组装成品这一步骤一般人需要8分钟，测试检验一般需要4分钟，贴膜包装成盒一般需要4分钟，总共需要16分钟。每16分钟，如果有3个工人的话，一共可以生产3部手机。一个新员工从进厂开始，要培训学习三个月才能掌握所有的技能，才能上岗。如果引入生产流水线就不一样了，每个人只负责一个工序，比如赵铁柱只负责焊接电路、组装手机，李小花只负责贴膜，进厂培训3天就可以快速上手了，对工人的技能要求大大降低！而且随着时间积累，每个人对自己所负责的工序越来越熟练，每道工序需要的时间大大减少：赵铁柱焊接电路越来越顺手，花费时间从原来的8分钟缩减为4分钟；张全蛋的质量检验练得如火纯情，整个流程做完只需要2分钟；李小花的贴膜技术也越来越溜了，从贴膜到包装2分钟搞定。每16分钟，赵铁柱可以焊接4块电路板 ，整个流水线可以生产出4部手机，产能整整提升了33.33%！老板高兴，赵铁柱高兴，张全蛋和李小花更高兴，因为每做2分钟，他们还可以休息2分钟，刷刷微博滑个抖音，岂不乐哉！</p>
+<p>看到这里可能有人抬杠了：你这么算是不对的，每道工序所用的时间都变为原来的一半，怎么可能做得到？其实要做到不难的，只要工序拆解得合理，容易上手，再加上足够时间的机械重复，很多人都可以做得到。只要奖金发到位，蛋糕店里的小姐姐夹蛋糕的速度比你眨眼的速度都快，银行柜台的小李数钞票的速度比点钞机都快，买单时饭店前台的小妹摁计算器的速度比你掏钱的速度都快。</p>
+<h5 id="流水线工作原理"><a href="#流水线工作原理" class="headerlink" title="流水线工作原理"></a>流水线工作原理</h5><p>一条指令的执行一般要经过：取指令、翻译指令、执行指令三个基本流程。CPU内部的电路分为不同的单元：取指单元、译码单元、执行单元等，指令的执行也是按照流水线工序一步一步执行的。我们假设每一个步骤执行时间都是一个时钟周期，那么一条指令执行需要3个时钟周期。</p>
+<center>
+    <img src="../images/cpu-arm-pipeline.png" width="50%"/>
+</center>
+
+
+<p>CPU 执行指令的3个时钟周期里，取指单元只在第一个时钟周期里工作，其余两个时钟周期都处于空闲状态，其它两个执行单元也是如此，效率太低了，消费者无法接受，老板也不能接受。解决方法就是引入流水线，让流水线每一颗螺丝钉都马不停蹄地运转起来，最好一刻也不要停。</p>
+<center>
+    <img src="../images/cpu-pipeline-multi.png" width="50%"/>
+</center>
+
+
+<p>引入流水线工作模式后可以看到，除了刚开始第一个时钟周期大家还可以偷懒外，其余的时间都不能闲着：从第二个时钟周期开始，当译码单元在翻译指令1时，取指单元也不能闲着，要接着去取指令2。同样如此，从第三个时钟周期开始，当执行单元执行指令1时，译码单元也不能闲着，要接着去翻译指令2，而取指单元要去取指令3。从第四个时钟周期开始，每个电路单元都会进入满荷负载工作状态，像富士康工厂里的流水线一样，源源不断地执行一条条指令。</p>
+<p>引入流水线后，虽然每一条指令执行流程不变，还是需要3个时钟周期，但是从整条流水线的输出看来，差不多平均每个时钟周期就能执行一条指令。原来执行一条指令需要3个时钟周期，现在平均只需要1个时钟周期，CPU 性能提升了不少。</p>
+<p>流水线的本质其实就是拿空间资源换时间。将每条指令分解为多步，指令的每一步都有独立的电路来执行，并让不同指令的各步操作重叠，从而实现几条指令并行处理，从而加快程序的运行。</p>
+<p>CPU内部的流水线如此，富士康工厂里的iPhone流水线也是如此，通过不断往流水线增加人手来提高流水线的生产效率，也就是吞吐率。</p>
+<h5 id="超流水线技术"><a href="#超流水线技术" class="headerlink" title="超流水线技术"></a>超流水线技术</h5><p>想知道什么是超流水线，让我们再回到富士康。</p>
+<p>在富士康 3 号 iPhone 流水生产线上，因为赵铁柱工作效率不高，焊接组装一步手机需要 4 分钟，导致生产一部iPhone手机也得需要 4 分钟，从而拖累了整条生产线的生产效率。老板很生气，后果很严重，赵铁柱没干到一个月就被 fire 掉了。后面几个月，陆陆续续来了不少人：小黑、皮裤哥、红姐，都想试试这份工作，可惜干得还不如赵铁柱，挑战电子厂失败，早已提桶跑路。</p>
+<p>老板招不到人，感觉又错怪了赵铁柱，于是决定升级生产线，并承诺加薪重新召回了赵铁柱。</p>
+<center>
+    <img src="../images/cpu-pipeline-phone2.png" width="50%"/>
+</center>
+
+<p>老板找出了生产线的瓶颈：每道工序都是需要2分钟，只有赵铁柱这道工序耗时4分钟，老板错怪了这铁柱，这不是赵铁柱的原因，是因为这道工序太复杂。于是把这道工序进行了拆解为2道工序：焊接电路板和组装手机。焊接电路仍由赵铁柱负责，把电路板、显示屏、手机外壳组装成手机这道工序则由新招员工王建国负责。生产流水线优化后，赵铁柱焊接电路只需要2分钟，王建国组装也只需要 2 分钟，生产每部 iPhone 的时间由原来的 4 分钟缩减为 2 分钟，生产流水线的瓶颈解决了！</p>
+<p>跟富士康流水线类似，优化CPU流水线也是提升CPU性能的有效手段。流水生产线存在木桶短板效应，我们只需要找出CPU流水线中的性能瓶颈，即耗时最长的那道工序，然后再进行细分、优化为更多的工序就可以了。每一道工序我们称为流水线的一级，流水线越深，每一道流水电路单元的执行时间就会变得越小，我们处理器的时钟周期就可以更短，从而可以通过提升CPU主频来提升CPU性能、提高工作效率。</p>
+<p>在富士康流水生产线中，每道工序的最长耗时时间决定了整条生产线的吞吐率。在CPU内部也是如此，每个流水单元的执行时间（即时间延迟）决定了CPU流水线的性能。CPU流水线中的每一道电路单元由组合逻辑电路和寄存器组成，逻辑单路用来执行本道工序的逻辑运算，寄存器用来保存结果，并作为下一道工序的输入。</p>
+<center>
+    <img src="../images/cpu-pipeline-line.png" width="50%"/>
+</center>
+
+<p>流水生产线是通过减少每一道工序的耗费时间来提升整条流水线效率的。在CPU内部也是如此，CPU内部的数字电路是靠时钟驱动来工作的，既然每条指令的执行时钟周期数不变，即执行每条指令需要3个时钟周期，但是我们可以通过缩短时钟周期的方法来提升效率，即减少每条指令所耗费的时间。减少时钟周期，也就是提升CPU主频，一个关键的制约因素就是CPU内部每一个执行单元的耗费时间。虽然说电信号在电路中的传播时间很快，可以接近光速，但是经过成千上万的晶体管，不停地信号翻转，还是会带来一定的时间延迟，这个时间延迟我们可以看做这道工作的执行时间。以上图为例，如果每个执行单元的延迟是 1.5 纳秒，那么你的时钟周期至少也得2纳秒以上，否则电路就会工作异常。如果驱动CPU工作的时钟周期是 2 纳秒，CPU的主频就是 500 MHz。现在的CPU流水线深度可以做到10级以上，流水线的每一级时间延迟可以做到皮秒级别，驱动CPU工作的时钟周期可以做到更短，因此可以把CPU的主频飙到 5 GHz 以上。</p>
+<p>我们把5级以上的流水线称为超流水线结构。高性能的处理器，为了提升CPU主频，一般都会采用这种超流水线结构。Intel的 i7 处理器有16级流水线，AMD的速龙64系列CPU流水线为20级。史上具有最长流水线的是Intel的第三代奔腾四处理器，有31级的流水线。</p>
+<p>想要提升CPU的主频，根本在于减少流水线中每一级流水的执行时间，消除木桶的短板效应，才能提升流水线的整体性能。解决方法有三个：一是优化流水线中各级流水线的性能，受限于当前集成电路的设计水平，这一步最难；二是依靠集成电路的制造工艺，更先进的纳米工艺，芯片面积越小，发热越小，更容易提升主频；三是不断地增加流水线，流水线越深，流水线的各级延迟就可以做得越小，更容易提高主频。</p>
+<p>流水线是否越深越好呢？非也。流水线的本质是拿空间换时间，流水线越深，电路就会越复杂，需要更多的组合逻辑电路和寄存器，芯片面积也就越大，功耗也就随之上升了。拿功耗增长换来性能提升，在PC机和服务器上还行，但对于很多靠电池供电的移动设备的处理器来说就无法接受了，CPU设计人员需要在性能和功耗之间做一个很好的平衡。</p>
+<p>流水线越深，就越能提升性能吗？也不一定。流水线是靠指令的并行来提升性能的，第一条指令还没有执行完，下面的第二条指令就开始取指、译码了。执行的程序指令如果是顺序结构，没有中断或跳转，流水线确实可以提高执行效率。但是当程序指令中存在跳转、分支结构时，下面预取的指令可能就要全部丢掉了，需要到要跳转的地方重新取指令执行。如下面的分支，如果BEQ条件不满足，处理器可能就会将预期的ADD指令全部丢弃，重新到here标签处取SUB指令执行。</p>
+<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">BEQ R1, R2, here</span><br><span class="line">ADD R2, R1, R0</span><br><span class="line">ADD R5, R4, R3</span><br><span class="line">...</span><br><span class="line">here:</span><br><span class="line">SUB R2, R1, R0</span><br><span class="line">SUB R5, R4, R3</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>流水线越深，一旦预取指令失败，浪费和损失就会越严重，因为流水线中预取的几十条指令可能都要丢弃掉，流水线发生了停顿，无法按照预期继续执行，这种情况我们一般称之为流水线冒险（hazard）。在现在很多超流水线处理器中，为了避免这种情况出现，会采取各种各样的方法去避免这种情况，以免影响处理器的性能。</p>
+<p>流水线越深，一旦预取指令失败，浪费和损失就会越严重，因为流水线中预取的几十条指令可能都要丢弃掉，流水线发生了停顿，无法按照预期继续执行，这种情况我们一般称之为流水线冒险（hazard）。在现在很多超流水线处理器中，为了避免这种情况出现，会采取各种各样的方法去避免这种情况发生，以免影响处理器的性能。</p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>计算机基础</tag>
+        <tag>CPU</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>数据结构之布隆过滤器</title>
+    <url>/cs-data-structure-bloomfilter.html</url>
+    <content><![CDATA[<hr>
+<h4 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h4><p>一种空间高效的概率型数据结构，用于判断一个元素是否存在于集合中。</p>
+<p>空间高效：用几个比特位来标识存在与否，不占用太多内存空间。<br>概率型：有几率把一个不存在的元素判定为存在。</p>
+<p>Hash表存在的问题：数据量很大时，占用内存太多了。</p>
+<h4 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h4><h5 id="插入操作："><a href="#插入操作：" class="headerlink" title="插入操作："></a>插入操作：</h5><p>初始bit数组A[m-1]全部置0，通过映射函数，将要插入的值随机映射到数组范围内，将该位置为1</p>
+<center>
+    <img src="../images/bloom-filters-insert.png" width="50%"/>
+</center>
+
+
+<h5 id="查找操作："><a href="#查找操作：" class="headerlink" title="查找操作："></a>查找操作：</h5><p>将要查找的元素通过映射函数，映射到数组中，判断该bit位是否为1</p>
+<center>
+    <img src="../images/bloom-filters_03.png" width="50%"/>
+</center>
+
+
+
+<h4 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h4><ul>
+<li>网页爬虫对 URL 去重，避免爬取相同的 URL 地址；</li>
+<li>反垃圾邮件，从数十亿个垃圾邮件列表中判断某邮箱是否垃圾邮箱；</li>
+</ul>
+<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><p><a href="https://freecontent.manning.com/all-about-bloom-filters/">图片来源</a><br><a href="https://juejin.cn/post/6844904007790673933">1</a></p>
+]]></content>
+      <tags>
+        <tag>计算机</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>操作系统之文件系统</title>
     <url>/cs-operating-systems-file-system.html</url>
     <content><![CDATA[<hr>
@@ -1367,100 +1461,6 @@
       </tags>
   </entry>
   <entry>
-    <title>CPU流水线工作原理</title>
-    <url>/cpu-pipline-overview.html</url>
-    <content><![CDATA[<h5 id="说明："><a href="#说明：" class="headerlink" title="说明："></a>说明：</h5><p>在<a href="https://www.zhaixue.cc/weixin/weixin-cpu-pipeline.html">宅学部落</a>这个网站看到一篇讲CPU流水线的文章，写的非常好，为了便于翻阅回顾，转载之。</p>
-<h5 id="正文："><a href="#正文：" class="headerlink" title="正文："></a>正文：</h5><p>现在的CPU处理器一般都是超流水线工作，动不动就是10级以上流水线，超高主频，这两者之间有什么关系呢？今天就跟大家科普下CPU流水线的工作原理，以及他们之间的关系。</p>
-<p>说到流水线，很多人会想到富士康；说到富士康，很多人会想到张全蛋。作为富士康 3 号流水线资深质检员，下面就请张全蛋给大家科普下什么是流水线，大家鼓掌欢迎。</p>
-<h5 id="Micheal-Jack-眼中的流水线"><a href="#Micheal-Jack-眼中的流水线" class="headerlink" title="Micheal Jack 眼中的流水线"></a>Micheal Jack 眼中的流水线</h5><blockquote>
-<p>大家好，我是张全蛋，英文名叫Micheal Jack，法文名叫霍雷呆-杰Q赖，大家也可以叫我查理。作为iPhone 手机 3 号流水线的资深质检员，我很忙的，每分钟都是几百万的生意。像我们富士康这样的transnational enterprise，经常会和不同国家的客户说一些技术上的meeting啊、下班陪他们message啊，都需要英文的。像我们厂里不会说英语的啊，都会被经理 fire 掉的。在我们厂里，流水线叫法太 low了，我们都叫 pipeline，一条pipeline，每个人分工不同，从手机原材料到成品iPhone ，只需要短短几分钟。—- 《嵌入式C语言自我修养》</p>
-</blockquote>
-<center>
-    <img src="../images/cpu-pipeline-phone.jpeg" width="90%"/>
-</center>
-
-<p>查理很忙，介绍到这里就走了，接下来我们继续了解下什么叫流水线。</p>
-<p>流水线是工业大生产下的产物。在农业社会做一部手机，需要的是工匠、手艺人，就像故宫里制作钟表的那些匠人一样，是需要拜师学艺、慢慢学习的：从手机组装、质检、贴膜、包装都是一个人，什么都要学。手艺人慢工出细活，但成本很高，到了工业化社会就不一样了：大家分工合作，将做手机这个复杂过程拆分为多个简单步骤，每个人负责一个步骤，经过刻意（机械）练习和培训，就可以很快上手。每个人都做自己最擅长的，可以大大提高工作效率。</p>
-<p>如果每个人都单独做一部手机，焊接电路、组装成品这一步骤一般人需要8分钟，测试检验一般需要4分钟，贴膜包装成盒一般需要4分钟，总共需要16分钟。每16分钟，如果有3个工人的话，一共可以生产3部手机。一个新员工从进厂开始，要培训学习三个月才能掌握所有的技能，才能上岗。如果引入生产流水线就不一样了，每个人只负责一个工序，比如赵铁柱只负责焊接电路、组装手机，李小花只负责贴膜，进厂培训3天就可以快速上手了，对工人的技能要求大大降低！而且随着时间积累，每个人对自己所负责的工序越来越熟练，每道工序需要的时间大大减少：赵铁柱焊接电路越来越顺手，花费时间从原来的8分钟缩减为4分钟；张全蛋的质量检验练得如火纯情，整个流程做完只需要2分钟；李小花的贴膜技术也越来越溜了，从贴膜到包装2分钟搞定。每16分钟，赵铁柱可以焊接4块电路板 ，整个流水线可以生产出4部手机，产能整整提升了33.33%！老板高兴，赵铁柱高兴，张全蛋和李小花更高兴，因为每做2分钟，他们还可以休息2分钟，刷刷微博滑个抖音，岂不乐哉！</p>
-<p>看到这里可能有人抬杠了：你这么算是不对的，每道工序所用的时间都变为原来的一半，怎么可能做得到？其实要做到不难的，只要工序拆解得合理，容易上手，再加上足够时间的机械重复，很多人都可以做得到。只要奖金发到位，蛋糕店里的小姐姐夹蛋糕的速度比你眨眼的速度都快，银行柜台的小李数钞票的速度比点钞机都快，买单时饭店前台的小妹摁计算器的速度比你掏钱的速度都快。</p>
-<h5 id="流水线工作原理"><a href="#流水线工作原理" class="headerlink" title="流水线工作原理"></a>流水线工作原理</h5><p>一条指令的执行一般要经过：取指令、翻译指令、执行指令三个基本流程。CPU内部的电路分为不同的单元：取指单元、译码单元、执行单元等，指令的执行也是按照流水线工序一步一步执行的。我们假设每一个步骤执行时间都是一个时钟周期，那么一条指令执行需要3个时钟周期。</p>
-<center>
-    <img src="../images/cpu-arm-pipeline.png" width="50%"/>
-</center>
-
-
-<p>CPU 执行指令的3个时钟周期里，取指单元只在第一个时钟周期里工作，其余两个时钟周期都处于空闲状态，其它两个执行单元也是如此，效率太低了，消费者无法接受，老板也不能接受。解决方法就是引入流水线，让流水线每一颗螺丝钉都马不停蹄地运转起来，最好一刻也不要停。</p>
-<center>
-    <img src="../images/cpu-pipeline-multi.png" width="50%"/>
-</center>
-
-
-<p>引入流水线工作模式后可以看到，除了刚开始第一个时钟周期大家还可以偷懒外，其余的时间都不能闲着：从第二个时钟周期开始，当译码单元在翻译指令1时，取指单元也不能闲着，要接着去取指令2。同样如此，从第三个时钟周期开始，当执行单元执行指令1时，译码单元也不能闲着，要接着去翻译指令2，而取指单元要去取指令3。从第四个时钟周期开始，每个电路单元都会进入满荷负载工作状态，像富士康工厂里的流水线一样，源源不断地执行一条条指令。</p>
-<p>引入流水线后，虽然每一条指令执行流程不变，还是需要3个时钟周期，但是从整条流水线的输出看来，差不多平均每个时钟周期就能执行一条指令。原来执行一条指令需要3个时钟周期，现在平均只需要1个时钟周期，CPU 性能提升了不少。</p>
-<p>流水线的本质其实就是拿空间资源换时间。将每条指令分解为多步，指令的每一步都有独立的电路来执行，并让不同指令的各步操作重叠，从而实现几条指令并行处理，从而加快程序的运行。</p>
-<p>CPU内部的流水线如此，富士康工厂里的iPhone流水线也是如此，通过不断往流水线增加人手来提高流水线的生产效率，也就是吞吐率。</p>
-<h5 id="超流水线技术"><a href="#超流水线技术" class="headerlink" title="超流水线技术"></a>超流水线技术</h5><p>想知道什么是超流水线，让我们再回到富士康。</p>
-<p>在富士康 3 号 iPhone 流水生产线上，因为赵铁柱工作效率不高，焊接组装一步手机需要 4 分钟，导致生产一部iPhone手机也得需要 4 分钟，从而拖累了整条生产线的生产效率。老板很生气，后果很严重，赵铁柱没干到一个月就被 fire 掉了。后面几个月，陆陆续续来了不少人：小黑、皮裤哥、红姐，都想试试这份工作，可惜干得还不如赵铁柱，挑战电子厂失败，早已提桶跑路。</p>
-<p>老板招不到人，感觉又错怪了赵铁柱，于是决定升级生产线，并承诺加薪重新召回了赵铁柱。</p>
-<center>
-    <img src="../images/cpu-pipeline-phone2.png" width="50%"/>
-</center>
-
-<p>老板找出了生产线的瓶颈：每道工序都是需要2分钟，只有赵铁柱这道工序耗时4分钟，老板错怪了这铁柱，这不是赵铁柱的原因，是因为这道工序太复杂。于是把这道工序进行了拆解为2道工序：焊接电路板和组装手机。焊接电路仍由赵铁柱负责，把电路板、显示屏、手机外壳组装成手机这道工序则由新招员工王建国负责。生产流水线优化后，赵铁柱焊接电路只需要2分钟，王建国组装也只需要 2 分钟，生产每部 iPhone 的时间由原来的 4 分钟缩减为 2 分钟，生产流水线的瓶颈解决了！</p>
-<p>跟富士康流水线类似，优化CPU流水线也是提升CPU性能的有效手段。流水生产线存在木桶短板效应，我们只需要找出CPU流水线中的性能瓶颈，即耗时最长的那道工序，然后再进行细分、优化为更多的工序就可以了。每一道工序我们称为流水线的一级，流水线越深，每一道流水电路单元的执行时间就会变得越小，我们处理器的时钟周期就可以更短，从而可以通过提升CPU主频来提升CPU性能、提高工作效率。</p>
-<p>在富士康流水生产线中，每道工序的最长耗时时间决定了整条生产线的吞吐率。在CPU内部也是如此，每个流水单元的执行时间（即时间延迟）决定了CPU流水线的性能。CPU流水线中的每一道电路单元由组合逻辑电路和寄存器组成，逻辑单路用来执行本道工序的逻辑运算，寄存器用来保存结果，并作为下一道工序的输入。</p>
-<center>
-    <img src="../images/cpu-pipeline-line.png" width="50%"/>
-</center>
-
-<p>流水生产线是通过减少每一道工序的耗费时间来提升整条流水线效率的。在CPU内部也是如此，CPU内部的数字电路是靠时钟驱动来工作的，既然每条指令的执行时钟周期数不变，即执行每条指令需要3个时钟周期，但是我们可以通过缩短时钟周期的方法来提升效率，即减少每条指令所耗费的时间。减少时钟周期，也就是提升CPU主频，一个关键的制约因素就是CPU内部每一个执行单元的耗费时间。虽然说电信号在电路中的传播时间很快，可以接近光速，但是经过成千上万的晶体管，不停地信号翻转，还是会带来一定的时间延迟，这个时间延迟我们可以看做这道工作的执行时间。以上图为例，如果每个执行单元的延迟是 1.5 纳秒，那么你的时钟周期至少也得2纳秒以上，否则电路就会工作异常。如果驱动CPU工作的时钟周期是 2 纳秒，CPU的主频就是 500 MHz。现在的CPU流水线深度可以做到10级以上，流水线的每一级时间延迟可以做到皮秒级别，驱动CPU工作的时钟周期可以做到更短，因此可以把CPU的主频飙到 5 GHz 以上。</p>
-<p>我们把5级以上的流水线称为超流水线结构。高性能的处理器，为了提升CPU主频，一般都会采用这种超流水线结构。Intel的 i7 处理器有16级流水线，AMD的速龙64系列CPU流水线为20级。史上具有最长流水线的是Intel的第三代奔腾四处理器，有31级的流水线。</p>
-<p>想要提升CPU的主频，根本在于减少流水线中每一级流水的执行时间，消除木桶的短板效应，才能提升流水线的整体性能。解决方法有三个：一是优化流水线中各级流水线的性能，受限于当前集成电路的设计水平，这一步最难；二是依靠集成电路的制造工艺，更先进的纳米工艺，芯片面积越小，发热越小，更容易提升主频；三是不断地增加流水线，流水线越深，流水线的各级延迟就可以做得越小，更容易提高主频。</p>
-<p>流水线是否越深越好呢？非也。流水线的本质是拿空间换时间，流水线越深，电路就会越复杂，需要更多的组合逻辑电路和寄存器，芯片面积也就越大，功耗也就随之上升了。拿功耗增长换来性能提升，在PC机和服务器上还行，但对于很多靠电池供电的移动设备的处理器来说就无法接受了，CPU设计人员需要在性能和功耗之间做一个很好的平衡。</p>
-<p>流水线越深，就越能提升性能吗？也不一定。流水线是靠指令的并行来提升性能的，第一条指令还没有执行完，下面的第二条指令就开始取指、译码了。执行的程序指令如果是顺序结构，没有中断或跳转，流水线确实可以提高执行效率。但是当程序指令中存在跳转、分支结构时，下面预取的指令可能就要全部丢掉了，需要到要跳转的地方重新取指令执行。如下面的分支，如果BEQ条件不满足，处理器可能就会将预期的ADD指令全部丢弃，重新到here标签处取SUB指令执行。</p>
-<figure class="highlight shell"><figcaption><span>script</span></figcaption><table><tr><td class="code"><pre><span class="line">BEQ R1, R2, here</span><br><span class="line">ADD R2, R1, R0</span><br><span class="line">ADD R5, R4, R3</span><br><span class="line">...</span><br><span class="line">here:</span><br><span class="line">SUB R2, R1, R0</span><br><span class="line">SUB R5, R4, R3</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-<p>流水线越深，一旦预取指令失败，浪费和损失就会越严重，因为流水线中预取的几十条指令可能都要丢弃掉，流水线发生了停顿，无法按照预期继续执行，这种情况我们一般称之为流水线冒险（hazard）。在现在很多超流水线处理器中，为了避免这种情况出现，会采取各种各样的方法去避免这种情况，以免影响处理器的性能。</p>
-<p>流水线越深，一旦预取指令失败，浪费和损失就会越严重，因为流水线中预取的几十条指令可能都要丢弃掉，流水线发生了停顿，无法按照预期继续执行，这种情况我们一般称之为流水线冒险（hazard）。在现在很多超流水线处理器中，为了避免这种情况出现，会采取各种各样的方法去避免这种情况发生，以免影响处理器的性能。</p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>计算机基础</tag>
-        <tag>CPU</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>数据结构之布隆过滤器</title>
-    <url>/cs-data-structure-bloomfilter.html</url>
-    <content><![CDATA[<hr>
-<h4 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h4><p>一种空间高效的概率型数据结构，用于判断一个元素是否存在于集合中。</p>
-<p>空间高效：用几个比特位来标识存在与否，不占用太多内存空间。<br>概率型：有几率把一个不存在的元素判定为存在。</p>
-<p>Hash表存在的问题：数据量很大时，占用内存太多了。</p>
-<h4 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h4><h5 id="插入操作："><a href="#插入操作：" class="headerlink" title="插入操作："></a>插入操作：</h5><p>初始bit数组A[m-1]全部置0，通过映射函数，将要插入的值随机映射到数组范围内，将该位置为1</p>
-<center>
-    <img src="../images/bloom-filters-insert.png" width="50%"/>
-</center>
-
-
-<h5 id="查找操作："><a href="#查找操作：" class="headerlink" title="查找操作："></a>查找操作：</h5><p>将要查找的元素通过映射函数，映射到数组中，判断该bit位是否为1</p>
-<center>
-    <img src="../images/bloom-filters_03.png" width="50%"/>
-</center>
-
-
-
-<h4 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h4><ul>
-<li>网页爬虫对 URL 去重，避免爬取相同的 URL 地址；</li>
-<li>反垃圾邮件，从数十亿个垃圾邮件列表中判断某邮箱是否垃圾邮箱；</li>
-</ul>
-<h4 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h4><p><a href="https://freecontent.manning.com/all-about-bloom-filters/">图片来源</a><br><a href="https://juejin.cn/post/6844904007790673933">1</a></p>
-]]></content>
-      <tags>
-        <tag>计算机</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>投资回报率</title>
     <url>/econonmics-roa-roe-roic-roce.html</url>
     <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><ul>
@@ -1545,6 +1545,27 @@
       </categories>
       <tags>
         <tag>经济学</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>开发者七条</title>
+    <url>/ep-good-developer-manifesto.html</url>
+    <content><![CDATA[<p>软件开发不只是API调用和基础语法，以下是应用开发的全貌：</p>
+<h4 id="一、相信数据"><a href="#一、相信数据" class="headerlink" title="一、相信数据"></a>一、相信数据</h4><p>如果你觉得系统正常运转，你应该拿出数据支撑你的想法。更重要的是，当研究证明你是错的时，你应该欣然接受实事。<br>这就需要做测试来验证你的代码，也需要一些流程来生成对应的数据。<br>你做的任何事都需要数据来辅助你下一步的决策。否则你将不知道自己做的事是对还是错。</p>
+<h4 id="二、软件开发不只是编码"><a href="#二、软件开发不只是编码" class="headerlink" title="二、软件开发不只是编码"></a>二、软件开发不只是编码</h4><p>除了编码，开发人员还需要协调、沟通、分析、设计、测试、项目管理等</p>
+<h4 id="三、代码就是和人沟通"><a href="#三、代码就是和人沟通" class="headerlink" title="三、代码就是和人沟通"></a>三、代码就是和人沟通</h4><p>如果我们真的只是“为计算机编程”，那么我们都将编写字节码。计算机最能理解它。但我们用的是一种“折衷”语言，这种语言其他人可以理解，也可以翻译成计算机可以理解的东西。</p>
+<p>好的软件开发是一个交流的过程。这是为了确保人们理解你在做什么。你的工作是与下一个阅读它的人交流。找到最好的表达方式可能需要同理心。</p>
+<h4 id="四、好的流程很重要"><a href="#四、好的流程很重要" class="headerlink" title="四、好的流程很重要"></a>四、好的流程很重要</h4><p>康威定律预言，你的软件注定要反映你的团队及其沟通结构。流程是沟通的结构。</p>
+<p>想象一下一架起飞的飞机:飞行员、副驾驶、机组人员和空中交通管制人员之间有一段非常有条理的对话。这确保了每个人都关注关键问题，每个人都有发言权。“机翼还在飞机上吗?””“检查。“没有别的飞机挡住我们的去路吗?”“可以起飞了。”</p>
+<h4 id="五、用结果证明自己，而不是身份低位"><a href="#五、用结果证明自己，而不是身份低位" class="headerlink" title="五、用结果证明自己，而不是身份低位"></a>五、用结果证明自己，而不是身份低位</h4><p>最糟糕的开发组织要么等级森严，要么每个开发人员有太多老板。这通常反映了管理者对地位的渴望。</p>
+<p>考虑“角色”，而不是“地位”。我工作过的最好的组织都首先认可那些推动事情的人，而不管他们在组织中扮演什么角色。</p>
+<h4 id="六、每个人都能从别人那学到"><a href="#六、每个人都能从别人那学到" class="headerlink" title="六、每个人都能从别人那学到"></a>六、每个人都能从别人那学到</h4><p>如果您认为人们的种族、性别或其他因素是判断他们的技能或他们必须教给您的东西的好方法，那么您就限制了自己作为软件开发人员的发展。</p>
+<h4 id="七、测试你所有的猜想，并随时准备改变这些猜想"><a href="#七、测试你所有的猜想，并随时准备改变这些猜想" class="headerlink" title="七、测试你所有的猜想，并随时准备改变这些猜想"></a>七、测试你所有的猜想，并随时准备改变这些猜想</h4><p>当指导年轻的开发者时，我总是强调你不应该证明自己是对的，而应该证明自己是错的。我还鼓励他们用证明自己正确的热情去做这件事。</p>
+<p>逻辑理论往往有一种方法可以证明你是错的。如果没有，这可能不是一个很好的理论。如果你不能证明它是错的，那么，只有那时，也许你可以试着证明它是对的。这与“相信数据”类似，但这不仅仅是关于数据，还有你使用数据的方式。</p>
+<p><a href="https://www.infoworld.com/article/3214481/the-good-software-development-manifesto.html">参考来源</a></p>
+]]></content>
+      <tags>
+        <tag>软件哲学</tag>
       </tags>
   </entry>
   <entry>
@@ -1693,27 +1714,6 @@
       </categories>
       <tags>
         <tag>C/C++</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>开发者七条</title>
-    <url>/ep-good-developer-manifesto.html</url>
-    <content><![CDATA[<p>软件开发不只是API调用和基础语法，以下是应用开发的全貌：</p>
-<h4 id="一、相信数据"><a href="#一、相信数据" class="headerlink" title="一、相信数据"></a>一、相信数据</h4><p>如果你觉得系统正常运转，你应该拿出数据支撑你的想法。更重要的是，当研究证明你是错的时，你应该欣然接受实事。<br>这就需要做测试来验证你的代码，也需要一些流程来生成对应的数据。<br>你做的任何事都需要数据来辅助你下一步的决策。否则你将不知道自己做的事是对还是错。</p>
-<h4 id="二、软件开发不只是编码"><a href="#二、软件开发不只是编码" class="headerlink" title="二、软件开发不只是编码"></a>二、软件开发不只是编码</h4><p>除了编码，开发人员还需要协调、沟通、分析、设计、测试、项目管理等</p>
-<h4 id="三、代码就是和人沟通"><a href="#三、代码就是和人沟通" class="headerlink" title="三、代码就是和人沟通"></a>三、代码就是和人沟通</h4><p>如果我们真的只是“为计算机编程”，那么我们都将编写字节码。计算机最能理解它。但我们用的是一种“折衷”语言，这种语言其他人可以理解，也可以翻译成计算机可以理解的东西。</p>
-<p>好的软件开发是一个交流的过程。这是为了确保人们理解你在做什么。你的工作是与下一个阅读它的人交流。找到最好的表达方式可能需要同理心。</p>
-<h4 id="四、好的流程很重要"><a href="#四、好的流程很重要" class="headerlink" title="四、好的流程很重要"></a>四、好的流程很重要</h4><p>康威定律预言，你的软件注定要反映你的团队及其沟通结构。流程是沟通的结构。</p>
-<p>想象一下一架起飞的飞机:飞行员、副驾驶、机组人员和空中交通管制人员之间有一段非常有条理的对话。这确保了每个人都关注关键问题，每个人都有发言权。“机翼还在飞机上吗?””“检查。“没有别的飞机挡住我们的去路吗?”“可以起飞了。”</p>
-<h4 id="五、用结果证明自己，而不是身份低位"><a href="#五、用结果证明自己，而不是身份低位" class="headerlink" title="五、用结果证明自己，而不是身份低位"></a>五、用结果证明自己，而不是身份低位</h4><p>最糟糕的开发组织要么等级森严，要么每个开发人员有太多老板。这通常反映了管理者对地位的渴望。</p>
-<p>考虑“角色”，而不是“地位”。我工作过的最好的组织都首先认可那些推动事情的人，而不管他们在组织中扮演什么角色。</p>
-<h4 id="六、每个人都能从别人那学到"><a href="#六、每个人都能从别人那学到" class="headerlink" title="六、每个人都能从别人那学到"></a>六、每个人都能从别人那学到</h4><p>如果您认为人们的种族、性别或其他因素是判断他们的技能或他们必须教给您的东西的好方法，那么您就限制了自己作为软件开发人员的发展。</p>
-<h4 id="七、测试你所有的猜想，并随时准备改变这些猜想"><a href="#七、测试你所有的猜想，并随时准备改变这些猜想" class="headerlink" title="七、测试你所有的猜想，并随时准备改变这些猜想"></a>七、测试你所有的猜想，并随时准备改变这些猜想</h4><p>当指导年轻的开发者时，我总是强调你不应该证明自己是对的，而应该证明自己是错的。我还鼓励他们用证明自己正确的热情去做这件事。</p>
-<p>逻辑理论往往有一种方法可以证明你是错的。如果没有，这可能不是一个很好的理论。如果你不能证明它是错的，那么，只有那时，也许你可以试着证明它是对的。这与“相信数据”类似，但这不仅仅是关于数据，还有你使用数据的方式。</p>
-<p><a href="https://www.infoworld.com/article/3214481/the-good-software-development-manifesto.html">参考来源</a></p>
-]]></content>
-      <tags>
-        <tag>软件哲学</tag>
       </tags>
   </entry>
   <entry>
@@ -2600,6 +2600,47 @@
       </tags>
   </entry>
   <entry>
+    <title>Kotlin之JvmStatic和override冲突问题</title>
+    <url>/kotlin-lang-jvmstatic-with-interface.html</url>
+    <content><![CDATA[<h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
+<table>
+    <tr>
+        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
+        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
+    </tr>
+</table>
+
+<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
+<center>
+    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
+</center>
+
+
+<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
+</code></pre>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
+<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
+</blockquote>
+<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Kotlin中的JVM注解</title>
     <url>/kotlin-lang-jvm-annotation.html</url>
     <content><![CDATA[<p>Kotlin提供了一些注解可以帮助开发者更好地兼容Java。下面探索一下Kotlin中JVM注解的使用，以及在Java中使用Kotlin类时注解对我们的影响。</p>
@@ -2670,47 +2711,6 @@
         <category>计算机</category>
       </categories>
       <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Kotlin之JvmStatic和override冲突问题</title>
-    <url>/kotlin-lang-jvmstatic-with-interface.html</url>
-    <content><![CDATA[<h4 id="一、问题"><a href="#一、问题" class="headerlink" title="一、问题"></a>一、问题</h4><p>   为了方便Java代码调用Kotlin的object类，我们通常会对object类的方法添加<code>@JvmStatic</code>注解。</p>
-<table>
-    <tr>
-        <td><img src="../images/kotlin-annotation-jvmstatic-1.jpeg" width="100%"/></td>
-        <td><img src="../images/kotlin-annotation-jvmstatic-2.jpeg" width="100%"/></td>
-    </tr>
-</table>
-
-<p>然而、当object类实现某个接口时，对应的方法却不能添加@JvmStatic注解。</p>
-<center>
-    <img src="../images/kotlin-annotation-jvmstatic-error.jpg" width="70%"/>
-</center>
-
-
-<h4 id="二、解决"><a href="#二、解决" class="headerlink" title="二、解决"></a>二、解决</h4><pre><code>要想解决上述问题，只需要将object类的实现做一些转换：
-</code></pre>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">companion</span> <span class="keyword">object</span> : Play2 &#123;</span><br><span class="line">        <span class="meta">@JvmStatic</span></span><br><span class="line">        <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">play</span><span class="params">()</span></span> &#123;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="三、思考"><a href="#三、思考" class="headerlink" title="三、思考"></a>三、思考</h4><blockquote>
-<p>为什么第一种方式会报错，而第二种方式没问题呢？</p>
-</blockquote>
-<p>通过反编译查看Java代码我们发现：object类的方法会被直接编译成Java的static方法</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> <span class="title">implements</span> <span class="title">Play</span> </span>&#123;</span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton INSTANCE;</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">private</span> Singleton() &#123;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   static &#123;</span><br><span class="line">      Singleton var0 = new Singleton();</span><br><span class="line">      INSTANCE = var0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而companion object则会被编译成<strong>静态内部类</strong>：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span> </span>&#123;</span><br><span class="line">   <span class="comment">/** <span class="doctag">@deprecated</span> */</span></span><br><span class="line">   <span class="meta">@Deprecated</span></span><br><span class="line">   <span class="keyword">public</span> static <span class="keyword">final</span> Singleton2.Companion Companion = new Singleton2.Companion((DefaultConstructorMarker)<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">   <span class="meta">@JvmStatic</span></span><br><span class="line">   <span class="keyword">public</span> static void play() &#123;</span><br><span class="line">      Companion.play();</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   <span class="keyword">private</span> static <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Companion</span> <span class="title">implements</span> <span class="title">Play2</span> </span>&#123;</span><br><span class="line">      <span class="meta">@JvmStatic</span></span><br><span class="line">      <span class="keyword">public</span> void play() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">private</span> Companion() &#123;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// $FF: synthetic method</span></span><br><span class="line">      <span class="keyword">public</span> Companion(DefaultConstructorMarker $constructor_marker) &#123;</span><br><span class="line">         <span class="keyword">this</span>();</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>由于static方法是不能重写（override）的，所以同一个关键字不能作用于一个函数。而通过静态内部类的方式，在类的层次增加静态能力，从而消除了方法的static关键字。</p>
-<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://youtrack.jetbrains.com/issue/KT-21342">issue-KT-21342</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
         <tag>Kotlin</tag>
       </tags>
   </entry>
@@ -3169,8 +3169,8 @@
         <category>计算机</category>
       </categories>
       <tags>
-        <tag>Concurrency</tag>
         <tag>Kotlin</tag>
+        <tag>Concurrency</tag>
       </tags>
   </entry>
   <entry>
@@ -4019,6 +4019,23 @@
       <tags>
         <tag>Reading</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>使用SDKMAN管理JDK</title>
+    <url>/%E4%BD%BF%E7%94%A8SDKMAN%E7%AE%A1%E7%90%86JDK.html</url>
+    <content><![CDATA[<p>在电脑安装多个版本的JDK，并自由切换，具有一定的灵活性。因为下载新JDK再配新环境变量真的很麻烦。SDKMAN可以帮我们解决这些烦恼。</p>
+<p>以下是在Mac电脑安装SDKMAN并使用：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">curl -s &quot;https://get.sdkman.io&quot; | bash</span><br></pre></td></tr></table></figure>
+<p>访问：<a href="https://get.sdkman.io/">https://get.sdkman.io/</a> 网站上的脚本，并使用bash执行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">source $HOME/.sdkman/bin/sdkman-init.sh</span><br></pre></td></tr></table></figure>
+<p>执行sdkman初始化脚本</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sdk list java</span><br></pre></td></tr></table></figure>
+<p>列出所有可用的jdk</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sdk install java 19.0.2-oracle</span><br></pre></td></tr></table></figure>
+<p>安装指定的jdk</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sdk use java 19.0.2-oracle</span><br></pre></td></tr></table></figure>
+<p>使用指定的jdk</p>
+]]></content>
   </entry>
   <entry>
     <title>做事必须搞清的十六个顺序</title>

@@ -186,6 +186,146 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/cpu-cache-overview.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="wangduwei">
+      <meta itemprop="description" content="耐心和坚持">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="蓝色的笔记本">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/cpu-cache-overview.html" class="post-title-link" itemprop="url">CPU的缓存</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-13 15:28:59" itemprop="dateCreated datePublished" datetime="2021-10-13T15:28:59+08:00">2021-10-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>971</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h4 id="一、性能"><a href="#一、性能" class="headerlink" title="一、性能"></a>一、性能</h4><p>1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。<a target="_blank" rel="noopener" href="https://gist.github.com/jboner/2841832">参考</a></p>
+<p>从数据可以看出，L1缓存和主存访问速度相差200倍。</p>
+<center>
+    <img src="../images/cpu_cache_speed.png" width="500"/>
+</center>
+
+
+<h4 id="二、缓存行"><a href="#二、缓存行" class="headerlink" title="二、缓存行"></a>二、缓存行</h4><p>CPU缓存的基本单位是缓存行，主存数据和缓存的映射存在下列关系：</p>
+<h5 id="2-1-直接映射缓存"><a href="#2-1-直接映射缓存" class="headerlink" title="2.1 直接映射缓存"></a>2.1 直接映射缓存</h5><center>
+    <img src="../images/cpu_cache_direct_map.jpeg" width="600"/>
+</center>
+
+<p>1、 index用于计算在哪一个缓存行<br>2、 offset用于计算在缓存行的哪个字节<br>3、 tag用于判断缓存是否命中（假设0x7f6601 和 0x8f6602两个地址，低位都一样，缓存行和字节偏移都命中了，tag不命中）</p>
+<p>缺点：<br>图中，cache缓存8行数据，当访问第0行、第8行、第16行时，缓存无法命中，每次都要去主存加载，发生<strong>缓存颠簸</strong></p>
+<h5 id="2-2-多路组相连"><a href="#2-2-多路组相连" class="headerlink" title="2.2 多路组相连"></a>2.2 多路组相连</h5><p>这是一个两路组相连的示意图：</p>
+<center>
+    <img src="../images/cpu_cache_n_way.png" width="500"/>
+</center>
+
+<p>1、index定位组<br>2、组内依次对tag进行对比（可以通过硬件并行比较增加性能）</p>
+<h4 id="三、缓存一致性"><a href="#三、缓存一致性" class="headerlink" title="三、缓存一致性"></a>三、缓存一致性</h4><h5 id="3-1-问题描述："><a href="#3-1-问题描述：" class="headerlink" title="3.1 问题描述："></a>3.1 问题描述：</h5><center>
+    <img src="../images/cpu_cache_problem.jpeg" width="500"/>
+</center>
+
+<p>处理器 1 读 X ：从内存读取24并缓存<br>处理器 2 读 X ：从内存读取24并缓存<br>处理器 1 写 X = 32 ：更新自己的缓存<br>处理器 3 读 X = ？  </p>
+<p>如何保证缓存的一致性？<a target="_blank" rel="noopener" href="https://people.eecs.berkeley.edu/~pattrsn/252F96/Lecture18.pdf">参考</a></p>
+<h5 id="3-2-解决方案"><a href="#3-2-解决方案" class="headerlink" title="3.2 解决方案"></a>3.2 解决方案</h5><p>3.1.1 嗅探-Snooping Solution(Snoopy Bus)</p>
+<p>根据写操作对缓存数据的影响嗅探协议可分为：<br>Write-invalidate：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并标志自己的缓存失效。这保证了全局只有一份缓存是有效的。</p>
+<ul>
+<li>MSI</li>
+<li>MESI</li>
+<li>MOSI</li>
+<li>MOESI</li>
+<li>MESIF </li>
+</ul>
+<p>Write-update：<br>当处理器写入数据时，所有的独立缓存将通过总线嗅探得到通知，并更新自己的缓存。通过总线广播给所有的缓存造成了总线繁忙，所以不常见。</p>
+<p>3.1.2 目录-Directory-Based Schemes</p>
+<h5 id="3-2-MESI协议参考"><a href="#3-2-MESI协议参考" class="headerlink" title="3.2 MESI协议参考"></a>3.2 MESI协议<a target="_blank" rel="noopener" href="https://people.cs.pitt.edu/~melhem/courses/2410p/ch5-4.pdf">参考</a></h5><p>MESI是四个状态的首字母缩写，在缓存行中用2个bit标志该缓存行的状态。</p>
+<ul>
+<li>M:Modified（只存在当前缓存行，已被修改，和主存不一致，需要更新回主存）</li>
+<li>E:Exclusive（只存在当前缓存行，和主存一致）</li>
+<li>S:Shared（其他缓存行也存在该数据，和主存一致）</li>
+<li>I:Invalid（此缓存行失效）</li>
+</ul>
+<p>MESI的状态迁移：</p>
+<center>
+    <img src="../images/cpu_cache_mesi_state.jpeg" width="500"/>
+</center>
+
+
+
+
+<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p><a target="_blank" rel="noopener" href="https://www.cnkirito.moe/cache-line/#%E4%BB%80%E4%B9%88%E6%98%AF%E7%BC%93%E5%AD%98%E8%A1%8C-Cache-Line-%EF%BC%9F">0.Java角度理解CPU缓存</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/102293437">1.Cache的基本原理</a><br><a target="_blank" rel="noopener" href="https://gist.github.com/jboner/2841832">2.每个开发者需要知道的数据</a><br><a target="_blank" rel="noopener" href="https://medium.com/fcamels-notes/%E5%BE%9E%E7%A1%AC%E9%AB%94%E8%A7%80%E9%BB%9E%E4%BA%86%E8%A7%A3-memry-barrier-%E7%9A%84%E5%AF%A6%E4%BD%9C%E5%92%8C%E6%95%88%E6%9E%9C-416ff0a64fc1">3.硬件角度看内存屏障</a><br><a target="_blank" rel="noopener" href="https://medium.com/fcamels-notes/%E5%BE%9E-double-checked-locking-%E4%BA%86%E8%A7%A3-memory-barrier-%E7%9A%84%E4%BD%9C%E7%94%A8-bb151a359c1b">4.软件角度内存屏障</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/3928995/how-do-cache-lines-work">5.stackoverflow-How do cache lines work?</a><br><a target="_blank" rel="noopener" href="https://courses.cs.duke.edu/spring09/cps104/lectures/2up-lecture17.pdf">6.courses-pdf</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://wangduwei.top/java-object-layout.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1624,101 +1764,6 @@
 <h4 id="六、参考链接"><a href="#六、参考链接" class="headerlink" title="六、参考链接"></a>六、参考链接</h4><p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4">Chapter 4. The class File Format</a>  </p>
 <p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/ae3f860499aa">Java Class文件结构解析</a></p>
 
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/android-target-30.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/android-target-30.html" class="post-title-link" itemprop="url">Android-11适配</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-26 20:27:25" itemprop="dateCreated datePublished" datetime="2021-08-26T20:27:25+08:00">2021-08-26</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.4k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Android-11,target-sdk 30 变更及适配指南</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/android-target-30.html">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
       
     </div>
 
