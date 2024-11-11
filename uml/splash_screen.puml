@@ -1,0 +1,23 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class SplashScreen
+
+class Activity
+
+class SplashScreenViewProvider
+
+interface OnExitAnimationListener
+
+interface KeepOnScreenCondition
+
+
+class Impl
+
+class Impl31
+
+SplashScreen *-- Activity
+SplashScreen *--Impl
+
+
+@enduml
