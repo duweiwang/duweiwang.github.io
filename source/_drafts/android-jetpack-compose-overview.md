@@ -13,23 +13,22 @@ tags: Android
 要想改变Compose的界面，只能通过修改控制界面的状态（变量、参数），将新状态传给它，让它重新布局绘制。  
 这个重新布局绘制的过程称为`recompose`
 
-2.1 State in composables
++ 2.1 State in composables
 
 1、可以使用`remember`在来保存一些和状态相关的数据，`recompose`时这些变量不会丢失。
-
 2、可以使用`mutableStateOf`函数，创建一个可观察的数据集。此数据的变化，会触发`recompose`。
 
 （1 + 2） = 数据变化 -> recompose -> 读取新数据构建界面
 
-2.2 其他可观察数据
-+ LiveData
-+ Flow
-+ ExJava2
++ 2.2 其他可观察数据
+  + LiveData
+  + Flow
+  + ExJava2
 
-2.3 提取状态
++ 2.3 提取状态
 
 
-2.4 状态恢复
++ 2.4 状态恢复
 
 
 #####  三、生命周期
