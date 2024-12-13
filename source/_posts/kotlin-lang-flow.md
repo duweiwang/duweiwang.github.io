@@ -121,6 +121,29 @@ fun main() = runBlocking<Unit> {
 + `flow{ ... }`
 + `flowOf`
 + `.asFlow()`
++ `callbackFlow`
+```kotlin
+fun locationFlow(locationManager: LocationManager): Flow<Location> = callbackFlow {
+  val listener = object : LocationListener {
+    override fun onLocationChanged(location: Location) {
+      trySend(location) // Emit the location update to the flow
+    }
+  }
+  locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, listener)
+  awaitClose {
+    locationManager.removeUpdates(listener) // Unregister listener on cancellation
+  }
+}
+
+fun main() {
+  runBlocking {
+    locationFlow(locationManager)
+      .collect { location ->
+        println("Received location: ${location.latitude}, ${location.longitude}")
+      }
+  }
+}
+```
 
 
 ##### 5、Flow操作符
@@ -256,5 +279,70 @@ nums.combine(strs) { a, b -> "$a -> $b" } // compose a single string with "combi
 ```
 
 
-参考文档：  
+##### 6、SharedFlow
+
+1.SharedFlow 是一种热流（hot flow），可以有多个收集器（collectors）。它能够独立于收集器发射值，并且多个收集器可以从流中收集相同的值。
+2.当需要将一个值广播给多个收集器，或者希望对同一个数据流有多个订阅者时，它非常有用。
+3.它没有初始值，但可以通过配置其重放缓存（replay cache）来为新加入的收集器存储一定数量的先前发射的值。
+
+```kotlin
+val sharedFlow = MutableSharedFlow<Int>()
+
+// Collect values from sharedFlow
+launch {
+    sharedFlow.collect { value ->
+        println("Collector 1 received: $value")
+    }
+}
+
+// Collect values from sharedFlow
+launch {
+    sharedFlow.collect { value ->
+        println("Collector 2 received: $value")
+    }
+}
+
+// Emit values to sharedFlow
+launch {
+    repeat(3) { i ->
+        sharedFlow.emit(i)
+    }
+}
+```
+
+##### 7、StateFlow
+
+1.StateFlow 是一种热流（hot flow），表示一种状态，每次仅持有一个值。它也是一种合流（conflated flow），这意味着当有新值发射时，最新的值会被保留，并立即发射给新加入的收集器。
+2.当需要维护某个状态的单一数据源（single source of truth）并自动向所有收集器更新最新状态时，它非常有用。
+3.它始终具有一个初始值，并且只存储最近发射的值。
+
+```kotlin
+val mutableStateFlow = MutableStateFlow(0)
+val stateFlow: StateFlow<Int> = mutableStateFlow
+
+// Collect values from stateFlow
+launch {
+    stateFlow.collect { value ->
+        println("Collector 1 received: $value")
+    }
+}
+
+// Collect values from stateFlow
+launch {
+    stateFlow.collect { value ->
+        println("Collector 2 received: $value")
+    }
+}
+
+// Update the state
+launch {
+    repeat(3) { i ->
+        mutableStateFlow.value = i
+    }
+}
+```
+
+
+##### 参考文档：  
 [ 1.官方文档](https://kotlinlang.org/docs/flow.html)
+[ 2.CallbackFlow in kotlin](https://medium.com/@appdevinsights/callbackflow-in-kotlin-b830a1498946)
