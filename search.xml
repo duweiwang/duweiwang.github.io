@@ -474,7 +474,7 @@
       </tags>
   </entry>
   <entry>
-    <title>android-database-large-query-2</title>
+    <title>【翻译】安卓数据库里的大量查询优化</title>
     <url>/android-database-large-query-2.html</url>
     <content><![CDATA[<p>SQLite是安卓平台存储成千上万数据的最佳方案，但是如此巨大的数据量，也可能导致性能问题。<br>在Paging库之前，我们调研了很多现存的分页方案，尤其对SQLiteCursor的潜在缺陷进行了研究。<br>这篇文章我们谈一下这个问题，并阐述是什么激励我们在架构组件Room和Paging库中使用小的查询。</p>
 <h5 id="SQLiteCursor-和-CursorAdapter"><a href="#SQLiteCursor-和-CursorAdapter" class="headerlink" title="SQLiteCursor 和 CursorAdapter"></a>SQLiteCursor 和 CursorAdapter</h5><p>SQLiteCursor是安卓SQLite数据库查询的返回值。它允许你以固定初始加载消耗来可视化大量查询结果集。</p>
@@ -504,33 +504,6 @@
 <h4 id="Android-Platform-—-Android-P-Update"><a href="#Android-Platform-—-Android-P-Update" class="headerlink" title="Android Platform — Android P Update!"></a>Android Platform — Android P Update!</h4><p>自本文首次发布以来，我们在 Android P 开发者预览版中添加了新的 API 来改善上述行为。<br>该平台现在允许应用禁用 ⅓ 窗口启发式算法并配置 CursorWindow 大小。<br>小查询仍然是避免上述所有问题的好方法，但 P 的更改赋予了应用更多的控制权，我们很快将在 Room 中使用它们来尽可能提高查询效率。</p>
 <h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://medium.com/androiddevelopers/large-database-queries-on-android-cb043ae626e8">原文</a></p>
 ]]></content>
-  </entry>
-  <entry>
-    <title>源码分析-网络框架之Retrofit</title>
-    <url>/android-github-source-retrofit.html</url>
-    <content><![CDATA[<h4 id="一、使用"><a href="#一、使用" class="headerlink" title="一、使用"></a>一、使用</h4><h5 id="1-1-定义API方法"><a href="#1-1-定义API方法" class="headerlink" title="1.1 定义API方法"></a>1.1 定义API方法</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">RemoteApi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(<span class="meta-string">&quot;timeline&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">timeline</span><span class="params">()</span></span>: RemoteLaunchesResponse </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h5 id="1-2-获取服务"><a href="#1-2-获取服务" class="headerlink" title="1.2 获取服务"></a>1.2 获取服务</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> client = OkHttpClient.Builder()</span><br><span class="line">             .addInterceptor(loggingInterceptor)</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">             .client(client)</span><br><span class="line">             .baseUrl(<span class="string">&quot;http://10.0.0.2:8080/&quot;</span>)</span><br><span class="line">             .addConverterFactory(GsonConverterFactory.create())</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> api = retrofit.create(RemoteApi::<span class="keyword">class</span>.java) <span class="comment">//1、create做了什么？</span></span><br></pre></td></tr></table></figure>
-
-<h5 id="1-3-发起请求"><a href="#1-3-发起请求" class="headerlink" title="1.3 发起请求"></a>1.3 发起请求</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">api.timeline() <span class="comment">//2、调用接口方法怎么发起请求?</span></span><br></pre></td></tr></table></figure>
-
-
-<h4 id="二、原理"><a href="#二、原理" class="headerlink" title="二、原理"></a>二、原理</h4><center>
-    <img src="../images/android-source-retrofit.jpeg" width="100%"/>
-</center>
-
-<h5 id="2-1-create做了什么"><a href="#2-1-create做了什么" class="headerlink" title="2.1 create做了什么"></a>2.1 create做了什么</h5><p>Retrofit的网络请求方法都是定义在接口中的，它会在运行时利用Java的动态代理产生代理对象，所以<code>create()</code>就是创建代理对象的方法。</p>
-<h5 id="2-2-调用接口方法怎么发起请求"><a href="#2-2-调用接口方法怎么发起请求" class="headerlink" title="2.2 调用接口方法怎么发起请求"></a>2.2 调用接口方法怎么发起请求</h5><p>当调用接口方法时，实际上是调用了代理对象的方法。它会去Retrofit中找该方法对应的<code>ServiceMethod</code>，如果找到缓存直接使用，否则解析后再使用。</p>
-<p>解析的结果是<code>ServiceMethod</code>的子类<code>CallAdapted</code>、<code>SuspendForResponse</code>、<code>SuspendForBody</code>三者之一。</p>
-<p>解析结束后调用返回对象的<code>invoke</code>方法初始化OkHttpCall对象发起真正的请求。</p>
-<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>阅读源码的过程当中，画了详细的代码执行流程图供后续回顾。另外源码中还有两个重要的对外拓展接口<code>CallAdapter</code>和<code>Converter</code>没有详细分析。</p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>Android</tag>
-        <tag>安卓框架</tag>
-      </tags>
   </entry>
   <entry>
     <title>源码分析-性能监控之Measure</title>
@@ -579,7 +552,34 @@
       </tags>
   </entry>
   <entry>
-    <title>android-github-source-shizuku</title>
+    <title>源码分析-网络框架之Retrofit</title>
+    <url>/android-github-source-retrofit.html</url>
+    <content><![CDATA[<h4 id="一、使用"><a href="#一、使用" class="headerlink" title="一、使用"></a>一、使用</h4><h5 id="1-1-定义API方法"><a href="#1-1-定义API方法" class="headerlink" title="1.1 定义API方法"></a>1.1 定义API方法</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">RemoteApi</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(<span class="meta-string">&quot;timeline&quot;</span>)</span></span><br><span class="line">    <span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">timeline</span><span class="params">()</span></span>: RemoteLaunchesResponse </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="1-2-获取服务"><a href="#1-2-获取服务" class="headerlink" title="1.2 获取服务"></a>1.2 获取服务</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> client = OkHttpClient.Builder()</span><br><span class="line">             .addInterceptor(loggingInterceptor)</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> retrofit = Retrofit.Builder()</span><br><span class="line">             .client(client)</span><br><span class="line">             .baseUrl(<span class="string">&quot;http://10.0.0.2:8080/&quot;</span>)</span><br><span class="line">             .addConverterFactory(GsonConverterFactory.create())</span><br><span class="line">             .build()</span><br><span class="line"></span><br><span class="line"> <span class="keyword">val</span> api = retrofit.create(RemoteApi::<span class="keyword">class</span>.java) <span class="comment">//1、create做了什么？</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="1-3-发起请求"><a href="#1-3-发起请求" class="headerlink" title="1.3 发起请求"></a>1.3 发起请求</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">api.timeline() <span class="comment">//2、调用接口方法怎么发起请求?</span></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="二、原理"><a href="#二、原理" class="headerlink" title="二、原理"></a>二、原理</h4><center>
+    <img src="../images/android-source-retrofit.jpeg" width="100%"/>
+</center>
+
+<h5 id="2-1-create做了什么"><a href="#2-1-create做了什么" class="headerlink" title="2.1 create做了什么"></a>2.1 create做了什么</h5><p>Retrofit的网络请求方法都是定义在接口中的，它会在运行时利用Java的动态代理产生代理对象，所以<code>create()</code>就是创建代理对象的方法。</p>
+<h5 id="2-2-调用接口方法怎么发起请求"><a href="#2-2-调用接口方法怎么发起请求" class="headerlink" title="2.2 调用接口方法怎么发起请求"></a>2.2 调用接口方法怎么发起请求</h5><p>当调用接口方法时，实际上是调用了代理对象的方法。它会去Retrofit中找该方法对应的<code>ServiceMethod</code>，如果找到缓存直接使用，否则解析后再使用。</p>
+<p>解析的结果是<code>ServiceMethod</code>的子类<code>CallAdapted</code>、<code>SuspendForResponse</code>、<code>SuspendForBody</code>三者之一。</p>
+<p>解析结束后调用返回对象的<code>invoke</code>方法初始化OkHttpCall对象发起真正的请求。</p>
+<h4 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h4><p>阅读源码的过程当中，画了详细的代码执行流程图供后续回顾。另外源码中还有两个重要的对外拓展接口<code>CallAdapter</code>和<code>Converter</code>没有详细分析。</p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>Android</tag>
+        <tag>安卓框架</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android之Shizuku库</title>
     <url>/android-github-source-shizuku.html</url>
     <content><![CDATA[<h4 id="Shizuku是什么"><a href="#Shizuku是什么" class="headerlink" title="Shizuku是什么"></a>Shizuku是什么</h4><p>一个可以让其他App，通过Shizuku来使用具有 adb/root 权限的系统 API的服务。</p>
 <h4 id="项目地址："><a href="#项目地址：" class="headerlink" title="项目地址："></a>项目地址：</h4><p><a href="https://github.com/RikkaApps/Shizuku">https://github.com/RikkaApps/Shizuku</a></p>
@@ -1194,54 +1194,6 @@
       </tags>
   </entry>
   <entry>
-    <title>对称/非对称加密和数字签名</title>
-    <url>/basic-encryption-algorithm.html</url>
-    <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
-<p>一般加密和解密的算法是公开的，需要保持隐秘的是密钥k<br>流行的对称加密算法有：DES，Triple-DES，RC2和RC4，AES</p>
-<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
-<li>发送方和接收方首先需要共享相同的密钥，即存在密钥k的分发问题，如何安全的把共享密钥在双方进行分享，这本身也是一个如何安全通信的问题，一种方法是提前双方约定好，不通过具体的通信进行协商，避免被监听和截获。另外一种方式，将是下面我们介绍的通过非对称加密信道进行对称密码的分发和共享，即混合加密系统。</li>
-<li>密钥管理的复杂度问题。由于对称加密的密钥是一对一的使用方式，若一方要跟n方通信，则需要维护n对密钥。</li>
-</ul>
-<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
-<li>加密和解密的速度要比非对称加密快很多，因此常用非对称加密建立的安全信道进行共享密钥的分享，完成后，具体的加解密则使用对称加密。即混合加密系统。</li>
-</ul>
-<p>另外一个点需要重点说明的是，密钥k的长度对解密破解的难度有很重大的影响，k的长度越长，对应的密码空间就越大，遭到暴力破解或者词典破解的难度就更大，就更加安全。</p>
-<center>
-    <img src="../images/dcjm.png" width="400"/>
-</center>
-
-<h4 id="2-数字签名的过程："><a href="#2-数字签名的过程：" class="headerlink" title="2.数字签名的过程："></a>2.数字签名的过程：</h4><ul>
-<li>发送方A首先对变长的报文提取成一个定长的摘要，一般是md5等</li>
-<li>A对摘要应用了一个签名函数，并且用A自己的私钥作为参数，因为只有A才知道私钥，所以正确的签名会说明签名者就是其所有者。</li>
-<li>一旦计算出签名，节点A就将其附加到报文的末尾，并将报文和签名一起都发送给B</li>
-<li>在接收端B，首先会按照同样的算法计算出报文的摘要，然后对签名用A的公钥进行解码，得出解码后的摘要，两个摘要进行比较，则可以判断是否是A发送的且内容没被篡改过。</li>
-</ul>
-<center>
-    <img src="../images/szqm.png" width="400"/>
-</center>
-
-
-<h4 id="3-非对称加解密的过程："><a href="#3-非对称加解密的过程：" class="headerlink" title="3.非对称加解密的过程："></a>3.非对称加解密的过程：</h4><p>加密一方找到接收方的公钥e (如何找到呢？大部分的公钥查找工作实际上都是通过数字证书来实现的)，然后用公钥e对明文p进行加密后得到密文c，并将得到的密文发送给接收方，接收方收到密文后，用自己保留的私钥d进行解密，得到明文p，需要注意的是：用公钥加密的密文，只有拥有私钥的一方才能解密，这样就可以解决加密的各方可以统一使用一个公钥即可。</p>
-<p>常用的非对称加密算法有：RSA</p>
-<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
-<li>不存在密钥分发的问题，解码方可以自己生成密钥对，一个做私钥存起来，另外一个作为公钥进行发布。</li>
-<li>解决了密钥管理的复杂度问题，多个加密方都可以使用一个已知的公钥进行加密，但只有拥有私钥的一方才能解密。</li>
-</ul>
-<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
-<li>非对称加密不足的地方是加解密的速度没有对称加密快。</li>
-</ul>
-<p>综上，分析了对称加密和非对称加密各自的优缺点后，有没有一种办法是可以利用两者的优点但避开对应的缺点呢？答应是有的，实际上用得最多的是混合加密系统，比如在两个节点间通过便捷的公开密码加密技术建立起安全通信，然后再用安全的通信产生并发送临时的随机对称密钥，通过更快的对称加密技术对剩余的数据进行加密。</p>
-<center>
-    <img src="../images/fdcjm.png" width="400"/>
-</center>]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>cryptography</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>CPU的缓存</title>
     <url>/cpu-cache-overview.html</url>
     <content><![CDATA[<h4 id="一、性能"><a href="#一、性能" class="headerlink" title="一、性能"></a>一、性能</h4><p>1.1 在分层存储结构中，随着存储容量的增加，延迟也随之增加。<a href="https://gist.github.com/jboner/2841832">参考</a></p>
@@ -1303,6 +1255,54 @@
       </categories>
       <tags>
         <tag>计算机基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>对称/非对称加密和数字签名</title>
+    <url>/basic-encryption-algorithm.html</url>
+    <content><![CDATA[<h4 id="1-对称加解密的过程："><a href="#1-对称加解密的过程：" class="headerlink" title="1.对称加解密的过程："></a>1.对称加解密的过程：</h4><p>（大家用相同的钥匙来进行加解密）<br><del>发送端和接收端首先要共享相同的密钥k(即通信前双方都需要知道对应的密钥)才能进行通信。发送端用共享密钥k对明文p进行加密，得到密文c，并将得到的密文发送给接收端，接收端收到密文后，并用其相同的共享密钥k对密文进行解密，得出明文p。</del></p>
+<p>一般加密和解密的算法是公开的，需要保持隐秘的是密钥k<br>流行的对称加密算法有：DES，Triple-DES，RC2和RC4，AES</p>
+<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>发送方和接收方首先需要共享相同的密钥，即存在密钥k的分发问题，如何安全的把共享密钥在双方进行分享，这本身也是一个如何安全通信的问题，一种方法是提前双方约定好，不通过具体的通信进行协商，避免被监听和截获。另外一种方式，将是下面我们介绍的通过非对称加密信道进行对称密码的分发和共享，即混合加密系统。</li>
+<li>密钥管理的复杂度问题。由于对称加密的密钥是一对一的使用方式，若一方要跟n方通信，则需要维护n对密钥。</li>
+</ul>
+<h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>加密和解密的速度要比非对称加密快很多，因此常用非对称加密建立的安全信道进行共享密钥的分享，完成后，具体的加解密则使用对称加密。即混合加密系统。</li>
+</ul>
+<p>另外一个点需要重点说明的是，密钥k的长度对解密破解的难度有很重大的影响，k的长度越长，对应的密码空间就越大，遭到暴力破解或者词典破解的难度就更大，就更加安全。</p>
+<center>
+    <img src="../images/dcjm.png" width="400"/>
+</center>
+
+<h4 id="2-数字签名的过程："><a href="#2-数字签名的过程：" class="headerlink" title="2.数字签名的过程："></a>2.数字签名的过程：</h4><ul>
+<li>发送方A首先对变长的报文提取成一个定长的摘要，一般是md5等</li>
+<li>A对摘要应用了一个签名函数，并且用A自己的私钥作为参数，因为只有A才知道私钥，所以正确的签名会说明签名者就是其所有者。</li>
+<li>一旦计算出签名，节点A就将其附加到报文的末尾，并将报文和签名一起都发送给B</li>
+<li>在接收端B，首先会按照同样的算法计算出报文的摘要，然后对签名用A的公钥进行解码，得出解码后的摘要，两个摘要进行比较，则可以判断是否是A发送的且内容没被篡改过。</li>
+</ul>
+<center>
+    <img src="../images/szqm.png" width="400"/>
+</center>
+
+
+<h4 id="3-非对称加解密的过程："><a href="#3-非对称加解密的过程：" class="headerlink" title="3.非对称加解密的过程："></a>3.非对称加解密的过程：</h4><p>加密一方找到接收方的公钥e (如何找到呢？大部分的公钥查找工作实际上都是通过数字证书来实现的)，然后用公钥e对明文p进行加密后得到密文c，并将得到的密文发送给接收方，接收方收到密文后，用自己保留的私钥d进行解密，得到明文p，需要注意的是：用公钥加密的密文，只有拥有私钥的一方才能解密，这样就可以解决加密的各方可以统一使用一个公钥即可。</p>
+<p>常用的非对称加密算法有：RSA</p>
+<h5 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>不存在密钥分发的问题，解码方可以自己生成密钥对，一个做私钥存起来，另外一个作为公钥进行发布。</li>
+<li>解决了密钥管理的复杂度问题，多个加密方都可以使用一个已知的公钥进行加密，但只有拥有私钥的一方才能解密。</li>
+</ul>
+<h5 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>非对称加密不足的地方是加解密的速度没有对称加密快。</li>
+</ul>
+<p>综上，分析了对称加密和非对称加密各自的优缺点后，有没有一种办法是可以利用两者的优点但避开对应的缺点呢？答应是有的，实际上用得最多的是混合加密系统，比如在两个节点间通过便捷的公开密码加密技术建立起安全通信，然后再用安全的通信产生并发送临时的随机对称密钥，通过更快的对称加密技术对剩余的数据进行加密。</p>
+<center>
+    <img src="../images/fdcjm.png" width="400"/>
+</center>]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>cryptography</tag>
       </tags>
   </entry>
   <entry>
@@ -1397,6 +1397,93 @@
 ]]></content>
       <tags>
         <tag>计算机</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>投资回报率</title>
+    <url>/econonmics-roa-roe-roic-roce.html</url>
+    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><ul>
+<li>资产回报率（ROA）</li>
+<li>净资产回报率（ROE）</li>
+<li>投入资本回报率（ROIC）</li>
+<li>使用资本回报率（ROCE）</li>
+</ul>
+<p>不同的回报率，实际上是衡量公司的不同视角。</p>
+<h4 id="二、资产回报率（ROA）"><a href="#二、资产回报率（ROA）" class="headerlink" title="二、资产回报率（ROA）"></a>二、资产回报率（ROA）</h4><h5 id="2-1-基本概念"><a href="#2-1-基本概念" class="headerlink" title="2.1 基本概念"></a>2.1 基本概念</h5><p><strong>运用全部资金获取利润能力的集中体现</strong></p>
+<center>
+    <img src="../images/ec-roa.png" width="50%"/>
+</center>
+
+<p>$$<br>    ROA=\frac{净利润}{总资产}<br>$$</p>
+<h5 id="2-2-概念拆分"><a href="#2-2-概念拆分" class="headerlink" title="2.2 概念拆分"></a>2.2 概念拆分</h5><p>$$<br>    ROA = 净利润率NPM * 资产利用率AU = \frac{净利润}{营业总收入} * \frac{营业总收入}{总资产} = \frac{（主营业务收入+非主营业务收入）}{总资产}<br>$$</p>
+<h5 id="2-3-概念理解"><a href="#2-3-概念理解" class="headerlink" title="2.3 概念理解"></a>2.3 概念理解</h5><p>ROA这个回报率衡量的是资产的回报率。<br>但是一个公司资产负债表上的资产价值更多的是反映了历史而不是当前，<br>而且不同的行业的ROA具有不可比性。<br>最简单的例子，很多类金融企业有无息流动负债，增加了总资产，降低了ROA，<br>但是无偿使用上下游资金实际上是公司有竞争力的体现。</p>
+<h4 id="三、净资产回报率（ROE）"><a href="#三、净资产回报率（ROE）" class="headerlink" title="三、净资产回报率（ROE）"></a>三、净资产回报率（ROE）</h4><h5 id="2-1-基本概念-1"><a href="#2-1-基本概念-1" class="headerlink" title="2.1 基本概念"></a>2.1 基本概念</h5><p>ROE的视角是从股东的角度看问题，单纯从股权的角度衡量回报，而不考虑公司的资本结构及负债情况。衡量公司赚钱的效率。</p>
+<center>
+    <img src="../images/ec-roe.png" width="50%"/>
+</center>
+
+<p>$$<br>    净资产收益率 = \frac{净利润}{净资产}<br>$$</p>
+<blockquote>
+<p>A公司：10亿净资产赚2亿。ROE = 20%<br>B公司：50亿净资产赚5亿。ROE = 10%</p>
+</blockquote>
+<h5 id="2-2-概念拆分-1"><a href="#2-2-概念拆分-1" class="headerlink" title="2.2 概念拆分"></a>2.2 概念拆分</h5><p>$$<br>    净资产收益率 = \frac{净利润}{净资产} = \frac{净利润}{营业收入} * \frac{营业收入}{总资产} * \frac{总资产}{净资产}<br>$$</p>
+<p>$$<br>    净资产收益率 = 净利润 * 资产周转率 * 权益乘数<br>$$</p>
+<p>$$<br>    权益乘数 = \frac{总资产}{净资产}<br>$$</p>
+<p>$$<br>    资产周转率 = \frac{营业收入}{总资产}<br>$$</p>
+<p>影响因素：</p>
+<ul>
+<li>净利润：反应盈利能力</li>
+<li>资产周转率：反应资产使用效率</li>
+<li>权益乘数：反应负债程度</li>
+</ul>
+<p>提升ROE的办法：</p>
+<ul>
+<li>提高周转率</li>
+<li>廉价的债务杠杆</li>
+<li>更高的债务杠杆</li>
+<li>更低的所得税</li>
+<li>更高的运营利润率</li>
+</ul>
+<h5 id="2-3-概念理解-1"><a href="#2-3-概念理解-1" class="headerlink" title="2.3 概念理解"></a>2.3 概念理解</h5><p>ROE对股东来说意义最大，是股票复利增长的源泉。<br>ROE可以在不同行业与不同企业之间横向比较。<br>相当于股票这种“股权债券”的收益率。<br>对投资人来说无论是投资铁路还是互联网，都相当于是买了“股权债券”。<br>在同等风险情况下，当然是收益率越高越好。<br>而且，ROE还可以与政府债券、企业债券的收益率跨资产类别横向比较。</p>
+<h5 id="不足"><a href="#不足" class="headerlink" title="不足"></a>不足</h5><p>ROE的问题在于无法反映债务杠杆对净利润的影响。<br>如果一个企业借更多的债，一般就能产生更多净利润，ROE也会提高。<br>但是这样的提高是以牺牲企业经营稳健程度为代价的。<br>因此，分析ROE一定要结合杜邦公式，并与同行业进行比较。</p>
+<hr>
+<h4 id="四、投入资本回报率（ROIC）"><a href="#四、投入资本回报率（ROIC）" class="headerlink" title="四、投入资本回报率（ROIC）"></a>四、投入资本回报率（ROIC）</h4><center>
+    <img src="../images/ec-roic-1.png" width="50%"/>
+</center>
+
+
+<p>ROIC是从资本的角度看问题，综合考虑股权与债权，衡量投资的效率。与ROIC对应的是平均资金成本（WACC）。如果ROIC小于WACC，就说明投入资本的回报小于平均资本成本，公司是在浪费资本。</p>
+<p>ROIC=息税前收益（EBIT）*（1-税率）/投入资本</p>
+<p>$$<br>    ROIC = \frac{息税前收益（EBIT）*（1-税率）}{投入资本}<br>$$</p>
+<p>$$<br>    投入资本 = 股东权益 + 有息负债<br>$$</p>
+<p>$$<br>    ROIC = \frac{EBIT（1-税率）}{有息负债+权益）}<br>$$</p>
+<p>公式中分子是指一家公司如果完全以权益筹资所应报告的净利润，分母是指公司所有要求回报的现金来源的总和，也就是说，尽管应付账款也是公司的一种现金来源，但因其未附带明确的成本而被排除在外。实质上，ROIC是生产经营活动中所有投入资本赚取的收益率，而不论这些投入资本是被称为债务还是权益。</p>
+<center>
+    <img src="../images/ec-roic-2.png" width="50%"/>
+</center>
+
+
+<p>投入资本回报率是EBIT（税及利息前盈利）经过税率调整比上投入的资本，也就是股东权益加负债减去非运营现金和投资。之所以用EBIT就是因为利息是由债务产生的，是对债权的回报，当计算债权加股权的总的投入资本的回报率时应该把利息加回来。</p>
+<p>投入资本也可以表示为净运营资金（流动运营资产减去无息流动负债）加固定资产，加无形资产及商誉，加其他运营资产。</p>
+<p>ROIC的问题在于没有考虑无息流动负债的影响。ROIC实际上是衡量投入的总资本的使用效率，与平均资金成本WACC相结合可以揭示一个企业的真正效率。ROIC &lt; WACC 是卖空大师Jim Chanos经常用来寻找卖空对象的一个重要指标。</p>
+<p>但是，ROIC对于类金融企业的分析不太容易。一些类金融企业如国美、苏宁、联想、格力等，占用了大量上下游资金作为无息流动负债，因此提高了EBIT。但是，和有息负债一样，无息负债也存在风险。虽然不用付利息，但是一旦经营形式改变，这些资金很有可能像“热钱”一样撤走。国美在黄光裕被捕后就陷入了这样的危险境地，只要供应商撤资，国美就会破产。这些企业虽然ROIC很高，但是静态不稳定，动态稳定。</p>
+<h4 id="五、使用资本回报率-ROCE-Return-on-Capital-Employed"><a href="#五、使用资本回报率-ROCE-Return-on-Capital-Employed" class="headerlink" title="五、使用资本回报率(ROCE = Return on Capital Employed)"></a>五、使用资本回报率(ROCE = Return on Capital Employed)</h4><center>
+    <img src="../images/ec-roce.png" width="50%"/>
+</center>
+
+<p>$$<br>    ROCE資本運用報酬率 = \frac{息税前收益（EBIT）}{已動用資本(Capital Employed)}<br>$$</p>
+<p>$$<br>    已動用資本 = 總資產 -流動負債<br>$$</p>
+<p>ROCE实质上是从企业价值（EnterpriseValue，EV）的角度，从并购的角度看资本的回报率。ROCE中的使用资本是股东权益加有息负债再减现金。这实质上相当于1倍PB并购企业时的企业价值。因为如果你以1倍PB并购一个企业，你要付的价格就是股东权益，并且承担所有负债，但也获得所有现金。</p>
+<p>ROCE实际上是从一个并购者的角度看问题，如果并购一个企业，付出企业价值EV后的回报率有多少？这与ROIC最大的不同是：ROIC从企业的拥有者的角度看问题，衡量投入资本的使用效率与回报率。而ROCE是从潜在并购者的角度看问题，衡量如果1倍PB并购付出EV后的回报率，也就是并购到底值不值的问题。这接近价值投资买股票就是买公司的原则。</p>
+<p>ROCE：使用资本回报率是EBIT（税及利息前盈利）比上使用的资本，也就是所有有息负债加上股东权益。这个指标与ROIC相近，但是使用的是EBIT而没有经过税率调整，因此可以用来比较不同税率的企业。ROCE也容易忽视公司无息负债的融资效应。</p>
+<p>总之，本质上是从四个不同的视角看问题，衡量不同的指标。只有全面综合考虑，才能更全面的看问题</p>
+<h4 id="六、参考来源"><a href="#六、参考来源" class="headerlink" title="六、参考来源"></a>六、参考来源</h4><p><a href="https://xueqiu.com/1484348349/107966592">雪球-老韩7</a><br><a href="https://rich01.com/what-is-roce/">ROCE資本運用報酬率</a></p>
+]]></content>
+      <categories>
+        <category>经济学</category>
+      </categories>
+      <tags>
+        <tag>经济学</tag>
       </tags>
   </entry>
   <entry>
@@ -1522,93 +1609,6 @@
       </tags>
   </entry>
   <entry>
-    <title>投资回报率</title>
-    <url>/econonmics-roa-roe-roic-roce.html</url>
-    <content><![CDATA[<h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><ul>
-<li>资产回报率（ROA）</li>
-<li>净资产回报率（ROE）</li>
-<li>投入资本回报率（ROIC）</li>
-<li>使用资本回报率（ROCE）</li>
-</ul>
-<p>不同的回报率，实际上是衡量公司的不同视角。</p>
-<h4 id="二、资产回报率（ROA）"><a href="#二、资产回报率（ROA）" class="headerlink" title="二、资产回报率（ROA）"></a>二、资产回报率（ROA）</h4><h5 id="2-1-基本概念"><a href="#2-1-基本概念" class="headerlink" title="2.1 基本概念"></a>2.1 基本概念</h5><p><strong>运用全部资金获取利润能力的集中体现</strong></p>
-<center>
-    <img src="../images/ec-roa.png" width="50%"/>
-</center>
-
-<p>$$<br>    ROA=\frac{净利润}{总资产}<br>$$</p>
-<h5 id="2-2-概念拆分"><a href="#2-2-概念拆分" class="headerlink" title="2.2 概念拆分"></a>2.2 概念拆分</h5><p>$$<br>    ROA = 净利润率NPM * 资产利用率AU = \frac{净利润}{营业总收入} * \frac{营业总收入}{总资产} = \frac{（主营业务收入+非主营业务收入）}{总资产}<br>$$</p>
-<h5 id="2-3-概念理解"><a href="#2-3-概念理解" class="headerlink" title="2.3 概念理解"></a>2.3 概念理解</h5><p>ROA这个回报率衡量的是资产的回报率。<br>但是一个公司资产负债表上的资产价值更多的是反映了历史而不是当前，<br>而且不同的行业的ROA具有不可比性。<br>最简单的例子，很多类金融企业有无息流动负债，增加了总资产，降低了ROA，<br>但是无偿使用上下游资金实际上是公司有竞争力的体现。</p>
-<h4 id="三、净资产回报率（ROE）"><a href="#三、净资产回报率（ROE）" class="headerlink" title="三、净资产回报率（ROE）"></a>三、净资产回报率（ROE）</h4><h5 id="2-1-基本概念-1"><a href="#2-1-基本概念-1" class="headerlink" title="2.1 基本概念"></a>2.1 基本概念</h5><p>ROE的视角是从股东的角度看问题，单纯从股权的角度衡量回报，而不考虑公司的资本结构及负债情况。衡量公司赚钱的效率。</p>
-<center>
-    <img src="../images/ec-roe.png" width="50%"/>
-</center>
-
-<p>$$<br>    净资产收益率 = \frac{净利润}{净资产}<br>$$</p>
-<blockquote>
-<p>A公司：10亿净资产赚2亿。ROE = 20%<br>B公司：50亿净资产赚5亿。ROE = 10%</p>
-</blockquote>
-<h5 id="2-2-概念拆分-1"><a href="#2-2-概念拆分-1" class="headerlink" title="2.2 概念拆分"></a>2.2 概念拆分</h5><p>$$<br>    净资产收益率 = \frac{净利润}{净资产} = \frac{净利润}{营业收入} * \frac{营业收入}{总资产} * \frac{总资产}{净资产}<br>$$</p>
-<p>$$<br>    净资产收益率 = 净利润 * 资产周转率 * 权益乘数<br>$$</p>
-<p>$$<br>    权益乘数 = \frac{总资产}{净资产}<br>$$</p>
-<p>$$<br>    资产周转率 = \frac{营业收入}{总资产}<br>$$</p>
-<p>影响因素：</p>
-<ul>
-<li>净利润：反应盈利能力</li>
-<li>资产周转率：反应资产使用效率</li>
-<li>权益乘数：反应负债程度</li>
-</ul>
-<p>提升ROE的办法：</p>
-<ul>
-<li>提高周转率</li>
-<li>廉价的债务杠杆</li>
-<li>更高的债务杠杆</li>
-<li>更低的所得税</li>
-<li>更高的运营利润率</li>
-</ul>
-<h5 id="2-3-概念理解-1"><a href="#2-3-概念理解-1" class="headerlink" title="2.3 概念理解"></a>2.3 概念理解</h5><p>ROE对股东来说意义最大，是股票复利增长的源泉。<br>ROE可以在不同行业与不同企业之间横向比较。<br>相当于股票这种“股权债券”的收益率。<br>对投资人来说无论是投资铁路还是互联网，都相当于是买了“股权债券”。<br>在同等风险情况下，当然是收益率越高越好。<br>而且，ROE还可以与政府债券、企业债券的收益率跨资产类别横向比较。</p>
-<h5 id="不足"><a href="#不足" class="headerlink" title="不足"></a>不足</h5><p>ROE的问题在于无法反映债务杠杆对净利润的影响。<br>如果一个企业借更多的债，一般就能产生更多净利润，ROE也会提高。<br>但是这样的提高是以牺牲企业经营稳健程度为代价的。<br>因此，分析ROE一定要结合杜邦公式，并与同行业进行比较。</p>
-<hr>
-<h4 id="四、投入资本回报率（ROIC）"><a href="#四、投入资本回报率（ROIC）" class="headerlink" title="四、投入资本回报率（ROIC）"></a>四、投入资本回报率（ROIC）</h4><center>
-    <img src="../images/ec-roic-1.png" width="50%"/>
-</center>
-
-
-<p>ROIC是从资本的角度看问题，综合考虑股权与债权，衡量投资的效率。与ROIC对应的是平均资金成本（WACC）。如果ROIC小于WACC，就说明投入资本的回报小于平均资本成本，公司是在浪费资本。</p>
-<p>ROIC=息税前收益（EBIT）*（1-税率）/投入资本</p>
-<p>$$<br>    ROIC = \frac{息税前收益（EBIT）*（1-税率）}{投入资本}<br>$$</p>
-<p>$$<br>    投入资本 = 股东权益 + 有息负债<br>$$</p>
-<p>$$<br>    ROIC = \frac{EBIT（1-税率）}{有息负债+权益）}<br>$$</p>
-<p>公式中分子是指一家公司如果完全以权益筹资所应报告的净利润，分母是指公司所有要求回报的现金来源的总和，也就是说，尽管应付账款也是公司的一种现金来源，但因其未附带明确的成本而被排除在外。实质上，ROIC是生产经营活动中所有投入资本赚取的收益率，而不论这些投入资本是被称为债务还是权益。</p>
-<center>
-    <img src="../images/ec-roic-2.png" width="50%"/>
-</center>
-
-
-<p>投入资本回报率是EBIT（税及利息前盈利）经过税率调整比上投入的资本，也就是股东权益加负债减去非运营现金和投资。之所以用EBIT就是因为利息是由债务产生的，是对债权的回报，当计算债权加股权的总的投入资本的回报率时应该把利息加回来。</p>
-<p>投入资本也可以表示为净运营资金（流动运营资产减去无息流动负债）加固定资产，加无形资产及商誉，加其他运营资产。</p>
-<p>ROIC的问题在于没有考虑无息流动负债的影响。ROIC实际上是衡量投入的总资本的使用效率，与平均资金成本WACC相结合可以揭示一个企业的真正效率。ROIC &lt; WACC 是卖空大师Jim Chanos经常用来寻找卖空对象的一个重要指标。</p>
-<p>但是，ROIC对于类金融企业的分析不太容易。一些类金融企业如国美、苏宁、联想、格力等，占用了大量上下游资金作为无息流动负债，因此提高了EBIT。但是，和有息负债一样，无息负债也存在风险。虽然不用付利息，但是一旦经营形式改变，这些资金很有可能像“热钱”一样撤走。国美在黄光裕被捕后就陷入了这样的危险境地，只要供应商撤资，国美就会破产。这些企业虽然ROIC很高，但是静态不稳定，动态稳定。</p>
-<h4 id="五、使用资本回报率-ROCE-Return-on-Capital-Employed"><a href="#五、使用资本回报率-ROCE-Return-on-Capital-Employed" class="headerlink" title="五、使用资本回报率(ROCE = Return on Capital Employed)"></a>五、使用资本回报率(ROCE = Return on Capital Employed)</h4><center>
-    <img src="../images/ec-roce.png" width="50%"/>
-</center>
-
-<p>$$<br>    ROCE資本運用報酬率 = \frac{息税前收益（EBIT）}{已動用資本(Capital Employed)}<br>$$</p>
-<p>$$<br>    已動用資本 = 總資產 -流動負債<br>$$</p>
-<p>ROCE实质上是从企业价值（EnterpriseValue，EV）的角度，从并购的角度看资本的回报率。ROCE中的使用资本是股东权益加有息负债再减现金。这实质上相当于1倍PB并购企业时的企业价值。因为如果你以1倍PB并购一个企业，你要付的价格就是股东权益，并且承担所有负债，但也获得所有现金。</p>
-<p>ROCE实际上是从一个并购者的角度看问题，如果并购一个企业，付出企业价值EV后的回报率有多少？这与ROIC最大的不同是：ROIC从企业的拥有者的角度看问题，衡量投入资本的使用效率与回报率。而ROCE是从潜在并购者的角度看问题，衡量如果1倍PB并购付出EV后的回报率，也就是并购到底值不值的问题。这接近价值投资买股票就是买公司的原则。</p>
-<p>ROCE：使用资本回报率是EBIT（税及利息前盈利）比上使用的资本，也就是所有有息负债加上股东权益。这个指标与ROIC相近，但是使用的是EBIT而没有经过税率调整，因此可以用来比较不同税率的企业。ROCE也容易忽视公司无息负债的融资效应。</p>
-<p>总之，本质上是从四个不同的视角看问题，衡量不同的指标。只有全面综合考虑，才能更全面的看问题</p>
-<h4 id="六、参考来源"><a href="#六、参考来源" class="headerlink" title="六、参考来源"></a>六、参考来源</h4><p><a href="https://xueqiu.com/1484348349/107966592">雪球-老韩7</a><br><a href="https://rich01.com/what-is-roce/">ROCE資本運用報酬率</a></p>
-]]></content>
-      <categories>
-        <category>经济学</category>
-      </categories>
-      <tags>
-        <tag>经济学</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>开发者七条</title>
     <url>/ep-good-developer-manifesto.html</url>
     <content><![CDATA[<p>软件开发不只是API调用和基础语法，以下是应用开发的全貌：</p>
@@ -1627,6 +1627,40 @@
 ]]></content>
       <tags>
         <tag>软件哲学</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>重定位</title>
+    <url>/file-format-elf-relocation.html</url>
+    <content><![CDATA[<h4 id="一、可重定位文件"><a href="#一、可重定位文件" class="headerlink" title="一、可重定位文件"></a>一、可重定位文件</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//main.c                    //x.c</span><br><span class="line"></span><br><span class="line">extern void foo(void);      |   #include &lt;stdio.h&gt;</span><br><span class="line">                            |</span><br><span class="line">int main(void)              |   void foo()</span><br><span class="line">&#123;                           |   &#123;</span><br><span class="line">    foo();                  |       printf(&quot;foo\n&quot;);</span><br><span class="line">    return 0;               |   &#125;</span><br><span class="line">&#125;                           |</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt; objdump -d main.o</span><br><span class="line">00000000 &lt;main&gt;:</span><br><span class="line">   0:	55                   	push   %ebp</span><br><span class="line">   1:	89 e5                	mov    %esp,%ebp</span><br><span class="line">   3:	83 e4 f0             	and    $0xfffffff0,%esp</span><br><span class="line">   6:	e8 fc ff ff ff       	call   7 &lt;main+0x7&gt;</span><br><span class="line">   b:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  10:	c9                   	leave</span><br><span class="line">  11:	c3                   	ret</span><br></pre></td></tr></table></figure>
+
+<p>在编译和汇编阶段，[main.c -&gt; main.o] 汇编器无法确定外部定义的函数和全局变量的地址，所以它只能使用一个假地址占位，并产生一条额外的记录，让后面的链接器使用这条记录帮它完成地址修正。这条记录对于代码段来说放在[.rel.text] ，对于数据段来说放在[.rel.data],它们都是重定位文件的一个section。</p>
+<p>对于每一条记录都对应于如下的一个数据结构：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr r_offset;</span><br><span class="line">        uint32_t   r_info;</span><br><span class="line">        int32_t    r_addend;</span><br><span class="line">&#125; Elf32_Rela;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="二、静态链接"><a href="#二、静态链接" class="headerlink" title="二、静态链接"></a>二、静态链接</h4><p>1、多个目标文件的合并:</p>
+<center>
+    <img src="../images/elf_obj_file_merge.png" width="500"/>
+</center>
+
+<p>2、对代码段，数据段以及各符号进行地址分配<br>3、根据 [relocation entries] 重新计算代码和数据段中的假地址。</p>
+<h4 id="三、动态链接"><a href="#三、动态链接" class="headerlink" title="三、动态链接"></a>三、动态链接</h4><h5 id="1、静态链接的缺点"><a href="#1、静态链接的缺点" class="headerlink" title="1、静态链接的缺点"></a>1、静态链接的缺点</h5><ul>
+<li>静态链接将使一些公用代码如libc库产生冗余，浪费内存和磁盘空间</li>
+<li>如果模块化开发，一个模块更新就得重新链接</li>
+</ul>
+<h5 id="2、动态链接的概念"><a href="#2、动态链接的概念" class="headerlink" title="2、动态链接的概念"></a>2、动态链接的概念</h5><p>相较于静态链接在编译期进行链接操作，将链接过程推迟到运行时进行的过程叫动态链接。</p>
+<h5 id="3、动态链接的实现"><a href="#3、动态链接的实现" class="headerlink" title="3、动态链接的实现"></a>3、动态链接的实现</h5><p>   3.1 地址无关代码<br>    由于在运行时，代码段是共享的，只能读不能写，所以需要将指令中那些需要修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变，而数据部分可以在每一个进程中拥有一个副本。</p>
+<p>   3.2 全局偏移表（Global Offset Table）<br>    当链接过程发生在运行期时，外部的符号调用只有在运行时装载模块后才能确定模块被装载的地址，以及模块内符号的确切地址。所以ELF提供了一个全局偏移表（GOT）来记录这些外部模块的符号引用。当模块被装载时，会更新此表的内容。</p>
+<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p>1.<a href="https://people.cs.pitt.edu/~xianeizhang/notes/Linking.html#symbol">Linking</a><br>2.<a href="https://stac47.github.io/c/relocation/elf/tutorial/2018/03/01/understanding-relocation-elf.html">understanding-relocation-elf</a><br>3.<a href="http://stffrdhrn.github.io/hardware/embedded/openrisc/2019/11/29/relocs.html">ELF Binaries and Relocation Entries</a><br>4.<a href="http://chuquan.me/2018/06/03/linking-static-linking-dynamic-linking/">static-linking-dynamic-linking</a><br>5.<a href="https://blog.csdn.net/ayu_ag/article/details/78655300">ELF函数重定位问题</a></p>
+]]></content>
+      <categories>
+        <category>计算机</category>
+      </categories>
+      <tags>
+        <tag>C/C++</tag>
       </tags>
   </entry>
   <entry>
@@ -1741,40 +1775,6 @@
       <tags>
         <tag>Java</tag>
         <tag>File</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>重定位</title>
-    <url>/file-format-elf-relocation.html</url>
-    <content><![CDATA[<h4 id="一、可重定位文件"><a href="#一、可重定位文件" class="headerlink" title="一、可重定位文件"></a>一、可重定位文件</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">//main.c                    //x.c</span><br><span class="line"></span><br><span class="line">extern void foo(void);      |   #include &lt;stdio.h&gt;</span><br><span class="line">                            |</span><br><span class="line">int main(void)              |   void foo()</span><br><span class="line">&#123;                           |   &#123;</span><br><span class="line">    foo();                  |       printf(&quot;foo\n&quot;);</span><br><span class="line">    return 0;               |   &#125;</span><br><span class="line">&#125;                           |</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt; objdump -d main.o</span><br><span class="line">00000000 &lt;main&gt;:</span><br><span class="line">   0:	55                   	push   %ebp</span><br><span class="line">   1:	89 e5                	mov    %esp,%ebp</span><br><span class="line">   3:	83 e4 f0             	and    $0xfffffff0,%esp</span><br><span class="line">   6:	e8 fc ff ff ff       	call   7 &lt;main+0x7&gt;</span><br><span class="line">   b:	b8 00 00 00 00       	mov    $0x0,%eax</span><br><span class="line">  10:	c9                   	leave</span><br><span class="line">  11:	c3                   	ret</span><br></pre></td></tr></table></figure>
-
-<p>在编译和汇编阶段，[main.c -&gt; main.o] 汇编器无法确定外部定义的函数和全局变量的地址，所以它只能使用一个假地址占位，并产生一条额外的记录，让后面的链接器使用这条记录帮它完成地址修正。这条记录对于代码段来说放在[.rel.text] ，对于数据段来说放在[.rel.data],它们都是重定位文件的一个section。</p>
-<p>对于每一条记录都对应于如下的一个数据结构：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">typedef struct &#123;</span><br><span class="line">        Elf32_Addr r_offset;</span><br><span class="line">        uint32_t   r_info;</span><br><span class="line">        int32_t    r_addend;</span><br><span class="line">&#125; Elf32_Rela;</span><br></pre></td></tr></table></figure>
-
-
-<h4 id="二、静态链接"><a href="#二、静态链接" class="headerlink" title="二、静态链接"></a>二、静态链接</h4><p>1、多个目标文件的合并:</p>
-<center>
-    <img src="../images/elf_obj_file_merge.png" width="500"/>
-</center>
-
-<p>2、对代码段，数据段以及各符号进行地址分配<br>3、根据 [relocation entries] 重新计算代码和数据段中的假地址。</p>
-<h4 id="三、动态链接"><a href="#三、动态链接" class="headerlink" title="三、动态链接"></a>三、动态链接</h4><h5 id="1、静态链接的缺点"><a href="#1、静态链接的缺点" class="headerlink" title="1、静态链接的缺点"></a>1、静态链接的缺点</h5><ul>
-<li>静态链接将使一些公用代码如libc库产生冗余，浪费内存和磁盘空间</li>
-<li>如果模块化开发，一个模块更新就得重新链接</li>
-</ul>
-<h5 id="2、动态链接的概念"><a href="#2、动态链接的概念" class="headerlink" title="2、动态链接的概念"></a>2、动态链接的概念</h5><p>相较于静态链接在编译期进行链接操作，将链接过程推迟到运行时进行的过程叫动态链接。</p>
-<h5 id="3、动态链接的实现"><a href="#3、动态链接的实现" class="headerlink" title="3、动态链接的实现"></a>3、动态链接的实现</h5><p>   3.1 地址无关代码<br>    由于在运行时，代码段是共享的，只能读不能写，所以需要将指令中那些需要修改的部分分离出来，跟数据部分放在一起，这样指令部分就可以保持不变，而数据部分可以在每一个进程中拥有一个副本。</p>
-<p>   3.2 全局偏移表（Global Offset Table）<br>    当链接过程发生在运行期时，外部的符号调用只有在运行时装载模块后才能确定模块被装载的地址，以及模块内符号的确切地址。所以ELF提供了一个全局偏移表（GOT）来记录这些外部模块的符号引用。当模块被装载时，会更新此表的内容。</p>
-<h4 id="四、参考文献"><a href="#四、参考文献" class="headerlink" title="四、参考文献"></a>四、参考文献</h4><p>1.<a href="https://people.cs.pitt.edu/~xianeizhang/notes/Linking.html#symbol">Linking</a><br>2.<a href="https://stac47.github.io/c/relocation/elf/tutorial/2018/03/01/understanding-relocation-elf.html">understanding-relocation-elf</a><br>3.<a href="http://stffrdhrn.github.io/hardware/embedded/openrisc/2019/11/29/relocs.html">ELF Binaries and Relocation Entries</a><br>4.<a href="http://chuquan.me/2018/06/03/linking-static-linking-dynamic-linking/">static-linking-dynamic-linking</a><br>5.<a href="https://blog.csdn.net/ayu_ag/article/details/78655300">ELF函数重定位问题</a></p>
-]]></content>
-      <categories>
-        <category>计算机</category>
-      </categories>
-      <tags>
-        <tag>C/C++</tag>
       </tags>
   </entry>
   <entry>
@@ -3238,8 +3238,8 @@
         <category>计算机</category>
       </categories>
       <tags>
-        <tag>Kotlin</tag>
         <tag>Concurrency</tag>
+        <tag>Kotlin</tag>
       </tags>
   </entry>
   <entry>

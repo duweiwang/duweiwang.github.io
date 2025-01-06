@@ -8,13 +8,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
     <meta name="description" content="SQLite是安卓平台存储成千上万数据的最佳方案，但是如此巨大的数据量，也可能导致性能问题。在Paging库之前，我们调研了很多现存的分页方案，尤其对SQLiteCursor的潜在缺陷进行了研究。这篇文章我们谈一下这个问题，并阐述是什么激励我们在架构组件Room和Paging库中使用小的查询。 SQLiteCursor 和 CursorAdapterSQLiteCursor是安卓SQLite数据库">
 <meta property="og:type" content="article">
-<meta property="og:title" content="android-database-large-query-2">
+<meta property="og:title" content="【翻译】安卓数据库里的大量查询优化">
 <meta property="og:url" content="https://wangduwei.top/android-database-large-query-2.html">
 <meta property="og:site_name" content="蓝色的笔记本">
 <meta property="og:description" content="SQLite是安卓平台存储成千上万数据的最佳方案，但是如此巨大的数据量，也可能导致性能问题。在Paging库之前，我们调研了很多现存的分页方案，尤其对SQLiteCursor的潜在缺陷进行了研究。这篇文章我们谈一下这个问题，并阐述是什么激励我们在架构组件Room和Paging库中使用小的查询。 SQLiteCursor 和 CursorAdapterSQLiteCursor是安卓SQLite数据库">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-01-03T07:38:16.000Z">
-<meta property="article:modified_time" content="2025-01-03T07:38:16.308Z">
+<meta property="article:modified_time" content="2025-01-06T06:41:37.993Z">
 <meta property="article:author" content="wangduwei">
 <meta name="twitter:card" content="summary">
     
@@ -36,7 +36,7 @@
       
     
     <!-- title -->
-    <title>android-database-large-query-2</title>
+    <title>【翻译】安卓数据库里的大量查询优化</title>
     <!-- async scripts -->
     <!-- Google Analytics -->
 
@@ -97,16 +97,16 @@
     <div id="share" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://wangduwei.top/android-database-large-query-2.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://wangduwei.top/android-database-large-query-2.html&text=android-database-large-query-2"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://wangduwei.top/android-database-large-query-2.html&title=android-database-large-query-2"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://wangduwei.top/android-database-large-query-2.html&is_video=false&description=android-database-large-query-2"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=android-database-large-query-2&body=Check out this article: https://wangduwei.top/android-database-large-query-2.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://wangduwei.top/android-database-large-query-2.html&title=android-database-large-query-2"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=android-database-large-query-2"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=android-database-large-query-2"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=android-database-large-query-2"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://wangduwei.top/android-database-large-query-2.html&name=android-database-large-query-2&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://wangduwei.top/android-database-large-query-2.html&t=android-database-large-query-2"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://wangduwei.top/android-database-large-query-2.html&text=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://wangduwei.top/android-database-large-query-2.html&title=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://wangduwei.top/android-database-large-query-2.html&is_video=false&description=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=【翻译】安卓数据库里的大量查询优化&body=Check out this article: https://wangduwei.top/android-database-large-query-2.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://wangduwei.top/android-database-large-query-2.html&title=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://wangduwei.top/android-database-large-query-2.html&name=【翻译】安卓数据库里的大量查询优化&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://wangduwei.top/android-database-large-query-2.html&t=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -126,7 +126,7 @@
   <header>
     
     <h1 class="posttitle p-name" itemprop="name headline">
-        android-database-large-query-2
+        【翻译】安卓数据库里的大量查询优化
     </h1>
 
 
@@ -218,16 +218,16 @@
     <div id="share-footer" style="display: none">
       <ul>
   <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://wangduwei.top/android-database-large-query-2.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://wangduwei.top/android-database-large-query-2.html&text=android-database-large-query-2"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://wangduwei.top/android-database-large-query-2.html&title=android-database-large-query-2"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://wangduwei.top/android-database-large-query-2.html&is_video=false&description=android-database-large-query-2"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=android-database-large-query-2&body=Check out this article: https://wangduwei.top/android-database-large-query-2.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://wangduwei.top/android-database-large-query-2.html&title=android-database-large-query-2"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=android-database-large-query-2"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=android-database-large-query-2"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=android-database-large-query-2"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://wangduwei.top/android-database-large-query-2.html&name=android-database-large-query-2&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://wangduwei.top/android-database-large-query-2.html&t=android-database-large-query-2"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://wangduwei.top/android-database-large-query-2.html&text=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://wangduwei.top/android-database-large-query-2.html&title=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://wangduwei.top/android-database-large-query-2.html&is_video=false&description=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=【翻译】安卓数据库里的大量查询优化&body=Check out this article: https://wangduwei.top/android-database-large-query-2.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://wangduwei.top/android-database-large-query-2.html&title=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://wangduwei.top/android-database-large-query-2.html&title=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://wangduwei.top/android-database-large-query-2.html&name=【翻译】安卓数据库里的大量查询优化&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://wangduwei.top/android-database-large-query-2.html&t=【翻译】安卓数据库里的大量查询优化"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
