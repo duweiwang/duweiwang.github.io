@@ -1,5 +1,5 @@
 ---
-title: android-database-large-query-2
+title: 【翻译】安卓数据库里的大量查询优化
 date: 2025-01-03 15:38:16
 tags:
 categories:
