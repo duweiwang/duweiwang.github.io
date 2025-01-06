@@ -1,26 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang=zh>
 <head>
-  <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 5.4.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"wangduwei.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
-  </script>
-
-  <meta name="description" content="一、什么是Flow1、如何通过同步和异步方式返回多个值？1.1 同步方式返回多个值 12345fun simple(): List&lt;Int&gt; &#x3D; listOf(1, 2, 3) fun main() &amp;#123;    simple().forEach &amp;#123; value -&gt; println(value) &amp;#125; &amp;#125; 1.2 同步方式依次返回多个值 123">
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="一、什么是Flow1、如何通过同步和异步方式返回多个值？1.1 同步方式返回多个值 12345fun simple(): List&lt;Int&gt; &#x3D; listOf(1, 2, 3) fun main() &amp;#123;    simple().forEach &amp;#123; value -&gt; println(value) &amp;#125; &amp;#125; 1.2 同步方式依次返回多个值 123">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Kotlin Flow 基础">
 <meta property="og:url" content="https://wangduwei.top/kotlin-lang-flow.html">
@@ -28,243 +14,157 @@
 <meta property="og:description" content="一、什么是Flow1、如何通过同步和异步方式返回多个值？1.1 同步方式返回多个值 12345fun simple(): List&lt;Int&gt; &#x3D; listOf(1, 2, 3) fun main() &amp;#123;    simple().forEach &amp;#123; value -&gt; println(value) &amp;#125; &amp;#125; 1.2 同步方式依次返回多个值 123">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-09-25T07:27:31.000Z">
-<meta property="article:modified_time" content="2024-04-29T11:50:54.583Z">
+<meta property="article:modified_time" content="2024-12-09T06:26:52.792Z">
 <meta property="article:author" content="wangduwei">
 <meta property="article:tag" content="Kotlin">
 <meta name="twitter:card" content="summary">
-
-<link rel="canonical" href="https://wangduwei.top/kotlin-lang-flow.html">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-CN'
-  };
-</script>
-
-  <title>Kotlin Flow 基础 | 蓝色的笔记本</title>
-  
-
-
-  <script>
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "https://hm.baidu.com/hm.js?9f3c7bb2232e1e3fda4c019e4a4406c0";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Kotlin Flow 基础</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
 
 
+    <!-- Umami Analytics -->
 
 
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
-
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
-
-<link rel="alternate" href="/atom.xml" title="蓝色的笔记本" type="application/atom+xml">
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="蓝色的笔记本" type="application/atom+xml">
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/java-multithreading-synchronized.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/basic-encryption-algorithm.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://wangduwei.top/kotlin-lang-flow.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://wangduwei.top/kotlin-lang-flow.html&text=Kotlin Flow 基础"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://wangduwei.top/kotlin-lang-flow.html&title=Kotlin Flow 基础"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://wangduwei.top/kotlin-lang-flow.html&is_video=false&description=Kotlin Flow 基础"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kotlin Flow 基础&body=Check out this article: https://wangduwei.top/kotlin-lang-flow.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://wangduwei.top/kotlin-lang-flow.html&title=Kotlin Flow 基础"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://wangduwei.top/kotlin-lang-flow.html&title=Kotlin Flow 基础"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://wangduwei.top/kotlin-lang-flow.html&title=Kotlin Flow 基础"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://wangduwei.top/kotlin-lang-flow.html&title=Kotlin Flow 基础"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://wangduwei.top/kotlin-lang-flow.html&name=Kotlin Flow 基础&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://wangduwei.top/kotlin-lang-flow.html&t=Kotlin Flow 基础"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
 
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
     </div>
-  </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">蓝色的笔记本</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-      <p class="site-subtitle" itemprop="description">记录学习内容</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-        <i class="fa fa-search fa-fw fa-lg"></i>
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="main-menu menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
-
-  </li>
-      <li class="menu-item menu-item-search">
-        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
-        </a>
-      </li>
-  </ul>
-</nav>
-
-
-
-  <div class="search-pop-overlay">
-    <div class="popup search-popup">
-        <div class="search-header">
-  <span class="search-icon">
-    <i class="fa fa-search"></i>
-  </span>
-  <div class="search-input-container">
-    <input autocomplete="off" autocapitalize="off"
-           placeholder="搜索..." spellcheck="false"
-           type="search" class="search-input">
-  </div>
-  <span class="popup-btn-close">
-    <i class="fa fa-times-circle"></i>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AFFlow"><span class="toc-number">1.</span> <span class="toc-text">一、什么是Flow</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87%E5%90%8C%E6%AD%A5%E5%92%8C%E5%BC%82%E6%AD%A5%E6%96%B9%E5%BC%8F%E8%BF%94%E5%9B%9E%E5%A4%9A%E4%B8%AA%E5%80%BC%EF%BC%9F"><span class="toc-number">1.1.</span> <span class="toc-text">1、如何通过同步和异步方式返回多个值？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81Flow%E6%98%AF%E5%86%B7%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="toc-number">1.2.</span> <span class="toc-text">2、Flow是冷数据流</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81Flow%E7%9A%84%E5%8F%96%E6%B6%88"><span class="toc-number">1.3.</span> <span class="toc-text">3、Flow的取消</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4%E3%80%81%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BAFlow%EF%BC%9F"><span class="toc-number">1.4.</span> <span class="toc-text">4、如何构建Flow？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5%E3%80%81Flow%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="toc-number">1.5.</span> <span class="toc-text">5、Flow操作符</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#6%E3%80%81SharedFlow"><span class="toc-number">1.6.</span> <span class="toc-text">6、SharedFlow</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#7%E3%80%81StateFlow"><span class="toc-number">1.7.</span> <span class="toc-text">7、StateFlow</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3%EF%BC%9A"><span class="toc-number">1.8.</span> <span class="toc-text">参考文档：</span></a></li></ol></li></ol>
+      </div>
+    
   </span>
 </div>
-<div id="search-result">
-  <div id="no-result">
-    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
-  </div>
-</div>
 
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Kotlin Flow 基础
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">wangduwei</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-09-25T07:27:31.000Z" class="dt-published" itemprop="datePublished">2021-09-25</time>
+        
+      
     </div>
-  </div>
 
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content post posts-expand">
-            
-
-    
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://wangduwei.top/kotlin-lang-flow.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="wangduwei">
-      <meta itemprop="description" content="耐心和坚持">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="蓝色的笔记本">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Kotlin Flow 基础
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-09-25 15:27:31" itemprop="dateCreated datePublished" datetime="2021-09-25T15:27:31+08:00">2021-09-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-04-29 19:50:54" itemprop="dateModified" datetime="2024-04-29T19:50:54+08:00">2024-04-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/" itemprop="url" rel="index"><span itemprop="name">计算机</span></a>
-                </span>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span id="busuanzi_value_page_pv"></span>
-            </span><br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>5.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>5 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
 
       
-        <h4 id="一、什么是Flow"><a href="#一、什么是Flow" class="headerlink" title="一、什么是Flow"></a>一、什么是Flow</h4><h5 id="1、如何通过同步和异步方式返回多个值？"><a href="#1、如何通过同步和异步方式返回多个值？" class="headerlink" title="1、如何通过同步和异步方式返回多个值？"></a>1、如何通过同步和异步方式返回多个值？</h5><p>1.1 同步方式返回多个值</p>
+    <div class="article-category">
+        <i class="fa-solid fa-archive"></i>
+        <a class="category-link" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Kotlin/" rel="tag">Kotlin</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h4 id="一、什么是Flow"><a href="#一、什么是Flow" class="headerlink" title="一、什么是Flow"></a>一、什么是Flow</h4><h5 id="1、如何通过同步和异步方式返回多个值？"><a href="#1、如何通过同步和异步方式返回多个值？" class="headerlink" title="1、如何通过同步和异步方式返回多个值？"></a>1、如何通过同步和异步方式返回多个值？</h5><p>1.1 同步方式返回多个值</p>
 <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">simple</span><span class="params">()</span></span>: List&lt;<span class="built_in">Int</span>&gt; = listOf(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    simple().forEach &#123; value -&gt; println(value) &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>1.2 同步方式<strong>依次</strong>返回多个值</p>
 <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">simple</span><span class="params">()</span></span>: Sequence&lt;<span class="built_in">Int</span>&gt; = sequence &#123; <span class="comment">// sequence builder</span></span><br><span class="line">    <span class="keyword">for</span> (i <span class="keyword">in</span> <span class="number">1.</span><span class="number">.3</span>) &#123;</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>) <span class="comment">// pretend we are computing it</span></span><br><span class="line">        yield(i) <span class="comment">// yield next value</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    simple().forEach &#123; value -&gt; println(<span class="string">&quot;time = <span class="subst">$&#123;System.currentTimeMillis()&#125;</span> ,<span class="variable">$value</span>&quot;</span>) &#125; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -287,6 +187,7 @@
 <li><code>flow&#123; ... &#125;</code></li>
 <li><code>flowOf</code></li>
 <li><code>.asFlow()</code></li>
+<li><code>callbackFlow</code><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">locationFlow</span><span class="params">(locationManager: <span class="type">LocationManager</span>)</span></span>: Flow&lt;Location&gt; = callbackFlow &#123;</span><br><span class="line">  <span class="keyword">val</span> listener = <span class="keyword">object</span> : LocationListener &#123;</span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onLocationChanged</span><span class="params">(location: <span class="type">Location</span>)</span></span> &#123;</span><br><span class="line">      trySend(location) <span class="comment">// Emit the location update to the flow</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, <span class="number">0L</span>, <span class="number">0f</span>, listener)</span><br><span class="line">  awaitClose &#123;</span><br><span class="line">    locationManager.removeUpdates(listener) <span class="comment">// Unregister listener on cancellation</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  runBlocking &#123;</span><br><span class="line">    locationFlow(locationManager)</span><br><span class="line">      .collect &#123; location -&gt;</span><br><span class="line">        println(<span class="string">&quot;Received location: <span class="subst">$&#123;location.latitude&#125;</span>, <span class="subst">$&#123;location.longitude&#125;</span>&quot;</span>)</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 </ul>
 <h5 id="5、Flow操作符"><a href="#5、Flow操作符" class="headerlink" title="5、Flow操作符"></a>5、Flow操作符</h5><p>5.1 中间操作符</p>
 <ul>
@@ -323,296 +224,148 @@
 <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">////速度不同步时，使用combine，有值到达即输出，无视同步</span></span><br><span class="line"><span class="keyword">val</span> nums = (<span class="number">1.</span><span class="number">.3</span>).asFlow().onEach &#123; delay(<span class="number">300</span>) &#125; <span class="comment">// numbers 1..3 every 300 ms</span></span><br><span class="line"><span class="keyword">val</span> strs = flowOf(<span class="string">&quot;one&quot;</span>, <span class="string">&quot;two&quot;</span>, <span class="string">&quot;three&quot;</span>).onEach &#123; delay(<span class="number">400</span>) &#125; <span class="comment">// strings every 400 ms          </span></span><br><span class="line"><span class="keyword">val</span> startTime = System.currentTimeMillis() <span class="comment">// remember the start time </span></span><br><span class="line">nums.combine(strs) &#123; a, b -&gt; <span class="string">&quot;<span class="variable">$a</span> -&gt; <span class="variable">$b</span>&quot;</span> &#125; <span class="comment">// compose a single string with &quot;combine&quot;</span></span><br><span class="line">    .collect &#123; value -&gt; <span class="comment">// collect and print </span></span><br><span class="line">        println(<span class="string">&quot;<span class="variable">$value</span> at <span class="subst">$&#123;System.currentTimeMillis() - startTime&#125;</span> ms from start&quot;</span>) </span><br><span class="line">    &#125; </span><br><span class="line"><span class="comment">//output:</span></span><br><span class="line"><span class="comment">//1 -&gt; one at 452 ms from start</span></span><br><span class="line"><span class="comment">//2 -&gt; one at 651 ms from start</span></span><br><span class="line"><span class="comment">//2 -&gt; two at 854 ms from start</span></span><br><span class="line"><span class="comment">//3 -&gt; two at 952 ms from start</span></span><br><span class="line"><span class="comment">//3 -&gt; three at 1256 ms from start</span></span><br></pre></td></tr></table></figure>
 
 
-<p>参考文档：<br><a target="_blank" rel="noopener" href="https://kotlinlang.org/docs/flow.html"> 1.官方文档</a></p>
+<h5 id="6、SharedFlow"><a href="#6、SharedFlow" class="headerlink" title="6、SharedFlow"></a>6、SharedFlow</h5><p>1.SharedFlow 是一种热流（hot flow），可以有多个收集器（collectors）。它能够独立于收集器发射值，并且多个收集器可以从流中收集相同的值。<br>2.当需要将一个值广播给多个收集器，或者希望对同一个数据流有多个订阅者时，它非常有用。<br>3.它没有初始值，但可以通过配置其重放缓存（replay cache）来为新加入的收集器存储一定数量的先前发射的值。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> sharedFlow = MutableSharedFlow&lt;<span class="built_in">Int</span>&gt;()</span><br><span class="line"></span><br><span class="line"><span class="comment">// Collect values from sharedFlow</span></span><br><span class="line">launch &#123;</span><br><span class="line">    sharedFlow.collect &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;Collector 1 received: <span class="variable">$value</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Collect values from sharedFlow</span></span><br><span class="line">launch &#123;</span><br><span class="line">    sharedFlow.collect &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;Collector 2 received: <span class="variable">$value</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Emit values to sharedFlow</span></span><br><span class="line">launch &#123;</span><br><span class="line">    repeat(<span class="number">3</span>) &#123; i -&gt;</span><br><span class="line">        sharedFlow.emit(i)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    </div>
+<h5 id="7、StateFlow"><a href="#7、StateFlow" class="headerlink" title="7、StateFlow"></a>7、StateFlow</h5><p>1.StateFlow 是一种热流（hot flow），表示一种状态，每次仅持有一个值。它也是一种合流（conflated flow），这意味着当有新值发射时，最新的值会被保留，并立即发射给新加入的收集器。<br>2.当需要维护某个状态的单一数据源（single source of truth）并自动向所有收集器更新最新状态时，它非常有用。<br>3.它始终具有一个初始值，并且只存储最近发射的值。</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> mutableStateFlow = MutableStateFlow(<span class="number">0</span>)</span><br><span class="line"><span class="keyword">val</span> stateFlow: StateFlow&lt;<span class="built_in">Int</span>&gt; = mutableStateFlow</span><br><span class="line"></span><br><span class="line"><span class="comment">// Collect values from stateFlow</span></span><br><span class="line">launch &#123;</span><br><span class="line">    stateFlow.collect &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;Collector 1 received: <span class="variable">$value</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Collect values from stateFlow</span></span><br><span class="line">launch &#123;</span><br><span class="line">    stateFlow.collect &#123; value -&gt;</span><br><span class="line">        println(<span class="string">&quot;Collector 2 received: <span class="variable">$value</span>&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Update the state</span></span><br><span class="line">launch &#123;</span><br><span class="line">    repeat(<span class="number">3</span>) &#123; i -&gt;</span><br><span class="line">        mutableStateFlow.value = i</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    
-    
-    
-        <div class="reward-container">
-  <div>赏你一杯咖啡</div>
-  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
-    打赏
-  </button>
-  <div id="qr" style="display: none;">
-      
-      <div style="display: inline-block;">
-        <img src="/images/wechatpay.png" alt="wangduwei 微信支付">
-        <p>微信支付</p>
-      </div>
-      
-      <div style="display: inline-block;">
-        <img src="/images/alipay.jpeg" alt="wangduwei 支付宝">
-        <p>支付宝</p>
-      </div>
+
+<h5 id="参考文档："><a href="#参考文档：" class="headerlink" title="参考文档："></a>参考文档：</h5><p><a target="_blank" rel="noopener" href="https://kotlinlang.org/docs/flow.html"> 1.官方文档</a><br><a target="_blank" rel="noopener" href="https://medium.com/@appdevinsights/callbackflow-in-kotlin-b830a1498946"> 2.CallbackFlow in kotlin</a></p>
 
   </div>
-</div>
+</article>
 
-        
-
-<div>
-<ul class="post-copyright">
-  <li class="post-copyright-author">
-    <strong>本文作者： </strong>wangduwei
-  </li>
-  <li class="post-copyright-link">
-    <strong>本文链接：</strong>
-    <a href="https://wangduwei.top/kotlin-lang-flow.html" title="Kotlin Flow 基础">https://wangduwei.top/kotlin-lang-flow.html</a>
-  </li>
-  <li class="post-copyright-license">
-    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
-  </li>
-</ul>
-</div>
-
-
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/Kotlin/" rel="tag"># Kotlin</a>
-          </div>
-
-        
-  <div class="post-widgets">
-    <div class="wp_rating">
-      <div id="wpac-rating"></div>
-    </div>
-  </div>
 
 
         
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/basic-encryption-algorithm.html" rel="prev" title="对称/非对称加密和数字签名">
-      <i class="fa fa-chevron-left"></i> 对称/非对称加密和数字签名
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/java-multithreading-synchronized.html" rel="next" title="Java synchronized">
-      Java synchronized <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
-  </article>
-  
-  
-  
+          <div id="footer-post-container">
+  <div id="footer-post">
 
-
-
-          </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
-        </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
       </ul>
+    </div>
 
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AFFlow"><span class="nav-number">1.</span> <span class="nav-text">一、什么是Flow</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1%E3%80%81%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87%E5%90%8C%E6%AD%A5%E5%92%8C%E5%BC%82%E6%AD%A5%E6%96%B9%E5%BC%8F%E8%BF%94%E5%9B%9E%E5%A4%9A%E4%B8%AA%E5%80%BC%EF%BC%9F"><span class="nav-number">1.1.</span> <span class="nav-text">1、如何通过同步和异步方式返回多个值？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2%E3%80%81Flow%E6%98%AF%E5%86%B7%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="nav-number">1.2.</span> <span class="nav-text">2、Flow是冷数据流</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3%E3%80%81Flow%E7%9A%84%E5%8F%96%E6%B6%88"><span class="nav-number">1.3.</span> <span class="nav-text">3、Flow的取消</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4%E3%80%81%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BAFlow%EF%BC%9F"><span class="nav-number">1.4.</span> <span class="nav-text">4、如何构建Flow？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5%E3%80%81Flow%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="nav-number">1.5.</span> <span class="nav-text">5、Flow操作符</span></a></li></ol></li></ol></div>
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AFFlow"><span class="toc-number">1.</span> <span class="toc-text">一、什么是Flow</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E5%A6%82%E4%BD%95%E9%80%9A%E8%BF%87%E5%90%8C%E6%AD%A5%E5%92%8C%E5%BC%82%E6%AD%A5%E6%96%B9%E5%BC%8F%E8%BF%94%E5%9B%9E%E5%A4%9A%E4%B8%AA%E5%80%BC%EF%BC%9F"><span class="toc-number">1.1.</span> <span class="toc-text">1、如何通过同步和异步方式返回多个值？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81Flow%E6%98%AF%E5%86%B7%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="toc-number">1.2.</span> <span class="toc-text">2、Flow是冷数据流</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81Flow%E7%9A%84%E5%8F%96%E6%B6%88"><span class="toc-number">1.3.</span> <span class="toc-text">3、Flow的取消</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4%E3%80%81%E5%A6%82%E4%BD%95%E6%9E%84%E5%BB%BAFlow%EF%BC%9F"><span class="toc-number">1.4.</span> <span class="toc-text">4、如何构建Flow？</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5%E3%80%81Flow%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="toc-number">1.5.</span> <span class="toc-text">5、Flow操作符</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#6%E3%80%81SharedFlow"><span class="toc-number">1.6.</span> <span class="toc-text">6、SharedFlow</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#7%E3%80%81StateFlow"><span class="toc-number">1.7.</span> <span class="toc-text">7、StateFlow</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3%EF%BC%9A"><span class="toc-number">1.8.</span> <span class="toc-text">参考文档：</span></a></li></ol></li></ol>
       </div>
-      <!--/noindex-->
+    
 
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">wangduwei</p>
-  <div class="site-description" itemprop="description">耐心和坚持</div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-categories">
-            <a href="/categories/">
-        <span class="site-state-item-count">5</span>
-        <span class="site-state-item-name">分类</span></a>
-      </div>
-      <div class="site-state-item site-state-tags">
-            <a href="/tags/">
-        <span class="site-state-item-count">29</span>
-        <span class="site-state-item-name">标签</span></a>
-      </div>
-  </nav>
-</div>
-
-
-
-      </div>
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://wangduwei.top/kotlin-lang-flow.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://wangduwei.top/kotlin-lang-flow.html&text=Kotlin Flow 基础"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://wangduwei.top/kotlin-lang-flow.html&title=Kotlin Flow 基础"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://wangduwei.top/kotlin-lang-flow.html&is_video=false&description=Kotlin Flow 基础"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Kotlin Flow 基础&body=Check out this article: https://wangduwei.top/kotlin-lang-flow.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://wangduwei.top/kotlin-lang-flow.html&title=Kotlin Flow 基础"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://wangduwei.top/kotlin-lang-flow.html&title=Kotlin Flow 基础"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://wangduwei.top/kotlin-lang-flow.html&title=Kotlin Flow 基础"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://wangduwei.top/kotlin-lang-flow.html&title=Kotlin Flow 基础"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://wangduwei.top/kotlin-lang-flow.html&name=Kotlin Flow 基础&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://wangduwei.top/kotlin-lang-flow.html&t=Kotlin Flow 基础"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
 
     </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
 
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
         
-
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
         
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
 
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2024</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">wangduwei</span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item-icon">
-      <i class="fa fa-chart-area"></i>
-    </span>
-      <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">133k</span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item-icon">
-      <i class="fa fa-coffee"></i>
-    </span>
-      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">2:01</span>
-</div>
-
-        
-<div class="busuanzi-count">
-  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-user"></i>
-      </span>
-      <span class="site-uv" title="总访客量">
-        <span id="busuanzi_value_site_uv"></span>
-      </span>
-    </span>
-    <span class="post-meta-divider">|</span>
-    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
-      <span class="post-meta-item-icon">
-        <i class="fa fa-eye"></i>
-      </span>
-      <span class="site-pv" title="总访问量">
-        <span id="busuanzi_value_site_pv"></span>
-      </span>
-    </span>
-</div>
-
-
-
-
-
-
-
-
-      </div>
-    </footer>
   </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2025
+    wangduwei
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
 
   
-  <script src="/lib/anime.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/pisces.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
   
-
-
-
-  <script>
-  if (CONFIG.page.isPost) {
-    wpac_init = window.wpac_init || [];
-    wpac_init.push({
-      widget: 'Rating',
-      id    : ,
-      el    : 'wpac-rating',
-      color : 'fc6423'
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
     });
-    (function() {
-      if ('WIDGETPACK_LOADED' in window) return;
-      WIDGETPACK_LOADED = true;
-      var mc = document.createElement('script');
-      mc.type = 'text/javascript';
-      mc.async = true;
-      mc.src = '//embed.widgetpack.com/widget.js';
-      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(mc, s.nextSibling);
-    })();
-  }
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
   </script>
 
-  
-<script src="/js/local-search.js"></script>
 
+<script src="/js/main.js"></script>
 
+<!-- search -->
 
+<!-- Baidu Analytics -->
 
+<!-- Cloudflare Analytics -->
 
+<!-- Disqus Comments -->
 
+<!-- utterances Comments -->
 
-
-
-
-
-
-
-  
-
-  
-
-
-  <!-- 页面点击小红心 -->
-  
-        <script type="text/javascript" src="/js/love.js"></script>
-  
 </body>
 </html>

@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2024-10-27T03:27:45.990Z</updated>
+  <updated>2025-01-03T08:06:05.021Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,69 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>android-github-source-shizuku</title>
+    <link href="https://wangduwei.top/android-github-source-shizuku.html"/>
+    <id>https://wangduwei.top/android-github-source-shizuku.html</id>
+    <published>2025-01-03T08:06:05.000Z</published>
+    <updated>2025-01-03T08:06:05.021Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;Shizuku是什么&quot;&gt;&lt;a href=&quot;#Shizuku是什么&quot; class=&quot;headerlink&quot; title=&quot;Shizuku是什么&quot;&gt;&lt;/a&gt;Shizuku是什么&lt;/h4&gt;&lt;p&gt;一个可以让其他App，通过Shizuku来使用具有 adb/root</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>android-database-large-query-2</title>
+    <link href="https://wangduwei.top/android-database-large-query-2.html"/>
+    <id>https://wangduwei.top/android-database-large-query-2.html</id>
+    <published>2025-01-03T07:38:16.000Z</published>
+    <updated>2025-01-03T07:38:16.308Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;p&gt;SQLite是安卓平台存储成千上万数据的最佳方案，但是如此巨大的数据量，也可能导致性能问题。&lt;br&gt;在Paging库之前，我们调研了很多现存的分页方案，尤其对SQLiteCursor的潜在缺陷进行了研究。&lt;br&gt;这篇文章我们谈一下这个问题，并阐述是什么激励我们在架构组件Ro</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>装机清单</title>
+    <link href="https://wangduwei.top/%E8%A3%85%E6%9C%BA%E6%B8%85%E5%8D%95.html"/>
+    <id>https://wangduwei.top/%E8%A3%85%E6%9C%BA%E6%B8%85%E5%8D%95.html</id>
+    <published>2024-10-28T03:41:03.000Z</published>
+    <updated>2024-10-28T03:41:03.208Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;开发环境类&quot;&gt;&lt;a href=&quot;#开发环境类&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>使用SDKMAN管理JDK</title>
@@ -423,86 +486,6 @@
     
     
     <category term="Flutter" scheme="https://wangduwei.top/tags/Flutter/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Flutter状态管理之Provider</title>
-    <link href="https://wangduwei.top/flutter-state-provider.html"/>
-    <id>https://wangduwei.top/flutter-state-provider.html</id>
-    <published>2023-06-01T07:30:50.000Z</published>
-    <updated>2024-05-23T08:45:13.597Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;hr&gt;
-&lt;h4 id=&quot;简介&quot;&gt;&lt;a href=&quot;#简介&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    
-    <category term="Flutter" scheme="https://wangduwei.top/tags/Flutter/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Flutter Widget之Row、Column</title>
-    <link href="https://wangduwei.top/flutter-widget-row.html"/>
-    <id>https://wangduwei.top/flutter-widget-row.html</id>
-    <published>2023-03-07T08:54:08.000Z</published>
-    <updated>2024-04-29T11:50:54.580Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;Row和Column分别在横向和纵向对子Widget进行布局。&quot;&gt;&lt;a href=&quot;#Row和Column分别在横向和纵向对子Widget进行布局。&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="计算机" scheme="https://wangduwei.top/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    
-    <category term="Flutter" scheme="https://wangduwei.top/tags/Flutter/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>《思考，快与慢》 第7章 字母B与数字13</title>
-    <link href="https://wangduwei.top/%E3%80%8A%E6%80%9D%E8%80%83%EF%BC%8C%E5%BF%AB%E4%B8%8E%E6%85%A2%E3%80%8B-%E7%AC%AC7%E7%AB%A0-%E5%AD%97%E6%AF%8DB%E4%B8%8E%E6%95%B0%E5%AD%9713.html"/>
-    <id>https://wangduwei.top/%E3%80%8A%E6%80%9D%E8%80%83%EF%BC%8C%E5%BF%AB%E4%B8%8E%E6%85%A2%E3%80%8B-%E7%AC%AC7%E7%AB%A0-%E5%AD%97%E6%AF%8DB%E4%B8%8E%E6%95%B0%E5%AD%9713.html</id>
-    <published>2022-10-09T12:52:58.000Z</published>
-    <updated>2024-04-29T11:50:54.589Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;p&gt;本章包含三节：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;是什么让你相信了那些荒谬之辞&lt;/li&gt;
-&lt;li&gt;光环效应与群体智慧&lt;/li&gt;
-&lt;li&gt;眼见为实的想法往往让我们仓促作出决定&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id=&quot;开篇&quot;&gt;&lt;a href=&quot;#开篇&quot;</summary>
-        
-      
-    
-    
-    
-    <category term="Reading" scheme="https://wangduwei.top/categories/Reading/"/>
-    
-    
-    <category term="Reading" scheme="https://wangduwei.top/tags/Reading/"/>
     
   </entry>
   
