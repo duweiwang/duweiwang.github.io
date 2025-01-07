@@ -3948,23 +3948,6 @@
       </tags>
   </entry>
   <entry>
-    <title>使用SDKMAN管理JDK</title>
-    <url>/%E4%BD%BF%E7%94%A8SDKMAN%E7%AE%A1%E7%90%86JDK.html</url>
-    <content><![CDATA[<p>在电脑安装多个版本的JDK，并自由切换，具有一定的灵活性。因为下载新JDK再配新环境变量真的很麻烦。SDKMAN可以帮我们解决这些烦恼。</p>
-<p>以下是在Mac电脑安装SDKMAN并使用：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">curl -s &quot;https://get.sdkman.io&quot; | bash</span><br></pre></td></tr></table></figure>
-<p>访问：<a href="https://get.sdkman.io/">https://get.sdkman.io/</a> 网站上的脚本，并使用bash执行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">source $HOME/.sdkman/bin/sdkman-init.sh</span><br></pre></td></tr></table></figure>
-<p>执行sdkman初始化脚本</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sdk list java</span><br></pre></td></tr></table></figure>
-<p>列出所有可用的jdk</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sdk install java 19.0.2-oracle</span><br></pre></td></tr></table></figure>
-<p>安装指定的jdk</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sdk use java 19.0.2-oracle</span><br></pre></td></tr></table></figure>
-<p>使用指定的jdk</p>
-]]></content>
-  </entry>
-  <entry>
     <title>《麻省理工深度思考法》</title>
     <url>/%E3%80%8A%E9%BA%BB%E7%9C%81%E7%90%86%E5%B7%A5%E6%B7%B1%E5%BA%A6%E6%80%9D%E8%80%83%E6%B3%95%E3%80%8B.html</url>
     <content><![CDATA[<hr>
@@ -4105,6 +4088,23 @@
       <tags>
         <tag>Reading</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>使用SDKMAN管理JDK</title>
+    <url>/%E4%BD%BF%E7%94%A8SDKMAN%E7%AE%A1%E7%90%86JDK.html</url>
+    <content><![CDATA[<p>在电脑安装多个版本的JDK，并自由切换，具有一定的灵活性。因为下载新JDK再配新环境变量真的很麻烦。SDKMAN可以帮我们解决这些烦恼。</p>
+<p>以下是在Mac电脑安装SDKMAN并使用：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">curl -s &quot;https://get.sdkman.io&quot; | bash</span><br></pre></td></tr></table></figure>
+<p>访问：<a href="https://get.sdkman.io/">https://get.sdkman.io/</a> 网站上的脚本，并使用bash执行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">source $HOME/.sdkman/bin/sdkman-init.sh</span><br></pre></td></tr></table></figure>
+<p>执行sdkman初始化脚本</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sdk list java</span><br></pre></td></tr></table></figure>
+<p>列出所有可用的jdk</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sdk install java 19.0.2-oracle</span><br></pre></td></tr></table></figure>
+<p>安装指定的jdk</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sdk use java 19.0.2-oracle</span><br></pre></td></tr></table></figure>
+<p>使用指定的jdk</p>
+]]></content>
   </entry>
   <entry>
     <title>做事必须搞清的十六个顺序</title>
