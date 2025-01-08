@@ -1,0 +1,62 @@
+@startuml
+!define TABLE(x) class x << (T,#FFAAAA) >>
+
+' 定义 WorkSpec 表
+TABLE(WorkSpec) {
+  + id : String [PK]
+  --
+  state : String
+  input_merger_class_name : String
+  worker_class_name : String
+  worker_parameters : String
+  initial_delay : Long
+  period_start_time : Long
+  next_run_time : Long
+  run_attempt_count : Integer
+}
+
+' 定义 WorkProgress 表
+TABLE(WorkProgress) {
+  + work_spec_id : String [FK]
+  --
+  progress_data : Byte[]
+}
+
+' 定义 WorkTag 表
+TABLE(WorkTag) {
+  + work_spec_id : String [FK]
+  --
+  tag : String
+}
+
+' 定义 SystemIdInfo 表
+TABLE(SystemIdInfo) {
+  + work_spec_id : String [FK]
+  --
+  system_id : Integer
+}
+
+' 定义 WorkRunning 表
+TABLE(WorkRunning) {
+  + work_spec_id : String [FK]
+  --
+  start_time : Long
+}
+
+' 定义 Dependency 表
+TABLE(Dependency) {
+  + id : Integer [PK]
+  --
+  work_spec_id : String [FK]
+  prerequisite_id : String [FK]
+}
+
+' 表之间的关系
+WorkSpec "1" --> "0..*" WorkProgress : contains
+WorkSpec "1" --> "0..*" WorkTag : has
+WorkSpec "1" --> "0..1" SystemIdInfo : identifies
+WorkSpec "1" --> "0..1" WorkRunning : runs
+WorkSpec "1" --> "0..*" Dependency : depends on
+Dependency "0..*" --> "1" WorkSpec : prerequisite
+
+@enduml
