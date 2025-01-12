@@ -139,6 +139,14 @@ tags: Java
 
 ```java
 private final HashSet<Worker> workers = new HashSet<>();
+
+//Worker的声明：
+private final class Worker
+        extends AbstractQueuedSynchronizer
+        implements Runnable
+{
+    final Thread thread;
+}
 ```
 
 线程被包装进`Worker`对象当中，缓存在Set集合中
