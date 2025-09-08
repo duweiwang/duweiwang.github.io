@@ -26,6 +26,30 @@ description:
 其初始化类为`WorkManagerInitializer`，其中调用了`WorkManager#initialize`，然后调用`WorkManager`的构造函数。
 整个流程初始化了如下一些对象：
 
+调度器的创建：
+```java
+@NonNull
+    static Scheduler createBestAvailableBackgroundScheduler(@NonNull Context context,
+            @NonNull WorkDatabase workDatabase, Configuration configuration) {
+
+        Scheduler scheduler;
+        //public static final int MIN_JOB_SCHEDULER_API_LEVEL = 23;
+        if (Build.VERSION.SDK_INT >= WorkManagerImpl.MIN_JOB_SCHEDULER_API_LEVEL) {
+            scheduler = new SystemJobScheduler(context, workDatabase, configuration);
+            setComponentEnabled(context, SystemJobService.class, true);
+            Logger.get().debug(TAG, "Created SystemJobScheduler and enabled SystemJobService");
+        } else {
+            scheduler = tryCreateGcmBasedScheduler(context, configuration.getClock());
+            if (scheduler == null) {
+                scheduler = new SystemAlarmScheduler(context);
+                setComponentEnabled(context, SystemAlarmService.class, true);
+                Logger.get().debug(TAG, "Created SystemAlarmScheduler");
+            }
+        }
+        return scheduler;
+    }
+```
+
 <center>
     <img src="../images/android-workmanager_init.jpg" width="100%"/>
 </center>

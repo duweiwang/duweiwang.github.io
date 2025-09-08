@@ -1,0 +1,26 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface EdgeToEdgeImpl {
+    fun setup(window, view)
+    fun adjustLayoutInDisplayCutoutMode(window)
+}
+
+
+class EdgeToEdgeBase
+
+
+EdgeToEdgeImpl <|.. EdgeToEdgeBase
+
+
+EdgeToEdgeBase <|-- EdgeToEdgeApi21
+EdgeToEdgeBase <|-- EdgeToEdgeApi23
+EdgeToEdgeBase <|-- EdgeToEdgeApi26
+EdgeToEdgeApi26 <|-- EdgeToEdgeApi28
+EdgeToEdgeApi28 <|-- EdgeToEdgeApi29
+EdgeToEdgeApi29 <|-- EdgeToEdgeApi30
+
+
+
+
+@enduml
