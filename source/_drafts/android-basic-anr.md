@@ -114,3 +114,7 @@ final void cancelBroadcastTimeoutLocked() {
 
 [1.ANR官方文档](https://developer.android.com/topic/performance/vitals/anr)
 [](https://medium.com/okcredit/how-we-reduced-our-anr-by-three-times-d9ae0b41ad94)
+
+
+[今日头条 ANR 优化实践系列 - 设计原理及影响因素](https://mp.weixin.qq.com/s?__biz=MzI1MzYzMjE0MQ==&mid=2247488116&idx=1&sn=fdf80fa52c57a3360ad1999da2a9656b&chksm=e9d0d996dea750807aadc62d7ed442948ad197607afb9409dd5a296b16fb3d5243f9224b5763&token=569762407&lang=zh_CN#rd)
+[ANR detection in InputDispatcher](https://android.googlesource.com/platform/frameworks/native/+/2d2150edc2/services/inputflinger/docs/anr.md)
