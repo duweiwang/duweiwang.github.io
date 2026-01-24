@@ -1,17 +1,22 @@
 ---
 title: Android存储
+date: 2026-01-13 21:25:59
 tags:
+categories:
+description:
 ---
 
+
 #### 一、Android存储路径相关API
-| API                                   | 示例路径                                                   | 分类                       | 说明                                                  |
-|---------------------------------------|-----------------------------------------------------------|----------------------------|-------------------------------------------------------|
-| context.getFilesDir()                 | /data/data/com.example.app/files                          | Internal Storage           | 应用私有，无权限需求，卸载即删除                      |
-| context.getCacheDir()                 | /data/data/com.example.app/cache                          | Internal Storage Cache     | 系统可能清理，用于临时文件                           |
-| context.getExternalFilesDir(null)     | /storage/emulated/0/Android/data/com.example.app/files    | External Private Storage   | App专属，无需权限（Android 4.4+）                    |
-| context.getExternalFilesDir(type)     | /storage/emulated/0/Android/data/com.example.app/Pictures | External Private Storage   | 媒体分类目录（如 Pictures/Music），无需权限          |
-| Environment.getExternalStoragePublicDirectory(DOWNLOADS) | /storage/emulated/0/Downloads           | External Public Storage    | 所有App可访问，Android 10+受限制                     |
-| Environment.getExternalStoragePublicDirectory(PICTURES) | /storage/emulated/0/Pictures             | External Public Storage    | Android 10+需 MediaStore/SAF，直接访问受限           |
+| API                                   | 示例路径                                                  | 分类                       | 说明                                 |
+|---------------------------------------|----------------------------------------------------------|----------------------------|------------------------------------|
+| context.getFilesDir()                 | /data/data/com.example.app/files                         | Internal Storage           | 应用私有，无权限需求，卸载即删除                   |
+| context.getCacheDir()                 | /data/data/com.example.app/cache                         | Internal Storage Cache     | 系统可能清理，用于临时文件                      |
+| context.getExternalFilesDir(null)     | /storage/emulated/0/Android/data/com.example.app/files   | External Private Storage   | App专属，无需权限（Android 4.4+）           |
+| context.getExternalFilesDir(type)     | /storage/emulated/0/Android/data/com.example.app/Pictures | External Private Storage   | 媒体分类目录（如 Pictures/Music），无需权限      |
+| Environment.getExternalStorageDirectory()     | /storage/emulated/0 | External Public Storage   | 外部根目录                              |
+| Environment.getExternalStoragePublicDirectory(DOWNLOADS) | /storage/emulated/0/Downloads          | External Public Storage    | 所有App可访问，Android 10+受限制            |
+| Environment.getExternalStoragePublicDirectory(PICTURES) | /storage/emulated/0/Pictures            | External Public Storage    | Android 10+需 MediaStore/SAF，直接访问受限 |
 
 
 #### 二、MediaStore API 和 Storage Access Framework (SAF)

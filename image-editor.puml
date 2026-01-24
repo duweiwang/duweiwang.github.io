@@ -1,0 +1,386 @@
+@startuml ImageEditor Core Class Diagram
+
+' 设置样式
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+skinparam noteBackgroundColor LightYellow
+skinparam noteBorderColor Orange
+
+package "Core Management" {
+
+    class IEManager <<Singleton>> {
+        - List<IEClip> mClipList
+        - IRenderTarget mPreviewTarget
+        - IRenderTarget mSaveTarget
+        - GLRenderThread mRenderThread
+        - long mCurrentPosition
+        --
+        + init(Context)
+        + startEngine()
+        + stopEngine()
+        + attachPreview(IEPreviewView)
+        + detachPreview(IEPreviewView)
+        + addClip(String, long): boolean
+        + seek(long): boolean
+        + addOperator(int, AbstractOperator, boolean): boolean
+        + undo(int, boolean): boolean
+        + redo(int, boolean): boolean
+        + setTransition(int, AbstractTransition, long, boolean): boolean
+        + saveAsImage(...): boolean
+        + saveAsVideo(...): boolean
+    }
+}
+
+package "Rendering System" {
+
+    class GLRenderThread {
+        - EglCore mEglCore
+        - Handler mHandler
+        --
+        + post(Runnable)
+        + start()
+        + quit()
+        + getEglCore(): EglCore
+    }
+
+    interface IRenderTarget {
+        + init(EglCore)
+        + makeCurrent()
+        + swapBuffers()
+        + getInputTextureId(): int
+        + getOutputTextureId(): int
+        + bindOffScreenFrameBuffer()
+        + attachOffScreenTexture(int)
+        + bindDefaultFrameBuffer()
+        + swapTexture()
+        + getSurfaceWidth(): int
+        + getSurfaceHeight(): int
+        + release()
+    }
+
+    class IEPreviewView <<TextureView>> {
+        - int[] mOffScreenFrameBuffer
+        - int[] mOffScreenTextureIds
+        - WindowSurface mWindowSurface
+        - int mInputTextureIndex
+        - int mOutputTextureIndex
+        --
+        + init(EglCore)
+        + makeCurrent()
+        + swapBuffers()
+    }
+}
+
+package "Data Model" {
+
+    interface RenderContext {
+        + getScaleFactor(): float
+        + getSurfaceWidth(): int
+        + getSurfaceHeight(): int
+        + getRenderWidth(): int
+        + getRenderHeight(): int
+        + getRenderLeft(): int
+        + getRenderTop(): int
+        + getRenderRight(): int
+        + getRenderBottom(): int
+        + getScissorX(): float
+        + getScissorY(): float
+        + getScissorWidth(): float
+        + getScissorHeight(): float
+        + getInputTextureId(): int
+        + getOutputTextureId(): int
+        + getFromTextureId(): int
+        + getToTextureId(): int
+        + bindOffScreenFrameBuffer()
+        + attachOffScreenTexture(int)
+        + bindDefaultFrameBuffer()
+        + swapTexture()
+    }
+
+    class IEClip {
+        - Bitmap mBitmap
+        - int mOriginWidth, mOriginHeight
+        - String mImageFilePath
+        - long mStartTime, mEndTime
+        - long mDuration
+        - int mBaseTextureId
+        - List<AbstractOperator> mOpList
+        - AbstractTransition mTransition
+        - IRenderTarget mRenderTarget
+        - BaseImageDrawer mDrawer
+        - float mScaleX, mScaleY
+        - float mTranslateX, mTranslateY
+        - float mScissorX, mScissorY
+        - float mScissorWidth, mScissorHeight
+        --
+        + loadImage(boolean)
+        + loadTexture()
+        + addOperator(AbstractOperator)
+        + undo(): boolean
+        + redo(): boolean
+        + setTransition(AbstractTransition, long)
+        + setScaleX(float)
+        + setScaleY(float)
+        + setTranslateX(float)
+        + setTranslateY(float)
+        + setScissorWidth(float)
+        + setScissorHeight(float)
+        + render(boolean, long)
+        + generatorHistogram(IHistogramGenerateListener)
+        + releaseImage()
+        + releaseTexture()
+    }
+}
+
+package "Operator System" {
+
+    abstract class AbstractOperator {
+        # String mName
+        # int mType
+        # RenderContext mContext
+        --
+        + setRenderContext(RenderContext)
+        + getName(): String
+        + getType(): int
+        + {abstract} checkRational(): boolean
+        + {abstract} exec()
+    }
+
+    note right of AbstractOperator
+        Operator Types:
+        OP_FILTER = 1
+        OP_TEXT = 2
+        OP_STICKER = 3
+        OP_BRIGHTNESS_ADJUST = 6
+        OP_CONTRAST_ADJUST = 7
+        OP_SATURATION_ADJUST = 8
+        OP_MOSAIC = 18
+        OP_LOOKUP_FILTER = 5
+        OP_DENOISE = 17
+        ... (20+ types)
+    end note
+
+    class BrightnessAdjustOperator {
+        - float mBrightness
+    }
+
+    class ContrastAdjustOperator {
+        - float mContrast
+    }
+
+    class SaturationAdjustOperator {
+        - float mSaturation
+    }
+
+    class MosaicOperator {
+        - float mScale
+    }
+
+    class LookupFilterOperator {
+        - Bitmap mLutBitmap
+    }
+
+    class TextOperator {
+        - String mText
+        - float mPosX, mPosY
+        - float mSize
+        - int mColor
+    }
+
+    class StickerOperator {
+        - Bitmap mStickerBitmap
+        - float mPosX, mPosY
+        - float mScale
+        - float mRotate
+    }
+}
+
+package "Transition System" {
+
+    abstract class AbstractTransition {
+        # String mName
+        # int mType
+        # float mProgress
+        # RenderContext mContext
+        # AbstractTransDrawer mDrawer
+        --
+        + setRenderContext(RenderContext)
+        + getType(): int
+        + setProgress(float)
+        + checkRational(): boolean
+        + {abstract} getDrawer()
+        + exec()
+    }
+
+    note right of AbstractTransition
+        65+ Transition Types:
+        FADE, FADE_COLOR, WIPE_LEFT, WIPE_RIGHT
+        ZOOM_IN_CIRCLES, KALEIDO_SCOPE, HEART
+        SWIRL, PIXELIZE, MORPH, CUBE
+        ... (from gl-transitions)
+    end note
+
+    class FadeTransition
+
+    class WipeLeftTransition
+
+    class ZoomInCirclesTransition
+
+    class KaleidoScopeTransition
+
+    class HeartTransition
+}
+
+package "Drawer System" {
+
+    abstract class AbstractDrawer {
+        # int mProgramId
+        --
+        # loadProgram(int...)
+        # createFloatBuffer(float[]): FloatBuffer
+    }
+
+    class BaseImageDrawer {
+        - FloatBuffer mVertexPositionBuffer
+        - FloatBuffer mTextureCoordinateBuffer
+        - ModelViewVertexShader mVertexShader
+        - BaseFragmentShader mFragmentShader
+        - float[] mModelMatrix
+        - float[] mViewMatrix
+        - float[] mProjectionMatrix
+        --
+        + draw(int, int, int, int, boolean, float, float, float, float)
+    }
+
+    abstract class AbstractTransDrawer {
+        - FloatBuffer mVertexPositionBuffer
+        - FloatBuffer mInputCoordinateBuffer
+        - TransitionMainVertexShader mVertexShader
+        - TransitionMainFragmentShader mTransitionShader
+        --
+        + setProgress(float)
+        + setRatio(float)
+        + setToRatio(float)
+        + draw(int, int, int, int, int, int)
+        + {abstract} getTransitionShader()
+    }
+}
+
+package "Export System" {
+
+    class ImageSaver {
+        - int mOriginWidth, mOriginHeight
+        - int mScissorX, mScissorY
+        - int mWidth, mHeight
+        - int mFormat
+        - int mQuality
+        - File mTarget
+        - SaveListener mListener
+        --
+        + init(EglCore)
+        + makeCurrent()
+        + release()
+    }
+
+    class VideoSaver {
+        - int mWidth, mHeight
+        - int mOrientation
+        - long mTotalDuration
+        - File mTarget
+        - File mBgmFile
+        - SaveListener mListener
+        --
+        + init(EglCore)
+        + makeCurrent()
+        + release()
+    }
+}
+
+package "GLES Utilities" {
+
+    class EglCore {
+        - EGLDisplay mEGLDisplay
+        - EGLContext mEGLContext
+        - EGLConfig mEGLConfig
+        --
+        + EglCore()
+        + release()
+        + createContext(EGLContext)
+        + createWindowSurface(Object): EGLSurface
+        + makeCurrent(EGLSurface)
+        + swapBuffers(EGLSurface)
+    }
+
+    class WindowSurface {
+        - SurfaceTexture mSurfaceTexture
+        - EGLSurface mEGLSurface
+        --
+        + WindowSurface(EglCore, SurfaceTexture)
+        + makeCurrent()
+        + swapBuffers()
+        + release()
+    }
+}
+
+' 关系定义
+
+IEManager --> GLRenderThread : manages
+IEManager *-- "1..*" IEClip : contains
+IEManager --> IRenderTarget : uses
+
+GLRenderThread --> EglCore : manages
+
+IEPreviewView --|> IRenderTarget : implements
+ImageSaver --|> IRenderTarget : implements
+VideoSaver --|> IRenderTarget : implements
+
+IEClip ..|> RenderContext : implements
+IEClip *-- "0..*" AbstractOperator : contains
+IEClip *-- "0..1" AbstractTransition : contains
+IEClip --> BaseImageDrawer : uses
+IEClip --> IRenderTarget : uses
+
+IEPreviewView --> WindowSurface : uses
+ImageSaver --> EglCore : uses
+VideoSaver --> EglCore : uses
+
+AbstractOperator <|-- BrightnessAdjustOperator
+AbstractOperator <|-- ContrastAdjustOperator
+AbstractOperator <|-- SaturationAdjustOperator
+AbstractOperator <|-- MosaicOperator
+AbstractOperator <|-- LookupFilterOperator
+AbstractOperator <|-- TextOperator
+AbstractOperator <|-- StickerOperator
+
+AbstractTransition <|-- FadeTransition
+AbstractTransition <|-- WipeLeftTransition
+AbstractTransition <|-- ZoomInCirclesTransition
+AbstractTransition <|-- KaleidoScopeTransition
+AbstractTransition <|-- HeartTransition
+
+AbstractDrawer <|-- BaseImageDrawer
+AbstractDrawer <|-- AbstractTransDrawer
+
+BaseImageDrawer --> AbstractDrawer : extends
+AbstractTransDrawer --> AbstractDrawer : extends
+
+AbstractTransition --> AbstractTransDrawer : uses
+
+note top of IEManager
+    Single entry point for image editor
+    Manages clips, operators, transitions
+    Handles preview and export
+end note
+
+note top of IEClip
+    Represents an image segment
+    Supports undo/redo
+    Contains operator chain
+    Can have transition to next clip
+end note
+
+@enduml
