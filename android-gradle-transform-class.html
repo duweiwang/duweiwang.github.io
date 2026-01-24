@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="AGP 8.0 重要 API 更新Transform API 被移除从 AGP 8.0 开始，Transform API 被正式移除。这意味着 com.android.build.api.transform 包下的所有类都已被删除。 移除 Transform API 的主要原因是为了提升构建性能。使用 Transform API 的项目会迫使 AGP 走一条较低效的构建流程，可能导致构建时间出现明">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AGP transform 变更">
+<meta property="og:url" content="https://wangduwei.top/android-gradle-transform-class.html">
+<meta property="og:site_name" content="蓝色的笔记本">
+<meta property="og:description" content="AGP 8.0 重要 API 更新Transform API 被移除从 AGP 8.0 开始，Transform API 被正式移除。这意味着 com.android.build.api.transform 包下的所有类都已被删除。 移除 Transform API 的主要原因是为了提升构建性能。使用 Transform API 的项目会迫使 AGP 走一条较低效的构建流程，可能导致构建时间出现明">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-01T01:46:32.000Z">
+<meta property="article:modified_time" content="2026-01-01T01:46:32.964Z">
+<meta property="article:author" content="wangduwei">
+<meta property="article:tag" content="Android">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>AGP transform 变更</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="蓝色的笔记本" type="application/atom+xml">
+</head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="上一篇" href="/android-basic-storage.html"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/kotlin-coroutine-pattern-antipattern.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://wangduwei.top/android-gradle-transform-class.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://wangduwei.top/android-gradle-transform-class.html&text=AGP transform 变更"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://wangduwei.top/android-gradle-transform-class.html&title=AGP transform 变更"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://wangduwei.top/android-gradle-transform-class.html&is_video=false&description=AGP transform 变更"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=AGP transform 变更&body=Check out this article: https://wangduwei.top/android-gradle-transform-class.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://wangduwei.top/android-gradle-transform-class.html&title=AGP transform 变更"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://wangduwei.top/android-gradle-transform-class.html&title=AGP transform 变更"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://wangduwei.top/android-gradle-transform-class.html&title=AGP transform 变更"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://wangduwei.top/android-gradle-transform-class.html&title=AGP transform 变更"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://wangduwei.top/android-gradle-transform-class.html&name=AGP transform 变更&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://wangduwei.top/android-gradle-transform-class.html&t=AGP transform 变更"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#AGP-8-0-%E9%87%8D%E8%A6%81-API-%E6%9B%B4%E6%96%B0"><span class="toc-number">1.</span> <span class="toc-text">AGP 8.0 重要 API 更新</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Transform-API-%E8%A2%AB%E7%A7%BB%E9%99%A4"><span class="toc-number">1.1.</span> <span class="toc-text">Transform API 被移除</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%BF%E4%BB%A3-API-%E8%AF%B4%E6%98%8E"><span class="toc-number">1.2.</span> <span class="toc-text">替代 API 说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E8%8A%82%E7%A0%81%E8%BD%AC%E6%8D%A2%E6%94%AF%E6%8C%81"><span class="toc-number">1.3.</span> <span class="toc-text">字节码转换支持</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%91-App-%E4%B8%AD%E6%B7%BB%E5%8A%A0%E7%94%9F%E6%88%90%E7%9A%84-Class"><span class="toc-number">1.4.</span> <span class="toc-text">向 App 中添加生成的 Class</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E5%85%A8%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90%EF%BC%88Whole-Program-Analysis%EF%BC%89%E7%9A%84%E8%BD%AC%E6%8D%A2%E6%94%AF%E6%8C%81"><span class="toc-number">1.5.</span> <span class="toc-text">基于全程序分析（Whole Program Analysis）的转换支持</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-Artifacts-forScope-API"><span class="toc-number">1.6.</span> <span class="toc-text">使用 Artifacts.forScope API</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E8%AF%B4%E6%98%8E"><span class="toc-number">1.7.</span> <span class="toc-text">其他说明</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        AGP transform 变更
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">wangduwei</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-01-01T01:46:32.000Z" class="dt-published" itemprop="datePublished">2026-01-01</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/Android/" rel="tag">Android</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h1 id="AGP-8-0-重要-API-更新"><a href="#AGP-8-0-重要-API-更新" class="headerlink" title="AGP 8.0 重要 API 更新"></a>AGP 8.0 重要 API 更新</h1><h2 id="Transform-API-被移除"><a href="#Transform-API-被移除" class="headerlink" title="Transform API 被移除"></a>Transform API 被移除</h2><p>从 <strong>AGP 8.0</strong> 开始，<strong>Transform API</strong> 被正式移除。这意味着 <code>com.android.build.api.transform</code> 包下的所有类都已被删除。</p>
+<p>移除 Transform API 的主要原因是为了提升构建性能。使用 Transform API 的项目会迫使 AGP 走一条较低效的构建流程，可能导致构建时间出现明显回退。此外，Transform API 很难与其他 Gradle 特性良好协作；新的替代 API 旨在让开发者更容易扩展 AGP，同时避免性能问题或构建正确性问题。</p>
+<hr>
+<h2 id="替代-API-说明"><a href="#替代-API-说明" class="headerlink" title="替代 API 说明"></a>替代 API 说明</h2><p>Transform API 并没有一个“一对一”的替代方案，而是针对不同使用场景提供了<strong>更精细化的 API</strong>。<br>所有替代 API 都位于 <code>androidComponents &#123;&#125;</code> 代码块中，并且 <strong>从 AGP 7.2 起即可使用</strong>。</p>
+<hr>
+<h2 id="字节码转换支持"><a href="#字节码转换支持" class="headerlink" title="字节码转换支持"></a>字节码转换支持</h2><p>如果需要对字节码进行转换，请使用 <strong>Instrumentation API</strong>。</p>
+<ul>
+<li><strong>Library 模块</strong>：只能对本地项目中的类进行字节码插桩</li>
+<li><strong>Application / Test 模块</strong>：可以选择仅对本地类插桩，或对包括远程依赖在内的所有类插桩</li>
+</ul>
+<p>该 API 的特点是：</p>
+<ul>
+<li>插桩逻辑<strong>按单个 class 独立运行</strong></li>
+<li>对 classpath 中其他类的访问能力受限（详见 <code>createClassVisitor()</code>）</li>
+<li>有利于提升 <strong>全量构建</strong> 和 <strong>增量构建</strong> 的性能</li>
+<li>API 更简单，设计更安全</li>
+</ul>
+<p>每个 library 会在其编译完成后立即并行进行插桩，而不是等待所有编译完成后再统一处理。在增量构建中，如果只修改了某一个类，那么只会重新插桩受影响的类。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/android/gradle-recipes/blob/agp-7.2/BuildSrc/testAsmTransformApi/buildSrc/src/main/kotlin/ExamplePlugin.kt">示例代码</a></p>
+<hr>
+<h2 id="向-App-中添加生成的-Class"><a href="#向-App-中添加生成的-Class" class="headerlink" title="向 App 中添加生成的 Class"></a>向 App 中添加生成的 Class</h2><p>如果你的插件需要向 App 中额外添加生成的 class，请使用 <strong>Artifacts API</strong>，并结合<br><code>MultipleArtifact.ALL_CLASSES_DIRS</code>。</p>
+<p>示例用法如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">artifacts.use(taskProvider)</span><br><span class="line">    .wiredWith(...)</span><br><span class="line">    .toAppend(Artifact.Multiple)</span><br></pre></td></tr></table></figure>
+
+<p>通过 <code>MultipleArtifact.ALL_CLASSES_DIRS</code>，可以将自定义 task 生成的 class 目录追加到项目的 class 输出中。</p>
+<p>Artifacts API 会自动为你的 task 分配一个唯一的输出目录。<br>示例可参考官方文档中的 <strong>addToAllClasses</strong> 示例。</p>
+<hr>
+<h2 id="基于全程序分析（Whole-Program-Analysis）的转换支持"><a href="#基于全程序分析（Whole-Program-Analysis）的转换支持" class="headerlink" title="基于全程序分析（Whole Program Analysis）的转换支持"></a>基于全程序分析（Whole Program Analysis）的转换支持</h2><p>如果你的转换逻辑需要基于<strong>整个程序的分析结果</strong>，可以选择在<strong>单个 task 中对所有 class 一起进行处理</strong>。</p>
+<p>⚠️ <strong>注意事项</strong>：</p>
+<ul>
+<li>这种方式的构建性能开销明显高于 Instrumentation API</li>
+<li>强烈建议将此能力设计为 <strong>按 BuildType 可选启用</strong></li>
+<li>方便开发者在 Debug / 开发构建中关闭该功能</li>
+</ul>
+<hr>
+<h2 id="使用-Artifacts-forScope-API"><a href="#使用-Artifacts-forScope-API" class="headerlink" title="使用 Artifacts.forScope API"></a>使用 Artifacts.forScope API</h2><p>从 <strong>AGP 7.4</strong> 开始，引入了 <code>Artifacts.forScope</code> API，用于注册对所有 class 统一处理的 task。</p>
+<p>可选作用范围：</p>
+<ul>
+<li><code>ScopedArtifacts.Scope.PROJECT</code>：仅当前项目</li>
+<li><code>ScopedArtifacts.Scope.ALL</code>：当前项目 + 引入的项目 + 所有外部依赖</li>
+</ul>
+<p>示例如下（对所有 class 进行统一转换）：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">variant.artifacts.forScope(ScopedArtifacts.Scope.ALL)</span><br><span class="line">    .use(taskProvider)</span><br><span class="line">    .toTransform(</span><br><span class="line">        ScopedArtifact.CLASSES,</span><br><span class="line">        ModifyClassesTask::allJars,</span><br><span class="line">        ModifyClassesTask::allDirectories,</span><br><span class="line">        ModifyClassesTask::output,</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+
+<p>示例参考：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/android/gradle-recipes/blob/agp-7.4/Kotlin/modifyProjectClasses/app/build.gradle.kts"><strong>modifyProjectClasses</strong></a>：如何修改项目中的 class</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/android/gradle-recipes/tree/agp-7.2/BuildSrc/customizeAgpDsl"><strong>customizeAgpDsl</strong></a>：如何为 BuildType 注册自定义 DSL 扩展</li>
+</ul>
+<hr>
+<h2 id="其他说明"><a href="#其他说明" class="headerlink" title="其他说明"></a>其他说明</h2><ul>
+<li>如果你的使用场景未被 AndroidComponents API 覆盖，请向官方提交 issue</li>
+<li>一些常用插件已经完成迁移并兼容 AGP 8.0，例如：<ul>
+<li><strong>Firebase Performance Monitoring</strong>：1.4.1 起支持 AGP 8.0</li>
+<li><strong>Hilt Gradle Plugin</strong>：2.40.1 起支持 AGP 8.0</li>
+</ul>
+</li>
+<li><strong>AGP Upgrade Assistant</strong> 可以帮助项目升级常用插件</li>
+<li>如果你通过第三方插件间接使用了 Transform API，请联系插件作者尽快适配新的 API</li>
+</ul>
+<hr>
+<p><strong>总结</strong>：<br>AGP 8.0 彻底移除了 Transform API，推荐使用 Instrumentation API 与 Artifacts API 进行字节码处理和构建扩展。这些新 API 在性能、可维护性和构建正确性方面都有显著提升。</p>
+<p><a target="_blank" rel="noopener" href="https://developer.android.com/build/releases/gradle-plugin-api-updates#transform-removed">原文</a></p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#AGP-8-0-%E9%87%8D%E8%A6%81-API-%E6%9B%B4%E6%96%B0"><span class="toc-number">1.</span> <span class="toc-text">AGP 8.0 重要 API 更新</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Transform-API-%E8%A2%AB%E7%A7%BB%E9%99%A4"><span class="toc-number">1.1.</span> <span class="toc-text">Transform API 被移除</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%BF%E4%BB%A3-API-%E8%AF%B4%E6%98%8E"><span class="toc-number">1.2.</span> <span class="toc-text">替代 API 说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E8%8A%82%E7%A0%81%E8%BD%AC%E6%8D%A2%E6%94%AF%E6%8C%81"><span class="toc-number">1.3.</span> <span class="toc-text">字节码转换支持</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%91-App-%E4%B8%AD%E6%B7%BB%E5%8A%A0%E7%94%9F%E6%88%90%E7%9A%84-Class"><span class="toc-number">1.4.</span> <span class="toc-text">向 App 中添加生成的 Class</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E5%85%A8%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90%EF%BC%88Whole-Program-Analysis%EF%BC%89%E7%9A%84%E8%BD%AC%E6%8D%A2%E6%94%AF%E6%8C%81"><span class="toc-number">1.5.</span> <span class="toc-text">基于全程序分析（Whole Program Analysis）的转换支持</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-Artifacts-forScope-API"><span class="toc-number">1.6.</span> <span class="toc-text">使用 Artifacts.forScope API</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E8%AF%B4%E6%98%8E"><span class="toc-number">1.7.</span> <span class="toc-text">其他说明</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://wangduwei.top/android-gradle-transform-class.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://wangduwei.top/android-gradle-transform-class.html&text=AGP transform 变更"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://wangduwei.top/android-gradle-transform-class.html&title=AGP transform 变更"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://wangduwei.top/android-gradle-transform-class.html&is_video=false&description=AGP transform 变更"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=AGP transform 变更&body=Check out this article: https://wangduwei.top/android-gradle-transform-class.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://wangduwei.top/android-gradle-transform-class.html&title=AGP transform 变更"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://wangduwei.top/android-gradle-transform-class.html&title=AGP transform 变更"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://wangduwei.top/android-gradle-transform-class.html&title=AGP transform 变更"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://wangduwei.top/android-gradle-transform-class.html&title=AGP transform 变更"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://wangduwei.top/android-gradle-transform-class.html&name=AGP transform 变更&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://wangduwei.top/android-gradle-transform-class.html&t=AGP transform 变更"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    wangduwei
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+  <script type="text/javascript">
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?9f3c7bb2232e1e3fda4c019e4a4406c0";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = 'duweiwang/comments';
+      var utterances_issue_term = 'title';
+      var utterances_label = 'Comment';
+      var utterances_theme = 'github-dark';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>

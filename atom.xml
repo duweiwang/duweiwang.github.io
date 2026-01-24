@@ -6,7 +6,7 @@
   <link href="https://wangduwei.top/atom.xml" rel="self"/>
   
   <link href="https://wangduwei.top/"/>
-  <updated>2025-12-31T09:57:01.256Z</updated>
+  <updated>2026-01-24T14:41:35.471Z</updated>
   <id>https://wangduwei.top/</id>
   
   <author>
@@ -15,6 +15,71 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>OpenGL ES 纹理</title>
+    <link href="https://wangduwei.top/opengles-texture.html"/>
+    <id>https://wangduwei.top/opengles-texture.html</id>
+    <published>2026-01-24T14:41:35.000Z</published>
+    <updated>2026-01-24T14:41:35.471Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、纹理坐标&quot;&gt;&lt;a href=&quot;#一、纹理坐标&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Android存储</title>
+    <link href="https://wangduwei.top/android-basic-storage.html"/>
+    <id>https://wangduwei.top/android-basic-storage.html</id>
+    <published>2026-01-13T13:25:59.000Z</published>
+    <updated>2026-01-16T02:50:50.511Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h4 id=&quot;一、Android存储路径相关API&quot;&gt;&lt;a href=&quot;#一、Android存储路径相关API&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>AGP transform 变更</title>
+    <link href="https://wangduwei.top/android-gradle-transform-class.html"/>
+    <id>https://wangduwei.top/android-gradle-transform-class.html</id>
+    <published>2026-01-01T01:46:32.000Z</published>
+    <updated>2026-01-01T01:46:32.964Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;AGP-8-0-重要-API-更新&quot;&gt;&lt;a href=&quot;#AGP-8-0-重要-API-更新&quot; class=&quot;headerlink&quot; title=&quot;AGP 8.0 重要 API 更新&quot;&gt;&lt;/a&gt;AGP 8.0 重要 API 更新&lt;/h1&gt;&lt;h2</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Android" scheme="https://wangduwei.top/tags/Android/"/>
+    
+  </entry>
   
   <entry>
     <title>【翻译】Kotlin 协程 模式与 反模式（Patterns &amp; Anti‑Patterns）</title>
@@ -397,70 +462,6 @@
 &lt;li&gt;扩展性：支持把日志记录到多个地方，如：本地文件、控制台、崩溃系统。&lt;/li&gt;
 &lt;li&gt;高性能：日志记录较为频繁时，如何写文件，提高性能。&lt;/li&gt;
 &lt;li&gt;稳定性：崩溃前一刻的日志不丢失</summary>
-        
-      
-    
-    
-    
-    
-  </entry>
-  
-  <entry>
-    <title>android jetpack startup</title>
-    <link href="https://wangduwei.top/android-jetpack-startup.html"/>
-    <id>https://wangduwei.top/android-jetpack-startup.html</id>
-    <published>2024-07-09T07:04:39.000Z</published>
-    <updated>2024-07-09T07:04:39.813Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h4&gt;&lt;p&gt;&lt;a</summary>
-        
-      
-    
-    
-    
-    
-  </entry>
-  
-  <entry>
-    <title>Admob的初始化过程</title>
-    <link href="https://wangduwei.top/admob-init-performance-test.html"/>
-    <id>https://wangduwei.top/admob-init-performance-test.html</id>
-    <published>2024-07-09T07:04:20.000Z</published>
-    <updated>2024-07-09T07:04:20.119Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;p&gt;在接入Google Admob时，依据官方文档 或 依据开发习惯，我们一般先对Admob SDK进行初始化，然后进行广告加载：&lt;/p&gt;
-&lt;figure class=&quot;highlight kotlin&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td</summary>
-        
-      
-    
-    
-    
-    
-  </entry>
-  
-  <entry>
-    <title>《异类-不一样的成功启示录》</title>
-    <link href="https://wangduwei.top/%E3%80%8A%E5%BC%82%E7%B1%BB-%E4%B8%8D%E4%B8%80%E6%A0%B7%E7%9A%84%E6%88%90%E5%8A%9F%E5%90%AF%E7%A4%BA%E5%BD%95%E3%80%8B.html"/>
-    <id>https://wangduwei.top/%E3%80%8A%E5%BC%82%E7%B1%BB-%E4%B8%8D%E4%B8%80%E6%A0%B7%E7%9A%84%E6%88%90%E5%8A%9F%E5%90%AF%E7%A4%BA%E5%BD%95%E3%80%8B.html</id>
-    <published>2024-05-25T03:33:10.000Z</published>
-    <updated>2024-06-06T08:04:38.631Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h4 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h4&gt;&lt;h6 id=&quot;书籍简介&quot;&gt;&lt;a href=&quot;#书籍简介&quot; class=&quot;headerlink&quot;</summary>
         
       
     

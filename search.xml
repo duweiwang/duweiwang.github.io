@@ -474,6 +474,178 @@
       </tags>
   </entry>
   <entry>
+    <title>Android存储</title>
+    <url>/android-basic-storage.html</url>
+    <content><![CDATA[<h4 id="一、Android存储路径相关API"><a href="#一、Android存储路径相关API" class="headerlink" title="一、Android存储路径相关API"></a>一、Android存储路径相关API</h4><table>
+<thead>
+<tr>
+<th>API</th>
+<th>示例路径</th>
+<th>分类</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>context.getFilesDir()</td>
+<td>/data/data/com.example.app/files</td>
+<td>Internal Storage</td>
+<td>应用私有，无权限需求，卸载即删除</td>
+</tr>
+<tr>
+<td>context.getCacheDir()</td>
+<td>/data/data/com.example.app/cache</td>
+<td>Internal Storage Cache</td>
+<td>系统可能清理，用于临时文件</td>
+</tr>
+<tr>
+<td>context.getExternalFilesDir(null)</td>
+<td>/storage/emulated/0/Android/data/com.example.app/files</td>
+<td>External Private Storage</td>
+<td>App专属，无需权限（Android 4.4+）</td>
+</tr>
+<tr>
+<td>context.getExternalFilesDir(type)</td>
+<td>/storage/emulated/0/Android/data/com.example.app/Pictures</td>
+<td>External Private Storage</td>
+<td>媒体分类目录（如 Pictures/Music），无需权限</td>
+</tr>
+<tr>
+<td>Environment.getExternalStorageDirectory()</td>
+<td>/storage/emulated/0</td>
+<td>External Public Storage</td>
+<td>外部根目录</td>
+</tr>
+<tr>
+<td>Environment.getExternalStoragePublicDirectory(DOWNLOADS)</td>
+<td>/storage/emulated/0/Downloads</td>
+<td>External Public Storage</td>
+<td>所有App可访问，Android 10+受限制</td>
+</tr>
+<tr>
+<td>Environment.getExternalStoragePublicDirectory(PICTURES)</td>
+<td>/storage/emulated/0/Pictures</td>
+<td>External Public Storage</td>
+<td>Android 10+需 MediaStore/SAF，直接访问受限</td>
+</tr>
+</tbody></table>
+<h4 id="二、MediaStore-API-和-Storage-Access-Framework-SAF"><a href="#二、MediaStore-API-和-Storage-Access-Framework-SAF" class="headerlink" title="二、MediaStore API 和 Storage Access Framework (SAF)"></a>二、MediaStore API 和 Storage Access Framework (SAF)</h4><h5 id="2-1-MediaStore-API：系统管理的媒体库"><a href="#2-1-MediaStore-API：系统管理的媒体库" class="headerlink" title="2.1 MediaStore API：系统管理的媒体库"></a>2.1 MediaStore API：系统管理的媒体库</h5><p>适用场景：访问图片、视频、音频等媒体文件</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 查询所有图片</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">queryImages</span><span class="params">(context: <span class="type">Context</span>)</span></span>: List&lt;ImageItem&gt; &#123;</span><br><span class="line">    <span class="keyword">val</span> images = mutableListOf&lt;ImageItem&gt;()</span><br><span class="line">    <span class="keyword">val</span> projection = arrayOf(</span><br><span class="line">        MediaStore.Images.Media._ID,</span><br><span class="line">        MediaStore.Images.Media.DISPLAY_NAME,</span><br><span class="line">        MediaStore.Images.Media.DATE_TAKEN,</span><br><span class="line">        MediaStore.Images.Media.SIZE)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> sortOrder = <span class="string">&quot;<span class="subst">$&#123;MediaStore.Images.Media.DATE_TAKEN&#125;</span> DESC&quot;</span></span><br><span class="line">    </span><br><span class="line">    context.contentResolver.query(</span><br><span class="line">        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,</span><br><span class="line">        projection,</span><br><span class="line">        <span class="literal">null</span>,</span><br><span class="line">        <span class="literal">null</span>,</span><br><span class="line">        sortOrder</span><br><span class="line">    )?.use &#123; cursor -&gt;</span><br><span class="line">        <span class="keyword">val</span> idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)</span><br><span class="line">        <span class="keyword">val</span> nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span> (cursor.moveToNext()) &#123;</span><br><span class="line">            <span class="keyword">val</span> id = cursor.getLong(idColumn)</span><br><span class="line">            <span class="keyword">val</span> name = cursor.getString(nameColumn)</span><br><span class="line">            <span class="keyword">val</span> contentUri = ContentUris.withAppendedId(</span><br><span class="line">                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)</span><br><span class="line">            </span><br><span class="line">            images.add(ImageItem(id, name, contentUri))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> images</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 保存图片到媒体库</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">saveImageToMediaStore</span><span class="params">(context: <span class="type">Context</span>, bitmap: <span class="type">Bitmap</span>)</span></span>: Uri? &#123;</span><br><span class="line">    <span class="keyword">val</span> contentValues = ContentValues().apply &#123;</span><br><span class="line">        put(MediaStore.Images.Media.DISPLAY_NAME, <span class="string">&quot;photo_<span class="subst">$&#123;System.currentTimeMillis()&#125;</span>.jpg&quot;</span>)</span><br><span class="line">        put(MediaStore.Images.Media.MIME_TYPE, <span class="string">&quot;image/jpeg&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + <span class="string">&quot;/MyApp&quot;</span>)</span><br><span class="line">            put(MediaStore.Images.Media.IS_PENDING, <span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> resolver = context.contentResolver</span><br><span class="line">    <span class="keyword">val</span> uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)</span><br><span class="line">    </span><br><span class="line">    uri?.let &#123;</span><br><span class="line">        resolver.openOutputStream(it)?.use &#123; outputStream -&gt;</span><br><span class="line">            bitmap.compress(Bitmap.CompressFormat.JPEG, <span class="number">90</span>, outputStream)</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">            contentValues.clear()</span><br><span class="line">            contentValues.put(MediaStore.Images.Media.IS_PENDING, <span class="number">0</span>)</span><br><span class="line">            resolver.update(uri, contentValues, <span class="literal">null</span>, <span class="literal">null</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> uri</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h5 id="2-2-Storage-Access-Framework-SAF-：用户控制的文件访问"><a href="#2-2-Storage-Access-Framework-SAF-：用户控制的文件访问" class="headerlink" title="2.2 Storage Access Framework (SAF)：用户控制的文件访问"></a>2.2 Storage Access Framework (SAF)：用户控制的文件访问</h5><p>适用场景：访问任意类型文件，让用户完全控制</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 打开文档</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">openDocument</span><span class="params">(activity: <span class="type">Activity</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply &#123;</span><br><span class="line">        addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">        type = <span class="string">&quot;*/*&quot;</span></span><br><span class="line">        putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(</span><br><span class="line">            <span class="string">&quot;image/*&quot;</span>,</span><br><span class="line">            <span class="string">&quot;application/pdf&quot;</span>,</span><br><span class="line">            <span class="string">&quot;text/plain&quot;</span></span><br><span class="line">        ))</span><br><span class="line">    &#125;</span><br><span class="line">    activity.startActivityForResult(intent, REQUEST_OPEN_DOCUMENT)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建文档</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">createDocument</span><span class="params">(activity: <span class="type">Activity</span>, mimeType: <span class="type">String</span>, filename: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply &#123;</span><br><span class="line">        addCategory(Intent.CATEGORY_OPENABLE)</span><br><span class="line">        type = mimeType</span><br><span class="line">        putExtra(Intent.EXTRA_TITLE, filename)</span><br><span class="line">    &#125;</span><br><span class="line">    activity.startActivityForResult(intent, REQUEST_CREATE_DOCUMENT)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 处理返回结果</span></span><br><span class="line"><span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onActivityResult</span><span class="params">(requestCode: <span class="type">Int</span>, resultCode: <span class="type">Int</span>, <span class="keyword">data</span>: <span class="type">Intent</span>?)</span></span> &#123;</span><br><span class="line">    <span class="keyword">super</span>.onActivityResult(requestCode, resultCode, <span class="keyword">data</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (resultCode == Activity.RESULT_OK &amp;&amp; <span class="keyword">data</span> != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">val</span> uri = <span class="keyword">data</span>.<span class="keyword">data</span></span><br><span class="line">        <span class="keyword">when</span> (requestCode) &#123;</span><br><span class="line">            REQUEST_OPEN_DOCUMENT -&gt; handleOpenDocument(uri)</span><br><span class="line">            REQUEST_CREATE_DOCUMENT -&gt; handleCreateDocument(uri)</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 获取持久化权限（Android 11+）</span></span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.KITKAT) &#123;</span><br><span class="line">            uri?.let &#123;</span><br><span class="line">                contentResolver.takePersistableUriPermission(</span><br><span class="line">                    it,</span><br><span class="line">                    Intent.FLAG_GRANT_READ_URI_PERMISSION or</span><br><span class="line">                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION</span><br><span class="line">                )</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用DocumentFile操作文件</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">processDocumentFile</span><span class="params">(context: <span class="type">Context</span>, uri: <span class="type">Uri</span>)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> documentFile = DocumentFile.fromSingleUri(context, uri)</span><br><span class="line">    documentFile?.let &#123;</span><br><span class="line">        <span class="keyword">val</span> fileName = it.name</span><br><span class="line">        <span class="keyword">val</span> fileSize = it.length()</span><br><span class="line">        <span class="keyword">val</span> mimeType = it.type</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 读取文件内容</span></span><br><span class="line">        context.contentResolver.openInputStream(uri)?.use &#123; inputStream -&gt;</span><br><span class="line">            <span class="comment">// 处理文件流</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 写入文件内容</span></span><br><span class="line">        context.contentResolver.openOutputStream(uri)?.use &#123; outputStream -&gt;</span><br><span class="line">            <span class="comment">// 写入数据</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-3-对比总结"><a href="#2-3-对比总结" class="headerlink" title="2.3 对比总结"></a>2.3 对比总结</h5><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>MediaStore API</th>
+<th>Storage Access Framework (SAF)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>访问范围</td>
+<td>媒体文件（图片、视频、音频）</td>
+<td>所有类型文件</td>
+</tr>
+<tr>
+<td>控制权</td>
+<td>系统管理</td>
+<td>用户控制</td>
+</tr>
+<tr>
+<td>权限需求</td>
+<td>运行时权限（Android 13+）</td>
+<td>无需存储权限</td>
+</tr>
+<tr>
+<td>数据持久性</td>
+<td>文件持续存在</td>
+<td>需要持久化权限（persistable permission）</td>
+</tr>
+<tr>
+<td>使用场景</td>
+<td>媒体密集型应用</td>
+<td>文件管理器、文档编辑器</td>
+</tr>
+</tbody></table>
+<h4 id="三、权限请求的版本演进"><a href="#三、权限请求的版本演进" class="headerlink" title="三、权限请求的版本演进"></a>三、权限请求的版本演进</h4><h5 id="3-1-Android-5-1-API-22-及之前"><a href="#3-1-Android-5-1-API-22-及之前" class="headerlink" title="3.1 Android 5.1 (API 22) 及之前"></a>3.1 Android 5.1 (API 22) 及之前</h5><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 安装时请求所有权限 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_EXTERNAL_STORAGE&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<h5 id="3-2-Android-6-0-9-0-API-23-28"><a href="#3-2-Android-6-0-9-0-API-23-28" class="headerlink" title="3.2 Android 6.0-9.0 (API 23-28)"></a>3.2 Android 6.0-9.0 (API 23-28)</h5><p>运行时权限系统引入</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 检查并请求权限</span></span><br><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">requestStoragePermission</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M) &#123;</span><br><span class="line">        <span class="keyword">when</span> &#123;</span><br><span class="line">            <span class="comment">// 已有权限</span></span><br><span class="line">            ContextCompat.checkSelfPermission(<span class="keyword">this</span>, Manifest.permission.READ_EXTERNAL_STORAGE) </span><br><span class="line">                    == PackageManager.PERMISSION_GRANTED -&gt; &#123;</span><br><span class="line">                <span class="comment">// 执行操作</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 需要解释权限用途</span></span><br><span class="line">            shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE) -&gt; &#123;</span><br><span class="line">                showPermissionRationale()</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 直接请求权限</span></span><br><span class="line">            <span class="keyword">else</span> -&gt; &#123;</span><br><span class="line">                requestPermissions(arrayOf(</span><br><span class="line">                    Manifest.permission.READ_EXTERNAL_STORAGE,</span><br><span class="line">                    Manifest.permission.WRITE_EXTERNAL_STORAGE),</span><br><span class="line">                REQUEST_STORAGE_PERMISSION)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-3-Android-10-API-29"><a href="#3-3-Android-10-API-29" class="headerlink" title="3.3 Android 10 (API 29)"></a>3.3 Android 10 (API 29)</h5><p>分区存储引入，WRITE_EXTERNAL_STORAGE权限作用域变化</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- AndroidManifest.xml --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_EXTERNAL_STORAGE&quot;</span> /&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 在Android 10上，WRITE_EXTERNAL_STORAGE只能访问媒体文件 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;</span> </span></span><br><span class="line"><span class="tag">                 <span class="attr">android:maxSdkVersion</span>=<span class="string">&quot;28&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>一般情况下都会使用：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">   <span class="attr">android:requestLegacyExternalStorage</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">   /&gt;</span></span><br></pre></td></tr></table></figure>
+<h5 id="3-4-Android-11-API-30"><a href="#3-4-Android-11-API-30" class="headerlink" title="3.4 Android 11 (API 30)"></a>3.4 Android 11 (API 30)</h5><p>强制分区存储，细化权限分组</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 请求管理所有文件访问权限（MANAGE_EXTERNAL_STORAGE）</span></span><br><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">requestManageAllFilesPermission</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.R) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!Environment.isExternalStorageManager()) &#123;</span><br><span class="line">            <span class="keyword">val</span> intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)</span><br><span class="line">            intent.<span class="keyword">data</span> = Uri.parse(<span class="string">&quot;package:<span class="subst">$&#123;packageName&#125;</span>&quot;</span>)</span><br><span class="line">            startActivity(intent)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-5-Android-13-API-33"><a href="#3-5-Android-13-API-33" class="headerlink" title="3.5 Android 13 (API 33)"></a>3.5 Android 13 (API 33)</h5><p>读取外部存储的权限被废弃。替换成三个权限：</p>
+<ul>
+<li>Manifest.permission.READ_MEDIA_IMAGES</li>
+<li>Manifest.permission.READ_MEDIA_VIDEO</li>
+<li>Manifest.permission.READ_MEDIA_AUDIO</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_EXTERNAL_STORAGE&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:maxSdkVersion</span>=<span class="string">&quot;32&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 检查并请求特定媒体类型权限</span></span><br><span class="line"><span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">requestMediaPermissions</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.TIRAMISU) &#123;</span><br><span class="line">        <span class="keyword">val</span> permissionsToRequest = mutableListOf&lt;String&gt;()</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 根据需求请求特定权限</span></span><br><span class="line">        <span class="keyword">if</span> (needPhotoAccess) &#123;</span><br><span class="line">            permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (needVideoAccess) &#123;</span><br><span class="line">            permissionsToRequest.add(Manifest.permission.READ_MEDIA_VIDEO)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (needAudioAccess) &#123;</span><br><span class="line">            permissionsToRequest.add(Manifest.permission.READ_MEDIA_AUDIO)</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (permissionsToRequest.isNotEmpty()) &#123;</span><br><span class="line">            requestPermissions(</span><br><span class="line">                permissionsToRequest.toTypedArray(),</span><br><span class="line">                REQUEST_MEDIA_PERMISSIONS</span><br><span class="line">            )</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Android 12及以下使用旧权限</span></span><br><span class="line">        requestPermissions(</span><br><span class="line">            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),</span><br><span class="line">            REQUEST_STORAGE_PERMISSION</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当申请Manifest.permission.READ_MEDIA_AUDIO权限时，系统弹窗供用户选择：</p>
+<ul>
+<li>Allow</li>
+<li>Deny<br>当申请Manifest.permission.READ_MEDIA_VIDEO权限时，系统弹窗供用户选择：</li>
+<li>Allow</li>
+<li>Deny</li>
+<li>Limit Access</li>
+</ul>
+<p>如果用户选择了Limit Access，接下来用户需要选择一部分资源供App使用。目前没有API可以判断到当前是Limit Access状态。<br>当前授予Manifest.permission.READ_MEDIA_VIDEO权限时，checkSelfPermission返回true<br>下次启动时，判断Manifest.permission.READ_MEDIA_VIDEO权限，checkSelfPermission返回false</p>
+<p>区分Limit Access状态:</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">isLimitAccess</span><span class="params">(context: <span class="type">Context</span>)</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">    <span class="keyword">val</span> noPermission = ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_MEDIA_VIDEO) ==</span><br><span class="line">            PackageManager.PERMISSION_DENIED</span><br><span class="line">    <span class="keyword">return</span> noPermission &amp;&amp; canReadAnyVideo(context)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Android 13之后，选择limit access之后，第二次启动就没权限了，但是其实可以访问到用户之前选择的文件。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">canReadAnyVideo</span><span class="params">(context: <span class="type">Context</span>)</span></span>: <span class="built_in">Boolean</span> =</span><br><span class="line">    withContext(Dispatchers.IO) &#123;</span><br><span class="line">        <span class="keyword">val</span> projection = arrayOf(MediaStore.Video.Media._ID)</span><br><span class="line">        context.contentResolver.query(</span><br><span class="line">            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,</span><br><span class="line">            projection,</span><br><span class="line">            <span class="literal">null</span>,</span><br><span class="line">            <span class="literal">null</span>,</span><br><span class="line">            <span class="literal">null</span></span><br><span class="line">        )?.use &#123; cursor -&gt;</span><br><span class="line">            cursor.moveToFirst()</span><br><span class="line">        &#125; ?: <span class="literal">false</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="四、各存储方案在不同版本的兼容性矩阵"><a href="#四、各存储方案在不同版本的兼容性矩阵" class="headerlink" title="四、各存储方案在不同版本的兼容性矩阵"></a>四、各存储方案在不同版本的兼容性矩阵</h4><h5 id="4-1-File-API的限制情况"><a href="#4-1-File-API的限制情况" class="headerlink" title="4.1 File API的限制情况"></a>4.1 File API的限制情况</h5><table>
+<thead>
+<tr>
+<th>Android版本</th>
+<th>File API访问范围</th>
+<th>是否需要权限</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>≤ 9 (API 28)</td>
+<td>整个外部存储</td>
+<td>读写都需要权限</td>
+<td>完全访问</td>
+</tr>
+<tr>
+<td>10 (API 29)</td>
+<td>应用私有目录 + 媒体文件</td>
+<td>读写媒体文件需要权限</td>
+<td>分区存储可选</td>
+</tr>
+<tr>
+<td>≥ 11 (API 30+)</td>
+<td>仅应用私有目录</td>
+<td>访问媒体文件需通过MediaStore</td>
+<td>强制分区存储</td>
+</tr>
+</tbody></table>
+<p>兼容性处理示例：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">getAppSpecificFile</span><span class="params">(context: <span class="type">Context</span>, filename: <span class="type">String</span>)</span></span>: File &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">    <span class="comment">// Android 10+：使用应用特定目录</span></span><br><span class="line">        File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), filename)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Android 9-：使用传统公共目录（需要权限）</span></span><br><span class="line">        File(Environment.getExternalStoragePublicDirectory(</span><br><span class="line">        Environment.DIRECTORY_DOCUMENTS),</span><br><span class="line">        filename)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="4-2-MediaStore-API的版本适配"><a href="#4-2-MediaStore-API的版本适配" class="headerlink" title="4.2 MediaStore API的版本适配"></a>4.2 MediaStore API的版本适配</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">saveMediaFileCompat</span><span class="params">(context: <span class="type">Context</span>, bitmap: <span class="type">Bitmap</span>)</span></span>: Uri? &#123;</span><br><span class="line">    <span class="keyword">val</span> contentValues = ContentValues().apply &#123;</span><br><span class="line">        put(MediaStore.Images.Media.DISPLAY_NAME, <span class="string">&quot;image_<span class="subst">$&#123;System.currentTimeMillis()&#125;</span>.jpg&quot;</span>)</span><br><span class="line">        put(MediaStore.Images.Media.MIME_TYPE, <span class="string">&quot;image/jpeg&quot;</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) &#123;</span><br><span class="line">        <span class="comment">// Android 10+：使用RELATIVE_PATH</span></span><br><span class="line">        contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, </span><br><span class="line">            Environment.DIRECTORY_PICTURES + <span class="string">&quot;/MyApp&quot;</span>)</span><br><span class="line">        contentValues.put(MediaStore.Images.Media.IS_PENDING, <span class="number">1</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">val</span> uri = context.contentResolver.insert(</span><br><span class="line">            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, </span><br><span class="line">            contentValues</span><br><span class="line">        )</span><br><span class="line">        </span><br><span class="line">        uri?.let &#123;</span><br><span class="line">            saveImageToUri(context, bitmap, it)</span><br><span class="line">            <span class="comment">// 标记完成</span></span><br><span class="line">            contentValues.clear()</span><br><span class="line">            contentValues.put(MediaStore.Images.Media.IS_PENDING, <span class="number">0</span>)</span><br><span class="line">            context.contentResolver.update(it, contentValues, <span class="literal">null</span>, <span class="literal">null</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        uri</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M) &#123;</span><br><span class="line">        <span class="comment">// Android 6.0-9.0：需要检查权限</span></span><br><span class="line">        <span class="keyword">if</span> (checkStoragePermission(context)) &#123;</span><br><span class="line">            <span class="comment">// 传统方式保存</span></span><br><span class="line">            <span class="keyword">val</span> uri = context.contentResolver.insert(</span><br><span class="line">                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, </span><br><span class="line">                contentValues</span><br><span class="line">            )</span><br><span class="line">            uri?.let &#123; saveImageToUri(context, bitmap, it) &#125;</span><br><span class="line">            uri</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="literal">null</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Android 5.1及以下</span></span><br><span class="line">        <span class="keyword">val</span> uri = context.contentResolver.insert(</span><br><span class="line">            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, </span><br><span class="line">            contentValues</span><br><span class="line">        )</span><br><span class="line">        uri?.let &#123; saveImageToUri(context, bitmap, it) &#125;</span><br><span class="line">        uri</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="4-3-SAF的版本兼容性"><a href="#4-3-SAF的版本兼容性" class="headerlink" title="4.3 SAF的版本兼容性"></a>4.3 SAF的版本兼容性</h5><p>Storage Access Framework自Android 4.4 (API 19)引入，向后兼容性较好，但需要注意持久化权限的处理：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">handleUriPermission</span><span class="params">(context: <span class="type">Context</span>, uri: <span class="type">Uri</span>)</span></span> &#123;</span><br><span class="line"><span class="comment">// 检查是否有持久化权限</span></span><br><span class="line">    <span class="keyword">val</span> hasPersistedPermission = context.contentResolver.persistedUriPermissions.any &#123; </span><br><span class="line">        it.uri == uri &amp;&amp; it.isWritePermission </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!hasPersistedPermission &amp;&amp; Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.KITKAT) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            context.contentResolver.takePersistableUriPermission(</span><br><span class="line">                uri,</span><br><span class="line">                Intent.FLAG_GRANT_READ_URI_PERMISSION or</span><br><span class="line">                Intent.FLAG_GRANT_WRITE_URI_PERMISSION</span><br><span class="line">            )</span><br><span class="line">        &#125; <span class="keyword">catch</span> (e: SecurityException) &#123;</span><br><span class="line">            <span class="comment">// 处理权限异常</span></span><br><span class="line">            Log.e(<span class="string">&quot;Storage&quot;</span>, <span class="string">&quot;无法获取持久化权限&quot;</span>, e)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="五、Android-13细化权限详解"><a href="#五、Android-13细化权限详解" class="headerlink" title="五、Android 13细化权限详解"></a>五、Android 13细化权限详解</h4><h5 id="5-1-权限分组和变化"><a href="#5-1-权限分组和变化" class="headerlink" title="5.1 权限分组和变化"></a>5.1 权限分组和变化</h5><p>Android 13将原来的READ_EXTERNAL_STORAGE权限细化为三个独立权限：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- AndroidManifest.xml声明 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_MEDIA_IMAGES&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_MEDIA_VIDEO&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_MEDIA_AUDIO&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 向后兼容：Android 12及以下使用旧权限 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">uses-permission</span> <span class="attr">android:name</span>=<span class="string">&quot;android.permission.READ_EXTERNAL_STORAGE&quot;</span></span></span><br><span class="line"><span class="tag"><span class="attr">android:maxSdkVersion</span>=<span class="string">&quot;32&quot;</span> /&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h5 id="5-2-权限请求策略"><a href="#5-2-权限请求策略" class="headerlink" title="5.2 权限请求策略"></a>5.2 权限请求策略</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MediaPermissionManager</span></span>(<span class="keyword">private</span> <span class="keyword">val</span> activity: Activity) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">companion</span> <span class="keyword">object</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> REQUEST_CODE_IMAGES = <span class="number">1001</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> REQUEST_CODE_VIDEO = <span class="number">1002</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> REQUEST_CODE_AUDIO = <span class="number">1003</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">val</span> REQUEST_CODE_ALL_MEDIA = <span class="number">1004</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 请求特定媒体类型权限</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">requestSpecificMediaPermission</span><span class="params">(mediaType: <span class="type">MediaType</span>)</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.TIRAMISU) &#123;</span><br><span class="line">            <span class="keyword">val</span> permission = <span class="keyword">when</span> (mediaType) &#123;</span><br><span class="line">                MediaType.IMAGE -&gt; Manifest.permission.READ_MEDIA_IMAGES</span><br><span class="line">                MediaType.VIDEO -&gt; Manifest.permission.READ_MEDIA_VIDEO</span><br><span class="line">                MediaType.AUDIO -&gt; Manifest.permission.READ_MEDIA_AUDIO</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> (ContextCompat.checkSelfPermission(activity, permission) </span><br><span class="line">                != PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line">                </span><br><span class="line">                ActivityCompat.requestPermissions(</span><br><span class="line">                    activity,</span><br><span class="line">                    arrayOf(permission),</span><br><span class="line">                    <span class="keyword">when</span> (mediaType) &#123;</span><br><span class="line">                        MediaType.IMAGE -&gt; REQUEST_CODE_IMAGES</span><br><span class="line">                        MediaType.VIDEO -&gt; REQUEST_CODE_VIDEO</span><br><span class="line">                        MediaType.AUDIO -&gt; REQUEST_CODE_AUDIO</span><br><span class="line">                    &#125;</span><br><span class="line">                )</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// Android 12及以下</span></span><br><span class="line">            requestLegacyStoragePermission()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 请求所有媒体权限（适用于需要全部访问的应用）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">requestAllMediaPermissions</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.TIRAMISU) &#123;</span><br><span class="line">            <span class="keyword">val</span> permissions = arrayOf(</span><br><span class="line">                Manifest.permission.READ_MEDIA_IMAGES,</span><br><span class="line">                Manifest.permission.READ_MEDIA_VIDEO,</span><br><span class="line">                Manifest.permission.READ_MEDIA_AUDIO</span><br><span class="line">            )</span><br><span class="line">            </span><br><span class="line">            ActivityCompat.requestPermissions(</span><br><span class="line">                activity,</span><br><span class="line">                permissions,</span><br><span class="line">                REQUEST_CODE_ALL_MEDIA</span><br><span class="line">            )</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            requestLegacyStoragePermission()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 检查是否有任何媒体权限</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">hasAnyMediaPermission</span><span class="params">()</span></span>: <span class="built_in">Boolean</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.TIRAMISU) &#123;</span><br><span class="line">            <span class="keyword">val</span> permissions = arrayOf(</span><br><span class="line">                Manifest.permission.READ_MEDIA_IMAGES,</span><br><span class="line">                Manifest.permission.READ_MEDIA_VIDEO,</span><br><span class="line">                Manifest.permission.READ_MEDIA_AUDIO</span><br><span class="line">            )</span><br><span class="line">            </span><br><span class="line">            permissions.any &#123; permission -&gt;</span><br><span class="line">                ContextCompat.checkSelfPermission(activity, permission) == </span><br><span class="line">                PackageManager.PERMISSION_GRANTED</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            ContextCompat.checkSelfPermission(</span><br><span class="line">                activity,</span><br><span class="line">                Manifest.permission.READ_EXTERNAL_STORAGE</span><br><span class="line">            ) == PackageManager.PERMISSION_GRANTED</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 请求旧版本存储权限</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">requestLegacyStoragePermission</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M) &#123;</span><br><span class="line">            ActivityCompat.requestPermissions(</span><br><span class="line">                activity,</span><br><span class="line">                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),</span><br><span class="line">                REQUEST_CODE_ALL_MEDIA</span><br><span class="line">            )</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">MediaType</span> </span>&#123;</span><br><span class="line">        IMAGE, VIDEO, AUDIO</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="5-3-权限回调处理"><a href="#5-3-权限回调处理" class="headerlink" title="5.3 权限回调处理"></a>5.3 权限回调处理</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onRequestPermissionsResult</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        requestCode: <span class="type">Int</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        permissions: <span class="type">Array</span>&lt;<span class="type">out</span> <span class="type">String</span>&gt;,</span></span></span><br><span class="line"><span class="params"><span class="function">        grantResults: <span class="type">IntArray</span></span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.onRequestPermissionsResult(requestCode, permissions, grantResults)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">when</span> (requestCode) &#123;</span><br><span class="line">            MediaPermissionManager.REQUEST_CODE_IMAGES -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span> (grantResults.isNotEmpty() &amp;&amp; grantResults[<span class="number">0</span>] == </span><br><span class="line">                    PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line">                    <span class="comment">// 图片权限已授予</span></span><br><span class="line">                    loadImagesFromGallery()</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    showPermissionDeniedDialog(getString(R.string.images_permission_denied))</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            MediaPermissionManager.REQUEST_CODE_VIDEO -&gt; &#123;</span><br><span class="line">                <span class="comment">// 处理视频权限结果</span></span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            MediaPermissionManager.REQUEST_CODE_AUDIO -&gt; &#123;</span><br><span class="line">                <span class="comment">// 处理音频权限结果</span></span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            MediaPermissionManager.REQUEST_CODE_ALL_MEDIA -&gt; &#123;</span><br><span class="line">                <span class="comment">// 处理所有媒体权限结果</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">showPermissionDeniedDialog</span><span class="params">(message: <span class="type">String</span>)</span></span> &#123;</span><br><span class="line">        AlertDialog.Builder(<span class="keyword">this</span>)</span><br><span class="line">            .setTitle(R.string.permission_required)</span><br><span class="line">            .setMessage(message)</span><br><span class="line">            .setPositiveButton(R.string.settings) &#123; _, _ -&gt;</span><br><span class="line">                openAppSettings()</span><br><span class="line">            &#125;</span><br><span class="line">            .setNegativeButton(R.string.cancel, <span class="literal">null</span>)</span><br><span class="line">            .show()</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">fun</span> <span class="title">openAppSettings</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">val</span> intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply &#123;</span><br><span class="line">            <span class="keyword">data</span> = Uri.parse(<span class="string">&quot;package:<span class="variable">$packageName</span>&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        startActivity(intent)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="六、最佳实践和迁移指南"><a href="#六、最佳实践和迁移指南" class="headerlink" title="六、最佳实践和迁移指南"></a>六、最佳实践和迁移指南</h4><h5 id="6-1-版本适配策略"><a href="#6-1-版本适配策略" class="headerlink" title="6.1 版本适配策略"></a>6.1 版本适配策略</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">object</span> StorageCompat &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 统一的文件保存方法，自动处理版本差异</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">saveFileCompat</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        context: <span class="type">Context</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="keyword">data</span>: <span class="type">ByteArray</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        mimeType: <span class="type">String</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        displayName: <span class="type">String</span></span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span>: Uri? &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">when</span> &#123;</span><br><span class="line">            <span class="comment">// Android 10+ 使用MediaStore</span></span><br><span class="line">            Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q -&gt; &#123;</span><br><span class="line">                saveViaMediaStore(context, <span class="keyword">data</span>, mimeType, displayName)</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// Android 6.0+ 检查权限后保存</span></span><br><span class="line">            Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span> (hasStoragePermission(context)) &#123;</span><br><span class="line">                    saveViaLegacyMethod(context, <span class="keyword">data</span>, displayName)</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// 请求权限</span></span><br><span class="line">                    requestStoragePermissionAndSave(context, <span class="keyword">data</span>, displayName)</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 旧版本直接保存</span></span><br><span class="line">            <span class="keyword">else</span> -&gt; &#123;</span><br><span class="line">                saveViaLegacyMethod(context, <span class="keyword">data</span>, displayName)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 检查当前版本的存储权限状态</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">getStoragePermissionState</span><span class="params">(context: <span class="type">Context</span>)</span></span>: PermissionState &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.TIRAMISU) &#123;</span><br><span class="line">            <span class="comment">// Android 13+</span></span><br><span class="line">            <span class="keyword">val</span> hasImages = ContextCompat.checkSelfPermission(</span><br><span class="line">                context, Manifest.permission.READ_MEDIA_IMAGES</span><br><span class="line">            ) == PackageManager.PERMISSION_GRANTED</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">val</span> hasVideo = ContextCompat.checkSelfPermission(</span><br><span class="line">                context, Manifest.permission.READ_MEDIA_VIDEO</span><br><span class="line">            ) == PackageManager.PERMISSION_GRANTED</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">val</span> hasAudio = ContextCompat.checkSelfPermission(</span><br><span class="line">                context, Manifest.permission.READ_MEDIA_AUDIO</span><br><span class="line">            ) == PackageManager.PERMISSION_GRANTED</span><br><span class="line">            </span><br><span class="line">            PermissionState(hasImages, hasVideo, hasAudio)</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M) &#123;</span><br><span class="line">            <span class="comment">// Android 6.0-12</span></span><br><span class="line">            <span class="keyword">val</span> hasStorage = ContextCompat.checkSelfPermission(</span><br><span class="line">                context, Manifest.permission.READ_EXTERNAL_STORAGE</span><br><span class="line">            ) == PackageManager.PERMISSION_GRANTED</span><br><span class="line">            </span><br><span class="line">            PermissionState(hasStorage, hasStorage, hasStorage)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// Android 5.1及以下，安装时已授予权限</span></span><br><span class="line">            PermissionState(<span class="literal">true</span>, <span class="literal">true</span>, <span class="literal">true</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">data</span> <span class="class"><span class="keyword">class</span> <span class="title">PermissionState</span></span>(</span><br><span class="line">        <span class="keyword">val</span> canReadImages: <span class="built_in">Boolean</span>,</span><br><span class="line">        <span class="keyword">val</span> canReadVideo: <span class="built_in">Boolean</span>,</span><br><span class="line">        <span class="keyword">val</span> canReadAudio: <span class="built_in">Boolean</span></span><br><span class="line">    )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+  </entry>
+  <entry>
     <title>【翻译】安卓数据库里的大量查询优化</title>
     <url>/android-database-large-query-2.html</url>
     <content><![CDATA[<p>SQLite是安卓平台存储成千上万数据的最佳方案，但是如此巨大的数据量，也可能导致性能问题。<br>在Paging库之前，我们调研了很多现存的分页方案，尤其对SQLiteCursor的潜在缺陷进行了研究。<br>这篇文章我们谈一下这个问题，并阐述是什么激励我们在架构组件Room和Paging库中使用小的查询。</p>
@@ -688,6 +860,77 @@
       <categories>
         <category>计算机</category>
       </categories>
+      <tags>
+        <tag>Android</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>AGP transform 变更</title>
+    <url>/android-gradle-transform-class.html</url>
+    <content><![CDATA[<h1 id="AGP-8-0-重要-API-更新"><a href="#AGP-8-0-重要-API-更新" class="headerlink" title="AGP 8.0 重要 API 更新"></a>AGP 8.0 重要 API 更新</h1><h2 id="Transform-API-被移除"><a href="#Transform-API-被移除" class="headerlink" title="Transform API 被移除"></a>Transform API 被移除</h2><p>从 <strong>AGP 8.0</strong> 开始，<strong>Transform API</strong> 被正式移除。这意味着 <code>com.android.build.api.transform</code> 包下的所有类都已被删除。</p>
+<p>移除 Transform API 的主要原因是为了提升构建性能。使用 Transform API 的项目会迫使 AGP 走一条较低效的构建流程，可能导致构建时间出现明显回退。此外，Transform API 很难与其他 Gradle 特性良好协作；新的替代 API 旨在让开发者更容易扩展 AGP，同时避免性能问题或构建正确性问题。</p>
+<hr>
+<h2 id="替代-API-说明"><a href="#替代-API-说明" class="headerlink" title="替代 API 说明"></a>替代 API 说明</h2><p>Transform API 并没有一个“一对一”的替代方案，而是针对不同使用场景提供了<strong>更精细化的 API</strong>。<br>所有替代 API 都位于 <code>androidComponents &#123;&#125;</code> 代码块中，并且 <strong>从 AGP 7.2 起即可使用</strong>。</p>
+<hr>
+<h2 id="字节码转换支持"><a href="#字节码转换支持" class="headerlink" title="字节码转换支持"></a>字节码转换支持</h2><p>如果需要对字节码进行转换，请使用 <strong>Instrumentation API</strong>。</p>
+<ul>
+<li><strong>Library 模块</strong>：只能对本地项目中的类进行字节码插桩</li>
+<li><strong>Application / Test 模块</strong>：可以选择仅对本地类插桩，或对包括远程依赖在内的所有类插桩</li>
+</ul>
+<p>该 API 的特点是：</p>
+<ul>
+<li>插桩逻辑<strong>按单个 class 独立运行</strong></li>
+<li>对 classpath 中其他类的访问能力受限（详见 <code>createClassVisitor()</code>）</li>
+<li>有利于提升 <strong>全量构建</strong> 和 <strong>增量构建</strong> 的性能</li>
+<li>API 更简单，设计更安全</li>
+</ul>
+<p>每个 library 会在其编译完成后立即并行进行插桩，而不是等待所有编译完成后再统一处理。在增量构建中，如果只修改了某一个类，那么只会重新插桩受影响的类。</p>
+<p><a href="https://github.com/android/gradle-recipes/blob/agp-7.2/BuildSrc/testAsmTransformApi/buildSrc/src/main/kotlin/ExamplePlugin.kt">示例代码</a></p>
+<hr>
+<h2 id="向-App-中添加生成的-Class"><a href="#向-App-中添加生成的-Class" class="headerlink" title="向 App 中添加生成的 Class"></a>向 App 中添加生成的 Class</h2><p>如果你的插件需要向 App 中额外添加生成的 class，请使用 <strong>Artifacts API</strong>，并结合<br><code>MultipleArtifact.ALL_CLASSES_DIRS</code>。</p>
+<p>示例用法如下：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">artifacts.use(taskProvider)</span><br><span class="line">    .wiredWith(...)</span><br><span class="line">    .toAppend(Artifact.Multiple)</span><br></pre></td></tr></table></figure>
+
+<p>通过 <code>MultipleArtifact.ALL_CLASSES_DIRS</code>，可以将自定义 task 生成的 class 目录追加到项目的 class 输出中。</p>
+<p>Artifacts API 会自动为你的 task 分配一个唯一的输出目录。<br>示例可参考官方文档中的 <strong>addToAllClasses</strong> 示例。</p>
+<hr>
+<h2 id="基于全程序分析（Whole-Program-Analysis）的转换支持"><a href="#基于全程序分析（Whole-Program-Analysis）的转换支持" class="headerlink" title="基于全程序分析（Whole Program Analysis）的转换支持"></a>基于全程序分析（Whole Program Analysis）的转换支持</h2><p>如果你的转换逻辑需要基于<strong>整个程序的分析结果</strong>，可以选择在<strong>单个 task 中对所有 class 一起进行处理</strong>。</p>
+<p>⚠️ <strong>注意事项</strong>：</p>
+<ul>
+<li>这种方式的构建性能开销明显高于 Instrumentation API</li>
+<li>强烈建议将此能力设计为 <strong>按 BuildType 可选启用</strong></li>
+<li>方便开发者在 Debug / 开发构建中关闭该功能</li>
+</ul>
+<hr>
+<h2 id="使用-Artifacts-forScope-API"><a href="#使用-Artifacts-forScope-API" class="headerlink" title="使用 Artifacts.forScope API"></a>使用 Artifacts.forScope API</h2><p>从 <strong>AGP 7.4</strong> 开始，引入了 <code>Artifacts.forScope</code> API，用于注册对所有 class 统一处理的 task。</p>
+<p>可选作用范围：</p>
+<ul>
+<li><code>ScopedArtifacts.Scope.PROJECT</code>：仅当前项目</li>
+<li><code>ScopedArtifacts.Scope.ALL</code>：当前项目 + 引入的项目 + 所有外部依赖</li>
+</ul>
+<p>示例如下（对所有 class 进行统一转换）：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">variant.artifacts.forScope(ScopedArtifacts.Scope.ALL)</span><br><span class="line">    .use(taskProvider)</span><br><span class="line">    .toTransform(</span><br><span class="line">        ScopedArtifact.CLASSES,</span><br><span class="line">        ModifyClassesTask::allJars,</span><br><span class="line">        ModifyClassesTask::allDirectories,</span><br><span class="line">        ModifyClassesTask::output,</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+
+<p>示例参考：</p>
+<ul>
+<li><a href="https://github.com/android/gradle-recipes/blob/agp-7.4/Kotlin/modifyProjectClasses/app/build.gradle.kts"><strong>modifyProjectClasses</strong></a>：如何修改项目中的 class</li>
+<li><a href="https://github.com/android/gradle-recipes/tree/agp-7.2/BuildSrc/customizeAgpDsl"><strong>customizeAgpDsl</strong></a>：如何为 BuildType 注册自定义 DSL 扩展</li>
+</ul>
+<hr>
+<h2 id="其他说明"><a href="#其他说明" class="headerlink" title="其他说明"></a>其他说明</h2><ul>
+<li>如果你的使用场景未被 AndroidComponents API 覆盖，请向官方提交 issue</li>
+<li>一些常用插件已经完成迁移并兼容 AGP 8.0，例如：<ul>
+<li><strong>Firebase Performance Monitoring</strong>：1.4.1 起支持 AGP 8.0</li>
+<li><strong>Hilt Gradle Plugin</strong>：2.40.1 起支持 AGP 8.0</li>
+</ul>
+</li>
+<li><strong>AGP Upgrade Assistant</strong> 可以帮助项目升级常用插件</li>
+<li>如果你通过第三方插件间接使用了 Transform API，请联系插件作者尽快适配新的 API</li>
+</ul>
+<hr>
+<p><strong>总结</strong>：<br>AGP 8.0 彻底移除了 Transform API，推荐使用 Instrumentation API 与 Artifacts API 进行字节码处理和构建扩展。这些新 API 在性能、可维护性和构建正确性方面都有显著提升。</p>
+<p><a href="https://developer.android.com/build/releases/gradle-plugin-api-updates#transform-removed">原文</a></p>
+]]></content>
       <tags>
         <tag>Android</tag>
       </tags>
@@ -1373,6 +1616,93 @@
       </tags>
   </entry>
   <entry>
+    <title>排序算法之交换排序</title>
+    <url>/cs-algorithms-exchange-sort.html</url>
+    <content><![CDATA[<p>–</p>
+<h1 id="交换类排序算法：冒泡排序与快速排序"><a href="#交换类排序算法：冒泡排序与快速排序" class="headerlink" title="交换类排序算法：冒泡排序与快速排序"></a>交换类排序算法：冒泡排序与快速排序</h1><p>交换类排序算法是一类通过交换元素位置来实现排序的算法。本篇博客将介绍两种经典的交换类排序算法：<strong>冒泡排序</strong>和<strong>快速排序</strong>，并通过 Java 代码实现具体的排序过程。</p>
+<hr>
+<h2 id="1-冒泡排序"><a href="#1-冒泡排序" class="headerlink" title="1. 冒泡排序"></a>1. 冒泡排序</h2><h3 id="算法思想"><a href="#算法思想" class="headerlink" title="算法思想"></a>算法思想</h3><p>冒泡排序通过多次比较相邻元素，将较大的元素逐步“冒泡”到序列的末尾。其核心步骤包括：</p>
+<ol>
+<li>从第一个元素开始，依次比较相邻元素；</li>
+<li>如果当前元素大于后一个元素，则交换两者的位置；</li>
+<li>重复上述过程，每轮确定一个最大元素的位置；</li>
+<li>重复 n-1 轮后，数组完全有序。</li>
+</ol>
+<h3 id="Java-实现"><a href="#Java-实现" class="headerlink" title="Java 实现"></a>Java 实现</h3><p>以下是冒泡排序的 Java 实现：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BubbleSort</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">bubbleSort</span><span class="params">(<span class="keyword">int</span>[] arr)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> n = arr.length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n - <span class="number">1</span>; i++) &#123;</span><br><span class="line">            <span class="comment">// 提前退出标志位</span></span><br><span class="line">            <span class="keyword">boolean</span> swapped = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; n - <span class="number">1</span> - i; j++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (arr[j] &gt; arr[j + <span class="number">1</span>]) &#123;</span><br><span class="line">                    <span class="comment">// 交换相邻元素</span></span><br><span class="line">                    <span class="keyword">int</span> temp = arr[j];</span><br><span class="line">                    arr[j] = arr[j + <span class="number">1</span>];</span><br><span class="line">                    arr[j + <span class="number">1</span>] = temp;</span><br><span class="line">                    swapped = <span class="keyword">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 如果没有发生交换，提前结束</span></span><br><span class="line">            <span class="keyword">if</span> (!swapped) <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">64</span>, <span class="number">34</span>, <span class="number">25</span>, <span class="number">12</span>, <span class="number">22</span>, <span class="number">11</span>, <span class="number">90</span>&#125;;</span><br><span class="line">        bubbleSort(arr);</span><br><span class="line">        System.out.println(<span class="string">&quot;Sorted array:&quot;</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> num : arr) &#123;</span><br><span class="line">            System.out.print(num + <span class="string">&quot; &quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出结果"><a href="#输出结果" class="headerlink" title="输出结果"></a>输出结果</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Sorted array:</span><br><span class="line">11 12 22 25 34 64 90</span><br></pre></td></tr></table></figure>
+
+<h3 id="时间复杂度"><a href="#时间复杂度" class="headerlink" title="时间复杂度"></a>时间复杂度</h3><ul>
+<li><strong>最坏情况：</strong> (O(n^2))（完全逆序）</li>
+<li><strong>最佳情况：</strong> (O(n))（已排序，提前退出）</li>
+<li><strong>平均情况：</strong> (O(n^2))</li>
+</ul>
+<h3 id="空间复杂度"><a href="#空间复杂度" class="headerlink" title="空间复杂度"></a>空间复杂度</h3><ul>
+<li>空间复杂度：(O(1))（原地排序）</li>
+<li>排序稳定性：稳定</li>
+</ul>
+<hr>
+<h2 id="2-快速排序"><a href="#2-快速排序" class="headerlink" title="2. 快速排序"></a>2. 快速排序</h2><h3 id="算法思想-1"><a href="#算法思想-1" class="headerlink" title="算法思想"></a>算法思想</h3><p>快速排序是基于分治思想的高效排序算法。其核心步骤包括：</p>
+<ol>
+<li>从序列中选择一个基准元素（通常为第一个或最后一个）；</li>
+<li>将序列分为两部分：一部分小于基准，一部分大于基准；</li>
+<li>分别对两部分递归进行快速排序；</li>
+<li>合并结果，最终得到有序序列。</li>
+</ol>
+<h3 id="Java-实现-1"><a href="#Java-实现-1" class="headerlink" title="Java 实现"></a>Java 实现</h3><p>以下是快速排序的 Java 实现：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuickSort</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">quickSort</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (low &lt; high) &#123;</span><br><span class="line">            <span class="comment">// 获取分区索引</span></span><br><span class="line">            <span class="keyword">int</span> pi = partition(arr, low, high);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 对左右子数组递归排序</span></span><br><span class="line">            quickSort(arr, low, pi - <span class="number">1</span>);</span><br><span class="line">            quickSort(arr, pi + <span class="number">1</span>, high);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">partition</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 选择最后一个元素作为基准</span></span><br><span class="line">        <span class="keyword">int</span> pivot = arr[high];</span><br><span class="line">        <span class="keyword">int</span> i = low - <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = low; j &lt; high; j++) &#123;</span><br><span class="line">            <span class="comment">// 如果当前元素小于或等于基准</span></span><br><span class="line">            <span class="keyword">if</span> (arr[j] &lt;= pivot) &#123;</span><br><span class="line">                i++;</span><br><span class="line">                <span class="comment">// 交换元素</span></span><br><span class="line">                <span class="keyword">int</span> temp = arr[i];</span><br><span class="line">                arr[i] = arr[j];</span><br><span class="line">                arr[j] = temp;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将基准元素放到正确位置</span></span><br><span class="line">        <span class="keyword">int</span> temp = arr[i + <span class="number">1</span>];</span><br><span class="line">        arr[i + <span class="number">1</span>] = arr[high];</span><br><span class="line">        arr[high] = temp;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> i + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">64</span>, <span class="number">34</span>, <span class="number">25</span>, <span class="number">12</span>, <span class="number">22</span>, <span class="number">11</span>, <span class="number">90</span>&#125;;</span><br><span class="line">        quickSort(arr, <span class="number">0</span>, arr.length - <span class="number">1</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;Sorted array:&quot;</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> num : arr) &#123;</span><br><span class="line">            System.out.print(num + <span class="string">&quot; &quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出结果-1"><a href="#输出结果-1" class="headerlink" title="输出结果"></a>输出结果</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Sorted array:</span><br><span class="line">11 12 22 25 34 64 90</span><br></pre></td></tr></table></figure>
+
+<h3 id="时间复杂度-1"><a href="#时间复杂度-1" class="headerlink" title="时间复杂度"></a>时间复杂度</h3><ul>
+<li><strong>最坏情况：</strong> (O(n^2))（每次选择的基准导致极端不平衡）</li>
+<li><strong>最佳情况：</strong> (O(n \log n))（每次平衡划分）</li>
+<li><strong>平均情况：</strong> (O(n \log n))</li>
+</ul>
+<h3 id="空间复杂度-1"><a href="#空间复杂度-1" class="headerlink" title="空间复杂度"></a>空间复杂度</h3><ul>
+<li>空间复杂度：(O(\log n))（递归栈的深度）</li>
+<li>排序稳定性：不稳定</li>
+</ul>
+<hr>
+<h2 id="3-冒泡排序与快速排序的对比"><a href="#3-冒泡排序与快速排序的对比" class="headerlink" title="3. 冒泡排序与快速排序的对比"></a>3. 冒泡排序与快速排序的对比</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>冒泡排序</th>
+<th>快速排序</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>时间复杂度</strong></td>
+<td>(O(n^2))</td>
+<td>(O(n \log n))</td>
+</tr>
+<tr>
+<td><strong>空间复杂度</strong></td>
+<td>(O(1))</td>
+<td>(O(\log n))</td>
+</tr>
+<tr>
+<td><strong>排序稳定性</strong></td>
+<td>稳定</td>
+<td>不稳定</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>小规模数据，简单场景</td>
+<td>大规模数据，高效排序</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li><strong>冒泡排序</strong> 简单易懂，但效率较低，适合学习排序思想或处理少量数据。</li>
+<li><strong>快速排序</strong> 利用分治思想，是实际应用中常用的高效排序算法，尤其适合大规模数据。</li>
+</ul>
+<p>通过理解这两种交换类排序算法，我们可以更深入地了解排序算法的多样性及其在不同场景中的应用。</p>
+]]></content>
+  </entry>
+  <entry>
     <title>排序算法之插入排序</title>
     <url>/cs-algorithms-insertion-sort.html</url>
     <content><![CDATA[<h1 id="插入类排序算法：直接插入排序与希尔排序"><a href="#插入类排序算法：直接插入排序与希尔排序" class="headerlink" title="插入类排序算法：直接插入排序与希尔排序"></a>插入类排序算法：直接插入排序与希尔排序</h1><p>插入类排序算法是一类基于插入操作的排序算法，其核心思想是：逐步构建一个有序序列，将每个新元素插入到已排序部分的适当位置。本篇博客将介绍两种常见的插入类排序算法：<strong>直接插入排序</strong>和<strong>希尔排序</strong>。</p>
@@ -1453,6 +1783,51 @@
 <li><strong>希尔排序</strong> 引入分组思想，显著提升了排序效率，更适合处理中到大规模的数据。</li>
 </ul>
 <p>通过学习这两种插入类排序算法，我们可以更加深入地理解插入排序的思想及其优化方向。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>cs-algorithms-merge-sort</title>
+    <url>/cs-algorithms-merge-sort.html</url>
+    <content><![CDATA[<h1 id="归并排序算法详解"><a href="#归并排序算法详解" class="headerlink" title="归并排序算法详解"></a>归并排序算法详解</h1><p>归并排序（Merge Sort）是一种高效的排序算法，采用分治策略（Divide and Conquer）。它将一个大问题分解为多个小问题，然后再将小问题的解合并成大问题的解。归并排序是一种稳定的排序算法，最坏时间复杂度为 (O(n \log n))，因此在处理大数据时非常有效。</p>
+<h2 id="归并排序的基本思想"><a href="#归并排序的基本思想" class="headerlink" title="归并排序的基本思想"></a>归并排序的基本思想</h2><p>归并排序的核心思想是：</p>
+<ol>
+<li><strong>分解（Divide）</strong>：将待排序数组分成两半，分别对这两部分进行归并排序。</li>
+<li><strong>合并（Conquer）</strong>：将排序好的两部分合并成一个有序的数组。</li>
+</ol>
+<h2 id="归并排序的步骤"><a href="#归并排序的步骤" class="headerlink" title="归并排序的步骤"></a>归并排序的步骤</h2><ol>
+<li>将数组分成两部分，分别进行归并排序。</li>
+<li>对两个已排序的部分进行合并，合并过程通过比较两个部分的元素，生成一个有序数组。</li>
+<li>重复这个过程，直到所有的子数组都合并成一个大数组。</li>
+</ol>
+<h2 id="归并排序的Java实现"><a href="#归并排序的Java实现" class="headerlink" title="归并排序的Java实现"></a>归并排序的Java实现</h2><p>下面是归并排序算法的Java实现：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MergeSort</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 主方法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] array = &#123; <span class="number">38</span>, <span class="number">27</span>, <span class="number">43</span>, <span class="number">3</span>, <span class="number">9</span>, <span class="number">82</span>, <span class="number">10</span> &#125;;</span><br><span class="line">        System.out.println(<span class="string">&quot;原始数组: &quot;</span>);</span><br><span class="line">        printArray(array);</span><br><span class="line">        </span><br><span class="line">        mergeSort(array);</span><br><span class="line">        </span><br><span class="line">        System.out.println(<span class="string">&quot;</span></span><br><span class="line"><span class="string">排序后的数组: &quot;</span>);</span><br><span class="line">        printArray(array);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 归并排序的核心方法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">mergeSort</span><span class="params">(<span class="keyword">int</span>[] array)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (array.length &lt; <span class="number">2</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> mid = array.length / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">int</span>[] left = <span class="keyword">new</span> <span class="keyword">int</span>[mid];</span><br><span class="line">        <span class="keyword">int</span>[] right = <span class="keyword">new</span> <span class="keyword">int</span>[array.length - mid];</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将数组分成两部分</span></span><br><span class="line">        System.arraycopy(array, <span class="number">0</span>, left, <span class="number">0</span>, mid);</span><br><span class="line">        System.arraycopy(array, mid, right, <span class="number">0</span>, array.length - mid);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 对左右两部分分别进行归并排序</span></span><br><span class="line">        mergeSort(left);</span><br><span class="line">        mergeSort(right);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 合并两部分</span></span><br><span class="line">        merge(array, left, right);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 合并两部分</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">merge</span><span class="params">(<span class="keyword">int</span>[] array, <span class="keyword">int</span>[] left, <span class="keyword">int</span>[] right)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>, k = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 合并过程：比较left和right的元素，按顺序放入array</span></span><br><span class="line">        <span class="keyword">while</span> (i &lt; left.length &amp;&amp; j &lt; right.length) &#123;</span><br><span class="line">            <span class="keyword">if</span> (left[i] &lt;= right[j]) &#123;</span><br><span class="line">                array[k++] = left[i++];</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                array[k++] = right[j++];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果left数组还有剩余元素，直接放入array</span></span><br><span class="line">        <span class="keyword">while</span> (i &lt; left.length) &#123;</span><br><span class="line">            array[k++] = left[i++];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果right数组还有剩余元素，直接放入array</span></span><br><span class="line">        <span class="keyword">while</span> (j &lt; right.length) &#123;</span><br><span class="line">            array[k++] = right[j++];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打印数组的方法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printArray</span><span class="params">(<span class="keyword">int</span>[] array)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; array.length; i++) &#123;</span><br><span class="line">            System.out.print(array[i] + <span class="string">&quot; &quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h2><ol>
+<li><p><strong><code>mergeSort</code> 方法</strong>：</p>
+<ul>
+<li>该方法首先检查数组的长度，如果数组长度小于2，则无需排序。</li>
+<li>将数组分成左右两部分，分别调用 <code>mergeSort</code> 方法进行递归排序。</li>
+</ul>
+</li>
+<li><p><strong><code>merge</code> 方法</strong>：</p>
+<ul>
+<li>该方法负责合并两个已排序的数组（<code>left</code> 和 <code>right</code>）为一个有序的数组。</li>
+<li>通过两个指针 <code>i</code> 和 <code>j</code>，分别遍历 <code>left</code> 和 <code>right</code> 数组，并将较小的元素放入原数组中。</li>
+<li>如果某一部分数组元素还未处理完，就直接将剩余的元素加入到原数组中。</li>
+</ul>
+</li>
+<li><p><strong><code>printArray</code> 方法</strong>：</p>
+<ul>
+<li>该方法用于打印数组的内容，帮助我们查看排序结果。</li>
+</ul>
+</li>
+</ol>
+<h2 id="时间复杂度分析"><a href="#时间复杂度分析" class="headerlink" title="时间复杂度分析"></a>时间复杂度分析</h2><ul>
+<li><strong>时间复杂度</strong>：归并排序的时间复杂度为 (O(n \log n))，其中 (n) 是数组的长度。</li>
+<li><strong>空间复杂度</strong>：归并排序需要额外的空间来存储临时数组，因此空间复杂度为 (O(n))。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>归并排序是一种非常高效的排序算法，适合处理大规模数据。其优点在于稳定性和较为平衡的时间复杂度，缺点在于空间开销较大。通过分治策略，归并排序能够确保在最坏情况下仍能保持较高的效率。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://www.cnblogs.com/chengxiao/p/6194356.html">cnblog</a></p>
 ]]></content>
   </entry>
   <entry>
@@ -2580,6 +2955,100 @@
       </tags>
   </entry>
   <entry>
+    <title>【翻译】Kotlin 协程 模式与 反模式（Patterns &amp; Anti‑Patterns）</title>
+    <url>/kotlin-coroutine-pattern-antipattern.html</url>
+    <content><![CDATA[<hr>
+<h2 id="📌-前言"><a href="#📌-前言" class="headerlink" title="📌 前言"></a>📌 前言</h2><p>在开始使用 Kotlin 协程之前，我们需要意识到一些应当做和不应当做的事项，特别是在异常处理、作用域管理和并发模式方面。本文总结了多种协程使用中的模式与反模式，帮助你写出更安全、清晰、可维护的协程代码。</p>
+<hr>
+<h2 id="🧠-1-把-async-调用包裹在-coroutineScope-或使用-SupervisorJob-来处理异常"><a href="#🧠-1-把-async-调用包裹在-coroutineScope-或使用-SupervisorJob-来处理异常" class="headerlink" title="🧠 1. 把 async 调用包裹在 coroutineScope 或使用 SupervisorJob 来处理异常"></a>🧠 1. 把 <code>async</code> 调用包裹在 <code>coroutineScope</code> 或使用 <code>SupervisorJob</code> 来处理异常</h2><h3 id="❌-反模式：在-async-中抛出异常但只用-try-catch-捕获"><a href="#❌-反模式：在-async-中抛出异常但只用-try-catch-捕获" class="headerlink" title="❌ 反模式：在 async 中抛出异常但只用 try/catch 捕获"></a>❌ 反模式：在 async 中抛出异常但只用 try/catch 捕获</h3><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> job: Job = Job()</span><br><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Default + job)</span><br><span class="line"></span><br><span class="line"><span class="comment">// may throw Exception</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doWork</span><span class="params">()</span></span>: Deferred&lt;String&gt; = scope.async &#123; … &#125;   <span class="comment">// (1)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">loadData</span><span class="params">()</span></span> = scope.launch &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        doWork().await()                               <span class="comment">// (2)</span></span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: Exception) &#123; … &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a href="https://github.com/duweiwang/kotlin-playground/blob/master/src/main/kotlin/com/wangduwei/kotlin/coroutines/ScopeDemo.kt">运行这个代码看效果</a></p>
+<p>这种写法看起来像在 try/catch 捕获异常，但它<strong>不会如你预期那样工作</strong>：如果 async 抛出异常，异常最终仍会导致父作用域失败。<br>这是因为协程遵循 <em>结构化并发</em> 的原则：子协程失败会传播给父协程。</p>
+<h3 id="✅-模式-1：使用-SupervisorJob"><a href="#✅-模式-1：使用-SupervisorJob" class="headerlink" title="✅ 模式 1：使用 SupervisorJob"></a>✅ 模式 1：使用 <code>SupervisorJob</code></h3><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)</span><br><span class="line">scope.async &#123; … &#125; <span class="comment">// 异常不会取消同级协程</span></span><br></pre></td></tr></table></figure>
+
+<p><code>SupervisorJob</code> 能让同一层级的子协程失败不会波及其他协程。<br><strong>失败不会导致上层作用域取消</strong>。</p>
+<h3 id="✅-模式-2（更推荐）：使用-coroutineScope"><a href="#✅-模式-2（更推荐）：使用-coroutineScope" class="headerlink" title="✅ 模式 2（更推荐）：使用 coroutineScope"></a>✅ 模式 2（更推荐）：使用 <code>coroutineScope</code></h3><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">loadData</span><span class="params">()</span></span> = coroutineScope &#123;</span><br><span class="line">    <span class="keyword">val</span> deferred = async &#123; … &#125;</span><br><span class="line">    deferred.await()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用挂起的 <code>coroutineScope</code> 把 async 协程包起来：</p>
+<ul>
+<li>使异常能被捕获；</li>
+<li>限制失败只影响当前协程块，不传播到外部。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</li>
+</ul>
+<p>此外，你也可以在 <code>async</code> 内部自己处理异常。</p>
+<hr>
+<h2 id="🎯-2-根协程应优先使用-Main-Dispatcher"><a href="#🎯-2-根协程应优先使用-Main-Dispatcher" class="headerlink" title="🎯 2. 根协程应优先使用 Main Dispatcher"></a>🎯 2. 根协程应优先使用 Main Dispatcher</h2><h3 id="❌-反模式：在根协程中使用非-Main-Dispatcher-去执行-UI-调用"><a href="#❌-反模式：在根协程中使用非-Main-Dispatcher-去执行-UI-调用" class="headerlink" title="❌ 反模式：在根协程中使用非 Main Dispatcher 去执行 UI 调用"></a>❌ 反模式：在根协程中使用非 Main Dispatcher 去执行 UI 调用</h3><p>这样写需要频繁手动切换到 Main 去更新 UI：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Default)</span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="comment">// …</span></span><br><span class="line">    withContext(Dispatchers.Main) &#123; <span class="comment">/* update UI */</span> &#125;</span><br><span class="line">    <span class="comment">// …</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="✅-推荐做法：根协程使用-Main-Dispatcher"><a href="#✅-推荐做法：根协程使用-Main-Dispatcher" class="headerlink" title="✅ 推荐做法：根协程使用 Main Dispatcher"></a>✅ 推荐做法：根协程使用 Main Dispatcher</h3><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="comment">// 不需要手动切换 dispatcher 就能更新 UI</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样可以让代码更简洁，避免大量显式切换上下文。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</p>
+<hr>
+<h2 id="🚫-3-避免无意义的-async-await"><a href="#🚫-3-避免无意义的-async-await" class="headerlink" title="🚫 3. 避免无意义的 async + await"></a>🚫 3. 避免无意义的 <code>async</code> + <code>await</code></h2><h3 id="❌-不推荐："><a href="#❌-不推荐：" class="headerlink" title="❌ 不推荐："></a>❌ 不推荐：</h3><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> result = async &#123; doWork() &#125;.await()</span><br></pre></td></tr></table></figure>
+
+<p>这种写法的效果等同于直接调用挂起函数，并不会带来并发优势。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</p>
+<h3 id="✅-推荐："><a href="#✅-推荐：" class="headerlink" title="✅ 推荐："></a>✅ 推荐：</h3><p>如果你只是想切换执行上下文，使用 <code>withContext</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> result = withContext(Dispatchers.IO) &#123;</span><br><span class="line">    doWork()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>async</code> 更适合用于多个协程并行启动，再一起 await。</p>
+<hr>
+<h2 id="⚠️-4-避免取消整个-scope-的-Job"><a href="#⚠️-4-避免取消整个-scope-的-Job" class="headerlink" title="⚠️ 4. 避免取消整个 scope 的 Job"></a>⚠️ 4. 避免取消整个 scope 的 Job</h2><h3 id="❌-反模式："><a href="#❌-反模式：" class="headerlink" title="❌ 反模式："></a>❌ 反模式：</h3><p>如果你调用整个 scope 的 <code>job.cancel()</code>, 那个 scope 会进入 completed 状态。<br>此后在该 scope 中启动的协程将不会执行。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</p>
+<h3 id="✅-推荐做法："><a href="#✅-推荐做法：" class="headerlink" title="✅ 推荐做法："></a>✅ 推荐做法：</h3><p>使用 <code>cancelChildren()</code> 来取消当前 scope 下的所有子协程：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">scope.coroutineContext.cancelChildren()</span><br></pre></td></tr></table></figure>
+
+<p>并适当为每个协程单独控制取消逻辑。</p>
+<hr>
+<h2 id="🛑-5-不要在-suspend-函数中隐式依赖调度器"><a href="#🛑-5-不要在-suspend-函数中隐式依赖调度器" class="headerlink" title="🛑 5. 不要在 suspend 函数中隐式依赖调度器"></a>🛑 5. 不要在 suspend 函数中隐式依赖调度器</h2><h3 id="❌-反模式：-1"><a href="#❌-反模式：-1" class="headerlink" title="❌ 反模式："></a>❌ 反模式：</h3><p>如果 suspend 函数内部直接访问 UI，会导致在非 Main dispatcher 抛出异常（如 Android 的 <code>CalledFromWrongThreadException</code>）。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</p>
+<h3 id="✅-推荐做法：-1"><a href="#✅-推荐做法：-1" class="headerlink" title="✅ 推荐做法："></a>✅ 推荐做法：</h3><p>让 suspend 函数对调度器透明，在内部使用 <code>withContext</code> 做必要的调度：</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">login</span><span class="params">()</span></span> = withContext(Dispatchers.Main) &#123;</span><br><span class="line">    <span class="comment">// UI 操作安全</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样该函数就能在任意 dispatcher 调用，而不会出错。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</p>
+<hr>
+<h2 id="🌍-6-避免使用-GlobalScope"><a href="#🌍-6-避免使用-GlobalScope" class="headerlink" title="🌍 6. 避免使用 GlobalScope"></a>🌍 6. 避免使用 <code>GlobalScope</code></h2><h3 id="❌-反模式：-2"><a href="#❌-反模式：-2" class="headerlink" title="❌ 反模式："></a>❌ 反模式：</h3><p>到处使用 <code>GlobalScope</code> 启动协程会让协程脱离生命周期管理。<br>这会导致资源泄露与不可预测行为，尤其在 Android 中很容易造成内存泄露、未取消协程等问题。(<a href="https://discuss.kotlinlang.org/t/unavoidable-memory-leak-when-using-coroutines/11603/4">discuss.kotlinlang.org</a>)</p>
+<h3 id="✅-推荐做法：-2"><a href="#✅-推荐做法：-2" class="headerlink" title="✅ 推荐做法："></a>✅ 推荐做法：</h3><p>在 Android 中，协程应该绑定到 Activity/Fragment/ViewModel 生命周期，例如使用：</p>
+<ul>
+<li><code>viewModelScope</code> / <code>lifecycleScope</code></li>
+<li>自定义带有 <code>SupervisorJob</code> 的 CoroutineScope</li>
+</ul>
+<hr>
+<h2 id="📌-总结"><a href="#📌-总结" class="headerlink" title="📌 总结"></a>📌 总结</h2><table>
+<thead>
+<tr>
+<th>主题</th>
+<th>建议</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>异常处理</td>
+<td>用 <code>coroutineScope</code> 或 <code>SupervisorJob</code>，不要简单 try/catch</td>
+</tr>
+<tr>
+<td>根协程 Dispatcher</td>
+<td>优先使用 Main</td>
+</tr>
+<tr>
+<td>async/await</td>
+<td>避免 immediate await，用于并发场景</td>
+</tr>
+<tr>
+<td>取消协程</td>
+<td>不要取消整个 scope Job，用 <code>cancelChildren()</code></td>
+</tr>
+<tr>
+<td>suspend 函数</td>
+<td>不要依赖隐式 dispatcher</td>
+</tr>
+<tr>
+<td>GlobalScope</td>
+<td>避免使用，绑定生命周期</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="🏁-参考"><a href="#🏁-参考" class="headerlink" title="🏁 参考"></a>🏁 参考</h2><p><a href="https://proandroiddev.com/kotlin-coroutines-patterns-anti-patterns-f9d12984c68e">原文</a></p>
+]]></content>
+      <tags>
+        <tag>Kotlin</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Kotlin Flow的工作原理</title>
     <url>/kotlin-lang-flow-under-the-hood.html</url>
     <content><![CDATA[<hr>
@@ -3451,6 +3920,125 @@
       <tags>
         <tag>工作</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>OpenGL ES 纹理</title>
+    <url>/opengles-texture.html</url>
+    <content><![CDATA[<h4 id="一、纹理坐标"><a href="#一、纹理坐标" class="headerlink" title="一、纹理坐标"></a>一、纹理坐标</h4><p>往三角形上贴纹理，三角形的顶点坐标经过计算，可以确定三角形内部每个点的坐标。三角形的每个点和纹理坐标对应起来，这样就可以把纹理贴到正确的位置了。</p>
+<center>
+    <img src="../images/opengl/opengl_texture_coordinates.png" width="50%"/>
+</center>
+
+
+<h4 id="二、API介绍"><a href="#二、API介绍" class="headerlink" title="二、API介绍"></a>二、API介绍</h4><h5 id="1、生成纹理ID（向-GPU-申请若干个“纹理句柄”）"><a href="#1、生成纹理ID（向-GPU-申请若干个“纹理句柄”）" class="headerlink" title="1、生成纹理ID（向 GPU 申请若干个“纹理句柄”）"></a>1、生成纹理ID（向 GPU 申请若干个“纹理句柄”）</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">int</span>[] textureObjId = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">1</span>];</span><br><span class="line"><span class="comment">//生成纹理的数量</span></span><br><span class="line"><span class="comment">//接收生成的纹理ID</span></span><br><span class="line"><span class="comment">//数组便宜，从数组的哪个脚标开始读取</span></span><br><span class="line">GLES20.glGenTextures(<span class="number">1</span>, textureObjId, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (textureObjId[<span class="number">0</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">    Log.d(<span class="string">&quot;opengl&quot;</span>, <span class="string">&quot;产生纹理出错&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2、加载图像"><a href="#2、加载图像" class="headerlink" title="2、加载图像"></a>2、加载图像</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> BitmapFactory.Options options = <span class="keyword">new</span> BitmapFactory.Options();</span><br><span class="line">options.inScaled = <span class="keyword">false</span>;<span class="comment">//不缩放</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),</span><br><span class="line">        resourceId, options);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (bitmap == <span class="keyword">null</span>) &#123;</span><br><span class="line"></span><br><span class="line">    GLES20.glDeleteTextures(<span class="number">1</span>, textureObjId, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h5 id="3、绑定纹理对象"><a href="#3、绑定纹理对象" class="headerlink" title="3、绑定纹理对象"></a>3、绑定纹理对象</h5><p>告诉OpenGL后面的纹理操作都应用于这个纹理对象。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">  <span class="comment">//这是一个二维纹理</span></span><br><span class="line">  <span class="comment">//纹理操作应用于 textureObjId[0] 这个纹理对象</span></span><br><span class="line">GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureObjId[<span class="number">0</span>]);</span><br></pre></td></tr></table></figure>
+
+
+<h5 id="4、配置纹理过滤-纹理在放大缩小的过程中像素的处理方式"><a href="#4、配置纹理过滤-纹理在放大缩小的过程中像素的处理方式" class="headerlink" title="4、配置纹理过滤(纹理在放大缩小的过程中像素的处理方式)"></a>4、配置纹理过滤(纹理在放大缩小的过程中像素的处理方式)</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,<span class="comment">//缩小的情况下</span></span><br><span class="line">        GLES20.GL_TEXTURE_MIN_FILTER,</span><br><span class="line">        GLES20.GL_LINEAR_MIPMAP_LINEAR);<span class="comment">//缩小情况下使用三线性过滤</span></span><br><span class="line"></span><br><span class="line">GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,<span class="comment">//放大的情况下</span></span><br><span class="line">        GLES20.GL_TEXTURE_MAG_FILTER,</span><br><span class="line">        GLES20.GL_LINEAR);<span class="comment">//放大情况下使用双线性过滤</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>过滤模式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GL_NEAREST</td>
+<td>最近邻过滤</td>
+</tr>
+<tr>
+<td>GL_NEAREST_MIPMAP_NEAREST</td>
+<td>使用 MIP 贴图的最近邻过滤</td>
+</tr>
+<tr>
+<td>GL_NEAREST_MIPMAP_LINEAR</td>
+<td>使用 MIP 贴图级别之间插值的最近邻过滤</td>
+</tr>
+<tr>
+<td>GL_LINEAR</td>
+<td>双线性过滤</td>
+</tr>
+<tr>
+<td>GL_LINEAR_MIPMAP_NEAREST</td>
+<td>使用 MIP 贴图的双线性过滤</td>
+</tr>
+<tr>
+<td>GL_LINEAR_MIPMAP_LINEAR</td>
+<td>三线性过滤（使用 MIP 贴图级别之间插值的双线性过滤）</td>
+</tr>
+</tbody></table>
+<ul>
+<li>缩小（Minification）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>支持模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GL_NEAREST</td>
+</tr>
+<tr>
+<td>GL_NEAREST_MIPMAP_NEAREST</td>
+</tr>
+<tr>
+<td>GL_NEAREST_MIPMAP_LINEAR</td>
+</tr>
+<tr>
+<td>GL_LINEAR</td>
+</tr>
+<tr>
+<td>GL_LINEAR_MIPMAP_NEAREST</td>
+</tr>
+<tr>
+<td>GL_LINEAR_MIPMAP_LINEAR</td>
+</tr>
+</tbody></table>
+<ul>
+<li>放大（Magnification）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>支持模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GL_NEAREST</td>
+</tr>
+<tr>
+<td>GL_LINEAR</td>
+</tr>
+</tbody></table>
+<h5 id="5、纹理环绕"><a href="#5、纹理环绕" class="headerlink" title="5、纹理环绕"></a>5、纹理环绕</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>GL_REPEAT    // 对纹理的默认行为。重复纹理图像。</li>
+<li>GL_MIRRORED_REPEAT    //和GL_REPEAT一样，但每次重复图片是镜像放置的。</li>
+<li>GL_CLAMP_TO_EDGE    //纹理坐标会被约束在0到1之间，超出的部分会重复纹理坐标的边缘，产生一种边缘被拉伸的效果。</li>
+<li>GL_CLAMP_TO_BORDER    //超出的坐标为用户指定的边缘颜色。</li>
+</ul>
+<h5 id="6、加载纹理到OpenGL"><a href="#6、加载纹理到OpenGL" class="headerlink" title="6、加载纹理到OpenGL"></a>6、加载纹理到OpenGL</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//纹理类型GL_TEXTURE_2D、GL_TEXTURE_EXTERNAL_OES、GL_TEXTURE_CUBE_MAP</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//要上传的 CPU 内存图片数据</span></span><br><span class="line"><span class="comment">//桌面 OpenGL 才支持 border</span></span><br><span class="line">GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, <span class="number">0</span>, bitmap, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>bitmap传到GPU就可以回收了</li>
+<li>与<em>GLUtils.texSubImage2D</em>的区别？</li>
+<li>与<em>GLES20.glTexImage2D</em>的区别？</li>
+</ul>
+<h5 id="7、纹理单元"><a href="#7、纹理单元" class="headerlink" title="7、纹理单元"></a>7、纹理单元</h5><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">//OpenGL ES 的状态机设置，激活0号纹理单元</span></span><br><span class="line"><span class="comment">//接下来所有的纹理绑定操作（glBindTexture）都绑定到 0 号纹理单元上</span></span><br><span class="line">GLES20.glActiveTexture(GL_TEXTURE0)</span><br></pre></td></tr></table></figure>
+
+
+<h5 id="8、解绑纹理"><a href="#8、解绑纹理" class="headerlink" title="8、解绑纹理"></a>8、解绑纹理</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, GLES20.GL_NONE);</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a href="https://www.cnblogs.com/goFlyer/p/16733604.html">Opengl ES之纹理贴图</a><br><a href="https://www.bilibili.com/video/BV1kx4y117yt/">B站视频</a></p>
+]]></content>
   </entry>
   <entry>
     <title>经济学的十大原理</title>
@@ -4525,232 +5113,6 @@
 <li>XMind思维导图</li>
 <li><a href="https://www.wps.com/download/">WPS Office</a></li>
 </ul>
-]]></content>
-  </entry>
-  <entry>
-    <title>排序算法之交换排序</title>
-    <url>/cs-algorithms-exchange-sort.html</url>
-    <content><![CDATA[<p>–</p>
-<h1 id="交换类排序算法：冒泡排序与快速排序"><a href="#交换类排序算法：冒泡排序与快速排序" class="headerlink" title="交换类排序算法：冒泡排序与快速排序"></a>交换类排序算法：冒泡排序与快速排序</h1><p>交换类排序算法是一类通过交换元素位置来实现排序的算法。本篇博客将介绍两种经典的交换类排序算法：<strong>冒泡排序</strong>和<strong>快速排序</strong>，并通过 Java 代码实现具体的排序过程。</p>
-<hr>
-<h2 id="1-冒泡排序"><a href="#1-冒泡排序" class="headerlink" title="1. 冒泡排序"></a>1. 冒泡排序</h2><h3 id="算法思想"><a href="#算法思想" class="headerlink" title="算法思想"></a>算法思想</h3><p>冒泡排序通过多次比较相邻元素，将较大的元素逐步“冒泡”到序列的末尾。其核心步骤包括：</p>
-<ol>
-<li>从第一个元素开始，依次比较相邻元素；</li>
-<li>如果当前元素大于后一个元素，则交换两者的位置；</li>
-<li>重复上述过程，每轮确定一个最大元素的位置；</li>
-<li>重复 n-1 轮后，数组完全有序。</li>
-</ol>
-<h3 id="Java-实现"><a href="#Java-实现" class="headerlink" title="Java 实现"></a>Java 实现</h3><p>以下是冒泡排序的 Java 实现：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BubbleSort</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">bubbleSort</span><span class="params">(<span class="keyword">int</span>[] arr)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> n = arr.length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n - <span class="number">1</span>; i++) &#123;</span><br><span class="line">            <span class="comment">// 提前退出标志位</span></span><br><span class="line">            <span class="keyword">boolean</span> swapped = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; n - <span class="number">1</span> - i; j++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (arr[j] &gt; arr[j + <span class="number">1</span>]) &#123;</span><br><span class="line">                    <span class="comment">// 交换相邻元素</span></span><br><span class="line">                    <span class="keyword">int</span> temp = arr[j];</span><br><span class="line">                    arr[j] = arr[j + <span class="number">1</span>];</span><br><span class="line">                    arr[j + <span class="number">1</span>] = temp;</span><br><span class="line">                    swapped = <span class="keyword">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 如果没有发生交换，提前结束</span></span><br><span class="line">            <span class="keyword">if</span> (!swapped) <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">64</span>, <span class="number">34</span>, <span class="number">25</span>, <span class="number">12</span>, <span class="number">22</span>, <span class="number">11</span>, <span class="number">90</span>&#125;;</span><br><span class="line">        bubbleSort(arr);</span><br><span class="line">        System.out.println(<span class="string">&quot;Sorted array:&quot;</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> num : arr) &#123;</span><br><span class="line">            System.out.print(num + <span class="string">&quot; &quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出结果"><a href="#输出结果" class="headerlink" title="输出结果"></a>输出结果</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Sorted array:</span><br><span class="line">11 12 22 25 34 64 90</span><br></pre></td></tr></table></figure>
-
-<h3 id="时间复杂度"><a href="#时间复杂度" class="headerlink" title="时间复杂度"></a>时间复杂度</h3><ul>
-<li><strong>最坏情况：</strong> (O(n^2))（完全逆序）</li>
-<li><strong>最佳情况：</strong> (O(n))（已排序，提前退出）</li>
-<li><strong>平均情况：</strong> (O(n^2))</li>
-</ul>
-<h3 id="空间复杂度"><a href="#空间复杂度" class="headerlink" title="空间复杂度"></a>空间复杂度</h3><ul>
-<li>空间复杂度：(O(1))（原地排序）</li>
-<li>排序稳定性：稳定</li>
-</ul>
-<hr>
-<h2 id="2-快速排序"><a href="#2-快速排序" class="headerlink" title="2. 快速排序"></a>2. 快速排序</h2><h3 id="算法思想-1"><a href="#算法思想-1" class="headerlink" title="算法思想"></a>算法思想</h3><p>快速排序是基于分治思想的高效排序算法。其核心步骤包括：</p>
-<ol>
-<li>从序列中选择一个基准元素（通常为第一个或最后一个）；</li>
-<li>将序列分为两部分：一部分小于基准，一部分大于基准；</li>
-<li>分别对两部分递归进行快速排序；</li>
-<li>合并结果，最终得到有序序列。</li>
-</ol>
-<h3 id="Java-实现-1"><a href="#Java-实现-1" class="headerlink" title="Java 实现"></a>Java 实现</h3><p>以下是快速排序的 Java 实现：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuickSort</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">quickSort</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (low &lt; high) &#123;</span><br><span class="line">            <span class="comment">// 获取分区索引</span></span><br><span class="line">            <span class="keyword">int</span> pi = partition(arr, low, high);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 对左右子数组递归排序</span></span><br><span class="line">            quickSort(arr, low, pi - <span class="number">1</span>);</span><br><span class="line">            quickSort(arr, pi + <span class="number">1</span>, high);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">partition</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 选择最后一个元素作为基准</span></span><br><span class="line">        <span class="keyword">int</span> pivot = arr[high];</span><br><span class="line">        <span class="keyword">int</span> i = low - <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j = low; j &lt; high; j++) &#123;</span><br><span class="line">            <span class="comment">// 如果当前元素小于或等于基准</span></span><br><span class="line">            <span class="keyword">if</span> (arr[j] &lt;= pivot) &#123;</span><br><span class="line">                i++;</span><br><span class="line">                <span class="comment">// 交换元素</span></span><br><span class="line">                <span class="keyword">int</span> temp = arr[i];</span><br><span class="line">                arr[i] = arr[j];</span><br><span class="line">                arr[j] = temp;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将基准元素放到正确位置</span></span><br><span class="line">        <span class="keyword">int</span> temp = arr[i + <span class="number">1</span>];</span><br><span class="line">        arr[i + <span class="number">1</span>] = arr[high];</span><br><span class="line">        arr[high] = temp;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> i + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">64</span>, <span class="number">34</span>, <span class="number">25</span>, <span class="number">12</span>, <span class="number">22</span>, <span class="number">11</span>, <span class="number">90</span>&#125;;</span><br><span class="line">        quickSort(arr, <span class="number">0</span>, arr.length - <span class="number">1</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;Sorted array:&quot;</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> num : arr) &#123;</span><br><span class="line">            System.out.print(num + <span class="string">&quot; &quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出结果-1"><a href="#输出结果-1" class="headerlink" title="输出结果"></a>输出结果</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Sorted array:</span><br><span class="line">11 12 22 25 34 64 90</span><br></pre></td></tr></table></figure>
-
-<h3 id="时间复杂度-1"><a href="#时间复杂度-1" class="headerlink" title="时间复杂度"></a>时间复杂度</h3><ul>
-<li><strong>最坏情况：</strong> (O(n^2))（每次选择的基准导致极端不平衡）</li>
-<li><strong>最佳情况：</strong> (O(n \log n))（每次平衡划分）</li>
-<li><strong>平均情况：</strong> (O(n \log n))</li>
-</ul>
-<h3 id="空间复杂度-1"><a href="#空间复杂度-1" class="headerlink" title="空间复杂度"></a>空间复杂度</h3><ul>
-<li>空间复杂度：(O(\log n))（递归栈的深度）</li>
-<li>排序稳定性：不稳定</li>
-</ul>
-<hr>
-<h2 id="3-冒泡排序与快速排序的对比"><a href="#3-冒泡排序与快速排序的对比" class="headerlink" title="3. 冒泡排序与快速排序的对比"></a>3. 冒泡排序与快速排序的对比</h2><table>
-<thead>
-<tr>
-<th>特性</th>
-<th>冒泡排序</th>
-<th>快速排序</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>时间复杂度</strong></td>
-<td>(O(n^2))</td>
-<td>(O(n \log n))</td>
-</tr>
-<tr>
-<td><strong>空间复杂度</strong></td>
-<td>(O(1))</td>
-<td>(O(\log n))</td>
-</tr>
-<tr>
-<td><strong>排序稳定性</strong></td>
-<td>稳定</td>
-<td>不稳定</td>
-</tr>
-<tr>
-<td><strong>适用场景</strong></td>
-<td>小规模数据，简单场景</td>
-<td>大规模数据，高效排序</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li><strong>冒泡排序</strong> 简单易懂，但效率较低，适合学习排序思想或处理少量数据。</li>
-<li><strong>快速排序</strong> 利用分治思想，是实际应用中常用的高效排序算法，尤其适合大规模数据。</li>
-</ul>
-<p>通过理解这两种交换类排序算法，我们可以更深入地了解排序算法的多样性及其在不同场景中的应用。</p>
-]]></content>
-  </entry>
-  <entry>
-    <title>【翻译】Kotlin 协程 模式与 反模式（Patterns &amp; Anti‑Patterns）</title>
-    <url>/kotlin-coroutine-pattern-antipattern.html</url>
-    <content><![CDATA[<hr>
-<h2 id="📌-前言"><a href="#📌-前言" class="headerlink" title="📌 前言"></a>📌 前言</h2><p>在开始使用 Kotlin 协程之前，我们需要意识到一些应当做和不应当做的事项，特别是在异常处理、作用域管理和并发模式方面。本文总结了多种协程使用中的模式与反模式，帮助你写出更安全、清晰、可维护的协程代码。</p>
-<hr>
-<h2 id="🧠-1-把-async-调用包裹在-coroutineScope-或使用-SupervisorJob-来处理异常"><a href="#🧠-1-把-async-调用包裹在-coroutineScope-或使用-SupervisorJob-来处理异常" class="headerlink" title="🧠 1. 把 async 调用包裹在 coroutineScope 或使用 SupervisorJob 来处理异常"></a>🧠 1. 把 <code>async</code> 调用包裹在 <code>coroutineScope</code> 或使用 <code>SupervisorJob</code> 来处理异常</h2><h3 id="❌-反模式：在-async-中抛出异常但只用-try-catch-捕获"><a href="#❌-反模式：在-async-中抛出异常但只用-try-catch-捕获" class="headerlink" title="❌ 反模式：在 async 中抛出异常但只用 try/catch 捕获"></a>❌ 反模式：在 async 中抛出异常但只用 try/catch 捕获</h3><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> job: Job = Job()</span><br><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Default + job)</span><br><span class="line"></span><br><span class="line"><span class="comment">// may throw Exception</span></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">doWork</span><span class="params">()</span></span>: Deferred&lt;String&gt; = scope.async &#123; … &#125;   <span class="comment">// (1)</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">loadData</span><span class="params">()</span></span> = scope.launch &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        doWork().await()                               <span class="comment">// (2)</span></span><br><span class="line">    &#125; <span class="keyword">catch</span> (e: Exception) &#123; … &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><a href="https://github.com/duweiwang/kotlin-playground/blob/master/src/main/kotlin/com/wangduwei/kotlin/coroutines/ScopeDemo.kt">运行这个代码看效果</a></p>
-<p>这种写法看起来像在 try/catch 捕获异常，但它<strong>不会如你预期那样工作</strong>：如果 async 抛出异常，异常最终仍会导致父作用域失败。<br>这是因为协程遵循 <em>结构化并发</em> 的原则：子协程失败会传播给父协程。</p>
-<h3 id="✅-模式-1：使用-SupervisorJob"><a href="#✅-模式-1：使用-SupervisorJob" class="headerlink" title="✅ 模式 1：使用 SupervisorJob"></a>✅ 模式 1：使用 <code>SupervisorJob</code></h3><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)</span><br><span class="line">scope.async &#123; … &#125; <span class="comment">// 异常不会取消同级协程</span></span><br></pre></td></tr></table></figure>
-
-<p><code>SupervisorJob</code> 能让同一层级的子协程失败不会波及其他协程。<br><strong>失败不会导致上层作用域取消</strong>。</p>
-<h3 id="✅-模式-2（更推荐）：使用-coroutineScope"><a href="#✅-模式-2（更推荐）：使用-coroutineScope" class="headerlink" title="✅ 模式 2（更推荐）：使用 coroutineScope"></a>✅ 模式 2（更推荐）：使用 <code>coroutineScope</code></h3><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">loadData</span><span class="params">()</span></span> = coroutineScope &#123;</span><br><span class="line">    <span class="keyword">val</span> deferred = async &#123; … &#125;</span><br><span class="line">    deferred.await()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>使用挂起的 <code>coroutineScope</code> 把 async 协程包起来：</p>
-<ul>
-<li>使异常能被捕获；</li>
-<li>限制失败只影响当前协程块，不传播到外部。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</li>
-</ul>
-<p>此外，你也可以在 <code>async</code> 内部自己处理异常。</p>
-<hr>
-<h2 id="🎯-2-根协程应优先使用-Main-Dispatcher"><a href="#🎯-2-根协程应优先使用-Main-Dispatcher" class="headerlink" title="🎯 2. 根协程应优先使用 Main Dispatcher"></a>🎯 2. 根协程应优先使用 Main Dispatcher</h2><h3 id="❌-反模式：在根协程中使用非-Main-Dispatcher-去执行-UI-调用"><a href="#❌-反模式：在根协程中使用非-Main-Dispatcher-去执行-UI-调用" class="headerlink" title="❌ 反模式：在根协程中使用非 Main Dispatcher 去执行 UI 调用"></a>❌ 反模式：在根协程中使用非 Main Dispatcher 去执行 UI 调用</h3><p>这样写需要频繁手动切换到 Main 去更新 UI：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Default)</span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="comment">// …</span></span><br><span class="line">    withContext(Dispatchers.Main) &#123; <span class="comment">/* update UI */</span> &#125;</span><br><span class="line">    <span class="comment">// …</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="✅-推荐做法：根协程使用-Main-Dispatcher"><a href="#✅-推荐做法：根协程使用-Main-Dispatcher" class="headerlink" title="✅ 推荐做法：根协程使用 Main Dispatcher"></a>✅ 推荐做法：根协程使用 Main Dispatcher</h3><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> scope = CoroutineScope(Dispatchers.Main)</span><br><span class="line">scope.launch &#123;</span><br><span class="line">    <span class="comment">// 不需要手动切换 dispatcher 就能更新 UI</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样可以让代码更简洁，避免大量显式切换上下文。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</p>
-<hr>
-<h2 id="🚫-3-避免无意义的-async-await"><a href="#🚫-3-避免无意义的-async-await" class="headerlink" title="🚫 3. 避免无意义的 async + await"></a>🚫 3. 避免无意义的 <code>async</code> + <code>await</code></h2><h3 id="❌-不推荐："><a href="#❌-不推荐：" class="headerlink" title="❌ 不推荐："></a>❌ 不推荐：</h3><figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> result = async &#123; doWork() &#125;.await()</span><br></pre></td></tr></table></figure>
-
-<p>这种写法的效果等同于直接调用挂起函数，并不会带来并发优势。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</p>
-<h3 id="✅-推荐："><a href="#✅-推荐：" class="headerlink" title="✅ 推荐："></a>✅ 推荐：</h3><p>如果你只是想切换执行上下文，使用 <code>withContext</code>：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">val</span> result = withContext(Dispatchers.IO) &#123;</span><br><span class="line">    doWork()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>async</code> 更适合用于多个协程并行启动，再一起 await。</p>
-<hr>
-<h2 id="⚠️-4-避免取消整个-scope-的-Job"><a href="#⚠️-4-避免取消整个-scope-的-Job" class="headerlink" title="⚠️ 4. 避免取消整个 scope 的 Job"></a>⚠️ 4. 避免取消整个 scope 的 Job</h2><h3 id="❌-反模式："><a href="#❌-反模式：" class="headerlink" title="❌ 反模式："></a>❌ 反模式：</h3><p>如果你调用整个 scope 的 <code>job.cancel()</code>, 那个 scope 会进入 completed 状态。<br>此后在该 scope 中启动的协程将不会执行。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</p>
-<h3 id="✅-推荐做法："><a href="#✅-推荐做法：" class="headerlink" title="✅ 推荐做法："></a>✅ 推荐做法：</h3><p>使用 <code>cancelChildren()</code> 来取消当前 scope 下的所有子协程：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line">scope.coroutineContext.cancelChildren()</span><br></pre></td></tr></table></figure>
-
-<p>并适当为每个协程单独控制取消逻辑。</p>
-<hr>
-<h2 id="🛑-5-不要在-suspend-函数中隐式依赖调度器"><a href="#🛑-5-不要在-suspend-函数中隐式依赖调度器" class="headerlink" title="🛑 5. 不要在 suspend 函数中隐式依赖调度器"></a>🛑 5. 不要在 suspend 函数中隐式依赖调度器</h2><h3 id="❌-反模式：-1"><a href="#❌-反模式：-1" class="headerlink" title="❌ 反模式："></a>❌ 反模式：</h3><p>如果 suspend 函数内部直接访问 UI，会导致在非 Main dispatcher 抛出异常（如 Android 的 <code>CalledFromWrongThreadException</code>）。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</p>
-<h3 id="✅-推荐做法：-1"><a href="#✅-推荐做法：-1" class="headerlink" title="✅ 推荐做法："></a>✅ 推荐做法：</h3><p>让 suspend 函数对调度器透明，在内部使用 <code>withContext</code> 做必要的调度：</p>
-<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="keyword">suspend</span> <span class="function"><span class="keyword">fun</span> <span class="title">login</span><span class="params">()</span></span> = withContext(Dispatchers.Main) &#123;</span><br><span class="line">    <span class="comment">// UI 操作安全</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样该函数就能在任意 dispatcher 调用，而不会出错。(<a href="https://onlyfor-me-blog.tistory.com/506">onlyfor-me-blog.tistory.com</a>)</p>
-<hr>
-<h2 id="🌍-6-避免使用-GlobalScope"><a href="#🌍-6-避免使用-GlobalScope" class="headerlink" title="🌍 6. 避免使用 GlobalScope"></a>🌍 6. 避免使用 <code>GlobalScope</code></h2><h3 id="❌-反模式：-2"><a href="#❌-反模式：-2" class="headerlink" title="❌ 反模式："></a>❌ 反模式：</h3><p>到处使用 <code>GlobalScope</code> 启动协程会让协程脱离生命周期管理。<br>这会导致资源泄露与不可预测行为，尤其在 Android 中很容易造成内存泄露、未取消协程等问题。(<a href="https://discuss.kotlinlang.org/t/unavoidable-memory-leak-when-using-coroutines/11603/4">discuss.kotlinlang.org</a>)</p>
-<h3 id="✅-推荐做法：-2"><a href="#✅-推荐做法：-2" class="headerlink" title="✅ 推荐做法："></a>✅ 推荐做法：</h3><p>在 Android 中，协程应该绑定到 Activity/Fragment/ViewModel 生命周期，例如使用：</p>
-<ul>
-<li><code>viewModelScope</code> / <code>lifecycleScope</code></li>
-<li>自定义带有 <code>SupervisorJob</code> 的 CoroutineScope</li>
-</ul>
-<hr>
-<h2 id="📌-总结"><a href="#📌-总结" class="headerlink" title="📌 总结"></a>📌 总结</h2><table>
-<thead>
-<tr>
-<th>主题</th>
-<th>建议</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>异常处理</td>
-<td>用 <code>coroutineScope</code> 或 <code>SupervisorJob</code>，不要简单 try/catch</td>
-</tr>
-<tr>
-<td>根协程 Dispatcher</td>
-<td>优先使用 Main</td>
-</tr>
-<tr>
-<td>async/await</td>
-<td>避免 immediate await，用于并发场景</td>
-</tr>
-<tr>
-<td>取消协程</td>
-<td>不要取消整个 scope Job，用 <code>cancelChildren()</code></td>
-</tr>
-<tr>
-<td>suspend 函数</td>
-<td>不要依赖隐式 dispatcher</td>
-</tr>
-<tr>
-<td>GlobalScope</td>
-<td>避免使用，绑定生命周期</td>
-</tr>
-</tbody></table>
-<hr>
-<h2 id="🏁-参考"><a href="#🏁-参考" class="headerlink" title="🏁 参考"></a>🏁 参考</h2><p><a href="https://proandroiddev.com/kotlin-coroutines-patterns-anti-patterns-f9d12984c68e">原文</a></p>
-]]></content>
-      <tags>
-        <tag>Kotlin</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>cs-algorithms-merge-sort</title>
-    <url>/cs-algorithms-merge-sort.html</url>
-    <content><![CDATA[<h1 id="归并排序算法详解"><a href="#归并排序算法详解" class="headerlink" title="归并排序算法详解"></a>归并排序算法详解</h1><p>归并排序（Merge Sort）是一种高效的排序算法，采用分治策略（Divide and Conquer）。它将一个大问题分解为多个小问题，然后再将小问题的解合并成大问题的解。归并排序是一种稳定的排序算法，最坏时间复杂度为 (O(n \log n))，因此在处理大数据时非常有效。</p>
-<h2 id="归并排序的基本思想"><a href="#归并排序的基本思想" class="headerlink" title="归并排序的基本思想"></a>归并排序的基本思想</h2><p>归并排序的核心思想是：</p>
-<ol>
-<li><strong>分解（Divide）</strong>：将待排序数组分成两半，分别对这两部分进行归并排序。</li>
-<li><strong>合并（Conquer）</strong>：将排序好的两部分合并成一个有序的数组。</li>
-</ol>
-<h2 id="归并排序的步骤"><a href="#归并排序的步骤" class="headerlink" title="归并排序的步骤"></a>归并排序的步骤</h2><ol>
-<li>将数组分成两部分，分别进行归并排序。</li>
-<li>对两个已排序的部分进行合并，合并过程通过比较两个部分的元素，生成一个有序数组。</li>
-<li>重复这个过程，直到所有的子数组都合并成一个大数组。</li>
-</ol>
-<h2 id="归并排序的Java实现"><a href="#归并排序的Java实现" class="headerlink" title="归并排序的Java实现"></a>归并排序的Java实现</h2><p>下面是归并排序算法的Java实现：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MergeSort</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 主方法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] array = &#123; <span class="number">38</span>, <span class="number">27</span>, <span class="number">43</span>, <span class="number">3</span>, <span class="number">9</span>, <span class="number">82</span>, <span class="number">10</span> &#125;;</span><br><span class="line">        System.out.println(<span class="string">&quot;原始数组: &quot;</span>);</span><br><span class="line">        printArray(array);</span><br><span class="line">        </span><br><span class="line">        mergeSort(array);</span><br><span class="line">        </span><br><span class="line">        System.out.println(<span class="string">&quot;</span></span><br><span class="line"><span class="string">排序后的数组: &quot;</span>);</span><br><span class="line">        printArray(array);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 归并排序的核心方法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">mergeSort</span><span class="params">(<span class="keyword">int</span>[] array)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (array.length &lt; <span class="number">2</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> mid = array.length / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">int</span>[] left = <span class="keyword">new</span> <span class="keyword">int</span>[mid];</span><br><span class="line">        <span class="keyword">int</span>[] right = <span class="keyword">new</span> <span class="keyword">int</span>[array.length - mid];</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将数组分成两部分</span></span><br><span class="line">        System.arraycopy(array, <span class="number">0</span>, left, <span class="number">0</span>, mid);</span><br><span class="line">        System.arraycopy(array, mid, right, <span class="number">0</span>, array.length - mid);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 对左右两部分分别进行归并排序</span></span><br><span class="line">        mergeSort(left);</span><br><span class="line">        mergeSort(right);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 合并两部分</span></span><br><span class="line">        merge(array, left, right);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 合并两部分</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">merge</span><span class="params">(<span class="keyword">int</span>[] array, <span class="keyword">int</span>[] left, <span class="keyword">int</span>[] right)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>, k = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 合并过程：比较left和right的元素，按顺序放入array</span></span><br><span class="line">        <span class="keyword">while</span> (i &lt; left.length &amp;&amp; j &lt; right.length) &#123;</span><br><span class="line">            <span class="keyword">if</span> (left[i] &lt;= right[j]) &#123;</span><br><span class="line">                array[k++] = left[i++];</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                array[k++] = right[j++];</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果left数组还有剩余元素，直接放入array</span></span><br><span class="line">        <span class="keyword">while</span> (i &lt; left.length) &#123;</span><br><span class="line">            array[k++] = left[i++];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果right数组还有剩余元素，直接放入array</span></span><br><span class="line">        <span class="keyword">while</span> (j &lt; right.length) &#123;</span><br><span class="line">            array[k++] = right[j++];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 打印数组的方法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printArray</span><span class="params">(<span class="keyword">int</span>[] array)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; array.length; i++) &#123;</span><br><span class="line">            System.out.print(array[i] + <span class="string">&quot; &quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h2><ol>
-<li><p><strong><code>mergeSort</code> 方法</strong>：</p>
-<ul>
-<li>该方法首先检查数组的长度，如果数组长度小于2，则无需排序。</li>
-<li>将数组分成左右两部分，分别调用 <code>mergeSort</code> 方法进行递归排序。</li>
-</ul>
-</li>
-<li><p><strong><code>merge</code> 方法</strong>：</p>
-<ul>
-<li>该方法负责合并两个已排序的数组（<code>left</code> 和 <code>right</code>）为一个有序的数组。</li>
-<li>通过两个指针 <code>i</code> 和 <code>j</code>，分别遍历 <code>left</code> 和 <code>right</code> 数组，并将较小的元素放入原数组中。</li>
-<li>如果某一部分数组元素还未处理完，就直接将剩余的元素加入到原数组中。</li>
-</ul>
-</li>
-<li><p><strong><code>printArray</code> 方法</strong>：</p>
-<ul>
-<li>该方法用于打印数组的内容，帮助我们查看排序结果。</li>
-</ul>
-</li>
-</ol>
-<h2 id="时间复杂度分析"><a href="#时间复杂度分析" class="headerlink" title="时间复杂度分析"></a>时间复杂度分析</h2><ul>
-<li><strong>时间复杂度</strong>：归并排序的时间复杂度为 (O(n \log n))，其中 (n) 是数组的长度。</li>
-<li><strong>空间复杂度</strong>：归并排序需要额外的空间来存储临时数组，因此空间复杂度为 (O(n))。</li>
-</ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>归并排序是一种非常高效的排序算法，适合处理大规模数据。其优点在于稳定性和较为平衡的时间复杂度，缺点在于空间开销较大。通过分治策略，归并排序能够确保在最坏情况下仍能保持较高的效率。</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://www.cnblogs.com/chengxiao/p/6194356.html">cnblog</a></p>
 ]]></content>
   </entry>
 </search>

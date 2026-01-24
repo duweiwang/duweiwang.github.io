@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="一、纹理坐标往三角形上贴纹理，三角形的顶点坐标经过计算，可以确定三角形内部每个点的坐标。三角形的每个点和纹理坐标对应起来，这样就可以把纹理贴到正确的位置了。          二、API介绍1、生成纹理ID（向 GPU 申请若干个“纹理句柄”）12345678910final int[] textureObjId &#x3D; new int[1];&#x2F;&#x2F;生成纹理的数量&#x2F;&#x2F;接收生成的纹理ID&#x2F;&#x2F;数组便宜，从数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenGL ES 纹理">
+<meta property="og:url" content="https://wangduwei.top/opengles-texture.html">
+<meta property="og:site_name" content="蓝色的笔记本">
+<meta property="og:description" content="一、纹理坐标往三角形上贴纹理，三角形的顶点坐标经过计算，可以确定三角形内部每个点的坐标。三角形的每个点和纹理坐标对应起来，这样就可以把纹理贴到正确的位置了。          二、API介绍1、生成纹理ID（向 GPU 申请若干个“纹理句柄”）12345678910final int[] textureObjId &#x3D; new int[1];&#x2F;&#x2F;生成纹理的数量&#x2F;&#x2F;接收生成的纹理ID&#x2F;&#x2F;数组便宜，从数">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wangduwei.top/images/opengl/opengl_texture_coordinates.png">
+<meta property="article:published_time" content="2026-01-24T14:41:35.000Z">
+<meta property="article:modified_time" content="2026-01-24T14:41:35.471Z">
+<meta property="article:author" content="wangduwei">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wangduwei.top/images/opengl/opengl_texture_coordinates.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>OpenGL ES 纹理</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+		<script type="text/x-mathjax-config">
+		  MathJax.Hub.Config({
+			tex2jax: {
+			  skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+			  inlineMath: [['$','$']]
+			}
+		  });
+		</script>
+		<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+	
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="蓝色的笔记本" type="application/atom+xml">
+</head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="目录"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="顶部" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="下一篇" href="/android-basic-storage.html"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://wangduwei.top/opengles-texture.html"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://wangduwei.top/opengles-texture.html&text=OpenGL ES 纹理"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://wangduwei.top/opengles-texture.html&title=OpenGL ES 纹理"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://wangduwei.top/opengles-texture.html&is_video=false&description=OpenGL ES 纹理"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=OpenGL ES 纹理&body=Check out this article: https://wangduwei.top/opengles-texture.html"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://wangduwei.top/opengles-texture.html&title=OpenGL ES 纹理"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://wangduwei.top/opengles-texture.html&title=OpenGL ES 纹理"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://wangduwei.top/opengles-texture.html&title=OpenGL ES 纹理"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://wangduwei.top/opengles-texture.html&title=OpenGL ES 纹理"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://wangduwei.top/opengles-texture.html&name=OpenGL ES 纹理&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://wangduwei.top/opengles-texture.html&t=OpenGL ES 纹理"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E7%BA%B9%E7%90%86%E5%9D%90%E6%A0%87"><span class="toc-number">1.</span> <span class="toc-text">一、纹理坐标</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81API%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">二、API介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E7%94%9F%E6%88%90%E7%BA%B9%E7%90%86ID%EF%BC%88%E5%90%91-GPU-%E7%94%B3%E8%AF%B7%E8%8B%A5%E5%B9%B2%E4%B8%AA%E2%80%9C%E7%BA%B9%E7%90%86%E5%8F%A5%E6%9F%84%E2%80%9D%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">1、生成纹理ID（向 GPU 申请若干个“纹理句柄”）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81%E5%8A%A0%E8%BD%BD%E5%9B%BE%E5%83%8F"><span class="toc-number">2.2.</span> <span class="toc-text">2、加载图像</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81%E7%BB%91%E5%AE%9A%E7%BA%B9%E7%90%86%E5%AF%B9%E8%B1%A1"><span class="toc-number">2.3.</span> <span class="toc-text">3、绑定纹理对象</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4%E3%80%81%E9%85%8D%E7%BD%AE%E7%BA%B9%E7%90%86%E8%BF%87%E6%BB%A4-%E7%BA%B9%E7%90%86%E5%9C%A8%E6%94%BE%E5%A4%A7%E7%BC%A9%E5%B0%8F%E7%9A%84%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%83%8F%E7%B4%A0%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F"><span class="toc-number">2.4.</span> <span class="toc-text">4、配置纹理过滤(纹理在放大缩小的过程中像素的处理方式)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5%E3%80%81%E7%BA%B9%E7%90%86%E7%8E%AF%E7%BB%95"><span class="toc-number">2.5.</span> <span class="toc-text">5、纹理环绕</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#6%E3%80%81%E5%8A%A0%E8%BD%BD%E7%BA%B9%E7%90%86%E5%88%B0OpenGL"><span class="toc-number">2.6.</span> <span class="toc-text">6、加载纹理到OpenGL</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#7%E3%80%81%E7%BA%B9%E7%90%86%E5%8D%95%E5%85%83"><span class="toc-number">2.7.</span> <span class="toc-text">7、纹理单元</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#8%E3%80%81%E8%A7%A3%E7%BB%91%E7%BA%B9%E7%90%86"><span class="toc-number">2.8.</span> <span class="toc-text">8、解绑纹理</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        OpenGL ES 纹理
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">wangduwei</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2026-01-24T14:41:35.000Z" class="dt-published" itemprop="datePublished">2026-01-24</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h4 id="一、纹理坐标"><a href="#一、纹理坐标" class="headerlink" title="一、纹理坐标"></a>一、纹理坐标</h4><p>往三角形上贴纹理，三角形的顶点坐标经过计算，可以确定三角形内部每个点的坐标。三角形的每个点和纹理坐标对应起来，这样就可以把纹理贴到正确的位置了。</p>
+<center>
+    <img src="../images/opengl/opengl_texture_coordinates.png" width="50%"/>
+</center>
+
+
+<h4 id="二、API介绍"><a href="#二、API介绍" class="headerlink" title="二、API介绍"></a>二、API介绍</h4><h5 id="1、生成纹理ID（向-GPU-申请若干个“纹理句柄”）"><a href="#1、生成纹理ID（向-GPU-申请若干个“纹理句柄”）" class="headerlink" title="1、生成纹理ID（向 GPU 申请若干个“纹理句柄”）"></a>1、生成纹理ID（向 GPU 申请若干个“纹理句柄”）</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">int</span>[] textureObjId = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">1</span>];</span><br><span class="line"><span class="comment">//生成纹理的数量</span></span><br><span class="line"><span class="comment">//接收生成的纹理ID</span></span><br><span class="line"><span class="comment">//数组便宜，从数组的哪个脚标开始读取</span></span><br><span class="line">GLES20.glGenTextures(<span class="number">1</span>, textureObjId, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (textureObjId[<span class="number">0</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">    Log.d(<span class="string">&quot;opengl&quot;</span>, <span class="string">&quot;产生纹理出错&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2、加载图像"><a href="#2、加载图像" class="headerlink" title="2、加载图像"></a>2、加载图像</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> BitmapFactory.Options options = <span class="keyword">new</span> BitmapFactory.Options();</span><br><span class="line">options.inScaled = <span class="keyword">false</span>;<span class="comment">//不缩放</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(),</span><br><span class="line">        resourceId, options);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (bitmap == <span class="keyword">null</span>) &#123;</span><br><span class="line"></span><br><span class="line">    GLES20.glDeleteTextures(<span class="number">1</span>, textureObjId, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h5 id="3、绑定纹理对象"><a href="#3、绑定纹理对象" class="headerlink" title="3、绑定纹理对象"></a>3、绑定纹理对象</h5><p>告诉OpenGL后面的纹理操作都应用于这个纹理对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">  <span class="comment">//这是一个二维纹理</span></span><br><span class="line">  <span class="comment">//纹理操作应用于 textureObjId[0] 这个纹理对象</span></span><br><span class="line">GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureObjId[<span class="number">0</span>]);</span><br></pre></td></tr></table></figure>
+
+
+<h5 id="4、配置纹理过滤-纹理在放大缩小的过程中像素的处理方式"><a href="#4、配置纹理过滤-纹理在放大缩小的过程中像素的处理方式" class="headerlink" title="4、配置纹理过滤(纹理在放大缩小的过程中像素的处理方式)"></a>4、配置纹理过滤(纹理在放大缩小的过程中像素的处理方式)</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,<span class="comment">//缩小的情况下</span></span><br><span class="line">        GLES20.GL_TEXTURE_MIN_FILTER,</span><br><span class="line">        GLES20.GL_LINEAR_MIPMAP_LINEAR);<span class="comment">//缩小情况下使用三线性过滤</span></span><br><span class="line"></span><br><span class="line">GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D,<span class="comment">//放大的情况下</span></span><br><span class="line">        GLES20.GL_TEXTURE_MAG_FILTER,</span><br><span class="line">        GLES20.GL_LINEAR);<span class="comment">//放大情况下使用双线性过滤</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>过滤模式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GL_NEAREST</td>
+<td>最近邻过滤</td>
+</tr>
+<tr>
+<td>GL_NEAREST_MIPMAP_NEAREST</td>
+<td>使用 MIP 贴图的最近邻过滤</td>
+</tr>
+<tr>
+<td>GL_NEAREST_MIPMAP_LINEAR</td>
+<td>使用 MIP 贴图级别之间插值的最近邻过滤</td>
+</tr>
+<tr>
+<td>GL_LINEAR</td>
+<td>双线性过滤</td>
+</tr>
+<tr>
+<td>GL_LINEAR_MIPMAP_NEAREST</td>
+<td>使用 MIP 贴图的双线性过滤</td>
+</tr>
+<tr>
+<td>GL_LINEAR_MIPMAP_LINEAR</td>
+<td>三线性过滤（使用 MIP 贴图级别之间插值的双线性过滤）</td>
+</tr>
+</tbody></table>
+<ul>
+<li>缩小（Minification）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>支持模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GL_NEAREST</td>
+</tr>
+<tr>
+<td>GL_NEAREST_MIPMAP_NEAREST</td>
+</tr>
+<tr>
+<td>GL_NEAREST_MIPMAP_LINEAR</td>
+</tr>
+<tr>
+<td>GL_LINEAR</td>
+</tr>
+<tr>
+<td>GL_LINEAR_MIPMAP_NEAREST</td>
+</tr>
+<tr>
+<td>GL_LINEAR_MIPMAP_LINEAR</td>
+</tr>
+</tbody></table>
+<ul>
+<li>放大（Magnification）</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>支持模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GL_NEAREST</td>
+</tr>
+<tr>
+<td>GL_LINEAR</td>
+</tr>
+</tbody></table>
+<h5 id="5、纹理环绕"><a href="#5、纹理环绕" class="headerlink" title="5、纹理环绕"></a>5、纹理环绕</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);</span><br><span class="line">glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>GL_REPEAT    // 对纹理的默认行为。重复纹理图像。</li>
+<li>GL_MIRRORED_REPEAT    //和GL_REPEAT一样，但每次重复图片是镜像放置的。</li>
+<li>GL_CLAMP_TO_EDGE    //纹理坐标会被约束在0到1之间，超出的部分会重复纹理坐标的边缘，产生一种边缘被拉伸的效果。</li>
+<li>GL_CLAMP_TO_BORDER    //超出的坐标为用户指定的边缘颜色。</li>
+</ul>
+<h5 id="6、加载纹理到OpenGL"><a href="#6、加载纹理到OpenGL" class="headerlink" title="6、加载纹理到OpenGL"></a>6、加载纹理到OpenGL</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//纹理类型GL_TEXTURE_2D、GL_TEXTURE_EXTERNAL_OES、GL_TEXTURE_CUBE_MAP</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//要上传的 CPU 内存图片数据</span></span><br><span class="line"><span class="comment">//桌面 OpenGL 才支持 border</span></span><br><span class="line">GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, <span class="number">0</span>, bitmap, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>bitmap传到GPU就可以回收了</li>
+<li>与<em>GLUtils.texSubImage2D</em>的区别？</li>
+<li>与<em>GLES20.glTexImage2D</em>的区别？</li>
+</ul>
+<h5 id="7、纹理单元"><a href="#7、纹理单元" class="headerlink" title="7、纹理单元"></a>7、纹理单元</h5><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//OpenGL ES 的状态机设置，激活0号纹理单元</span></span><br><span class="line"><span class="comment">//接下来所有的纹理绑定操作（glBindTexture）都绑定到 0 号纹理单元上</span></span><br><span class="line">GLES20.glActiveTexture(GL_TEXTURE0)</span><br></pre></td></tr></table></figure>
+
+
+<h5 id="8、解绑纹理"><a href="#8、解绑纹理" class="headerlink" title="8、解绑纹理"></a>8、解绑纹理</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, GLES20.GL_NONE);</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/goFlyer/p/16733604.html">Opengl ES之纹理贴图</a><br><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1kx4y117yt/">B站视频</a></p>
+
+  </div>
+</article>
+
+
+    <div class="blog-post-comments">
+        <div id="utterances_thread">
+            <noscript>加载评论需要在浏览器启用 JavaScript 脚本支持。</noscript>
+        </div>
+    </div>
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">首页</a></li>
+        
+          <li><a href="/about/">关于</a></li>
+        
+          <li><a href="/archives/">归档</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E7%BA%B9%E7%90%86%E5%9D%90%E6%A0%87"><span class="toc-number">1.</span> <span class="toc-text">一、纹理坐标</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81API%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.</span> <span class="toc-text">二、API介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E7%94%9F%E6%88%90%E7%BA%B9%E7%90%86ID%EF%BC%88%E5%90%91-GPU-%E7%94%B3%E8%AF%B7%E8%8B%A5%E5%B9%B2%E4%B8%AA%E2%80%9C%E7%BA%B9%E7%90%86%E5%8F%A5%E6%9F%84%E2%80%9D%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">1、生成纹理ID（向 GPU 申请若干个“纹理句柄”）</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81%E5%8A%A0%E8%BD%BD%E5%9B%BE%E5%83%8F"><span class="toc-number">2.2.</span> <span class="toc-text">2、加载图像</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81%E7%BB%91%E5%AE%9A%E7%BA%B9%E7%90%86%E5%AF%B9%E8%B1%A1"><span class="toc-number">2.3.</span> <span class="toc-text">3、绑定纹理对象</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4%E3%80%81%E9%85%8D%E7%BD%AE%E7%BA%B9%E7%90%86%E8%BF%87%E6%BB%A4-%E7%BA%B9%E7%90%86%E5%9C%A8%E6%94%BE%E5%A4%A7%E7%BC%A9%E5%B0%8F%E7%9A%84%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%83%8F%E7%B4%A0%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F"><span class="toc-number">2.4.</span> <span class="toc-text">4、配置纹理过滤(纹理在放大缩小的过程中像素的处理方式)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5%E3%80%81%E7%BA%B9%E7%90%86%E7%8E%AF%E7%BB%95"><span class="toc-number">2.5.</span> <span class="toc-text">5、纹理环绕</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#6%E3%80%81%E5%8A%A0%E8%BD%BD%E7%BA%B9%E7%90%86%E5%88%B0OpenGL"><span class="toc-number">2.6.</span> <span class="toc-text">6、加载纹理到OpenGL</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#7%E3%80%81%E7%BA%B9%E7%90%86%E5%8D%95%E5%85%83"><span class="toc-number">2.7.</span> <span class="toc-text">7、纹理单元</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#8%E3%80%81%E8%A7%A3%E7%BB%91%E7%BA%B9%E7%90%86"><span class="toc-number">2.8.</span> <span class="toc-text">8、解绑纹理</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">3.</span> <span class="toc-text">参考</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://wangduwei.top/opengles-texture.html"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://wangduwei.top/opengles-texture.html&text=OpenGL ES 纹理"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://wangduwei.top/opengles-texture.html&title=OpenGL ES 纹理"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://wangduwei.top/opengles-texture.html&is_video=false&description=OpenGL ES 纹理"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=OpenGL ES 纹理&body=Check out this article: https://wangduwei.top/opengles-texture.html"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://wangduwei.top/opengles-texture.html&title=OpenGL ES 纹理"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://wangduwei.top/opengles-texture.html&title=OpenGL ES 纹理"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://wangduwei.top/opengles-texture.html&title=OpenGL ES 纹理"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://wangduwei.top/opengles-texture.html&title=OpenGL ES 纹理"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://wangduwei.top/opengles-texture.html&name=OpenGL ES 纹理&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://wangduwei.top/opengles-texture.html&t=OpenGL ES 纹理"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2026
+    wangduwei
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">首页</a></li><!--
+     --><!--
+       --><li><a href="/about/">关于</a></li><!--
+     --><!--
+       --><li><a href="/archives/">归档</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板！\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功！");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+  <script type="text/javascript">
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "https://hm.baidu.com/hm.js?9f3c7bb2232e1e3fda4c019e4a4406c0";
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+    <script type="text/javascript">
+      var utterances_repo = 'duweiwang/comments';
+      var utterances_issue_term = 'title';
+      var utterances_label = 'Comment';
+      var utterances_theme = 'github-dark';
+
+      (function(){
+          var script = document.createElement('script');
+
+          script.src = 'https://utteranc.es/client.js';
+          script.setAttribute('repo', utterances_repo);
+          script.setAttribute('issue-term', 'pathname');
+          script.setAttribute('label', utterances_label);
+          script.setAttribute('theme', utterances_theme);
+          script.setAttribute('crossorigin', 'anonymous');
+          script.async = true;
+          (document.getElementById('utterances_thread')).appendChild(script);
+      }());
+  </script>
+
+</body>
+</html>
