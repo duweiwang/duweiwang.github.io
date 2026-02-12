@@ -3,39 +3,105 @@ title: 《OpenGL ES应用开发实践指南Android卷》
 tags:
 ---
 
+<table>
+    <tr>
+        <td><img src="../images/opengl/opengl_es_book.png" width="100"/></td>
+        <td>OpenGL ES应用开发实践指南Android卷</td>
+    </tr>
+</table>
+
+
 ##### 第一章：准备开始
-略
+本章主要是安装Android开发环境，建立一个项目。略。
 
 #### 第一部分：一个简单的空气曲棍球游戏
+
 ##### 第2章 定义顶点和着色器
 + 在OpenGL里，只能绘制点、直线以及三角形
 + 桌面：逆时针定义2个三角形
 <div style="text-align: center;">
-    <img src="../images/opengl_trangle.jpg.jpg" width="400"/>
+    <img src="../images/opengl_trangle.jpg" width="400"/>
 </div>
+
+```java
+float[] vertex = new float[]{
+            0f, 0f,
+            9f, 14f,
+            0f, 14f,
+
+            0f, 0f,
+            9f, 0f,
+            9f, 14f
+    };
+```
 
 + 数据放入本地内存：ByteBuffer
 + 顶点着色器 & 片元着色器
+
+<div style="text-align: center;">
+    <img src="../images/opengl/opengl_pipeline.png" width="400"/>
+</div>
+
+
+光栅化
+
+<div style="text-align: center;">
+    <img src="../images/opengl/opengl_rasterization.png" width="400"/>
+</div>
+
+
 ##### 第3章 编译着色器及在屏幕上绘制
 + 加载着色器：
 + 编译着色器：
-  + 创建一个着色器对象：glCreateShader
-  + 上传和编译着色器：glShaderSource/glCompileShader
-  + 取出编译状态：glGetShaderiv
-+ 把着色器链接进程序
+  + 创建一个着色器对象: glCreateShader
+  + 上传和编译着色器: glShaderSource/glCompileShader
+  + 取出编译状态: glGetShaderiv
++ 把着色器链接进程序: 
+  + glCreateProgram
+  + glAttachShader
+  + glLinkProgram
+  + glUseProgram
 + 做最后的拼接
-  + 验证程序：glValidateProgram
-  + 获得uniform的位置：glGetUniformLocation
-  + 获取属性的位置：glGetAttribLocation
-  + 关联属性和顶点数据：glVertexAttribPoint
-  + 使能顶点数组：glEnableVertexAttribArray
+  + 验证程序: glValidateProgram
+  + 获得uniform的位置: glGetUniformLocation
+  + 获取属性的位置: glGetAttribLocation
+  + 关联属性和顶点数据: glVertexAttribPoint
+  + 使能顶点数组: glEnableVertexAttribArray
 + 在屏幕上绘制
+  + glUniform4f(uColorLocation, 1f, 1f, 1f, 1f);  //设置u_Color的值为白色
+  + glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);  //画三角形，从0位置开始，读6个点
+
+  调整坐标
+```java
+ private float[] vertex = {
+            //第一个三角形
+            -0.5f, -0.5f,
+            0.5f,0.5f,
+            -0.5f, 0.5f,
+            //第二个三角形
+            -0.5f, -0.5f,
+            0.5f, -0.5f,
+            0.5f, 0.5f,
+            //中间线
+            -0.5f, 0f,
+            0.5f, 0f,
+            //棒槌
+            0f, -0.25f,
+            0f, 0.25f
+    };
+```
+
 ##### 第4章 增加颜色和着色
 + 4.1 平滑着色
 + 4.2 引入三角形扇
 + 4.3 增加一个新的颜色属性
 + 4.4 使用新的颜色属性渲染
+
+
+
 ##### 第5章 调整屏幕宽高比
+
+
 ##### 第6章 进入第三维
 6.1 三维的艺术
 6.2 从着色器到屏幕的坐标变换：顶点位置 -> 透视除法 -> 归一化坐标
@@ -62,7 +128,13 @@ tags:
 7.5 为着色器程序添加类
 7.6 绘制纹理
 7.7 小结
+
+
+
 ##### 第8章 构建简单物体
+
+
+
 ##### 第9章 增加触控反馈：与空气曲棍球游戏交互
 9.1 glSurfaceView.setOnTouchListener 
 9.2 

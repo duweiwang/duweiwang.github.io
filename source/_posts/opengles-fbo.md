@@ -19,6 +19,7 @@ description:
         // 纹理：作为 color attachment
         glGenTextures(1, fboTexId, 0)
         glBindTexture(GL_TEXTURE_2D, fboTexId[0])
+        //EglUtil.setupSampler(GL_TEXTURE_2D, GL_LINEAR, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
